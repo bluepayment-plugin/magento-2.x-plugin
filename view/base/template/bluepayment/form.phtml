@@ -1,0 +1,31 @@
+<!--
+/**
+ * BlueMedia_BluePayment extension
+ * 
+ * NOTICE OF LICENSE
+ * 
+ * This source file is subject to the MIT License
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * @category       Design
+ * @package        Template
+ * @copyright      Copyright (c) 2015
+ * @license        http://opensource.org/licenses/mit-license.php MIT License
+ */
+
+-->
+
+<!--Unikatowy identyfikator-->
+<?php $code = $this->getMethodCode(); ?>
+
+<!--Adres do pliku z logo firmy-->
+<?php $img  = $this->getLogoSrc(); ?>
+
+<ul class="form-list" id="payment_form_<?php echo $code ?>" style="display:none;">
+    <?php if ($img): ?>
+        <img src="<?php echo $img ?>"alt="Blue Media Logo" /><br />
+    <?php endif; ?>
+    <li class="form-alt"><?php echo $this->__('You will be redirected to the Blue Media secure service payment after submitting the order.'); ?></li>
+</ul>

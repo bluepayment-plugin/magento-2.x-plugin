@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<config>
+    <default>
+        <payment>
+            <bluepayment>
+                <active>0</active>
+                <model>BlueMedia\BluePayment\Model\Payment</model>
+                <encoding>UTF</encoding>
+                <title>Online payment BM</title>
+                <payment_action>authorize</payment_action>
+                <allowspecific>0</allowspecific>
+                <test_address_url>https://pay-accept.bm.pl/payment</test_address_url>
+                <prod_address_url>https://pay.bm.pl/payment</prod_address_url>
+                <hash_algorithm>sha256</hash_algorithm>
+                <hash_separator>|</hash_separator>
+            </bluepayment>
+        </payment>
+    </default>
+</config>
