@@ -1,27 +1,60 @@
-<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+<div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
     <div class="payment-method-title field choice">
         <input type="radio"
                name="payment[method]"
-               class="radio"
+               class="radio theme-radio"
                data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()" />
         <label data-bind="attr: {'for': getCode()}" class="label">
             <!-- BM Logo -->
-            <img src="https://bm.pl/img/www/logos/bmLogo.png"
-                 data-bind="attr: {alt: $t('Acceptance Mark')}"
+            <img src=""
+                 data-bind="attr: {alt: $t('Acceptance Mark'), src: bmLogo}"
                  class="payment-icon"/>
             <!-- BM Logo -->
             <span data-bind="text: getTitle()"></span>
         </label>
     </div>
+    <!--ko if: getCode() == isChecked()-->
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
+        <!-- ko if: renderSubOptions.length > 0 -->
         <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
             <div class="payment-method-note">
-                <!-- ko i18n: 'You will be redirected to the Blue Media secure service payment after submitting the order.' --><!-- /ko -->
+                <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
+                    <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}">
+                            <input required
+                                   data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+                                   name="payment_method_bluepayment_gateway"
+                                   class="radio theme-radio"
+                                   data-validate="{'validate-one-required-by-name':true}"
+                                   type="radio" />
+                            <label data-bind="attr:{for:  $parent.getCode() + gateway_id }" class="theme-radio__label">
+                                <img data-bind="attr:{src: logo_url,alt: name}"
+                                     class="payment-logo" />
+                                <span class="details">
+                                    <span class="title" data-bind="text: name"></span>
+                                    <span class="desc" data-bind="text: description"></span>
+                                </span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </fieldset>
+        <!--/ko-->
+        <!-- ko ifnot: renderSubOptions.length > 0-->
+        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-empty-gateway" data-bind="{visible: validationFailed}">
+            <p><!-- ko i18n: 'No gateway was selected.' --><!-- /ko --></p>
+        </div>
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
             <!-- ko template: getTemplate() --><!-- /ko -->
@@ -31,11 +64,50 @@
             <div class="primary">
                 <button class="action primary checkout"
                         type="submit"
-                        data-bind="click: placeOrder, enable: (getCode() == isChecked())"
+                        data-bind="click: placeOrder, enable: (getCode() == isChecked() && renderSubOptions.length > 0)"
                         disabled>
                     <span data-bind="i18n: 'Place Order'"></span>
                 </button>
             </div>
         </div>
     </div>
+    <!--/ko-->
 </div>
+<!-- ko if: !!renderCardOptions.length -->
+
+<div class="separated-payments-wrapper" data-bind="foreach: renderCardOptions">
+    <div class="payment-method blue-payment blue-payment__card">
+        <div class="payment-method-title field choice">
+            <input type="radio"
+                   name="payment_method_bluepayment_gateway"
+                   class="radio theme-radio"
+                   data-bind="attr:{id:  $parent.getCode() + $data.gateway_id, value: $data.gateway_id }, checked: $parent.isCardChecked($data), click: $parent.selectPaymentMethodCard.bind($parent), visible: $parent.isRadioButtonVisible()" />
+            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }"  class="label theme-radio__label">
+                <span data-bind="text: name"></span>
+            </label>
+        </div>
+        <div data-bind="visible: $parent.isCardChecked($data)">
+            <div class="payment-method-billing-address">
+                <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button class="action primary checkout"
+                            type="submit"
+                            data-bind="click: $parent.placeOrder.bind($parent)">
+                        <span data-bind="i18n: 'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--/ko-->
