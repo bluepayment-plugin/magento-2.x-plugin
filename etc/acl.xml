@@ -1,0 +1,12 @@
+<!-- File: app/code/BlueMedia/BluePayment/etc/acl.xml -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="BlueMedia_BluePayment::bluepayment" title="BluePayment">
+                    <resource id="BlueMedia_BluePayment::gateways" title="Gateways"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

@@ -21,7 +21,6 @@ define(
         return Component.extend({
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
             renderCardOptions:  window.checkoutConfig.payment.bluePaymentCard,
-            bmLogo:  window.checkoutConfig.payment.bmLogo,
             selectedPaymentObject: undefined,
             validationFailed: ko.observable(false),
             activeMethod: ko.computed(function(){

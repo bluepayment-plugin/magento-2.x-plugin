@@ -6,8 +6,8 @@
                data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()" />
         <label data-bind="attr: {'for': getCode()}" class="label">
             <!-- BM Logo -->
-            <img src=""
-                 data-bind="attr: {alt: $t('Acceptance Mark'), src: bmLogo}"
+            <img src="https://bm.pl/img/www/logos/bmLogo.png"
+                 data-bind="attr: {alt: $t('Acceptance Mark')}"
                  class="payment-icon"/>
             <!-- BM Logo -->
             <span data-bind="text: getTitle()"></span>
