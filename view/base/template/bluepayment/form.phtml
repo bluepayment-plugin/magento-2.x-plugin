@@ -1,0 +1,99 @@
+<!--
+/**
+ * BlueMedia_BluePayment extension
+ * 
+ * NOTICE OF LICENSE
+ * 
+ * This source file is subject to the MIT License
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * @category       Design
+ * @package        Template
+ * @copyright      Copyright (c) 2015
+ * @license        http://opensource.org/licenses/mit-license.php MIT License
+ */
+
+-->
+
+<!--Unikatowy identyfikator-->
+<?php $code = $this->getMethodCode(); ?>
+
+<!--Adres do pliku z logo firmy-->
+<?php $img  = $this->getLogoSrc(); ?>
+
+<ul class="bluemediatest123 form-list" id="payment_form_<?php echo $code ?>" style="display:none;">
+    <?php if ($img): ?>
+        <img src="<?php echo $img ?>" alt="Blue Media Logo" /><br />
+    <?php endif; ?>
+    <li class="form-alt"><?php echo $this->__('You will be redirected to the Blue Media secure service payment after submitting the order.'); ?></li>
+</ul>
+
+
+
+
+
+
+<script>
+    //<![CDATA[
+
+    var $gateways = jQuery('#p_method_bluepayment_gateway');
+    jQuery(document).ready(function () {
+
+        $interval = setInterval(function () {
+            jQuery('#p_method_bluepayment_gateway').find('input:radio').each(function () {
+                jQuery(this).removeAttr('disabled');
+            });
+        }, 50);
+        setTimeout(function () {
+            clearInterval($interval);
+        }, 1000);
+
+        var $bluepaymentInput = jQuery('#p_method_bluepayment');
+        if ($bluepaymentInput.length) {
+            setDefauleDisplayGateways($bluepaymentInput);
+
+//            jQuery('.input [name="payment[method]"]').each.change(function () {
+//                showHideGateways();
+//            });
+
+            jQuery('input:radio[name="payment[method]"]').change(function () {
+                if (jQuery(this).val() === 'bluepayment') {
+                    showGateways();
+                } else {
+                    hideGateways();
+                }
+            });
+        }
+    });
+
+    function setDefauleDisplayGateways(input) {
+        if ($gateways.length) {
+            $gateways.find('input:radio').each(function () {
+                jQuery(this).prop('disabled', false);
+            });
+            if (input.is(':checked')) {
+                $gateways.show();
+            } else {
+                $gateways.hide();
+            }
+        }
+    }
+
+    function showGateways() {
+        if ($gateways.length) {
+            $gateways.find('input:radio').each(function () {
+                jQuery(this).prop('disabled', false);
+            });
+            $gateways.show();
+        }
+    }
+    function hideGateways() {
+        if ($gateways.length) {
+            $gateways.hide();
+        }
+    }
+
+    //]]>
+</script>
