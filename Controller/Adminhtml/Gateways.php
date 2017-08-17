@@ -10,6 +10,7 @@ use BlueMedia\BluePayment\Model\GatewaysFactory;
 
 /**
  * Class Gateways
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml
  */
 abstract class Gateways extends Action
@@ -49,9 +50,9 @@ abstract class Gateways extends Action
      * @param GatewaysFactory $gatewaysFactory
      */
     public function __construct(
-        Context $context,
-        Registry $coreRegistry,
-        PageFactory $resultPageFactory,
+        Context         $context,
+        Registry        $coreRegistry,
+        PageFactory     $resultPageFactory,
         GatewaysFactory $gatewaysFactory
     ) {
         parent::__construct($context);

@@ -3,6 +3,7 @@
  * Copyright © 2016 Bold Brand Commerce
  * created by Piotr Kozioł (piotr.koziol@bold.net.pl)
  */
+
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Helper\Gateways;
@@ -12,6 +13,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 /**
  * Class Synchronize
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
  */
 class Synchronize extends Action
@@ -44,9 +46,9 @@ class Synchronize extends Action
      * @param \BlueMedia\BluePayment\Helper\Gateways     $gatewaysHelper
      */
     public function __construct(
-        Context $context,
+        Context     $context,
         PageFactory $resultPageFactory,
-        Gateways $gatewaysHelper
+        Gateways    $gatewaysHelper
     ) {
         parent::__construct($context);
         $this->_resultPageFactory = $resultPageFactory;

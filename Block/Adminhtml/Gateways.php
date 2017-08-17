@@ -1,10 +1,12 @@
 <?php
+
 namespace BlueMedia\BluePayment\Block\Adminhtml;
 
 use Magento\Backend\Block\Widget\Grid\Container;
 
 /**
  * Class Gateways
+ *
  * @package BlueMedia\BluePayment\Block\Adminhtml
  */
 class Gateways extends Container
@@ -33,10 +35,9 @@ class Gateways extends Container
     protected function _addSynchronizeGatewaysButton()
     {
         $this->addButton('synchronize_gateways', [
-            'label' => __('Synchronize Gateways'),
+            'label'   => __('Synchronize Gateways'),
             'onclick' => 'setLocation(\'' . $this->getUrl('*/*/synchronize') . '\')',
-            'class' => 'add primary'
+            'class'   => 'add primary',
         ]);
     }
-
 }

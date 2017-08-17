@@ -7,6 +7,7 @@ use Magento\Backend\Block\Widget\Tabs as WidgetTabs;
 
 /**
  * Class Tabs
+ *
  * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit
  */
 class Tabs extends WidgetTabs
@@ -30,10 +31,10 @@ class Tabs extends WidgetTabs
     protected function _beforeToHtml()
     {
         $this->addTab('gateways_info', [
-            'label' => __('General'),
-            'title' => __('General'),
+            'label'   => __('General'),
+            'title'   => __('General'),
             'content' => $this->getLayout()->createBlock(InfoTab::class)->toHtml(),
-            'active' => true
+            'active'  => true,
         ]);
 
         return parent::_beforeToHtml();

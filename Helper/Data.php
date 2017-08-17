@@ -1,9 +1,11 @@
 <?php
 
+
 namespace BlueMedia\BluePayment\Helper;
 
 /**
  * Class Data
+ *
  * @package BlueMedia\BluePayment\Helper
  */
 class Data extends \Magento\Payment\Helper\Data

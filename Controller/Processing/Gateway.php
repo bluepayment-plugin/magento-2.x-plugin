@@ -11,6 +11,7 @@ use Magento\Sales\Model\OrderFactory;
 
 /**
  * Class Gateway
+ *
  * @package BlueMedia\BluePayment\Controller\Processing
  */
 class Gateway extends Action
@@ -55,11 +56,11 @@ class Gateway extends Action
      * @param \Magento\Checkout\Model\Session                     $session
      */
     public function __construct(
-        Context $context,
-        JsonFactory $resultJsonFactory,
-        OrderSender $orderSender,
+        Context      $context,
+        JsonFactory  $resultJsonFactory,
+        OrderSender  $orderSender,
         OrderFactory $orderFactory,
-        Session $session
+        Session      $session
     ) {
         $this->resultJsonFactory = $resultJsonFactory;
         $this->session           = $session;

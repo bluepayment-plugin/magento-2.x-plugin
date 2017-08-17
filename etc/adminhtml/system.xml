@@ -40,6 +40,22 @@
                 <field id="title" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Title</label>
                 </field>
+                <field id="disabled_gateways_notification_active" translate="label comment" type="select" sortOrder="500" showInDefault="1">
+                    <label>Enabled disabled gateways notification</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="disabled_gateways_notification_sender_name" translate="label comment" type="text" sortOrder="510" showInDefault="1">
+                    <label>Disabled gateways notification Sender Name</label>
+                </field>
+                <field id="disabled_gateways_notification_receivers" translate="label comment" sortOrder="520" showInDefault="1">
+                    <label>Disabled gateways notification Receivers</label>
+                    <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\Receivers</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="disabled_gateways_notification_template" translate="label comment" type="select" sortOrder="530" showInDefault="1">
+                    <label>Disabled gateways notification Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                </field>
             </group>
         </section>
     </system>

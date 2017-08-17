@@ -3,6 +3,7 @@
  * Copyright © 2016 Bold Brand Commerce
  * created by Piotr Kozioł (piotr.koziol@bold.net.pl)
  */
+
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use Magento\Backend\App\Action;
@@ -11,6 +12,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 /**
  * Class Index
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
  */
 class Index extends Action
@@ -32,7 +34,7 @@ class Index extends Action
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      */
     public function __construct(
-        Context $context,
+        Context     $context,
         PageFactory $resultPageFactory
     ) {
         parent::__construct($context);
@@ -48,10 +50,9 @@ class Index extends Action
     }
 
     /**
-     * @return mixed
-     *
      * Call page factory to render layout and page content
      *
+     * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
     {
@@ -76,10 +77,9 @@ class Index extends Action
     }
 
     /**
-     * @return mixed
-     *
      * Returns created page
      *
+     * @return \Magento\Framework\View\Result\Page
      */
     public function getResultPage()
     {
@@ -89,5 +89,4 @@ class Index extends Action
 
         return $this->_resultPage;
     }
-
 }

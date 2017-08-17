@@ -11,6 +11,7 @@ use Magento\Framework\Model\AbstractModel;
  * Class Gateways
  *
  * @method int getGatewayStatus()
+ * @method int getForceDisable()
  * @method int getGatewayId()
  * @method string getGatewayName()
  * @method string getBankName()
@@ -26,8 +27,9 @@ use Magento\Framework\Model\AbstractModel;
  */
 class Gateways extends AbstractModel implements IdentityInterface, GatewaysInterface
 {
-    const STATUS_ACTIVE          = 1;
-    const STATUS_INACTIVE        = 0;
+    const FORCE_DISABLE   = 1;
+    const STATUS_ACTIVE   = 1;
+    const STATUS_INACTIVE = 0;
 
     /**
      *
@@ -45,7 +47,7 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     protected $_eventPrefix = 'blue_gateways';
 
     /**
-     *
+     * @return void
      */
     protected function _construct()
     {
@@ -73,7 +75,7 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
      */
     public function isActive()
     {
-        return $this->getGatewayStatus() == self::STATUS_ACTIVE;
+        return $this->getGatewayStatus() == self::STATUS_ACTIVE && $this->getForceDisable() != self::FORCE_DISABLE;
     }
 
     /**

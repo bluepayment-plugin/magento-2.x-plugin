@@ -6,6 +6,7 @@ use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 /**
  * Class Edit
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
  */
 class Edit extends Gateways
@@ -13,7 +14,7 @@ class Edit extends Gateways
     const GATEWAYS_REGISTER_CODE = 'adminbluepayment_gateways';
 
     /**
-     * @return void
+     * @return \Magento\Backend\Model\View\Result\Page|void
      */
     public function execute()
     {

@@ -9,6 +9,7 @@ use Magento\Framework\Registry;
 
 /**
  * Class Edit
+ *
  * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways
  */
 class Edit extends Container
@@ -26,9 +27,9 @@ class Edit extends Container
      * @param array    $data
      */
     public function __construct(
-        Context $context,
+        Context  $context,
         Registry $registry,
-        array $data = []
+        array    $data = []
     ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
@@ -49,17 +50,17 @@ class Edit extends Container
 
         $this->buttonList->update('save', 'label', __('Save'));
         $this->buttonList->add('saveandcontinue', [
-                'label' => __('Save and Continue Edit'),
-                'class' => 'save',
-                'data_attribute' => [
-                    'mage-init' => [
-                        'button' => [
-                            'event' => 'saveAndContinueEdit',
-                            'target' => '#edit_form'
-                        ]
-                    ]
-                ]
-            ], -100);
+            'label'          => __('Save and Continue Edit'),
+            'class'          => 'save',
+            'data_attribute' => [
+                'mage-init' => [
+                    'button' => [
+                        'event'  => 'saveAndContinueEdit',
+                        'target' => '#edit_form',
+                    ],
+                ],
+            ],
+        ], -100);
         $this->buttonList->update('delete', 'label', __('Delete'));
     }
 

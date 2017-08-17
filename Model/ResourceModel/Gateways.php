@@ -1,4 +1,5 @@
 <?php
+
 namespace BlueMedia\BluePayment\Model\ResourceModel;
 
 use Magento\Framework\Model\AbstractModel;
@@ -8,6 +9,7 @@ use Magento\Framework\Stdlib\DateTime\DateTime;
 
 /**
  * Class Gateways
+ *
  * @package BlueMedia\BluePayment\Model\ResourceModel
  */
 class Gateways extends AbstractDb
@@ -27,7 +29,7 @@ class Gateways extends AbstractDb
      */
     public function __construct(
         DateTime $date,
-        Context $context
+        Context  $context
     ) {
         $this->_date = $date;
         parent::__construct($context);

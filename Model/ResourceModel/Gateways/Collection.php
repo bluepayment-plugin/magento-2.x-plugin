@@ -1,4 +1,5 @@
 <?php
+
 namespace BlueMedia\BluePayment\Model\ResourceModel\Gateways;
 
 use BlueMedia\BluePayment\Model\Gateways;
@@ -7,6 +8,7 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**
  * Class Collection
+ *
  * @package BlueMedia\BluePayment\Model\ResourceModel\Gateways
  */
 class Collection extends AbstractCollection

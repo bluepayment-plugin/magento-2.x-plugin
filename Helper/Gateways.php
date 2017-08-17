@@ -11,9 +11,11 @@ use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 
 /**
  * Class Gateways
+ *
  * @package BlueMedia\BluePayment\Helper
  */
 class Gateways extends \BlueMedia\BluePayment\Helper\Data
@@ -36,6 +38,12 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
      */
     protected $_logger;
 
+
+    /**
+     * @var Email
+     */
+    protected $_emailHelper;
+
     /**
      * Gateways constructor.
      *
@@ -46,21 +54,24 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
      * @param \Magento\Payment\Model\Config                $paymentConfig
      * @param \Magento\Framework\App\Config\Initial        $initialConfig
      * @param \BlueMedia\BluePayment\Model\GatewaysFactory $gatewaysFactory
+     * @param EmailHelper                                  $emailHelper
      */
     public function __construct(
-        Context $context,
-        LayoutFactory $layoutFactory,
-        Factory $paymentMethodFactory,
-        Emulation $appEmulation,
-        Config $paymentConfig,
-        Initial $initialConfig,
-        GatewaysFactory $gatewaysFactory
+        Context         $context,
+        LayoutFactory   $layoutFactory,
+        Factory         $paymentMethodFactory,
+        Emulation       $appEmulation,
+        Config          $paymentConfig,
+        Initial         $initialConfig,
+        GatewaysFactory $gatewaysFactory,
+        EmailHelper     $emailHelper
     ) {
         parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
         $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
         $this->_logger = new \Zend\Log\Logger();
         $this->_logger->addWriter($writer);
         $this->_gatewaysFactory = $gatewaysFactory;
+        $this->_emailHelper     = $emailHelper;
     }
 
     /**
@@ -96,7 +107,7 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     private function getGatewayListUrl()
     {
@@ -109,7 +120,7 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
     }
 
     /**
-     * @param $length
+     * @param int $length
      *
      * @return string
      */
@@ -125,11 +136,11 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
     }
 
     /**
-     * @param $hashMethod
-     * @param $serviceId
-     * @param $messageId
-     * @param $hashKey
-     * @param $gatewayListAPIUrl
+     * @param string $hashMethod
+     * @param string $serviceId
+     * @param int    $messageId
+     * @param string $hashKey
+     * @param string $gatewayListAPIUrl
      *
      * @return bool|\SimpleXMLElement
      */
@@ -139,7 +150,7 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
         $data   = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
-            'Hash' => $hash
+            'Hash'      => $hash,
         ];
         $fields = (is_array($data)) ? http_build_query($data) : $data;
         try {
@@ -165,7 +176,7 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
     }
 
     /**
-     * @param $gatewayList
+     * @param array $gatewayList
      */
     private function saveGateways($gatewayList)
     {
@@ -188,9 +199,11 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
                         $gatewayModel->load($existingGateways[$gateway['gatewayID']]['entity_id']);
                     } else {
                         $gatewayModel = $this->_gatewaysFactory->create();
+                        $gatewayModel->setData('force_disable', 1);
                     }
 
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
+                    $gatewayModel->setData('gateway_status', 1);
                     $gatewayModel->setData('bank_name', $gateway['bankName']);
                     $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
@@ -204,19 +217,26 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
                 }
             }
 
+            $disabledGateways = [];
             foreach ($existingGateways as $existingGatewayId => $existingGatewayData) {
                 if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
-                    && $existingGatewayData['gateway_status']
-                    != 0
+                    && $existingGatewayData['gateway_status'] != 0
                 ) {
                     $gatewayModel = $this->_gatewaysFactory->create()->load($existingGatewayData['entity_id']);
                     $gatewayModel->setData('gateway_status', 0);
                     try {
                         $gatewayModel->save();
+                        $disabledGateways[] = [
+                            'gateway_name' => $existingGatewayData['gateway_name'],
+                            'gateway_id'   => $existingGatewayId,
+                        ];
                     } catch (\Exception $e) {
                         $this->_logger->info($e->getMessage());
                     }
                 }
+            }
+            if (!empty($disabledGateways)) {
+                $this->_emailHelper->sendGatewayDeactivationEmail($disabledGateways);
             }
         }
     }
@@ -233,17 +253,17 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
         $existingGateways = [];
         foreach ($bluegatewaysCollection as $blueGateways) {
             $existingGateways[$blueGateways->getData('gateway_id')] = [
-                'entity_id' => $blueGateways->getId(),
-                'gateway_status' => $blueGateways->getData('gateway_status'),
-                'bank_name' => $blueGateways->getData('bank_name'),
-                'gateway_name' => $blueGateways->getData('gateway_name'),
+                'entity_id'           => $blueGateways->getId(),
+                'gateway_status'      => $blueGateways->getData('gateway_status'),
+                'bank_name'           => $blueGateways->getData('bank_name'),
+                'gateway_name'        => $blueGateways->getData('gateway_name'),
                 'gateway_description' => $blueGateways->getData('gateway_description'),
-                'gateway_sort_order' => $blueGateways->getData('gateway_sort_order'),
-                'gateway_type' => $blueGateways->getData('gateway_type'),
-                'gateway_logo_url' => $blueGateways->getData('gateway_logo_url'),
-                'use_own_logo' => $blueGateways->getData('use_own_logo'),
-                'gateway_logo_path' => $blueGateways->getData('gateway_logo_path'),
-                'status_date' => $blueGateways->getData('status_date')
+                'gateway_sort_order'  => $blueGateways->getData('gateway_sort_order'),
+                'gateway_type'        => $blueGateways->getData('gateway_type'),
+                'gateway_logo_url'    => $blueGateways->getData('gateway_logo_url'),
+                'use_own_logo'        => $blueGateways->getData('use_own_logo'),
+                'gateway_logo_path'   => $blueGateways->getData('gateway_logo_path'),
+                'status_date'         => $blueGateways->getData('status_date'),
             ];
         }
 
@@ -255,10 +275,6 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
      */
     public function showGatewayLogo()
     {
-        if ($this->scopeConfig->getValue("payment/bluepayment/show_gateway_logo") == 1) {
-            return true;
-        }
-
-        return false;
+        return $this->scopeConfig->getValue("payment/bluepayment/show_gateway_logo") == 1;
     }
 }

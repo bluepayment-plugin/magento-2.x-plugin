@@ -1,30 +1,29 @@
-define(
-    [
+define([
         'jquery',
+        'underscore',
         'ko',
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/action/select-payment-method',
         'mage/url',
         'BlueMedia_BluePayment/js/model/quote',
         'BlueMedia_BluePayment/js/checkout-data'
-    ],
-    function ($,
-              ko,
-              Component,
-              selectPaymentMethodAction,
-              url,
-              quote,
-              checkoutData
-        ) {
+    ], function ($,
+                 _,
+                 ko,
+                 Component,
+                 selectPaymentMethodAction,
+                 url,
+                 quote,
+                 checkoutData) {
         'use strict';
         var widget;
         return Component.extend({
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
-            renderCardOptions:  window.checkoutConfig.payment.bluePaymentCard,
-            selectedPaymentObject: undefined,
+            renderCardOptions: window.checkoutConfig.payment.bluePaymentCard,
+            selectedPaymentObject: {},
             validationFailed: ko.observable(false),
-            activeMethod: ko.computed(function(){
-                if(checkoutData.getBlueMediaPaymentMethod() && quote.paymentMethod()){
+            activeMethod: ko.computed(function () {
+                if (checkoutData.getBlueMediaPaymentMethod() && quote.paymentMethod()) {
                     if (quote.paymentMethod().method === 'bluepayment') {
                         return checkoutData.getBlueMediaPaymentMethod().gateway_id;
                     }
@@ -53,22 +52,21 @@ define(
                     }
                 };
                 ko.bindingHandlers.addActiveClass = {
-                     init: function (element) {
-                         var el = $(element);
-                         var checkboxes = el.find('input');
-                         checkboxes.each(function () {
-                             if ($(this).is(':checked')) {
-                                 $(this).parent().addClass('_active');
-                             }
-                         });
-                     }
+                    init: function (element) {
+                        var el = $(element);
+                        var checkboxes = el.find('input');
+                        checkboxes.each(function () {
+                            if ($(this).is(':checked')) {
+                                $(this).parent().addClass('_active');
+                            }
+                        });
+                    }
                 };
             },
-
             defaults: {
                 template: 'BlueMedia_BluePayment/payment/bluepayment'
             },
-            selectPaymentOption: function (value){
+            selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
                 return true;
             },
@@ -78,6 +76,8 @@ define(
 
                 selectPaymentMethodAction(this.getData());
                 checkoutData.setSelectedPaymentMethod(this.item.method);
+                checkoutData.setIndividualGatewayFlag('');
+                this.setBlueMediaGatewayMethod({});
 
                 return true;
             },
@@ -86,7 +86,7 @@ define(
                 checkoutData.setSelectedPaymentMethod(this.item.method);
                 return true;
             },
-            selectPaymentMethodCard: function(cardContext) {
+            selectPaymentMethodCard: function (cardContext) {
                 this.item.individual_gateway = cardContext.gateway_id;
                 checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
 
@@ -105,7 +105,7 @@ define(
             /**
              * Get payment method data
              */
-            getData: function() {
+            getData: function () {
                 return {
                     "method": this.item.method,
                     "po_number": null,
@@ -114,7 +114,7 @@ define(
             },
             isChecked: ko.computed(function () {
                 var paymentMethod = quote.paymentMethod();
-                if(paymentMethod){
+                if (paymentMethod) {
                     return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
                 }
                 return null;
@@ -143,14 +143,14 @@ define(
              * @return {Boolean}
              */
             validate: function () {
-                if (this.selectedPaymentObject === undefined) {
+                if (_.isEmpty(this.selectedPaymentObject)) {
                     this.validationFailed(true);
                     return false;
                 }
                 return true;
             },
             afterPlaceOrder: function () {
-                window.location.href = url.build('bluepayment/processing/create') + '?gateway_id=' +  this.selectedPaymentObject.gateway_id;
+                window.location.href = url.build('bluepayment/processing/create') + '?gateway_id=' + this.selectedPaymentObject.gateway_id;
             },
             inputIdPrefix: function () {
                 return 'blue-payment';

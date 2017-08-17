@@ -3,13 +3,44 @@
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Result\PageFactory;
+use BlueMedia\BluePayment\Model\GatewaysFactory;
+use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 
 /**
  * Class Save
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
  */
 class Save extends Gateways
 {
+    /**
+     * @var EmailHelper
+     */
+    protected $_emailHelper;
+
+    /**
+     * Save constructor.
+     *
+     * @param Context         $context
+     * @param Registry        $coreRegistry
+     * @param PageFactory     $resultPageFactory
+     * @param GatewaysFactory $gatewaysFactory
+     * @param EmailHelper     $emailHelper
+     */
+    public function __construct(
+        Context         $context,
+        Registry        $coreRegistry,
+        PageFactory     $resultPageFactory,
+        GatewaysFactory $gatewaysFactory,
+        EmailHelper     $emailHelper
+    ) {
+        parent::__construct($context, $coreRegistry, $resultPageFactory, $gatewaysFactory);
+        $this->_emailHelper = $emailHelper;
+    }
+
     /**
      * @return void
      */
@@ -21,11 +52,29 @@ class Save extends Gateways
             $gatewaysModel = $this->_gatewaysFactory->create();
             $gatewaysId    = (int)$this->getRequest()->getParam('id', 0);
 
-            if ($gatewaysId) {
-                $gatewaysModel->load($gatewaysId);
-            }
             $formData              = $this->getRequest()->getParam('gateways');
             $formData['entity_id'] = (int)$formData['id'];
+
+            if ($gatewaysId) {
+                $gatewaysModel->load($gatewaysId);
+            } elseif ($formData['entity_id']) {
+                $gatewaysModel->load($formData['entity_id']);
+            }
+
+            if (isset($formData['gateway_status'])
+                && $gatewaysModel->getId()
+                && $gatewaysModel->getGatewayStatus()
+                && !$formData['gateway_status']
+            ) {
+                $disabledGateways = [
+                    [
+                        'gateway_name' => $gatewaysModel->getData('gateway_name'),
+                        'gateway_id'   => $gatewaysModel->getData('gateway_id'),
+                    ],
+                ];
+                $this->_emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+            }
+
             $gatewaysModel->setData($formData);
 
             try {

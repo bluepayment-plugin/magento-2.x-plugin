@@ -5,10 +5,11 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Psr\Log\LoggerInterface;
+use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Status
+ *
  * @package BlueMedia\BluePayment\Controller\Processing
  */
 class Status extends Action
@@ -27,12 +28,12 @@ class Status extends Action
      * Status constructor.
      *
      * @param \Magento\Framework\App\Action\Context       $context
-     * @param \Psr\Log\LoggerInterface                    $logger
+     * @param \BlueMedia\BluePayment\Logger\Logger        $logger
      * @param \BlueMedia\BluePayment\Model\PaymentFactory $paymentFactory
      */
     public function __construct(
-        Context $context,
-        LoggerInterface $logger,
+        Context        $context,
+        Logger         $logger,
         PaymentFactory $paymentFactory
     ) {
         $this->logger         = $logger;
@@ -49,10 +50,12 @@ class Status extends Action
     {
         try {
             $params = $this->getRequest()->getParams();
+            $this->logger->info('STATUS:' . __LINE__, ['params' => $params]);
             if (array_key_exists('transactions', $params)) {
                 $paramTransactions  = $params['transactions'];
                 $base64transactions = base64_decode($paramTransactions);
                 $simpleXml          = simplexml_load_string($base64transactions);
+                $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
                 $this->paymentFactory->create()->processStatusPayment($simpleXml);
             }
         } catch (\Exception $e) {

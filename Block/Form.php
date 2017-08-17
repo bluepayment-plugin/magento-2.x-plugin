@@ -7,6 +7,7 @@ use Magento\Framework\View\Element\Template\Context;
 
 /**
  * Class Form
+ *
  * @package BlueMedia\BluePayment\Block
  */
 class Form extends \Magento\Payment\Block\Form
@@ -34,9 +35,9 @@ class Form extends \Magento\Payment\Block\Form
      * @param array                                                                 $data
      */
     public function __construct(
-        Context $context,
+        Context           $context,
         CollectionFactory $collectionFactory,
-        array $data = []
+        array             $data = []
     ) {
         parent::__construct($context, $data);
         $this->collectionFactory = $collectionFactory;
@@ -49,7 +50,10 @@ class Form extends \Magento\Payment\Block\Form
     {
         if (!$this->_gatewayList) {
             $this->_gatewayList = $this->collectionFactory->create();
-            $this->_gatewayList->addFieldToFilter('gateway_status', 1)->load();
+            $this->_gatewayList
+                ->addFieldToFilter('gateway_status', 1)
+                ->addFieldToFilter('force_disable', 0)
+                ->load();
         }
 
         return $this->_gatewayList;

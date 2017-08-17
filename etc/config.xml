@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-
 <config>
     <default>
         <payment>
@@ -20,4 +19,13 @@
             </bluepayment>
         </payment>
     </default>
+    <websites>
+        <base>
+            <payment>
+                <bluepayment>
+                    <title>Płatność elektroniczna BlueMedia</title>
+                </bluepayment>
+            </payment>
+        </base>
+    </websites>
 </config>

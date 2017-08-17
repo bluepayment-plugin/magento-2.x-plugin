@@ -7,6 +7,7 @@ use Magento\Checkout\Model\ConfigProviderInterface;
 
 /**
  * Class ConfigProvider
+ *
  * @package BlueMedia\BluePayment\Model
  */
 class ConfigProvider implements ConfigProviderInterface
@@ -17,12 +18,12 @@ class ConfigProvider implements ConfigProviderInterface
     protected $gatewaysCollection;
 
     /**
-     * @var
+     * @var array
      */
     protected $_activeGateways;
 
     /**
-     * @var []
+     * @var array
      */
     protected $_activeGatewaysResponse;
 
@@ -42,11 +43,9 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig()
     {
-        $config = [
-            'payment' => $this->getActiveGateways()
+        return [
+            'payment' => $this->getActiveGateways(),
         ];
-
-        return $config;
     }
 
     /**
@@ -70,13 +69,13 @@ class ConfigProvider implements ConfigProviderInterface
                 }
             }
 
-            usort($result, function($a, $b) {
+            usort($result, function ($a, $b) {
                 return (int)$a['sort_order'] > (int)$b['sort_order'];
             });
 
             $this->_activeGateways = [
                 'bluePaymentOptions' => $result,
-                'bluePaymentCard' => $resultCard
+                'bluePaymentCard'    => $resultCard,
             ];
         }
 
@@ -96,14 +95,14 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return [
-            'gateway_id' => $gateway->getGatewayId(),
-            'name' => $gateway->getGatewayName(),
-            'bank' => $gateway->getBankName(),
-            'description' => $gateway->getGatewayDescription(),
-            'sort_order' => $gateway->getGatewaySortOrder(),
-            'type' => $gateway->getGatewayType(),
-            'logo_url' => $logoUrl,
-            'is_separated_method' => $gateway->getIsSeparatedMethod()
+            'gateway_id'          => $gateway->getGatewayId(),
+            'name'                => $gateway->getGatewayName(),
+            'bank'                => $gateway->getBankName(),
+            'description'         => $gateway->getGatewayDescription(),
+            'sort_order'          => $gateway->getGatewaySortOrder(),
+            'type'                => $gateway->getGatewayType(),
+            'logo_url'            => $logoUrl,
+            'is_separated_method' => $gateway->getIsSeparatedMethod(),
         ];
     }
 }

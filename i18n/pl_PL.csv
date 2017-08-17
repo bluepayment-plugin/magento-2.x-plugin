@@ -1,2 +1,6 @@
 "Authorisation key does not exists","Klucz autoryzacji transakcji nie istnieje"
 "Invalid authorisation key","Klucz autoryzacji transakcji jest nieprawidłowy"
+"No gateway was selected.","Nie wybrano bramki."
+"Gateway ID: %1 ","ID Kanału Płatności: %1 "
+"Name: %1 ","Nazwa: %1 "
+"CRON Service","Usługa CRON"

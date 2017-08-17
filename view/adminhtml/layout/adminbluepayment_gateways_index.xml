@@ -136,6 +136,25 @@
                                 </argument>
                             </arguments>
                         </block>
+                        <block class="Magento\Backend\Block\Widget\Grid\Column" as="force_disable">
+                            <arguments>
+                                <argument name="header" xsi:type="string" translate="true">Force Disable Gateway</argument>
+                                <argument name="index" xsi:type="string">force_disable</argument>
+                                <argument name="type" xsi:type="string">options</argument>
+                                <argument name="column_css_class" xsi:type="string">col-id</argument>
+                                <argument name="header_css_class" xsi:type="string">col-id</argument>
+                                <argument name="options" xsi:type="array">
+                                    <item name="no" xsi:type="array">
+                                        <item name="value" xsi:type="string">0</item>
+                                        <item name="label" xsi:type="string" translate="true">No</item>
+                                    </item>
+                                    <item name="yes" xsi:type="array">
+                                        <item name="value" xsi:type="string">1</item>
+                                        <item name="label" xsi:type="string" translate="true">Yes</item>
+                                    </item>
+                                </argument>
+                            </arguments>
+                        </block>
                         <block class="Magento\Backend\Block\Widget\Grid\Column" as="use_own_logo">
                             <arguments>
                                 <argument name="header" xsi:type="string" translate="true">Use Own Logo</argument>

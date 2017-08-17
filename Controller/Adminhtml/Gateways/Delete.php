@@ -6,6 +6,7 @@ use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 /**
  * Class Delete
+ *
  * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
  */
 class Delete extends Gateways
@@ -27,10 +28,7 @@ class Delete extends Gateways
                 try {
                     $gatewaysModel->delete();
                     $this->messageManager->addSuccess(__('The gateway has been deleted.'));
-
                     $this->_redirect('*/*/');
-
-                    return;
                 } catch (\Exception $e) {
                     $this->messageManager->addError($e->getMessage());
                     $this->_redirect('*/*/edit', ['id' => $gatewaysModel->getId()]);

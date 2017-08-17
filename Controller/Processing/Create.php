@@ -11,10 +11,11 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
-use Psr\Log\LoggerInterface;
+use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Create
+ *
  * @package BlueMedia\BluePayment\Controller\Processing
  */
 class Create extends Action
@@ -52,22 +53,23 @@ class Create extends Action
     /**
      * Create constructor.
      *
-     * @param \Magento\Framework\App\Action\Context               $context
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
-     * @param \BlueMedia\BluePayment\Model\PaymentFactory         $paymentFactory
-     * @param \Magento\Sales\Model\OrderFactory                   $orderFactory
-     * @param \Magento\Checkout\Model\Session                     $session
-     * @param \Psr\Log\LoggerInterface                            $logger
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface  $scopeConfig
+     * @param Context              $context
+     * @param OrderSender          $orderSender
+     * @param PaymentFactory       $paymentFactory
+     * @param OrderFactory         $orderFactory
+     * @param Session              $session
+     * @param Logger               $logger
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        Context $context,
-        OrderSender $orderSender,
-        PaymentFactory $paymentFactory,
-        OrderFactory $orderFactory,
-        Session $session,
-        LoggerInterface $logger,
+        Context              $context,
+        OrderSender          $orderSender,
+        PaymentFactory       $paymentFactory,
+        OrderFactory         $orderFactory,
+        Session              $session,
+        Logger               $logger,
         ScopeConfigInterface $scopeConfig
+
     ) {
         $this->paymentFactory = $paymentFactory;
         $this->scopeConfig    = $scopeConfig;
@@ -87,12 +89,14 @@ class Create extends Action
             $payment       = $this->paymentFactory->create();
             $session       = $this->_getCheckout();
             $quoteModuleId = $session->getBluePaymentQuoteId();
+            $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
             $session->setQuoteId($quoteModuleId);
             $sessionLastRealOrderSessionId = $session->getLastRealOrderId();
-            $order                         = $this->orderFactory->create()
-                                                                ->loadByIncrementId($sessionLastRealOrderSessionId);
+            $this->logger->info('CREATE:' . __LINE__, ['sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId]);
+            $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
+
             if (!$order->getId()) {
-                $this->logger->info('Zamówienie bez identyfikatora');
+                $this->logger->info('CREATE:' . __LINE__, ['Zamówienie bez identyfikatora']);
             }
             $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
 
@@ -110,12 +114,16 @@ class Create extends Action
                     }
                 }
 
+                $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
                 $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment)->save();
+                $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
             } else {
                 $order->setState(Order::STATE_PENDING_PAYMENT)->setStatus(Order::STATE_PENDING_PAYMENT)->save();
+                $this->logger->info('CREATE:' . __LINE__, ['setStatePendingPayment AND setStatusPendingPayment']);
             }
 
             if ($order->getCanSendNewEmailFlag()) {
+                $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
                 try {
                     $this->orderSender->send($order);
                 } catch (\Exception $e) {
@@ -123,10 +131,13 @@ class Create extends Action
                 }
             }
 
-            $url = $this->_url->getUrl($payment->getUrlGateway()
+            $url = $this->_url->getUrl(
+                $payment->getUrlGateway()
                 . '?'
-                . http_build_query($payment->getFormRedirectFields($order, $gatewayId)));
+                . http_build_query($payment->getFormRedirectFields($order, $gatewayId))
+            );
 
+            $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $url]);
             $this->getResponse()->setRedirect($url);
         } catch (\Exception $e) {
             $this->logger->critical($e);

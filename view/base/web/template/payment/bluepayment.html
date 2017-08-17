@@ -2,8 +2,8 @@
     <div class="payment-method-title field choice">
         <input type="radio"
                name="payment[method]"
-               class="radio theme-radio"
-               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()" />
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
         <label data-bind="attr: {'for': getCode()}" class="label">
             <!-- BM Logo -->
             <img src="https://bm.pl/img/www/logos/bmLogo.png"
@@ -27,12 +27,12 @@
                             <input required
                                    data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
                                    name="payment_method_bluepayment_gateway"
-                                   class="radio theme-radio"
+                                   class="radio"
                                    data-validate="{'validate-one-required-by-name':true}"
-                                   type="radio" />
-                            <label data-bind="attr:{for:  $parent.getCode() + gateway_id }" class="theme-radio__label">
+                                   type="radio"/>
+                            <label data-bind="attr:{for:  $parent.getCode() + gateway_id }">
                                 <img data-bind="attr:{src: logo_url,alt: name}"
-                                     class="payment-logo" />
+                                     class="payment-logo"/>
                                 <span class="details">
                                     <span class="title" data-bind="text: name"></span>
                                     <span class="desc" data-bind="text: description"></span>
@@ -64,7 +64,12 @@
             <div class="primary">
                 <button class="action primary checkout"
                         type="submit"
-                        data-bind="click: placeOrder, enable: (getCode() == isChecked() && renderSubOptions.length > 0)"
+                        data-bind="
+                        click: placeOrder,
+                        enable: (getCode() == isChecked() && renderSubOptions.length > 0),
+                        attr:{
+                            'data-payment-method-name': $data.index
+                        }"
                         disabled>
                     <span data-bind="i18n: 'Place Order'"></span>
                 </button>
@@ -76,17 +81,18 @@
 <!-- ko if: !!renderCardOptions.length -->
 
 <div class="separated-payments-wrapper" data-bind="foreach: renderCardOptions">
-    <div class="payment-method blue-payment blue-payment__card">
+    <div class="payment-method blue-payment blue-payment__card"
+         data-bind="css:{'_active': $parent.isCardChecked($data)}">
         <div class="payment-method-title field choice">
             <input type="radio"
                    name="payment_method_bluepayment_gateway"
-                   class="radio theme-radio"
-                   data-bind="attr:{id:  $parent.getCode() + $data.gateway_id, value: $data.gateway_id }, checked: $parent.isCardChecked($data), click: $parent.selectPaymentMethodCard.bind($parent), visible: $parent.isRadioButtonVisible()" />
-            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }"  class="label theme-radio__label">
+                   class="radio"
+                   data-bind="attr:{id:  $parent.getCode() + $data.gateway_id, value: $data.gateway_id }, checked: $parent.isCardChecked($data), click: $parent.selectPaymentMethodCard.bind($parent), visible: $parent.isRadioButtonVisible()"/>
+            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
                 <span data-bind="text: name"></span>
             </label>
         </div>
-        <div data-bind="visible: $parent.isCardChecked($data)">
+        <div class="payment-method-content" data-bind="visible: $parent.isCardChecked($data)">
             <div class="payment-method-billing-address">
                 <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
                 <!-- ko template: getTemplate() --><!-- /ko -->
@@ -101,7 +107,11 @@
                 <div class="primary">
                     <button class="action primary checkout"
                             type="submit"
-                            data-bind="click: $parent.placeOrder.bind($parent)">
+                            data-bind="
+                            click: $parent.placeOrder.bind($parent),
+                            attr:{
+                            'data-payment-method-name': $parent.index + '_'+ $data.bank
+                            }">
                         <span data-bind="i18n: 'Place Order'"></span>
                     </button>
                 </div>

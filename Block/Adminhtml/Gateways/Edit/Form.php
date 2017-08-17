@@ -6,6 +6,7 @@ use Magento\Backend\Block\Widget\Form\Generic;
 
 /**
  * Class Form
+ *
  * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit
  */
 class Form extends Generic
@@ -17,12 +18,12 @@ class Form extends Generic
     {
         /** @var \Magento\Framework\Data\Form $form */
         $form = $this->_formFactory->create([
-                'data' => [
-                    'id' => 'edit_form',
-                    'action' => $this->getData('action'),
-                    'method' => 'post'
-                ]
-            ]);
+            'data' => [
+                'id'     => 'edit_form',
+                'action' => $this->getData('action'),
+                'method' => 'post',
+            ],
+        ]);
         $form->setUseContainer(true);
         $this->setForm($form);
 
