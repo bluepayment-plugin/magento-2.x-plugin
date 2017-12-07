@@ -2,7 +2,7 @@
 
 namespace BlueMedia\BluePayment\Model;
 
-use BlueMedia\BluePayment\Model\Api\Data\GatewaysInterface;
+use BlueMedia\BluePayment\Api\Data\GatewaysInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways as GatewaysResource;
 use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;

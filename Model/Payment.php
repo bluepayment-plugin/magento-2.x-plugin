@@ -2,22 +2,24 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Helper\Data;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\Method\AbstractMethod;
+use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
-use Magento\Payment\Model\Method\Logger;
 
 /**
  * Class Payment
@@ -26,8 +28,7 @@ use Magento\Payment\Model\Method\Logger;
  */
 class Payment extends AbstractMethod
 {
-    const METHOD_CODE = 'bluepayment';
-
+    const METHOD_CODE                    = 'bluepayment';
     const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
     /**
@@ -36,6 +37,7 @@ class Payment extends AbstractMethod
     const PAYMENT_STATUS_PENDING = 'PENDING';
     const PAYMENT_STATUS_SUCCESS = 'SUCCESS';
     const PAYMENT_STATUS_FAILURE = 'FAILURE';
+
 
     /**
      * Stałe potwierdzenia autentyczności transakcji
@@ -124,6 +126,16 @@ class Payment extends AbstractMethod
     protected $statusCollectionFactory;
 
     /**
+     * @var \BlueMedia\BluePayment\Model\TransactionFactory
+     */
+    protected $transactionFactory;
+
+    /**
+     * @var \BlueMedia\BluePayment\Api\TransactionRepositoryInterface
+     */
+    protected $transactionRepository;
+
+    /**
      * Payment constructor.
      *
      * @param \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory $statusCollectionFactory
@@ -138,26 +150,30 @@ class Payment extends AbstractMethod
      * @param \Magento\Payment\Helper\Data                                      $paymentData
      * @param \Magento\Framework\App\Config\ScopeConfigInterface                $scopeConfig
      * @param \Magento\Payment\Model\Method\Logger                              $logger
+     * @param \BlueMedia\BluePayment\Model\TransactionFactory                   $transactionFactory
+     * @param \BlueMedia\BluePayment\Api\TransactionRepositoryInterface         $transactionRepository
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null      $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null                $resourceCollection
      * @param array                                                             $data
      */
     public function __construct(
-        CollectionFactory          $statusCollectionFactory,
-        OrderSender                $orderSender,
-        Data                       $helper,
-        UrlInterface               $url,
-        OrderFactory               $orderFactory,
-        Context                    $context,
-        Registry                   $registry,
-        ExtensionAttributesFactory $extensionFactory,
-        AttributeValueFactory      $customAttributeFactory,
-        PaymentData                $paymentData,
-        ScopeConfigInterface       $scopeConfig,
-        Logger                     $logger,
-        AbstractResource           $resource = null,
-        AbstractDb                 $resourceCollection = null,
-        array                      $data = []
+        CollectionFactory              $statusCollectionFactory,
+        OrderSender                    $orderSender,
+        Data                           $helper,
+        UrlInterface                   $url,
+        OrderFactory                   $orderFactory,
+        Context                        $context,
+        Registry                       $registry,
+        ExtensionAttributesFactory     $extensionFactory,
+        AttributeValueFactory          $customAttributeFactory,
+        PaymentData                    $paymentData,
+        ScopeConfigInterface           $scopeConfig,
+        Logger                         $logger,
+        TransactionFactory             $transactionFactory,
+        TransactionRepositoryInterface $transactionRepository,
+        AbstractResource               $resource = null,
+        AbstractDb                     $resourceCollection = null,
+        array                          $data = []
     ) {
         $this->statusCollectionFactory = $statusCollectionFactory;
         $this->sender                  = $orderSender;
@@ -177,6 +193,9 @@ class Payment extends AbstractMethod
             $resourceCollection,
             $data
         );
+
+        $this->transactionFactory    = $transactionFactory;
+        $this->transactionRepository = $transactionRepository;
     }
 
     /**
@@ -314,12 +333,7 @@ class Payment extends AbstractMethod
      */
     public function _validAllTransaction($response)
     {
-        $service_id = $this->getConfigData('service_id');
-        $shared_key = $this->getConfigData('shared_key');
-        $algorithm  = $this->getConfigData('hash_algorithm');
-        $separator  = $this->getConfigData('hash_separator');
-
-        if ($service_id != $response->serviceID) {
+        if ($this->getConfigData('service_id') != $response->serviceID) {
             return false;
         }
         $this->_checkHashArray   = [];
@@ -329,25 +343,11 @@ class Payment extends AbstractMethod
         foreach ($response->transactions->transaction as $trans) {
             $this->_checkInList($trans);
         }
-        $this->_checkHashArray[] = $shared_key;
+        $this->_checkHashArray[] = $this->getConfigData('shared_key');
+        $connectedFields = implode($this->getConfigData('hash_separator'), $this->_checkHashArray);
 
-        return hash($algorithm, implode($separator, $this->_checkHashArray)) == $hash;
-    }
 
-    /**
-     * @param mixed $list
-     *
-     * @return void
-     */
-    private function _checkInList($list)
-    {
-        foreach ((array)$list as $row) {
-            if (is_object($row)) {
-                $this->_checkInList($row);
-            } else {
-                $this->_checkHashArray[] = $row;
-            }
-        }
+        return hash($this->getConfigData('hash_algorithm'), $connectedFields) == $hash;
     }
 
     /**
@@ -386,55 +386,6 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * Potwierdzenie w postaci xml o prawidłowej/nieprawidłowej transakcji
-     *
-     * @param string $orderId
-     * @param string $confirmation
-     *
-     * @return void
-     */
-    protected function returnConfirmation($orderId, $confirmation)
-    {
-        // Id serwisu partnera
-        $serviceId = $this->getConfigData('service_id');
-
-        // Klucz współdzielony
-        $sharedKey = $this->getConfigData('shared_key');
-
-        // Tablica danych z których wygenerować hash
-        $hashData = array($serviceId, $orderId, $confirmation, $sharedKey);
-
-        // Klucz hash
-        $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
-
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-
-        $confirmationList = $dom->createElement('confirmationList');
-
-        $domServiceID = $dom->createElement('serviceID', $serviceId);
-        $confirmationList->appendChild($domServiceID);
-
-        $transactionsConfirmations = $dom->createElement('transactionsConfirmations');
-        $confirmationList->appendChild($transactionsConfirmations);
-
-        $domTransactionConfirmed = $dom->createElement('transactionConfirmed');
-        $transactionsConfirmations->appendChild($domTransactionConfirmed);
-
-        $domOrderID = $dom->createElement('orderID', $orderId);
-        $domTransactionConfirmed->appendChild($domOrderID);
-
-        $domConfirmation = $dom->createElement('confirmation', $confirmation);
-        $domTransactionConfirmed->appendChild($domConfirmation);
-
-        $domHash = $dom->createElement('hash', $hashConfirmation);
-        $confirmationList->appendChild($domHash);
-
-        $dom->appendChild($confirmationList);
-
-        echo $dom->saveXML();
-    }
-
-    /**
      * Aktualizacja statusu zamówienia, transakcji oraz wysyłka maila do klienta
      *
      * @param $transaction
@@ -449,6 +400,9 @@ class Payment extends AbstractMethod
         $orderId           = $transaction->orderID;
         $transactionAmount = number_format(round($transaction->amount, 2), 2, '.', '');
         $order             = $this->orderFactory->create()->loadByIncrementId($orderId);
+
+        $this->saveTransactionResponse($transaction);
+
         /**
          * @var \Magento\Sales\Model\Order\Payment $orderPayment
          */
@@ -562,4 +516,84 @@ class Payment extends AbstractMethod
             $this->_logger->critical($e);
         }
     }
+
+    /**
+     * @param $list
+     */
+    private function _checkInList($list)
+    {
+        foreach ((array)$list as $row) {
+            if (is_object($row)) {
+                $this->_checkInList($row);
+            } else {
+                $this->_checkHashArray[] = $row;
+            }
+        }
+    }
+
+    /**
+     * Potwierdzenie w postaci xml o prawidłowej/nieprawidłowej transakcji
+     *
+     * @param string $orderId
+     * @param string $confirmation
+     *
+     * @return XML
+     */
+    protected function returnConfirmation($orderId, $confirmation)
+    {
+        $serviceId        = $this->getConfigData('service_id');
+        $sharedKey        = $this->getConfigData('shared_key');
+        $hashData         = [$serviceId, $orderId, $confirmation, $sharedKey];
+        $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+
+        $confirmationList = $dom->createElement('confirmationList');
+
+        $domServiceID = $dom->createElement('serviceID', $serviceId);
+        $confirmationList->appendChild($domServiceID);
+
+        $transactionsConfirmations = $dom->createElement('transactionsConfirmations');
+        $confirmationList->appendChild($transactionsConfirmations);
+
+        $domTransactionConfirmed = $dom->createElement('transactionConfirmed');
+        $transactionsConfirmations->appendChild($domTransactionConfirmed);
+
+        $domOrderID = $dom->createElement('orderID', $orderId);
+        $domTransactionConfirmed->appendChild($domOrderID);
+
+        $domConfirmation = $dom->createElement('confirmation', $confirmation);
+        $domTransactionConfirmed->appendChild($domConfirmation);
+
+        $domHash = $dom->createElement('hash', $hashConfirmation);
+        $confirmationList->appendChild($domHash);
+
+        $dom->appendChild($confirmationList);
+
+        echo $dom->saveXML();
+    }
+
+    /**
+     * @param $transactionResponse
+     */
+    private function saveTransactionResponse($transactionResponse)
+    {
+        /** @var \BlueMedia\BluePayment\Model\Transaction $transaction */
+        $transaction = $this->transactionFactory->create();
+        $transaction->setOrderId($transactionResponse->orderID)
+            ->setRemoteId($transactionResponse->remoteID)
+            ->setAmount((float)$transactionResponse->amount)
+            ->setCurrency($transactionResponse->currency)
+            ->setGatewayId((int)$transactionResponse->gatewayID)
+            ->setPaymentDate($transactionResponse->paymentDate)
+            ->setPaymentStatus($transactionResponse->paymentStatus)
+            ->setPaymentStatusDetails($transactionResponse->paymentStatusDetails);
+
+        try {
+            $this->transactionRepository->save($transaction);
+        } catch (CouldNotSaveException $e) {
+            $this->_logger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
+        }
+    }
+
 }

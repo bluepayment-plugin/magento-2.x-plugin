@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="BlueMedia\BluePayment\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
@@ -14,7 +14,6 @@
             </argument>
         </arguments>
     </type>
-
     <virtualType name="BlueMediaBluePaymentGirdFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
         <arguments>
             <argument name="appliers" xsi:type="array">
@@ -46,4 +45,14 @@
             </argument>
         </arguments>
     </type>
+
+    <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface"
+                type="BlueMedia\BluePayment\Model\TransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface"
+                type="BlueMedia\BluePayment\Model\Transaction"/>
+
+    <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface"
+                type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface"
+                type="BlueMedia\BluePayment\Model\RefundTransaction"/>
 </config>

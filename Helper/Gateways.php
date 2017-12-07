@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Helper;
 
+use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Magento\Framework\App\Config\Initial;
@@ -18,7 +19,7 @@ use BlueMedia\BluePayment\Helper\Email as EmailHelper;
  *
  * @package BlueMedia\BluePayment\Helper
  */
-class Gateways extends \BlueMedia\BluePayment\Helper\Data
+class Gateways extends Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
     const MESSAGE_ID_STRING_LENGTH      = 32;
@@ -54,6 +55,7 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
      * @param \Magento\Payment\Model\Config                $paymentConfig
      * @param \Magento\Framework\App\Config\Initial        $initialConfig
      * @param \BlueMedia\BluePayment\Model\GatewaysFactory $gatewaysFactory
+     * @param \BlueMedia\BluePayment\Api\Client            $apiClient
      * @param EmailHelper                                  $emailHelper
      */
     public function __construct(
@@ -64,9 +66,10 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
         Config          $paymentConfig,
         Initial         $initialConfig,
         GatewaysFactory $gatewaysFactory,
+        Client          $apiClient,
         EmailHelper     $emailHelper
     ) {
-        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
+        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig, $apiClient);
         $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
         $this->_logger = new \Zend\Log\Logger();
         $this->_logger->addWriter($writer);
@@ -120,22 +123,6 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
     }
 
     /**
-     * @param int $length
-     *
-     * @return string
-     */
-    private function randomString($length)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $randstring = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randstring .= $characters[rand(0, strlen($characters) - 1)];
-        }
-
-        return $randstring;
-    }
-
-    /**
      * @param string $hashMethod
      * @param string $serviceId
      * @param int    $messageId
@@ -152,22 +139,9 @@ class Gateways extends \BlueMedia\BluePayment\Helper\Data
             'MessageID' => $messageId,
             'Hash'      => $hash,
         ];
-        $fields = (is_array($data)) ? http_build_query($data) : $data;
-        try {
-            $curl = curl_init($gatewayListAPIUrl);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-            $curlResponse = curl_exec($curl);
-            curl_close($curl);
-            if ($curlResponse == 'ERROR') {
-                return false;
-            } else {
-                $response = simplexml_load_string($curlResponse);
 
-                return $response;
-            }
+        try {
+            return $this->apiClient->call($gatewayListAPIUrl, $data);
         } catch (\Exception $e) {
             $this->_logger->info($e->getMessage());
 

@@ -5,6 +5,7 @@
             <resource id="Magento_Backend::admin">
                 <resource id="BlueMedia_BluePayment::bluepayment" title="BluePayment">
                     <resource id="BlueMedia_BluePayment::gateways" title="Gateways"/>
+                    <resource id="BlueMedia_BluePayment::refunds" title="Refunds"/>
                 </resource>
             </resource>
         </resources>

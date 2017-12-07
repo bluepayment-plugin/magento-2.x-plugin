@@ -1,0 +1,60 @@
+<?php /** @var \BlueMedia\BluePayment\Block\Adminhtml\Order\View\Popup $block */ ?>
+
+<script type="text/html" id="bluemedia_refund_popup">
+    <p><?php echo __('You are about to perform a return from Blue Media service. You can do full or partial return.') ?></p>
+    <form>
+        <input type="hidden" name="order_id" value="<?php echo $block->getOrderId() ?>">
+        <?php if ($block->canShowFullRefund()): ?>
+            <div class="bm_partial_option">
+                <input type="radio" name="is_partial" value="0" id="bm_partial_no"/>
+                <label for="bm_partial_no"><?php echo __('Full return') ?></label>
+            </div>
+        <?php endif; ?>
+        <div class="bm_partial_option">
+            <input type="radio" name="is_partial" value="1" id="bm_partial_yes"/>
+            <label for="bm_partial_yes"><?php echo __('Partial return') ?></label>
+            <br/>
+            <label for="bm_partial_amount"><?php echo __('Return amount') ?></label>
+            <input type="text" name="partial_amount" value id="bm_partial_amount" readonly
+            placeholder="<?php echo __('Max %1', number_format((float)$block->getAmountToReturn(), 2, '.', '')) ?>"/>
+        </div>
+        <div>
+            <ul id="bm_error_container">
+            </ul>
+        </div>
+        <div class="bm_buttons">
+            <button id="bm_return_confirmation" >
+                <span>
+                    <span><?php echo __('Send') ?></span>
+                </span>
+            </button>
+        </div>
+    </form>
+</script>
+
+<script type="text/html" id="bluemedia_refund_confirm">
+    <p><?php echo __('Are you sure you want to perform a return?') ?></p>
+</script>
+
+<script type="text/html" id="bluemedia_refund_success">
+    <p><?php echo __('Return request has been successfully sent to Blue Media.') ?></p>
+</script>
+
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "bluemediaRefunds": {
+                "popupId": "bluemedia_refund_popup",
+                "confirmId": "bluemedia_refund_confirm",
+                "successId": "bluemedia_refund_success",
+                "form": {
+                    "radioName": "is_partial",
+                    "inputId": "bm_partial_amount",
+                    "submitId": "bm_return_confirmation",
+                    "errorContainerId": "bm_error_container"
+                },
+                "refundUrl": "<?php echo $block->getUrl('adminbluepayment/refunds/place')?>"
+            }
+        }
+    }
+</script>

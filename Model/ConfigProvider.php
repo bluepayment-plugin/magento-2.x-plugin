@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
 use Magento\Checkout\Model\ConfigProviderInterface;
 
@@ -27,15 +28,20 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected $_activeGatewaysResponse;
 
+    protected $logoBlock;
+
     /**
      * ConfigProvider constructor.
      *
      * @param \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection $gatewaysCollection
+     * @param Form $logoBlock
      */
     public function __construct(
-        GatewaysCollection $gatewaysCollection
+        GatewaysCollection $gatewaysCollection,
+        Form $logoBlock
     ) {
         $this->gatewaysCollection = $gatewaysCollection;
+        $this->logoBlock = $logoBlock;
     }
 
     /**
@@ -76,6 +82,7 @@ class ConfigProvider implements ConfigProviderInterface
             $this->_activeGateways = [
                 'bluePaymentOptions' => $result,
                 'bluePaymentCard'    => $resultCard,
+                'bluePaymentLogo' => $this->logoBlock->getLogoSrc()
             ];
         }
 

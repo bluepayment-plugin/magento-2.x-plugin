@@ -64,7 +64,8 @@ define([
                 };
             },
             defaults: {
-                template: 'BlueMedia_BluePayment/payment/bluepayment'
+                template: 'BlueMedia_BluePayment/payment/bluepayment',
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png'
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);

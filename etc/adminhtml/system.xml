@@ -31,7 +31,15 @@
                     <label>Status error payment</label>
                     <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
                 </field>
-                <field id="transaction_life_hours" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="status_full_refund" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Status full refund</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="status_partial_refund" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Status partial refund</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="transaction_life_hours" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Transaction Life Hours</label>
                 </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="121" showInDefault="1" showInWebsite="1" showInStore="0">

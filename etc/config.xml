@@ -13,6 +13,8 @@
                 <prod_address_url>https://pay.bm.pl/payment</prod_address_url>
                 <test_address_gateways_url>https://pay-accept.bm.pl/paywayList</test_address_gateways_url>
                 <prod_address_gateways_url>https://pay.bm.pl/paywayList</prod_address_gateways_url>
+                <test_address_refunds_url>https://pay-accept.bm.pl/transactionRefund</test_address_refunds_url>
+                <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <transaction_life_hours></transaction_life_hours>

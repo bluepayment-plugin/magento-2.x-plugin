@@ -42,6 +42,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(), '2.2.2') < 0) {
             $this->addForceDisabledToBlueMediaGatewaysTable($setup);
         }
+
+        if (version_compare($context->getVersion(), '2.3.0') < 0) {
+            $this->addTransactionAndRefundTables($setup);
+        }
     }
 
     /**
@@ -98,11 +102,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @param \Magento\Framework\Setup\SchemaSetupInterface $installer
      */
-    private function addCardFlagToBlueMediaTable(SchemaSetupInterface $setup)
+    private function addCardFlagToBlueMediaTable(SchemaSetupInterface $installer)
     {
-        $installer = $setup;
         $installer->startSetup();
         if ($installer->tableExists('blue_gateways')) {
             $installer->getConnection()->addColumn(
@@ -140,5 +143,154 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     ]
                 );
         }
+    }
+
+    /**
+     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     */
+    private function addTransactionAndRefundTables(SchemaSetupInterface $setup)
+    {
+        $setup->startSetup();
+
+        $this->createTransactionTable($setup);
+        $this->createRefundTable($setup);
+
+        $setup->endSetup();
+    }
+
+    /**
+     * @param $installer
+     */
+    private function createTransactionTable(SchemaSetupInterface $installer)
+    {
+        $table = $installer->getConnection()->newTable(
+            $installer->getTable('blue_transaction')
+        )->addColumn(
+            'transaction_id',
+            Table::TYPE_INTEGER,
+            null,
+            ['identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true,],
+            'Entity ID'
+        )->addColumn(
+            'order_id',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Order increment ID'
+        )->addColumn(
+            'remote_id',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Remote transaction ID'
+        )->addColumn(
+            'amount',
+            Table::TYPE_DECIMAL,
+            [12,4],
+            ['nullable' => false, 'unsigned' => true, 'default' => '0.0000'],
+            'Transaction amount'
+        )->addColumn(
+            'currency',
+            Table::TYPE_TEXT,
+            10,
+            [],
+            'Transaction currency'
+        )->addColumn(
+            'gateway_id',
+            Table::TYPE_SMALLINT,
+            null,
+            [],
+            'Payment gateway ID'
+        )->addColumn(
+            'payment_date',
+            Table::TYPE_TIMESTAMP,
+            null,
+            [],
+            'Payment date'
+        )->addColumn(
+            'payment_status',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Remote transaction status'
+        )->addColumn(
+            'payment_status_details',
+            Table::TYPE_TEXT,
+            50,
+            [],
+            'Remote transaction status details'
+        )->addColumn(
+            'creation_time',
+            Table::TYPE_TIMESTAMP,
+            null,
+            ['nullable' => false, 'default' => Table::TIMESTAMP_INIT,],
+            'Creation Time'
+        );
+        $installer->getConnection()->createTable($table);
+    }
+
+    /**
+     * @param $installer
+     */
+    private function createRefundTable(SchemaSetupInterface $installer)
+    {
+        $table = $installer->getConnection()->newTable(
+            $installer->getTable('blue_refund')
+        )->addColumn(
+            'refund_id',
+            Table::TYPE_INTEGER,
+            null,
+            ['identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true,],
+            'Entity ID'
+        )->addColumn(
+            'order_id',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Order increment ID'
+        )->addColumn(
+            'remote_id',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Remote transaction ID'
+        )->addColumn(
+            'remote_out_id',
+            Table::TYPE_TEXT,
+            50,
+            ['nullable' => false,],
+            'Remote refund ID'
+        )->addColumn(
+            'amount',
+            Table::TYPE_DECIMAL,
+            [12,4],
+            ['nullable' => false, 'unsigned' => true, 'default' => '0.0000'],
+            'Refund amount'
+        )->addColumn(
+            'currency',
+            Table::TYPE_TEXT,
+            10,
+            [],
+            'Transaction currency'
+        )->addColumn(
+            'is_partial',
+            Table::TYPE_BOOLEAN,
+            null,
+            [],
+            'Is partial refund'
+        )->addColumn(
+            'creation_time',
+            Table::TYPE_TIMESTAMP,
+            null,
+            ['nullable' => false, 'default' => Table::TIMESTAMP_INIT,],
+            'Creation Time'
+        )->addColumn(
+            'update_time',
+            Table::TYPE_TIMESTAMP,
+            null,
+            ['nullable' => false, 'default' => Table::TIMESTAMP_INIT,],
+            'Creation Time'
+        );
+        $installer->getConnection()->createTable($table);
     }
 }
