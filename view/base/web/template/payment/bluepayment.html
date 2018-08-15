@@ -2,7 +2,7 @@
     <div class="payment-method-title field choice">
         <input type="radio"
                name="payment[method]"
-               class="radio"
+               class="radio payment_bluepayment"
                data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
         <label data-bind="attr: {'for': getCode()}" class="label">
             <!-- BM Logo -->
@@ -78,21 +78,21 @@
     </div>
     <!--/ko-->
 </div>
-<!-- ko if: !!renderCardOptions.length -->
 
-<div class="separated-payments-wrapper" data-bind="foreach: renderCardOptions">
-    <div class="payment-method blue-payment blue-payment__card"
-         data-bind="css:{'_active': $parent.isCardChecked($data)}">
+<!-- ko if: !!renderCardOptions.length -->
+<div class="separated-payments-wrapper" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method blue-payment blue-payment__card" data-bind="foreach: renderCardOptions">
         <div class="payment-method-title field choice">
             <input type="radio"
                    name="payment_method_bluepayment_gateway"
                    class="radio"
-                   data-bind="attr:{id:  $parent.getCode() + $data.gateway_id, value: $data.gateway_id }, checked: $parent.isCardChecked($data), click: $parent.selectPaymentMethodCard.bind($parent), visible: $parent.isRadioButtonVisible()"/>
+                   data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
             <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
                 <span data-bind="text: name"></span>
             </label>
         </div>
-        <div class="payment-method-content" data-bind="visible: $parent.isCardChecked($data)">
+        <!--ko if: getCode() == isChecked()-->
+        <div class="payment-method-content">
             <div class="payment-method-billing-address">
                 <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
                 <!-- ko template: getTemplate() --><!-- /ko -->
@@ -117,7 +117,115 @@
                 </div>
             </div>
         </div>
+        <!--/ko-->
     </div>
 </div>
+<!--/ko-->
 
+<!-- ko if: renderAutomaticPayment.length > 0 -->
+<div class="separated-payments-wrapper" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method blue-payment__automatic"
+         data-bind="foreach: renderAutomaticPayment">
+
+        <div class="payment-method-title field choice">
+            <input type="radio"
+                   name="payment[method]"
+                   class="radio payment_method_bluepayment_automatic"
+                   data-bind="attr: {'id': 'automatic' + $parent.getCode()}, value: gateway_id, click: $parent.selectAutomaticMethod, visible: $parent.isRadioButtonVisible()"/>
+            <label data-bind="attr:{for: 'automatic' + $parent.getCode()}" class="label">
+                <span data-bind="text: name"></span>
+            </label>
+        </div>
+
+        <!--ko if: getCode() == isChecked()-->
+        <div class="payment-method-content">
+            <div class="payment-method-billing-address">
+                <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button class="action primary checkout"
+                            type="submit"
+                            data-bind="
+                                click: $parent.placeOrder.bind($parent),
+                                attr:{
+                                'data-payment-method-name': $parent.index + '_'+ $data.bank
+                                }">
+                        <span data-bind="i18n: 'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--/ko-->
+    </div>
+</div>
+<!--/ko-->
+
+<!-- ko if: renderAutomaticPayment.length > 0 -->
+<div class="separated-payments-wrapper" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method blue-payment__blik"
+         data-bind="foreach: renderBlikPayment">
+
+        <div class="payment-method-title field choice">
+            <input type="radio"
+                   name="payment[method]"
+                   class="radio payment_method_bluepayment_blik"
+                   data-bind="attr: {'id': 'blik' + $parent.getCode()}, value: gateway_id, click: $parent.selectBlikMethod, visible: $parent.isRadioButtonVisible()"/>
+            <label data-bind="attr:{for: 'blik' + $parent.getCode() }" class="label">
+                <span data-bind="text: name.toUpperCase()"></span>
+            </label>
+            <hr style="margin-bottom: 0;">
+
+            <!-- BLIK Logo -->
+            <img src="https://platnosci.bm.pl/pomoc/grafika/509.gif"
+                 class="blik-logo"/>
+            <!-- BLIK Logo -->
+
+            <input type="number"
+                   name="payment_method_bluepayment_code"
+                   class="blik-code"
+                   min="000000"
+                   max="999999"
+                   data-validate="{required:true, 'pattern':'000000'}"
+                   placeholder="Wprowadź kod BLIK" />
+            <div class="blik-error mage-error" generated="yes" style="display: none; clear: both;">Niepoprawny kod BLIK.</div>
+
+            <div style="clear: both;"></div>
+        </div>
+
+        <div class="payment-method-content">
+            <div class="payment-method-billing-address">
+                <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button class="action primary checkout"
+                            type="submit"
+                            data-bind="
+                                click: $parent.placeOrder.bind($parent),
+                                attr:{
+                                'data-payment-method-name': $parent.index + '_'+ $data.bank
+                                }">
+                        <span data-bind="i18n: 'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 <!--/ko-->

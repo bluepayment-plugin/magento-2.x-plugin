@@ -10,6 +10,29 @@ and open the template in the editor.
 & when (@media-common = true) {
     .blue-payment {
 
+        &__blik {
+            hr {
+                margin-bottom: 0;
+            }
+            .blik-logo {
+                max-height: 80px;
+                float: left;
+            }
+            .blik-code {
+                float: left;
+                margin-top: 24px;
+                width: 200px;
+            }
+            .blik-error {
+                clear: both;
+                margin-top: 0;
+                top: -20px;
+                left: 80px;
+                display: block;
+                position: relative;
+            }
+        }
+
         &__card {
             .payment-method-title {
                 .separated-payments-wrapper:not(:first-child) & {

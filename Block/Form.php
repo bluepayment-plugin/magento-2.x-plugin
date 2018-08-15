@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
@@ -28,19 +29,27 @@ class Form extends \Magento\Payment\Block\Form
     protected $collectionFactory;
 
     /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
      * Form constructor.
      *
      * @param \Magento\Framework\View\Element\Template\Context                      $context
      * @param \BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory $collectionFactory
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface                    $scopeConfig
      * @param array                                                                 $data
      */
     public function __construct(
         Context           $context,
         CollectionFactory $collectionFactory,
+        ScopeConfigInterface $scopeConfig,
         array             $data = []
     ) {
         parent::__construct($context, $data);
         $this->collectionFactory = $collectionFactory;
+        $this->scopeConfig  = $scopeConfig;
     }
 
     /**
@@ -77,5 +86,15 @@ class Form extends \Magento\Payment\Block\Form
     public function getMethodTitle()
     {
         return __('Quick online payment');
+    }
+
+    public function getTitleAutomatic()
+    {
+        return $this->scopeConfig->getValue("payment/bluepayment/title_automatic");
+    }
+
+    public function getTitleBlik()
+    {
+        return $this->scopeConfig->getValue("payment/bluepayment/title_blik");
     }
 }

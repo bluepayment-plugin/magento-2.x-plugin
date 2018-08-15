@@ -13,6 +13,10 @@ use Magento\Checkout\Model\ConfigProviderInterface;
  */
 class ConfigProvider implements ConfigProviderInterface
 {
+
+    const IFRAME_GATEWAY_ID = 1500;
+    const BLIK_GATEWAY_ID = 509;
+
     /**
      * @var \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection
      */
@@ -28,20 +32,20 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected $_activeGatewaysResponse;
 
-    protected $logoBlock;
+    protected $block;
 
     /**
      * ConfigProvider constructor.
      *
      * @param \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection $gatewaysCollection
-     * @param Form $logoBlock
+     * @param Form $block
      */
     public function __construct(
         GatewaysCollection $gatewaysCollection,
-        Form $logoBlock
+        Form $block
     ) {
         $this->gatewaysCollection = $gatewaysCollection;
-        $this->logoBlock = $logoBlock;
+        $this->block = $block;
     }
 
     /**
@@ -81,8 +85,10 @@ class ConfigProvider implements ConfigProviderInterface
 
             $this->_activeGateways = [
                 'bluePaymentOptions' => $result,
-                'bluePaymentCard'    => $resultCard,
-                'bluePaymentLogo' => $this->logoBlock->getLogoSrc()
+                'bluePaymentCard' => $resultCard,
+                'bluePaymentLogo' => $this->block->getLogoSrc(),
+                'bluePaymentAutomatic' => $this->prepareGatewayAutomatic(),
+                'bluePaymentBlik' => $this->prepareGatewayBlik(),
             ];
         }
 
@@ -110,6 +116,32 @@ class ConfigProvider implements ConfigProviderInterface
             'type'                => $gateway->getGatewayType(),
             'logo_url'            => $logoUrl,
             'is_separated_method' => $gateway->getIsSeparatedMethod(),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function prepareGatewayAutomatic()
+    {
+        return [
+            [
+                'gateway_id'          => self::IFRAME_GATEWAY_ID,
+                'name'                => $this->block->getTitleAutomatic(),
+            ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function prepareGatewayBlik()
+    {
+        return [
+            [
+                'gateway_id'          => self::BLIK_GATEWAY_ID,
+                'name'                => $this->block->getTitleBlik(),
+            ]
         ];
     }
 }

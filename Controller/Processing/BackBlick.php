@@ -10,11 +10,11 @@ use Magento\Sales\Model\OrderFactory;
 use BlueMedia\BluePayment\Logger\Logger;
 
 /**
- * Class Back
+ * Class BackBlick
  *
  * @package BlueMedia\BluePayment\Controller\Processing
  */
-class Back extends Action
+class BackBlick extends Action
 {
     /**
      * @var \Psr\Log\LoggerInterface
@@ -57,7 +57,6 @@ class Back extends Action
         $this->scopeConfig  = $scopeConfig;
         $this->logger       = $logger;
         $this->orderFactory = $orderFactory;
-
         parent::__construct($context);
     }
 
@@ -68,26 +67,19 @@ class Back extends Action
      */
     public function execute()
     {
-        $this->logger->info('BACK:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
+        $this->logger->info('BackBlick:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
         try {
             $params = $this->getRequest()->getParams();
-            /**
-             * https://magento2-bm.softja.pro-linuxpl.com/bluepayment/processing/
-             * back?ServiceID=101381
-             * &OrderID=000000029
-             * &Hash=6d272ed5bd1c8bab3b7c872e840e42e9efad6ffc4128a9e0e19950a0dc9a7bb3
-             */
 
             if (array_key_exists('Hash', $params)) {
                 $serviceId = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-                $this->logger->info('BACK:' . __LINE__, ['serviceId' => $serviceId]);
+                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
+
                 $orderId   = $params['OrderID'];
                 $hash      = $params['Hash'];
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
-                $this->logger->info('BACK:' . __LINE__, ['sharedKey' => $sharedKey]);
+
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $this->logger->info('BACK:' . __LINE__, ['hashLocal' => $hashLocal]);
 
                 // @ToDo
                 /** @var \Magento\Checkout\Model\Session $session */
@@ -96,15 +88,18 @@ class Back extends Action
                 $session->setLastSuccessQuoteId($orderId);
 
                 if ($hash == $hashLocal) {
-                    $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
+                    $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
 
+                    if ($params['paymentStatus'] == 'FAILURE') {
+                        $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+                    }
                     $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                 } else {
-                    $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
+                    $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
                     $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
                 }
             } else {
-                $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji nie istnieje');
+                $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji nie istnieje');
                 $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
             }
         } catch (\Exception $e) {

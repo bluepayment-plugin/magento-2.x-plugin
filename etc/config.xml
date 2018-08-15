@@ -7,6 +7,8 @@
                 <model>BlueMedia\BluePayment\Model\Payment</model>
                 <encoding>UTF</encoding>
                 <title>Online payment BM</title>
+                <title_automatic>Title Automatic Gateway</title_automatic>
+                <title_blik>Blik</title_blik>
                 <payment_action>authorize</payment_action>
                 <allowspecific>0</allowspecific>
                 <test_address_url>https://pay-accept.bm.pl/payment</test_address_url>
@@ -17,17 +19,12 @@
                 <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
+                <autopay_gateway>1503</autopay_gateway>
+                <card_gateway>1500</card_gateway>
+                <blik_gateway>509</blik_gateway>
                 <transaction_life_hours></transaction_life_hours>
+                <info_automatic_payment>You will be redirected to the Blue Media secure service payment after submitting the order.</info_automatic_payment>
             </bluepayment>
         </payment>
     </default>
-    <websites>
-        <base>
-            <payment>
-                <bluepayment>
-                    <title>Płatność elektroniczna BlueMedia</title>
-                </bluepayment>
-            </payment>
-        </base>
-    </websites>
 </config>

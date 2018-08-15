@@ -29,6 +29,7 @@ use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
 class Payment extends AbstractMethod
 {
     const METHOD_CODE                    = 'bluepayment';
+    const IFRAME_GATEWAY_ID              = 'IFRAME';
     const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
     /**
@@ -227,10 +228,10 @@ class Payment extends AbstractMethod
      *
      * @param object $order
      * @param int    $gatewayId
-     *
+     * @param string $authorizationCode
      * @return array
      */
-    public function getFormRedirectFields($order, $gatewayId = 0)
+    public function getFormRedirectFields($order, $gatewayId = 0, $authorizationCode = 0)
     {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
@@ -238,6 +239,8 @@ class Payment extends AbstractMethod
         $sharedKey     = $this->getConfigData('shared_key');
         $customerEmail = $order->getCustomerEmail();
         $validityTime  = $this->getTransactionLifeHours();
+        $cardGateway   = $this->getConfigData('card_gateway');
+        $blikGateway   = $this->getConfigData('blik_gateway');
 
         if ($gatewayId === 0) {
             if ($validityTime) {
@@ -277,6 +280,37 @@ class Payment extends AbstractMethod
                 ];
             } else {
                 $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, $sharedKey];
+
+                if ($cardGateway == $gatewayId) {
+                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, self::IFRAME_GATEWAY_ID, $sharedKey];
+                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
+
+                    return [
+                        'ServiceID'         => $serviceId,
+                        'OrderID'           => $orderId,
+                        'Amount'            => $amount,
+                        'GatewayID'         => $gatewayId,
+                        'CustomerEmail'     => $customerEmail,
+                        'ScreenType'        => self::IFRAME_GATEWAY_ID,
+                        'Hash'              => $hashLocal,
+                    ];
+                }
+
+                if ($blikGateway == $gatewayId) {
+                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, $authorizationCode, $sharedKey];
+                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
+
+                    return [
+                        'ServiceID'         => $serviceId,
+                        'OrderID'           => $orderId,
+                        'Amount'            => $amount,
+                        'GatewayID'         => $gatewayId,
+                        'CustomerEmail'     => $customerEmail,
+                        'AuthorizationCode' => $authorizationCode,
+                        'Hash'              => $hashLocal,
+                    ];
+                }
+
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $params    = [
                     'ServiceID'     => $serviceId,
@@ -288,6 +322,7 @@ class Payment extends AbstractMethod
                 ];
             }
         }
+
 
         return $params;
     }

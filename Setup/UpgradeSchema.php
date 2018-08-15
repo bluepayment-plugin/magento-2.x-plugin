@@ -98,6 +98,47 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ->setOption('collate', 'utf8_general_ci');
             $installer->getConnection()->createTable($table);
         }
+        if (!$installer->tableExists('blue_gateways')) {
+            $table = $installer->getConnection()
+                ->newTable($installer->getTable('blue_gateways'))
+                ->addColumn('entity_id', Table::TYPE_INTEGER, null, [
+                    'identity' => true,
+                    'unsigned' => true,
+                    'nullable' => false,
+                    'primary'  => true,
+                ], 'Entity Id')
+                ->addColumn('gateway_status', Table::TYPE_INTEGER, null, ['nullable' => false], 'Gateway Status')
+                ->addColumn('gateway_id', Table::TYPE_INTEGER, null, ['nullable' => false], 'Gateway ID')
+                ->addColumn('bank_name', Table::TYPE_TEXT, 100, ['nullable' => false], 'Bank Name')
+                ->addColumn('gateway_name', Table::TYPE_TEXT, 100, ['nullable' => false], 'Gateway name')
+                ->addColumn('gateway_description', Table::TYPE_TEXT, 1000, [
+                    'nullable' => true,
+                    'default'  => null,
+                ], 'Gateway Description')
+                ->addColumn('gateway_sort_order', Table::TYPE_INTEGER, null, [
+                    'nullable' => true,
+                    'default'  => null,
+                ], 'Gateway Sort Order')
+                ->addColumn('gateway_type', Table::TYPE_TEXT, 50, ['nullable' => false], 'Gateway Type')
+                ->addColumn('gateway_logo_url', Table::TYPE_TEXT, 500, [
+                    'nullable' => true,
+                    'default'  => null,
+                ], 'Gateway Logo URL')
+                ->addColumn('use_own_logo', Table::TYPE_INTEGER, null, ['nullable' => false], 'Use Own Logo')
+                ->addColumn('gateway_logo_path', Table::TYPE_TEXT, 500, [
+                    'nullable' => true,
+                    'default'  => null,
+                ], 'Gateway Logo Path')
+                ->addColumn('status_date', Table::TYPE_TIMESTAMP, null, [
+                    'nullable' => true,
+                    'default'  => 'CURRENT_TIMESTAMP',
+                ], 'Status Date')
+                ->setComment('BlueMedia BluePayment Gateways Table')
+                ->setOption('type', 'INNODB')
+                ->setOption('charset', 'utf8')
+                ->setOption('collate', 'utf8_general_ci');
+            $installer->getConnection()->createTable($table);
+        }
         $installer->endSetup();
     }
 

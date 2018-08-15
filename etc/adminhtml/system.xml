@@ -60,6 +60,21 @@
                     <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\Receivers</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
+                <field id="title_automatic" translate="label" type="text" sortOrder="521" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title Automatic Gateway</label>
+                </field>
+                <field id="curl_payment" translate="label comment" type="select" sortOrder="522" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Curl Payment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="iframe_payment" translate="label comment" type="select" sortOrder="523" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Iframe Payment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="auto_payment" translate="label comment" type="select" sortOrder="524" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Auto Payment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="disabled_gateways_notification_template" translate="label comment" type="select" sortOrder="530" showInDefault="1">
                     <label>Disabled gateways notification Template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
