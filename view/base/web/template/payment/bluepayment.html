@@ -137,7 +137,7 @@
             </label>
         </div>
 
-        <!--ko if: getCode() == isChecked()-->
+        <!--/// ko if: $parent.getCode() == $parent.isChecked()-->
         <div class="payment-method-content">
             <div class="payment-method-billing-address">
                 <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
@@ -163,12 +163,12 @@
                 </div>
             </div>
         </div>
-        <!--/ko-->
+        <!--/// /ko-->
     </div>
 </div>
 <!--/ko-->
 
-<!-- ko if: renderAutomaticPayment.length > 0 -->
+<!-- ko if: renderBlikPayment.length > 0 -->
 <div class="separated-payments-wrapper" data-bind="css: {'_active': (getCode() == isChecked())}">
     <div class="payment-method blue-payment__blik"
          data-bind="foreach: renderBlikPayment">
@@ -200,6 +200,7 @@
             <div style="clear: both;"></div>
         </div>
 
+        <!--ko if: $parent.getCode() == $parent.isChecked()-->
         <div class="payment-method-content">
             <div class="payment-method-billing-address">
                 <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
@@ -225,7 +226,7 @@
                 </div>
             </div>
         </div>
-
+        <!--/ko-->
     </div>
 </div>
 <!--/ko-->
