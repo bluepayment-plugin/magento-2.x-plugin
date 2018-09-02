@@ -231,58 +231,63 @@ class Payment extends AbstractMethod
      * @param string $authorizationCode
      * @return array
      */
-    public function getFormRedirectFields($order, $gatewayId = 0, $authorizationCode = 0)
+    public function getFormRedirectFields($order, $gatewayId = 0, $automatic = false, $authorizationCode = 0)
     {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-        $serviceId     = $this->getConfigData('service_id');
-        $sharedKey     = $this->getConfigData('shared_key');
+        $currency      = $order->getOrderCurrencyCode();
+
+        // Config
+        $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+        $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
+        $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
+
         $customerEmail = $order->getCustomerEmail();
         $validityTime  = $this->getTransactionLifeHours();
-        $cardGateway   = $this->getConfigData('card_gateway');
-        $blikGateway   = $this->getConfigData('blik_gateway');
 
         if ($gatewayId === 0) {
             if ($validityTime) {
-                $hashData  = [$serviceId, $orderId, $amount, $customerEmail, $validityTime, $sharedKey];
+                $hashData  = [$serviceId, $orderId, $amount, $currency, $customerEmail, $validityTime, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $params    = [
                     'ServiceID'     => $serviceId,
                     'OrderID'       => $orderId,
                     'Amount'        => $amount,
+                    'Currency'      => $currency,
                     'CustomerEmail' => $customerEmail,
                     'ValidityTime'  => $validityTime,
                     'Hash'          => $hashLocal,
                 ];
             } else {
-                $hashData  = [$serviceId, $orderId, $amount, $customerEmail, $sharedKey];
+                $hashData  = [$serviceId, $orderId, $amount, $currency, $customerEmail, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $params    = [
                     'ServiceID'     => $serviceId,
                     'OrderID'       => $orderId,
                     'Amount'        => $amount,
+                    'Currency'      => $currency,
                     'CustomerEmail' => $customerEmail,
                     'Hash'          => $hashLocal,
                 ];
             }
         } else {
             if ($validityTime) {
-                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, $validityTime, $sharedKey];
+                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $validityTime, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $params    = [
                     'ServiceID'     => $serviceId,
                     'OrderID'       => $orderId,
                     'Amount'        => $amount,
                     'GatewayID'     => $gatewayId,
+                    'Currency'      => $currency,
                     'CustomerEmail' => $customerEmail,
                     'ValidityTime'  => $validityTime,
                     'Hash'          => $hashLocal,
                 ];
             } else {
-                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, $sharedKey];
-
-                if ($cardGateway == $gatewayId) {
-                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, self::IFRAME_GATEWAY_ID, $sharedKey];
+                if ($automatic === true && $cardGateway == $gatewayId) {
+                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, self::IFRAME_GATEWAY_ID, $sharedKey];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
 
                     return [
@@ -290,14 +295,15 @@ class Payment extends AbstractMethod
                         'OrderID'           => $orderId,
                         'Amount'            => $amount,
                         'GatewayID'         => $gatewayId,
+                        'Currency'          => $currency,
                         'CustomerEmail'     => $customerEmail,
                         'ScreenType'        => self::IFRAME_GATEWAY_ID,
                         'Hash'              => $hashLocal,
                     ];
                 }
 
-                if ($blikGateway == $gatewayId) {
-                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $customerEmail, $authorizationCode, $sharedKey];
+                if ($automatic === true && $blikGateway == $gatewayId) {
+                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $authorizationCode, $sharedKey];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
 
                     return [
@@ -305,18 +311,21 @@ class Payment extends AbstractMethod
                         'OrderID'           => $orderId,
                         'Amount'            => $amount,
                         'GatewayID'         => $gatewayId,
+                        'Currency'          => $currency,
                         'CustomerEmail'     => $customerEmail,
                         'AuthorizationCode' => $authorizationCode,
                         'Hash'              => $hashLocal,
                     ];
                 }
 
+                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $params    = [
                     'ServiceID'     => $serviceId,
                     'OrderID'       => $orderId,
                     'Amount'        => $amount,
                     'GatewayID'     => $gatewayId,
+                    'Currency'      => $currency,
                     'CustomerEmail' => $customerEmail,
                     'Hash'          => $hashLocal,
                 ];
@@ -368,7 +377,14 @@ class Payment extends AbstractMethod
      */
     public function _validAllTransaction($response)
     {
-        if ($this->getConfigData('service_id') != $response->serviceID) {
+        $currency = $response->transactions->transaction->currency;
+
+        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $hashSeparator  = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
+        $hashAlgorithm  = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+
+        if ($serviceId != $response->serviceID) {
             return false;
         }
         $this->_checkHashArray   = [];
@@ -378,11 +394,10 @@ class Payment extends AbstractMethod
         foreach ($response->transactions->transaction as $trans) {
             $this->_checkInList($trans);
         }
-        $this->_checkHashArray[] = $this->getConfigData('shared_key');
-        $connectedFields = implode($this->getConfigData('hash_separator'), $this->_checkHashArray);
+        $this->_checkHashArray[] = $sharedKey;
+        $connectedFields = implode($hashSeparator, $this->_checkHashArray);
 
-
-        return hash($this->getConfigData('hash_algorithm'), $connectedFields) == $hash;
+        return hash($hashAlgorithm, $connectedFields) == $hash;
     }
 
     /**
@@ -402,7 +417,7 @@ class Payment extends AbstractMethod
         );
 
         if ($this->getConfigData('status_accept_payment') != '') {
-            $statusAcceptPayment = $this->getConfigData('status_accept_payment');
+            $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
         } else {
             $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
         }
@@ -435,6 +450,7 @@ class Payment extends AbstractMethod
         $orderId           = $transaction->orderID;
         $transactionAmount = number_format(round($transaction->amount, 2), 2, '.', '');
         $order             = $this->orderFactory->create()->loadByIncrementId($orderId);
+        $currency          = $transaction->currency;
 
         $this->saveTransactionResponse($transaction);
 
@@ -447,8 +463,9 @@ class Payment extends AbstractMethod
         $transactionAmount = $amount;
 
         $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-        if ($this->getConfigData('status_waiting_payment') != '') {
-            $statusWaitingPayment = $this->getConfigData('status_waiting_payment');
+
+        $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
+        if ($statusWaitingPayment != '') {
             foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
                 /** @var \Magento\Sales\Model\Order\Status $status */
                 if ($status->getStatus() == $statusWaitingPayment) {
@@ -460,8 +477,8 @@ class Payment extends AbstractMethod
         }
 
         $orderStatusAcceptState = Order::STATE_PROCESSING;
-        if ($this->getConfigData('status_accept_payment') != '') {
-            $statusAcceptPayment = $this->getConfigData('status_accept_payment');
+        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
+        if ($statusAcceptPayment != '') {
             foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
                 /** @var \Magento\Sales\Model\Order\Status $status */
                 if ($status->getStatus() == $statusAcceptPayment) {
@@ -473,8 +490,8 @@ class Payment extends AbstractMethod
         }
 
         $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
-        if ($this->getConfigData('status_error_payment') != '') {
-            $statusErrorPayment = $this->getConfigData('status_error_payment');
+        $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
+        if ($statusErrorPayment != '') {
             foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
                 /** @var \Magento\Sales\Model\Order\Status $status */
                 if ($status->getStatus() == $statusErrorPayment) {
@@ -487,7 +504,10 @@ class Payment extends AbstractMethod
 
         try {
             if (!$this->isOrderCompleted($order) && $orderPaymentState != $paymentStatus) {
-                $orderComment = '[BM] Transaction ID: ' . (string)$remoteId . ' | Amount: ' . $transactionAmount . ' | Status: ' . $paymentStatus;
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $transactionAmount
+                    . ' | Status: ' . $paymentStatus;
                 switch ($paymentStatus) {
                     case self::PAYMENT_STATUS_PENDING:
                         if ($paymentStatus != $orderPaymentState) {
@@ -533,7 +553,11 @@ class Payment extends AbstractMethod
                         break;
                 }
             } else {
-                $orderComment = '[BM] Transaction ID: ' . (string)$remoteId . ' | Amount: ' . $transactionAmount . ' | Status: ' . $paymentStatus . ' [IGNORED]';
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $transactionAmount
+                    . ' | Status: ' . $paymentStatus . ' [IGNORED]';
+
                 $order->addStatusToHistory(
                     $order->getStatus(),
                     $orderComment,
@@ -546,7 +570,7 @@ class Payment extends AbstractMethod
             }
             $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
             $orderPayment->save();
-            $this->returnConfirmation($orderId, self::TRANSACTION_CONFIRMED);
+            $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (\Exception $e) {
             $this->_logger->critical($e);
         }
@@ -569,16 +593,18 @@ class Payment extends AbstractMethod
     /**
      * Potwierdzenie w postaci xml o prawidłowej/nieprawidłowej transakcji
      *
-     * @param string $orderId
+     * @param Order $order
      * @param string $confirmation
      *
      * @return XML
      */
-    protected function returnConfirmation($orderId, $confirmation)
+    protected function returnConfirmation($order, $confirmation)
     {
-        $serviceId        = $this->getConfigData('service_id');
-        $sharedKey        = $this->getConfigData('shared_key');
-        $hashData         = [$serviceId, $orderId, $confirmation, $sharedKey];
+        $currency = $order->getOrderCurrencyCode();
+
+        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $hashData         = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
@@ -594,7 +620,7 @@ class Payment extends AbstractMethod
         $domTransactionConfirmed = $dom->createElement('transactionConfirmed');
         $transactionsConfirmations->appendChild($domTransactionConfirmed);
 
-        $domOrderID = $dom->createElement('orderID', $orderId);
+        $domOrderID = $dom->createElement('orderID', $order->getId());
         $domTransactionConfirmed->appendChild($domOrderID);
 
         $domConfirmation = $dom->createElement('confirmation', $confirmation);

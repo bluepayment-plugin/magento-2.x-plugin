@@ -11,6 +11,7 @@ use Magento\Framework\Model\AbstractModel;
  * Class Gateways
  *
  * @method int getGatewayStatus()
+ * @method string getGatewayCurrency()
  * @method int getForceDisable()
  * @method int getGatewayId()
  * @method string getGatewayName()

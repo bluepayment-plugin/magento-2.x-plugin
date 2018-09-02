@@ -110,10 +110,20 @@ class Create extends Action
             $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
             $session->setQuoteId($quoteModuleId);
             $sessionLastRealOrderSessionId = $session->getLastRealOrderId();
-            $this->logger->info('CREATE:' . __LINE__, ['sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId]);
-            $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
+            ]);
+
             $cardGateway = $this->scopeConfig->getValue("payment/bluepayment/card_gateway");
             $blikGateway = $this->scopeConfig->getValue('payment/bluepayment/blik_gateway');
+
+            $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
+
+            $currency       = $order->getOrderCurrencyCode();
+            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+            $orderId        = $order->getRealOrderId();
 
             if (!$order->getId()) {
                 $this->logger->info('CREATE:' . __LINE__, ['Zamówienie bez identyfikatora']);
@@ -153,11 +163,7 @@ class Create extends Action
             }
 
             if ($cardGateway == $gatewayId && $automatic === true) {
-                $params = $payment->getFormRedirectFields($order, $gatewayId);
-
-                $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-                $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
-                $orderId        = $order->getRealOrderId();
+                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic);
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $redirectHash = $this->helper->generateAndReturnHash($hashData);
@@ -175,15 +181,11 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
                 if ($this->validateBlikCode($authorizationCode)) {
-                    $params = $payment->getFormRedirectFields($order, $gatewayId, $authorizationCode);
+                    $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, $authorizationCode);
                     $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
                     $responseParams = $this->sendRequestBlik($payment->getUrlGateway(), $params);
                     $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
-
-                    $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-                    $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
-                    $orderId        = $order->getRealOrderId();
 
                     $hashData  = [$serviceId, $orderId, $sharedKey];
                     $this->logger->info('CREATE:' . __LINE__, ['hashData' => $hashData]);

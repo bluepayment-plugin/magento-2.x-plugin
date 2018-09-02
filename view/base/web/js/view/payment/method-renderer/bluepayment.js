@@ -87,6 +87,8 @@ define([
                 return true;
             },
             selectPaymentMethod: function () {
+                console.log(this.item);
+
                 this.item.individual_gateway = null;
                 checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
                 selectPaymentMethodAction(this.getData());
@@ -240,7 +242,10 @@ define([
                     return false;
                 }
 
-                if (this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id) {
+                if (
+                    this.renderBlikPayment.length > 0 &&
+                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
+                ) {
                     var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
                     if (code.length !== 6) {
                         $('.blik-error').show();
@@ -252,13 +257,19 @@ define([
             },
             afterPlaceOrder: function () {
 
-                if (this.renderAutomaticPayment[0].gateway_id == this.selectedPaymentObject.gateway_id) {
+                if (
+                    this.renderAutomaticPayment.length > 0 &&
+                    this.renderAutomaticPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
+                ) {
                     this.callIframePayment();
 
                     return false;
                 }
 
-                if (this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id) {
+                if (
+                    this.renderBlikPayment.length > 0 &&
+                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
+                ) {
                     this.callBlikPayment();
 
                     return false;

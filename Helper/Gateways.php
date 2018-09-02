@@ -25,6 +25,10 @@ class Gateways extends Data
     const MESSAGE_ID_STRING_LENGTH      = 32;
     const UPLOAD_PATH                   = '/BlueMedia/';
 
+    public $currencies = [
+        'PLN', 'EUR', 'GBP', 'USD'
+    ];
+
     /**
      * Gateways model factory
      *
@@ -86,24 +90,27 @@ class Gateways extends Data
         $hashMethod        = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
         $gatewayListAPIUrl = $this->getGatewayListUrl();
 
-        $serviceId = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-        $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-        $hashKey   = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
+        foreach ($this->currencies as $currency) {
+            $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+            $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
+            $hashKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
 
-        $tryCount   = 0;
-        $loadResult = false;
-        while (!$loadResult) {
-            $loadResult = $this->loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl);
-            if ($loadResult) {
-                $result['success'] = $this->saveGateways((array)$loadResult);
-                break;
-            } else {
-                if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
-                    $result['error'] = 'Exceeded the limit of attempts to sync gateways list!';
+            $tryCount = 0;
+            $loadResult = false;
+            while (!$loadResult) {
+                $loadResult = $this->loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl);
+
+                if ($loadResult) {
+                    $result['success'] = $this->saveGateways((array)$loadResult, $currency);
                     break;
+                } else {
+                    if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
+                        $result['error'] = 'Exceeded the limit of attempts to sync gateways list!';
+                        break;
+                    }
                 }
+                $tryCount++;
             }
-            $tryCount++;
         }
 
         return $result;
@@ -152,13 +159,19 @@ class Gateways extends Data
     /**
      * @param array $gatewayList
      */
-    private function saveGateways($gatewayList)
+    private function saveGateways($gatewayList, $currency = 'PLN')
     {
         $existingGateways          = $this->getSimpleGatewaysList();
         $currentlyActiveGatewayIDs = [];
 
         if (isset($gatewayList['gateway'])) {
-            foreach ($gatewayList['gateway'] as $gatewayXMLObject) {
+            if (is_array($gatewayList['gateway'])) {
+                $gatewayXMLObjects = $gatewayList['gateway'];
+            } else {
+                $gatewayXMLObjects = [$gatewayList['gateway']];
+            }
+
+            foreach ($gatewayXMLObjects as $gatewayXMLObject) {
                 $gateway = (array)$gatewayXMLObject;
                 if (isset($gateway['gatewayID'])
                     && isset($gateway['gatewayName'])
@@ -168,14 +181,16 @@ class Gateways extends Data
                     && isset($gateway['statusDate'])
                 ) {
                     $currentlyActiveGatewayIDs[] = $gateway['gatewayID'];
-                    if (isset($existingGateways[$gateway['gatewayID']])) {
+
+                    if (isset($existingGateways[$currency][$gateway['gatewayID']])) {
                         $gatewayModel = $this->_gatewaysFactory->create();
-                        $gatewayModel->load($existingGateways[$gateway['gatewayID']]['entity_id']);
+                        $gatewayModel->load($existingGateways[$currency][$gateway['gatewayID']]['entity_id']);
                     } else {
                         $gatewayModel = $this->_gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 1);
                     }
 
+                    $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
                     $gatewayModel->setData('gateway_status', 1);
                     $gatewayModel->setData('bank_name', $gateway['bankName']);
@@ -192,7 +207,7 @@ class Gateways extends Data
             }
 
             $disabledGateways = [];
-            foreach ($existingGateways as $existingGatewayId => $existingGatewayData) {
+            foreach ($existingGateways[$currency] as $existingGatewayId => $existingGatewayData) {
                 if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
                     && $existingGatewayData['gateway_status'] != 0
                 ) {
@@ -225,9 +240,15 @@ class Gateways extends Data
         $bluegatewaysCollection->load();
 
         $existingGateways = [];
+
+        foreach ($this->currencies as $currency) {
+            $existingGateways[$currency] = [];
+        }
+
         foreach ($bluegatewaysCollection as $blueGateways) {
-            $existingGateways[$blueGateways->getData('gateway_id')] = [
+            $existingGateways[$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
                 'entity_id'           => $blueGateways->getId(),
+                'gateway_currency'    => $blueGateways->getData('gateway_currency'),
                 'gateway_status'      => $blueGateways->getData('gateway_status'),
                 'bank_name'           => $blueGateways->getData('bank_name'),
                 'gateway_name'        => $blueGateways->getData('gateway_name'),

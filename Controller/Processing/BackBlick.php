@@ -70,16 +70,24 @@ class BackBlick extends Action
         $this->logger->info('BackBlick:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
         try {
             $params = $this->getRequest()->getParams();
+            $orderId    = $params['OrderID'];
+            $hash       = $params['Hash'];
+
+            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+            $currency = $order->getOrderCurrencyCode();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
-
-                $orderId   = $params['OrderID'];
-                $hash      = $params['Hash'];
+                $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
+                $this->logger->info('BACK:' . __LINE__, [
+                    'serviceId' => $serviceId,
+                    'orderId' => $orderId,
+                    'sharedKey' => $sharedKey,
+                    'hashLocal' => $hashLocal
+                ]);
 
                 // @ToDo
                 /** @var \Magento\Checkout\Model\Session $session */

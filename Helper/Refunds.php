@@ -97,9 +97,10 @@ class Refunds extends Data
         $hashMethod   = $this->getConfigValue('hash_algorithm');
         $refundAPIUrl = $this->getRefundUrl();
 
-        $serviceId = $this->getConfigValue('service_id');
+        $order     = $this->orderFactory->create()->loadByIncrementId($transaction->getOrderId());
+        $serviceId = $this->getConfigValue('service_id', $order->getOrderCurrencyCode());
+        $sharedKey = $this->getConfigValue('shared_key', $order->getOrderCurrencyCode());
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-        $hashKey   = $this->getConfigValue('shared_key');
 
         $refundAmount          = $this->refundTransactionRepository->getTotalRefundAmountOnTransaction($transaction);
         $availableRefundAmount = $transaction->getAmount() - $refundAmount;
@@ -119,7 +120,7 @@ class Refunds extends Data
             $messageId,
             $transaction->getRemoteId(),
             $amount,
-            $hashKey,
+            $sharedKey,
             $refundAPIUrl
         );
 
@@ -128,7 +129,7 @@ class Refunds extends Data
                 $loadResult['serviceID'],
                 $loadResult['messageID'],
                 $loadResult['remoteOutID'],
-                $hashKey
+                $sharedKey
             ];
             $hashSeparator = $this->getConfigValue('hash_separator') ?? self::DEFAULT_HASH_SEPARATOR;
             if ($loadResult['hash'] != hash($hashMethod, implode($hashSeparator, $valuesForHash))) {
@@ -152,9 +153,13 @@ class Refunds extends Data
      *
      * @return mixed
      */
-    protected function getConfigValue($name)
+    protected function getConfigValue($name, $currency = null)
     {
-        return $this->scopeConfig->getValue('payment/bluepayment/' . $name);
+        if ($currency) {
+            return $this->scopeConfig->getValue('payment/bluepayment_'.strtolower($currency).'/'.$name);
+        }
+
+        return $this->scopeConfig->getValue('payment/bluepayment/'.$name);
     }
 
     /**

@@ -46,6 +46,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(), '2.3.0') < 0) {
             $this->addTransactionAndRefundTables($setup);
         }
+
+        if (version_compare($context->getVersion(), '2.4.0') < 0) {
+            $this->addCurrencyToGateways($setup);
+        }
     }
 
     /**
@@ -333,5 +337,31 @@ class UpgradeSchema implements UpgradeSchemaInterface
             'Creation Time'
         );
         $installer->getConnection()->createTable($table);
+    }
+
+    /**
+     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     */
+    private function addCurrencyToGateways(SchemaSetupInterface $setup)
+    {
+        $installer = $setup;
+        $installer->startSetup();
+
+        if ($installer->tableExists('blue_gateways')) {
+            $installer->getConnection()
+                ->addColumn(
+                    $installer->getTable('blue_gateways'),
+                    'gateway_currency',
+                    [
+                        'type'     => Table::TYPE_TEXT,
+                        'length'   => 5,
+                        'nullable' => false,
+                        'default'  => 'PLN',
+                        'comment'  => 'Gateway Currency',
+                        'after'    => 'entity_id',
+                    ]
+                );
+        }
+        $installer->endSetup();
     }
 }

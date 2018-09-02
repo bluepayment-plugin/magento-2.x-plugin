@@ -13,7 +13,6 @@ use Magento\Checkout\Model\ConfigProviderInterface;
  */
 class ConfigProvider implements ConfigProviderInterface
 {
-
     const IFRAME_GATEWAY_ID = 1500;
     const BLIK_GATEWAY_ID = 509;
 
@@ -25,27 +24,41 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @var array
      */
-    protected $_activeGateways;
+    protected $_activeGateways = [];
 
     /**
      * @var array
      */
     protected $_activeGatewaysResponse;
 
+    /** @var Form  */
     protected $block;
+
+    protected $priceCurrency;
+
+    protected $logger;
+
+    protected $scopeConfig;
 
     /**
      * ConfigProvider constructor.
      *
      * @param \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection $gatewaysCollection
      * @param Form $block
+     * @param \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency
      */
     public function __construct(
         GatewaysCollection $gatewaysCollection,
-        Form $block
+        Form $block,
+        \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency,
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->gatewaysCollection = $gatewaysCollection;
         $this->block = $block;
+        $this->priceCurrency = $priceCurrency;
+        $this->logger = $logger;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -63,10 +76,17 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getActiveGateways()
     {
-        if (!$this->_activeGateways) {
+        $currency = $this->getCurrentCurrencyCode();
+
+        if (!isset($this->_activeGateways[$currency])) {
             $resultCard         = [];
             $result             = [];
-            $gatewaysCollection = $this->gatewaysCollection->load();
+            $automaticAvailable = false;
+            $blikAvailable      = false;
+
+            $gatewaysCollection = $this->gatewaysCollection
+                ->addFilter('gateway_currency', $currency)
+                ->load();
 
             /** @var Gateways $gateway */
             foreach ($gatewaysCollection as $gateway) {
@@ -76,6 +96,15 @@ class ConfigProvider implements ConfigProviderInterface
                     } else {
                         $result[] = $this->prepareGatewayStructure($gateway);
                     }
+
+                    if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
+                        && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
+                        $automaticAvailable = true;
+                    }
+
+                    if ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
+                        $blikAvailable = true;
+                    }
                 }
             }
 
@@ -83,16 +112,19 @@ class ConfigProvider implements ConfigProviderInterface
                 return (int)$a['sort_order'] > (int)$b['sort_order'];
             });
 
-            $this->_activeGateways = [
+            $activeGateways = [
                 'bluePaymentOptions' => $result,
                 'bluePaymentCard' => $resultCard,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentAutomatic' => $this->prepareGatewayAutomatic(),
-                'bluePaymentBlik' => $this->prepareGatewayBlik(),
             ];
+
+            $activeGateways['bluePaymentAutomatic'] = $automaticAvailable ? $this->prepareGatewayAutomatic() : [];
+            $activeGateways['bluePaymentBlik'] = $blikAvailable ? $this->prepareGatewayBlik() : [];
+
+            $this->_activeGateways[$currency] = $activeGateways;
         }
 
-        return $this->_activeGateways;
+        return $this->_activeGateways[$currency];
     }
 
     /**
@@ -124,12 +156,10 @@ class ConfigProvider implements ConfigProviderInterface
      */
     private function prepareGatewayAutomatic()
     {
-        return [
-            [
-                'gateway_id'          => self::IFRAME_GATEWAY_ID,
-                'name'                => $this->block->getTitleAutomatic(),
-            ]
-        ];
+        return [[
+            'gateway_id'          => self::IFRAME_GATEWAY_ID,
+            'name'                => $this->block->getTitleAutomatic(),
+        ]];
     }
 
     /**
@@ -137,11 +167,14 @@ class ConfigProvider implements ConfigProviderInterface
      */
     private function prepareGatewayBlik()
     {
-        return [
-            [
-                'gateway_id'          => self::BLIK_GATEWAY_ID,
-                'name'                => $this->block->getTitleBlik(),
-            ]
-        ];
+        return [[
+            'gateway_id'          => self::BLIK_GATEWAY_ID,
+            'name'                => $this->block->getTitleBlik(),
+        ]];
+    }
+
+    public function getCurrentCurrencyCode()
+    {
+        return $this->priceCurrency->getCurrency()->getCurrencyCode();
     }
 }

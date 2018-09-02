@@ -71,23 +71,24 @@ class Back extends Action
         $this->logger->info('BACK:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
         try {
             $params = $this->getRequest()->getParams();
-            /**
-             * https://magento2-bm.softja.pro-linuxpl.com/bluepayment/processing/
-             * back?ServiceID=101381
-             * &OrderID=000000029
-             * &Hash=6d272ed5bd1c8bab3b7c872e840e42e9efad6ffc4128a9e0e19950a0dc9a7bb3
-             */
+            $orderId    = $params['OrderID'];
+            $hash       = $params['Hash'];
+
+            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+            $currency = $order->getOrderCurrencyCode();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/service_id");
-                $this->logger->info('BACK:' . __LINE__, ['serviceId' => $serviceId]);
-                $orderId   = $params['OrderID'];
-                $hash      = $params['Hash'];
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/shared_key");
-                $this->logger->info('BACK:' . __LINE__, ['sharedKey' => $sharedKey]);
+                $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $this->logger->info('BACK:' . __LINE__, ['hashLocal' => $hashLocal]);
+                $this->logger->info('BACK:' . __LINE__, [
+                    'serviceId' => $serviceId,
+                    'orderId' => $orderId,
+                    'sharedKey' => $sharedKey,
+                    'hashLocal' => $hashLocal
+                ]);
 
                 // @ToDo
                 /** @var \Magento\Checkout\Model\Session $session */
@@ -97,7 +98,6 @@ class Back extends Action
 
                 if ($hash == $hashLocal) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
-
                     $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                 } else {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
