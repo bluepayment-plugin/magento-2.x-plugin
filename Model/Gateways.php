@@ -78,12 +78,4 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     {
         return $this->getGatewayStatus() == self::STATUS_ACTIVE && $this->getForceDisable() != self::FORCE_DISABLE;
     }
-
-    /**
-     * @return bool
-     */
-    public function isCreditCard()
-    {
-        return (bool)$this->getIsSeparatedMethod();
-    }
 }

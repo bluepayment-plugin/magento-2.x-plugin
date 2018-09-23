@@ -21,9 +21,7 @@ define([
         return Component.extend({
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
-            renderCardOptions: window.checkoutConfig.payment.bluePaymentCard,
-            renderAutomaticPayment: window.checkoutConfig.payment.bluePaymentAutomatic,
-            renderBlikPayment: window.checkoutConfig.payment.bluePaymentBlik,
+            renderSeparatedOptions: window.checkoutConfig.payment.bluePaymentSeparated,
             selectedPaymentObject: {},
             validationFailed: ko.observable(false),
             activeMethod: ko.computed(function () {
@@ -34,9 +32,6 @@ define([
                 }
                 return -1;
             }),
-            inputIdPrefix: function () {
-                return 'blue-payment';
-            },
             /**
              * Get payment method data
              */
@@ -108,24 +103,6 @@ define([
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
 
-                var $automaticRadio = $("input.payment_method_bluepayment_automatic"),
-                    $blikRadio = $("input.payment_method_bluepayment_blik"),
-                    isCheckedAutomatic = $("input.payment_method_bluepayment_automatic").is(':checked'),
-                    isCheckedBlik = $("input.payment_method_bluepayment_blik").is(':checked');
-
-                if (isCheckedAutomatic) {
-                    $automaticRadio.attr("checked", false);
-                }
-
-                if (isCheckedBlik) {
-                    $blikRadio.attr("checked", false);
-                }
-
-                $(this).attr("checked", true);
-                $('.blue-payment').find('.payment-method-content').show();
-                $('.blue-payment__automatic').find('.payment-method-content').hide();
-                $('.blue-payment__blik').find('.payment-method-content').hide();
-
                 return true;
             },
             selectCardPaymentMethod: function () {
@@ -139,54 +116,6 @@ define([
 
                 this.setBlueMediaGatewayMethod(cardContext);
                 this.selectCardPaymentMethod();
-
-                return true;
-            },
-            selectAutomaticMethod: function (value) {
-                $('#checkout-payment-method-load input[type=radio]').each( function() {
-                    var $this = $(this),
-                        $paymentMethod = $this.parent().parent(),
-                        billingContent = $paymentMethod.find('.payment-method-content');
-
-                    if ($paymentMethod.hasClass('_active')) {
-                        $paymentMethod.removeClass('_active');
-                    }
-
-                    if ($paymentMethod.hasClass('blue-payment') || $paymentMethod.hasClass('blue-payment__blik')) {
-                        $this.attr("checked", false);
-                        billingContent.hide();
-                    }
-                });
-
-                $(this).attr("checked", true);
-                $('.blue-payment__automatic').find('.payment-method-content').show();
-
-                // widget.selectCardPaymentMethod();
-                widget.setBlueMediaGatewayMethod(value);
-
-                return true;
-            },
-            selectBlikMethod: function (value) {
-                $('#checkout-payment-method-load input[type=radio]').each( function() {
-                    var $this = $(this),
-                        $paymentMethod = $this.parent().parent(),
-                        billingContent = $paymentMethod.find('.payment-method-content');
-
-                    if ($paymentMethod.hasClass('_active')) {
-                        $paymentMethod.removeClass('_active');
-                    }
-
-                    if ($paymentMethod.hasClass('blue-payment') || $paymentMethod.hasClass('blue-payment__automatic')) {
-                        $this.attr("checked", false);
-                        billingContent.hide();
-                    }
-                });
-
-                $(this).attr("checked", true);
-                $('.blue-payment__blik').find('.payment-method-content').show();
-
-                // widget.selectCardPaymentMethod();
-                widget.setBlueMediaGatewayMethod(value);
 
                 return true;
             },
@@ -204,7 +133,7 @@ define([
                 }
                 return null;
             }),
-            isCardChecked: function (context) {
+            isSeparatedChecked: function (context) {
                 return ko.pureComputed(function () {
                     var paymentMethod = quote.paymentMethod();
                     var individualFlag = checkoutData.getIndividualGatewayFlag();
@@ -223,26 +152,11 @@ define([
                     return null;
                 });
             },
-            isAutomaticChecked: function (context) {
-                return ko.pureComputed(function () {
-                    var paymentMethod = quote.paymentMethod();
-                    if (paymentMethod) {
-                        return true;
-                    }
-                    return null;
-                });
-            },
             isIframeSelected: function() {
-                return (
-                    this.renderAutomaticPayment.length > 0 &&
-                    this.renderAutomaticPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
-                );
+                return this.selectedPaymentObject.is_iframe;
             },
             isBlikSelected: function() {
-                return (
-                    this.renderBlikPayment.length > 0 &&
-                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
-                );
+                return this.selectedPaymentObject.is_blik;
             },
             /**
              * @return {Boolean}

@@ -79,7 +79,7 @@ class ConfigProvider implements ConfigProviderInterface
         $currency = $this->getCurrentCurrencyCode();
 
         if (!isset($this->_activeGateways[$currency])) {
-            $resultCard         = [];
+            $resultSeparated         = [];
             $result             = [];
             $automaticAvailable = false;
             $blikAvailable      = false;
@@ -94,18 +94,18 @@ class ConfigProvider implements ConfigProviderInterface
                     // Płatność kartą w iframe
                     if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
                         && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
-                        $automaticAvailable = true;
+                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
                         continue;
                     }
 
-                    // Blik 0
+                    // BLIK 0
                     if ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
-                        $blikAvailable = true;
+                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
                         continue;
                     }
 
-                    if ($gateway->isCreditCard()) {
-                        $resultCard[] = $this->prepareGatewayStructure($gateway);
+                    if ($gateway->getIsSeparatedMethod()) {
+                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
                     } else {
                         $result[] = $this->prepareGatewayStructure($gateway);
                     }
@@ -118,12 +118,9 @@ class ConfigProvider implements ConfigProviderInterface
 
             $activeGateways = [
                 'bluePaymentOptions' => $result,
-                'bluePaymentCard' => $resultCard,
+                'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
             ];
-
-            $activeGateways['bluePaymentAutomatic'] = $automaticAvailable ? $this->prepareGatewayAutomatic() : [];
-            $activeGateways['bluePaymentBlik'] = $blikAvailable ? $this->prepareGatewayBlik() : [];
 
             $this->_activeGateways[$currency] = $activeGateways;
         }
@@ -143,38 +140,31 @@ class ConfigProvider implements ConfigProviderInterface
             $logoUrl = $gateway->getGatewayLogoPath();
         }
 
+        $name = $gateway->getGatewayName();
+        $isIframe = false;
+        $isBlik = false;
+
+        if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
+            && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
+            $name = $this->block->getTitleAutomatic();
+            $isIframe = true;
+        } elseif ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
+            $name = $this->block->getTitleBlik();
+            $isBlik = true;
+        }
+
         return [
             'gateway_id'          => $gateway->getGatewayId(),
-            'name'                => $gateway->getGatewayName(),
+            'name'                => $name,
             'bank'                => $gateway->getBankName(),
             'description'         => $gateway->getGatewayDescription(),
             'sort_order'          => $gateway->getGatewaySortOrder(),
             'type'                => $gateway->getGatewayType(),
             'logo_url'            => $logoUrl,
             'is_separated_method' => $gateway->getIsSeparatedMethod(),
+            'is_iframe'           => $isIframe,
+            'is_blik'             => $isBlik,
         ];
-    }
-
-    /**
-     * @return array
-     */
-    private function prepareGatewayAutomatic()
-    {
-        return [[
-            'gateway_id'          => self::IFRAME_GATEWAY_ID,
-            'name'                => $this->block->getTitleAutomatic(),
-        ]];
-    }
-
-    /**
-     * @return array
-     */
-    private function prepareGatewayBlik()
-    {
-        return [[
-            'gateway_id'          => self::BLIK_GATEWAY_ID,
-            'name'                => $this->block->getTitleBlik(),
-        ]];
     }
 
     public function getCurrentCurrencyCode()
