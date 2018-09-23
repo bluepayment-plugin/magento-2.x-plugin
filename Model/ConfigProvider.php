@@ -91,19 +91,23 @@ class ConfigProvider implements ConfigProviderInterface
             /** @var Gateways $gateway */
             foreach ($gatewaysCollection as $gateway) {
                 if ($gateway->isActive()) {
+                    // Płatność kartą w iframe
+                    if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
+                        && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
+                        $automaticAvailable = true;
+                        continue;
+                    }
+
+                    // Blik 0
+                    if ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
+                        $blikAvailable = true;
+                        continue;
+                    }
+
                     if ($gateway->isCreditCard()) {
                         $resultCard[] = $this->prepareGatewayStructure($gateway);
                     } else {
                         $result[] = $this->prepareGatewayStructure($gateway);
-                    }
-
-                    if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
-                        && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
-                        $automaticAvailable = true;
-                    }
-
-                    if ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
-                        $blikAvailable = true;
                     }
                 }
             }

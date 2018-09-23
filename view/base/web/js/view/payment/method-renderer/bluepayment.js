@@ -19,6 +19,7 @@ define([
         var widget;
         var redirectUrl;
         return Component.extend({
+            redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
             renderCardOptions: window.checkoutConfig.payment.bluePaymentCard,
             renderAutomaticPayment: window.checkoutConfig.payment.bluePaymentAutomatic,
@@ -33,6 +34,19 @@ define([
                 }
                 return -1;
             }),
+            inputIdPrefix: function () {
+                return 'blue-payment';
+            },
+            /**
+             * Get payment method data
+             */
+            getData: function () {
+                return {
+                    "method": this.item.method,
+                    "po_number": null,
+                    "additional_data": null
+                };
+            },
             initialize: function (config) {
                 var self = this;
                 widget = this;
@@ -87,8 +101,6 @@ define([
                 return true;
             },
             selectPaymentMethod: function () {
-                console.log(this.item);
-
                 this.item.individual_gateway = null;
                 checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
                 selectPaymentMethodAction(this.getData());
@@ -129,58 +141,6 @@ define([
                 this.selectCardPaymentMethod();
 
                 return true;
-            },
-            setBlueMediaGatewayMethod: function (value) {
-                this.validationFailed(false);
-                this.selectedPaymentObject = value;
-
-                quote.setBlueMediaPaymentMethod(value);
-                checkoutData.setBlueMediaPaymentMethod(value);
-            },
-            /**
-             * Get payment method data
-             */
-            getData: function () {
-                return {
-                    "method": this.item.method,
-                    "po_number": null,
-                    "additional_data": null
-                };
-            },
-            isChecked: ko.computed(function () {
-                var paymentMethod = quote.paymentMethod();
-                if (paymentMethod) {
-                    return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
-                }
-                return null;
-            }),
-            isCardChecked: function (context) {
-                return ko.pureComputed(function () {
-                    var paymentMethod = quote.paymentMethod();
-                    var individualFlag = checkoutData.getIndividualGatewayFlag();
-                    if (paymentMethod) {
-                        if (individualFlag && paymentMethod.method == 'bluepayment') {
-                            if (individualFlag == context.gateway_id) {
-                                return individualFlag;
-                            }
-
-                            return false;
-
-                        } else {
-                            return false;
-                        }
-                    }
-                    return null;
-                });
-            },
-            isAutomaticChecked: function (context) {
-                return ko.pureComputed(function () {
-                    var paymentMethod = quote.paymentMethod();
-                    if (paymentMethod) {
-                        return true;
-                    }
-                    return null;
-                });
             },
             selectAutomaticMethod: function (value) {
                 $('#checkout-payment-method-load input[type=radio]').each( function() {
@@ -230,7 +190,60 @@ define([
 
                 return true;
             },
-            redirectAfterPlaceOrder: false,
+            setBlueMediaGatewayMethod: function (value) {
+                this.validationFailed(false);
+                this.selectedPaymentObject = value;
+
+                quote.setBlueMediaPaymentMethod(value);
+                checkoutData.setBlueMediaPaymentMethod(value);
+            },
+            isChecked: ko.computed(function () {
+                var paymentMethod = quote.paymentMethod();
+                if (paymentMethod) {
+                    return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
+                }
+                return null;
+            }),
+            isCardChecked: function (context) {
+                return ko.pureComputed(function () {
+                    var paymentMethod = quote.paymentMethod();
+                    var individualFlag = checkoutData.getIndividualGatewayFlag();
+                    if (paymentMethod) {
+                        if (individualFlag && paymentMethod.method == 'bluepayment') {
+                            if (individualFlag == context.gateway_id) {
+                                return individualFlag;
+                            }
+
+                            return false;
+
+                        } else {
+                            return false;
+                        }
+                    }
+                    return null;
+                });
+            },
+            isAutomaticChecked: function (context) {
+                return ko.pureComputed(function () {
+                    var paymentMethod = quote.paymentMethod();
+                    if (paymentMethod) {
+                        return true;
+                    }
+                    return null;
+                });
+            },
+            isIframeSelected: function() {
+                return (
+                    this.renderAutomaticPayment.length > 0 &&
+                    this.renderAutomaticPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
+                );
+            },
+            isBlikSelected: function() {
+                return (
+                    this.renderBlikPayment.length > 0 &&
+                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
+                );
+            },
             /**
              * @return {Boolean}
              */
@@ -242,10 +255,8 @@ define([
                     return false;
                 }
 
-                if (
-                    this.renderBlikPayment.length > 0 &&
-                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
-                ) {
+                // Add code validation if BLIK is selected./
+                if (this.isBlikSelected()) {
                     var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
                     if (code.length !== 6) {
                         $('.blik-error').show();
@@ -256,29 +267,17 @@ define([
                 return true;
             },
             afterPlaceOrder: function () {
-
-                if (
-                    this.renderAutomaticPayment.length > 0 &&
-                    this.renderAutomaticPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
-                ) {
+                if (this.isIframeSelected()) {
                     this.callIframePayment();
-
                     return false;
                 }
 
-                if (
-                    this.renderBlikPayment.length > 0 &&
-                    this.renderBlikPayment[0].gateway_id == this.selectedPaymentObject.gateway_id
-                ) {
+                if (this.isBlikSelected()) {
                     this.callBlikPayment();
-
                     return false;
                 }
 
                 window.location.href = url.build('bluepayment/processing/create') + '?gateway_id=' + this.selectedPaymentObject.gateway_id;
-            },
-            inputIdPrefix: function () {
-                return 'blue-payment';
             },
             callIframePayment: function() {
                 var urlResponse = url.build('bluepayment/processing/create')
