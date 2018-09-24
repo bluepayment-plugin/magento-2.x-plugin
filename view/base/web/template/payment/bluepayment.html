@@ -104,7 +104,14 @@
                      click: $parent.selectPaymentMethodCard.bind($parent),
                      visible: $parent.isRadioButtonVisible()
                    "/>
+
             <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
+                <!-- ko ifnot: $data.is_blik -->
+                <img src=""
+                     data-bind="attr: {src: logo_url,alt: name}"
+                     class="payment-icon"/>
+                <!--/ko -->
+
                 <span data-bind="text: name"></span>
             </label>
 
