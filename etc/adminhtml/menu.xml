@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="BlueMedia_BluePayment::bluepayment" title="BluePayment" module="BlueMedia_BluePayment" sortOrder="200"
+             resource="BlueMedia_BluePayment::bluepayment"/>
+        <add id="BlueMedia_BluePayment::gateways" title="Gateways" module="BlueMedia_BluePayment" sortOrder="10" action="adminbluepayment/gateways"
+             resource="BlueMedia_BluePayment::gateways" parent="BlueMedia_BluePayment::bluepayment"/>
+    </menu>
+</config>

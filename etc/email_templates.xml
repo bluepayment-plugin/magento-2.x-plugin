@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="payment_other_bluepayment_disabled_gateways_notification_template"
+              label="BM Disabled Gateways Notification Template"
+              file="disabled_gateways_notification_template.html"
+              type="text"
+              module="Bluemedia_Bluepayment"
+              area="frontend"
+    />
+    <template id="payment_us_bluepayment_disabled_gateways_notification_template"
+              label="BM Disabled Gateways Notification Template"
+              file="disabled_gateways_notification_template.html"
+              type="text"
+              module="Bluemedia_Bluepayment"
+              area="frontend"
+    />
+</config>

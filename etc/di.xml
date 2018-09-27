@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="BlueMedia\BluePayment\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="BlueMedia\BluePayment\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">BlueMediaLogger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">BlueMedia\BluePayment\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="BlueMediaBluePaymentGirdFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="BlueMediaBluePaymentGatewaysGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">BlueMediaBluePaymentGirdFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <type name="BlueMedia\BluePayment\Model\ResourceModel\Gateways\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">blue_gateways</argument>
+            <argument name="eventPrefix" xsi:type="string">bluemedia_bluepayment_gateways_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">gateways_grid_collection</argument>
+            <argument name="resourceModel" xsi:type="string">BlueMedia\BluePayment\Model\ResourceModel\Gateways</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="bluemedia_bluepayment_gateways_listing_data_source" xsi:type="string">
+                    BlueMedia\BluePayment\Model\ResourceModel\Gateways\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface"
+                type="BlueMedia\BluePayment\Model\TransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface"
+                type="BlueMedia\BluePayment\Model\Transaction"/>
+
+    <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface"
+                type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface"
+                type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+</config>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="sales_order_edit">
+            <block class="BlueMedia\BluePayment\Block\Adminhtml\Order\View\Buttons" name="bluemedia_buttons">
+                <action method="addButtons"/>
+            </block>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="BlueMedia\BluePayment\Block\Adminhtml\Order\View\Popup" name="bluemedia_returns_popup" template="BlueMedia_BluePayment::popup.phtml" />
+        </referenceContainer>
+    </body>
+</page>
