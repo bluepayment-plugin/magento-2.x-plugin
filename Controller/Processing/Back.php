@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\Payment;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -70,18 +71,21 @@ class Back extends Action
     {
         $this->logger->info('BACK:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
         try {
-            $params = $this->getRequest()->getParams();
+            $params     = $this->getRequest()->getParams();
             $orderId    = $params['OrderID'];
             $hash       = $params['Hash'];
-
+            $status     = isset($params['Status']) ? $params['Status'] : null;
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+
             $currency = $order->getOrderCurrencyCode();
+            $payment = $order->getPayment();
 
             if (array_key_exists('Hash', $params)) {
                 $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
                 $sharedKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
+
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $this->logger->info('BACK:' . __LINE__, [
                     'serviceId' => $serviceId,
@@ -96,7 +100,10 @@ class Back extends Action
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
 
-                if ($hash == $hashLocal) {
+                if (
+                    $hash == $hashLocal
+                    && ($status == 'SUCCESS' || $this->getBluePaymentState($payment) == Payment::PAYMENT_STATUS_SUCCESS)
+                ) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
                     $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                 } else {
@@ -112,5 +119,10 @@ class Back extends Action
             $this->logger->critical($e);
             $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
         }
+    }
+
+    protected function getBluePaymentState($payment)
+    {
+        return $payment->getAdditionalInformation('bluepayment_state');
     }
 }

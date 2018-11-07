@@ -411,8 +411,8 @@ class Payment extends AbstractMethod
     {
         $status        = $order->getStatus();
         $stateOrderTab = array(
-            \Magento\Sales\Model\Order::STATE_CLOSED,
-            \Magento\Sales\Model\Order::STATE_CANCELED,
+//            \Magento\Sales\Model\Order::STATE_CLOSED,
+//            \Magento\Sales\Model\Order::STATE_CANCELED,
             \Magento\Sales\Model\Order::STATE_COMPLETE,
         );
 
@@ -446,6 +446,7 @@ class Payment extends AbstractMethod
     protected function updateStatusTransactionAndOrder($transaction)
     {
         $paymentStatus     = (string)$transaction->paymentStatus;
+
         $remoteId          = $transaction->remoteID;
         $orderId           = $transaction->orderID;
         $transactionAmount = number_format(round($transaction->amount, 2), 2, '.', '');
@@ -511,14 +512,19 @@ class Payment extends AbstractMethod
                 switch ($paymentStatus) {
                     case self::PAYMENT_STATUS_PENDING:
                         if ($paymentStatus != $orderPaymentState) {
-                            $order->setState($orderStatusWaitingState)
-                                ->setStatus($statusWaitingPayment)
-                                ->addStatusToHistory(
-                                    $statusWaitingPayment,
-                                    $orderComment,
-                                    false
-                                )
-                                ->save();
+                        $transaction = $orderPayment->setTransactionId((string) $remoteId);
+                        $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
+                        $transaction->setIsTransactionPending(true);
+                        $transaction->save();
+
+                        $order->setState($orderStatusWaitingState)
+                            ->setStatus($statusWaitingPayment)
+                            ->addStatusToHistory(
+                                $statusWaitingPayment,
+                                $orderComment,
+                                false
+                            )
+                            ->save();
                         }
                         break;
                     case self::PAYMENT_STATUS_SUCCESS:
@@ -539,7 +545,8 @@ class Payment extends AbstractMethod
                         break;
                     case self::PAYMENT_STATUS_FAILURE:
                         if ($orderPaymentState != $paymentStatus) {
-                            $order->setState($orderStatusErrorState)
+                            $order
+                                ->setState($orderStatusErrorState)
                                 ->setStatus($statusErrorPayment)
                                 ->addStatusToHistory(
                                     $orderStatusErrorState,
