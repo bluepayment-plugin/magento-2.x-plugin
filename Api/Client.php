@@ -30,6 +30,7 @@ class Client implements ClientInterface
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         $curlResponse = curl_exec($curl);
         curl_close($curl);
+
         if ($curlResponse == 'ERROR') {
             throw new ResponseException();
         }

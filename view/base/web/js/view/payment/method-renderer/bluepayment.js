@@ -6,7 +6,9 @@ define([
         'Magento_Checkout/js/action/select-payment-method',
         'mage/url',
         'BlueMedia_BluePayment/js/model/quote',
-        'BlueMedia_BluePayment/js/checkout-data'
+        'BlueMedia_BluePayment/js/checkout-data',
+        'Magento_Ui/js/modal/modal',
+        'text!BlueMedia_BluePayment/template/blik-popup.html',
     ], function ($,
                  _,
                  ko,
@@ -14,11 +16,15 @@ define([
                  selectPaymentMethodAction,
                  url,
                  quote,
-                 checkoutData) {
+                 checkoutData,
+                 modal,
+                 blikTpl) {
         'use strict';
         var widget;
         var redirectUrl;
+
         return Component.extend({
+            ordered: false,
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
             renderSeparatedOptions: window.checkoutConfig.payment.bluePaymentSeparated,
@@ -32,6 +38,16 @@ define([
                 }
                 return -1;
             }),
+            blikModal: modal({
+                title: 'Potwierdź transakcję BLIK',
+                autoOpen: false,
+                buttons: [],
+                type: 'popup',
+                popupTpl: blikTpl,
+                keyEventHandlers: {},
+                modalClass: 'blik-modal',
+            }, $('<div />').html('Potwierdź płatność w aplikacji swojego banku.')),
+
             /**
              * Get payment method data
              */
@@ -153,10 +169,10 @@ define([
                 });
             },
             isIframeSelected: function() {
-                return this.selectedPaymentObject.is_iframe;
+                return this.selectedPaymentObject.is_iframe === true && this.selectedPaymentObject.is_separated_method === "1";
             },
             isBlikSelected: function() {
-                return this.selectedPaymentObject.is_blik;
+                return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method === "1";
             },
             /**
              * @return {Boolean}
@@ -173,12 +189,60 @@ define([
                 if (this.isBlikSelected()) {
                     var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
                     if (code.length !== 6) {
-                        $('.blik-error').show();
+                        $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                        $(".blue-payment__blik input[name='payment_method_bluepayment_code']").focus();
                         return false;
                     }
                 }
 
                 return true;
+            },
+            /**
+             * Place order.
+             */
+            placeOrder: function (data, event) {
+                var self = this;
+
+                if (event) {
+                    event.preventDefault();
+                }
+
+                if (this.validate()) {
+                    if (!this.ordered) {
+                        // Disable other payment types
+                        $('.payment-method:not(.blue-payment) input[type=radio]').prop('disabled', true);
+
+                        this.isPlaceOrderActionAllowed(false);
+
+                        this.getPlaceOrderDeferredObject()
+                            .fail(
+                                function () {
+                                    self.isPlaceOrderActionAllowed(true);
+                                }
+                            ).done(
+                            function () {
+                                self.ordered = true;
+                                self.afterPlaceOrder();
+
+                                if (self.redirectAfterPlaceOrder) {
+                                    redirectOnSuccessAction.execute();
+                                }
+                            }
+                        );
+
+                        return true;
+                    } else {
+                        // Order has been placed already.
+                        // Create only payment.
+                        self.afterPlaceOrder();
+
+                        if (self.redirectAfterPlaceOrder) {
+                            redirectOnSuccessAction.execute();
+                        }
+                    }
+                }
+
+                return false;
             },
             afterPlaceOrder: function () {
                 if (this.isIframeSelected()) {
@@ -214,11 +278,14 @@ define([
                 return false;
             },
             callBlikPayment: function() {
+                var self = this;
+
                 var urlResponse = url.build('bluepayment/processing/create')
                     + '?gateway_id='
                     + this.selectedPaymentObject.gateway_id
                     + '&automatic=true';
                 var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
+                $('.blik-error').hide();
 
                 if (code.length === 6) {
                     $.ajax({
@@ -228,20 +295,61 @@ define([
                         type: "POST",
                         dataType: "json",
                     }).done(function (response) {
-                        if (response.status && response.status == false) {
-                            alert('Status = false');
-                        } else {
-                            redirectUrl = url.build('bluepayment/processing/backblick')
-                                + '?ServiceID=' + response.params.ServiceID
-                                + '&OrderID=' + response.params.OrderID
-                                + '&Hash=' + response.params.hash
-                                + '&paymentStatus=' + response.params.paymentStatus;
-                            window.location.href = redirectUrl;
+                        if (response.params) {
+                            if (response.params.confirmation && response.params.confirmation == 'NOTCONFIRMED') {
+                                $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                            } else if (response.params.confirmation && response.params.confirmation == 'CONFIRMED') {
+                                if (response.params.paymentStatus) {
+                                    self.handleBlikStatus(response.params.paymentStatus, response.params);
+                                }
+                            }
                         }
                     });
                 }
 
                 return false;
+            },
+
+            handleBlikStatus: function(status, params) {
+                var self = this;
+
+                if (status === 'PENDING') {
+                    if (this.blikModal.options.isOpen !== true) {
+                        this.blikModal.openModal();
+                        this.blikModal._removeKeyListener();
+                    }
+
+                    setTimeout(function() {
+                        self.updateBlikStatus(status);
+                    }, 2000);
+                } else if (status === 'SUCCESS') {
+                    redirectUrl = url.build('bluepayment/processing/back')
+                        + '?ServiceID=' + params.ServiceID
+                        + '&OrderID=' + params.OrderID
+                        + '&Hash=' + params.hash
+                        + '&Status=' + 'SUCCESS';
+
+                    window.location.href = redirectUrl;
+                } else if (status === 'FAILURE') {
+                    this.blikModal.closeModal();
+                    $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                }
+            },
+
+            updateBlikStatus: function() {
+                var urlResponse = url.build('bluepayment/processing/blik');
+                var self = this;
+
+                $.ajax({
+                    showLoader: false,
+                    url: urlResponse,
+                    type: 'GET',
+                    dataType: "json"
+                }).done(function (response) {
+                    if (response.Status) {
+                        self.handleBlikStatus(response.Status, response);
+                    }
+                });
             }
         });
     }

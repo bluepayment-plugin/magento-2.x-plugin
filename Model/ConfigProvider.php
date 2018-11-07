@@ -91,19 +91,6 @@ class ConfigProvider implements ConfigProviderInterface
             /** @var Gateways $gateway */
             foreach ($gatewaysCollection as $gateway) {
                 if ($gateway->isActive()) {
-                    // Płatność kartą w iframe
-                    if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
-                        && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
-                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
-                        continue;
-                    }
-
-                    // BLIK 0
-                    if ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
-                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
-                        continue;
-                    }
-
                     if ($gateway->getIsSeparatedMethod()) {
                         $resultSeparated[] = $this->prepareGatewayStructure($gateway);
                     } else {

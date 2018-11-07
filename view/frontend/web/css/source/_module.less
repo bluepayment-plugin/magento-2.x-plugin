@@ -8,8 +8,27 @@ and open the template in the editor.
     Author     : krzysztof
 */
 & when (@media-common = true) {
-    .blue-payment {
+    .blik-modal {
+        .modal-inner-wrap {
+            width: 400px !important;
+            margin-left: -200px !important;
+            text-align: center;
+            padding-bottom: 20px;
 
+            div.loader {
+                box-sizing: border-box;
+                width: 40px;
+                height: 40px;
+                padding-left: 40px;
+                z-index: 2;
+                background: url("https://magento2.bm.devmouse.pl/static/version1541352738/frontend/Magento/luma/pl_PL/images/loader-2.gif") no-repeat 50% 50%;
+                background-size: 200px;
+                margin: 0 auto 20px auto;
+            }
+        }
+    }
+
+    .blue-payment {
         &__blik {
             hr {
                 margin-bottom: 0;
@@ -34,6 +53,14 @@ and open the template in the editor.
         }
 
         &__card {
+            .payment-method-title {
+                .separated-payments-wrapper:not(:first-child) & {
+                    border-top: 1px solid #cccccc !important;
+                }
+            }
+        }
+
+        &__blik {
             .payment-method-title {
                 .separated-payments-wrapper:not(:first-child) & {
                     border-top: 1px solid #cccccc !important;

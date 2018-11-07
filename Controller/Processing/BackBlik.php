@@ -10,11 +10,11 @@ use Magento\Sales\Model\OrderFactory;
 use BlueMedia\BluePayment\Logger\Logger;
 
 /**
- * Class BackBlick
+ * Class BackBlik
  *
  * @package BlueMedia\BluePayment\Controller\Processing
  */
-class BackBlick extends Action
+class BackBlik extends Action
 {
     /**
      * @var \Psr\Log\LoggerInterface
@@ -67,7 +67,7 @@ class BackBlick extends Action
      */
     public function execute()
     {
-        $this->logger->info('BackBlick:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
+        $this->logger->info('BackBlik:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
         try {
             $params = $this->getRequest()->getParams();
             $orderId    = $params['OrderID'];
@@ -96,18 +96,18 @@ class BackBlick extends Action
                 $session->setLastSuccessQuoteId($orderId);
 
                 if ($hash == $hashLocal) {
-                    $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
+                    $this->logger->info('BackBlik:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
 
                     if ($params['paymentStatus'] == 'FAILURE') {
                         $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
                     }
                     $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                 } else {
-                    $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
+                    $this->logger->info('BackBlik:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
                     $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
                 }
             } else {
-                $this->logger->info('BackBlick:' . __LINE__ . ' Klucz autoryzacji transakcji nie istnieje');
+                $this->logger->info('BackBlik:' . __LINE__ . ' Klucz autoryzacji transakcji nie istnieje');
                 $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
             }
         } catch (\Exception $e) {

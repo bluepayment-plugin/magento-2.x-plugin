@@ -95,21 +95,24 @@ class Gateways extends Data
             $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
             $hashKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
 
-            $tryCount = 0;
-            $loadResult = false;
-            while (!$loadResult) {
-                $loadResult = $this->loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl);
+            if ($serviceId) {
+                $tryCount = 0;
+                $loadResult = false;
+                while (!$loadResult) {
+                    $loadResult = $this->loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey,
+                        $gatewayListAPIUrl);
 
-                if ($loadResult) {
-                    $result['success'] = $this->saveGateways((array)$loadResult, $currency);
-                    break;
-                } else {
-                    if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
-                        $result['error'] = 'Exceeded the limit of attempts to sync gateways list!';
+                    if ($loadResult) {
+                        $result['success'] = $this->saveGateways((array)$loadResult, $currency);
                         break;
+                    } else {
+                        if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
+                            $result['error'] = 'Exceeded the limit of attempts to sync gateways list!';
+                            break;
+                        }
                     }
+                    $tryCount++;
                 }
-                $tryCount++;
             }
         }
 
