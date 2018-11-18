@@ -131,7 +131,9 @@ class Create extends Action
             $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
 
+            $unchangeableStatuses = explode(',', $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses"));
             $statusWaitingPayment = $this->scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
+
             if ($statusWaitingPayment != '') {
                 /**
                  * @var \Magento\Sales\Model\ResourceModel\Order\Status\Collection $statusCollection
@@ -144,13 +146,17 @@ class Create extends Action
                         $orderStatusWaitingState = $status->getState();
                     }
                 }
-
-                $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
-                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment)->save();
-                $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
             } else {
-                $order->setState(Order::STATE_PENDING_PAYMENT)->setStatus(Order::STATE_PENDING_PAYMENT)->save();
-                $this->logger->info('CREATE:' . __LINE__, ['setStatePendingPayment AND setStatusPendingPayment']);
+                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
+            }
+
+
+            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+                $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
+                $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
+
+                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment)->save();
             }
 
             if ($order->getCanSendNewEmailFlag()) {

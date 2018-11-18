@@ -401,24 +401,23 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * Sprawdza czy zamówienie zostało zakończone, zamknięte, lub anulowane
+     * Sprawdza czy można zmienić status zamówienia oraz czy nie zostało już opłacone.
      *
      * @param object $order
      *
      * @return boolean
      */
-    public function isOrderCompleted($order)
+    public function isOrderChangable($order)
     {
         $status        = $order->getStatus();
-        $stateOrderTab = array(
-//            \Magento\Sales\Model\Order::STATE_CLOSED,
-//            \Magento\Sales\Model\Order::STATE_CANCELED,
-            \Magento\Sales\Model\Order::STATE_COMPLETE,
-        );
+        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue("payment/bluepayment/unchangeable_statuses"));
 
-        if ($this->getConfigData('status_accept_payment') != '') {
-            $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
-        } else {
+        if (in_array($status, $unchangeableStatuses)) {
+            return false;
+        }
+
+        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
+        if ($statusAcceptPayment == '') {
             $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
         }
 
@@ -432,7 +431,7 @@ class Payment extends AbstractMethod
             }
         }
 
-        return in_array($status, $stateOrderTab) || $alreadyPaidBefore;
+        return $alreadyPaidBefore == false;
     }
 
     /**
@@ -504,7 +503,7 @@ class Payment extends AbstractMethod
         }
 
         try {
-            if (!$this->isOrderCompleted($order) && $orderPaymentState != $paymentStatus) {
+            if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
                     . ' | Amount: ' . $transactionAmount
