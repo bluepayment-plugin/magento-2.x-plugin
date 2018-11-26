@@ -33,6 +33,10 @@
                     <label>Status partial refund</label>
                     <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
                 </field>
+                <field id="unchangeable_statuses" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Unchangeable statuses</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
                 <field id="transaction_life_hours" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Transaction Life Hours</label>
                 </field>
