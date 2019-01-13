@@ -117,6 +117,7 @@ class Create extends Action
 
             $cardGateway = $this->scopeConfig->getValue("payment/bluepayment/card_gateway");
             $blikGateway = $this->scopeConfig->getValue('payment/bluepayment/blik_gateway');
+            $gpayGateway = $this->scopeConfig->getValue('payment/bluepayment/gpay_gateway');
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
@@ -222,6 +223,38 @@ class Create extends Action
                 return $resultJson;
             }
 
+            if ($gpayGateway == $gatewayId && $automatic === true) {
+                $token = $this->getRequest()->getParam('token', null);
+
+                $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);
+
+                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, 0, $token);
+                $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
+
+                $responseParams = $this->sendRequestGPay($payment->getUrlGateway(), $params);
+                $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
+
+                $hashData  = [$serviceId, $orderId, $sharedKey];
+                $this->logger->info('CREATE:' . __LINE__, ['hashData' => $hashData]);
+
+                $hash = $this->helper->generateAndReturnHash($hashData);
+                $this->logger->info('CREATE:' . __LINE__, ['hash' => $hash]);
+
+                $params = [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'GatewayID' => $gatewayId,
+                    'hash' => $hash,
+                    'paymentStatus' => $responseParams['paymentStatus']
+                ];
+                $result = $this->prepareGPayJsonResponse($payment->getUrlGateway(), $params);
+
+                /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+                $resultJson = $this->resultJsonFactory->create();
+                $resultJson->setData($result);
+                return $resultJson;
+            }
+
             $url = $this->_url->getUrl(
                 $payment->getUrlGateway()
                 . '?'
@@ -281,6 +314,22 @@ class Create extends Action
     }
 
     /**
+     * @param string $gatewayUrl
+     * @param string $authorizationCode
+     * @param array  $params
+     * @return array
+     */
+    private function prepareGPayJsonResponse($gatewayUrl, $params)
+    {
+        $params['GatewayID'] = (string) $params['GatewayID'];
+
+        return [
+            'gateway_url' => $gatewayUrl,
+            'params' => $params,
+        ];
+    }
+
+    /**
      * @param string $code
      * @return bool
      */
@@ -328,4 +377,43 @@ class Create extends Action
         return $responseParams;
     }
 
+    /**
+     * @param $urlGateway
+     * @param $params
+     */
+    private function sendRequestGPay($urlGateway, $params)
+    {
+        $fields = (is_array($params)) ? http_build_query($params) : $params;
+        $curl = curl_init($urlGateway);
+        if (array_key_exists('ClientHash', $params)){
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
+        } else{
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        }
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+        $curlResponse = curl_exec($curl);
+        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $response = curl_getinfo($curl);
+        curl_close($curl);
+
+        $xml = simplexml_load_string($curlResponse);
+
+        $paymentStatus = (string) $xml->status;
+        $orderID = (string) $xml->orderID;
+        $remoteID = (string) $xml->remoteID;
+        $hash = (string) $xml->hash;
+
+        $this->logger->info('CREATE:' . __LINE__, ['$curlResponse' => $curlResponse]);
+
+        $responseParams = [
+            'orderID' => $orderID,
+            'remoteID' => $remoteID,
+            'paymentStatus' => $paymentStatus
+        ];
+
+        return $responseParams;
+    }
 }

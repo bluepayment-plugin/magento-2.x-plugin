@@ -231,7 +231,8 @@ class Payment extends AbstractMethod
      * @param string $authorizationCode
      * @return array
      */
-    public function getFormRedirectFields($order, $gatewayId = 0, $automatic = false, $authorizationCode = 0)
+    public function getFormRedirectFields($order, $gatewayId = 0, $automatic = false, $authorizationCode = 0,
+        $paymentToken = '')
     {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
@@ -242,6 +243,7 @@ class Payment extends AbstractMethod
         $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
         $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
         $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
+        $gpayGateway   = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
 
         $customerEmail = $order->getCustomerEmail();
         $validityTime  = $this->getTransactionLifeHours();
@@ -314,6 +316,26 @@ class Payment extends AbstractMethod
                         'Currency'          => $currency,
                         'CustomerEmail'     => $customerEmail,
                         'AuthorizationCode' => $authorizationCode,
+                        'Hash'              => $hashLocal,
+                    ];
+                }
+
+                if ($automatic === true && $gpayGateway == $gatewayId) {
+                    $paymentToken = base64_encode($paymentToken);
+                    $desc = 'Google Pay test';
+                    $hashData  = [$serviceId, $orderId, $amount, $desc, $gatewayId, $currency, $customerEmail,
+                        $paymentToken, $sharedKey];
+                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
+
+                    return [
+                        'ServiceID'         => $serviceId,
+                        'OrderID'           => $orderId,
+                        'Amount'            => $amount,
+                        'Description'       => $desc,
+                        'GatewayID'         => $gatewayId,
+                        'Currency'          => $currency,
+                        'CustomerEmail'     => $customerEmail,
+                        'PaymentToken'      => $paymentToken,
                         'Hash'              => $hashLocal,
                     ];
                 }

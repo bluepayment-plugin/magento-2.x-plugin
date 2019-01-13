@@ -69,6 +69,9 @@
                     <!--<label>Auto Payment</label>-->
                     <!--<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
                 <!--</field>-->
+                <field id="gpay_merchant_id" translate="label" type="text" sortOrder="525" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Pay merchant ID</label>
+                </field>
                 <field id="disabled_gateways_notification_template" translate="label comment" type="select" sortOrder="530" showInDefault="1">
                     <label>Disabled gateways notification Template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>

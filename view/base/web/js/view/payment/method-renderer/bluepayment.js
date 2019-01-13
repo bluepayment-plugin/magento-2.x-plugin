@@ -96,12 +96,14 @@ define([
                 };
 
                 PayBmCheckout.transactionDeclined = function(status) {
-                    window.location.href = redirectUrl;
+                    // window.location.href = redirectUrl;
                 };
 
                 PayBmCheckout.transactionError = function(status) {
-                    window.location.href = redirectUrl;
+                    // window.location.href = redirectUrl;
                 };
+
+                this.initGPay();
             },
             defaults: {
                 template: 'BlueMedia_BluePayment/payment/bluepayment',
@@ -174,10 +176,18 @@ define([
             isBlikSelected: function() {
                 return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method === "1";
             },
+            isGPaySelected: function() {
+                return this.selectedPaymentObject.is_gpay === true && this.selectedPaymentObject.is_separated_method === "1";
+            },
             /**
              * @return {Boolean}
              */
             validate: function () {
+                if (this.isGPaySelected()) {
+                    this.callGPayPayment();
+                    return false;
+                }
+
                 $('.blik-error').hide();
 
                 if (_.isEmpty(this.selectedPaymentObject)) {
@@ -208,41 +218,46 @@ define([
                 }
 
                 if (this.validate()) {
-                    if (!this.ordered) {
-                        // Disable other payment types
-                        $('.payment-method:not(.blue-payment) input[type=radio]').prop('disabled', true);
-
-                        this.isPlaceOrderActionAllowed(false);
-
-                        this.getPlaceOrderDeferredObject()
-                            .fail(
-                                function () {
-                                    self.isPlaceOrderActionAllowed(true);
-                                }
-                            ).done(
-                            function () {
-                                self.ordered = true;
-                                self.afterPlaceOrder();
-
-                                if (self.redirectAfterPlaceOrder) {
-                                    redirectOnSuccessAction.execute();
-                                }
-                            }
-                        );
-
-                        return true;
-                    } else {
-                        // Order has been placed already.
-                        // Create only payment.
-                        self.afterPlaceOrder();
-
-                        if (self.redirectAfterPlaceOrder) {
-                            redirectOnSuccessAction.execute();
-                        }
-                    }
+                    self.placeOrderAfterValidation();
                 }
 
                 return false;
+            },
+            placeOrderAfterValidation: function () {
+                var self = this;
+
+                if (!this.ordered) {
+                    // Disable other payment types
+                    $('.payment-method:not(.blue-payment) input[type=radio]').prop('disabled', true);
+
+                    this.isPlaceOrderActionAllowed(false);
+
+                    this.getPlaceOrderDeferredObject()
+                        .fail(
+                            function () {
+                                self.isPlaceOrderActionAllowed(true);
+                            }
+                        ).done(
+                        function () {
+                            self.ordered = true;
+                            self.afterPlaceOrder();
+
+                            if (self.redirectAfterPlaceOrder) {
+                                redirectOnSuccessAction.execute();
+                            }
+                        }
+                    );
+
+                    return true;
+                } else {
+                    // Order has been placed already.
+                    // Create only payment.
+                    self.afterPlaceOrder();
+
+                    if (self.redirectAfterPlaceOrder) {
+                        redirectOnSuccessAction.execute();
+                    }
+                }
             },
             afterPlaceOrder: function () {
                 if (this.isIframeSelected()) {
@@ -252,6 +267,10 @@ define([
 
                 if (this.isBlikSelected()) {
                     this.callBlikPayment();
+                    return false;
+                }
+
+                if (this.isGPaySelected()) {
                     return false;
                 }
 
@@ -309,7 +328,6 @@ define([
 
                 return false;
             },
-
             handleBlikStatus: function(status, params) {
                 var self = this;
 
@@ -350,7 +368,155 @@ define([
                         self.handleBlikStatus(response.Status, response);
                     }
                 });
-            }
+            },
+
+            /* Google Pay */
+            GPayClient: null,
+            GPayMerchantId: window.checkoutConfig.payment.GPayMerchantId,
+            GPayServiceId: window.checkoutConfig.payment.GPayServiceId,
+            GPayModal: modal({
+                title: 'Oczekiwanie na potwierdzenie transakcji.',
+                autoOpen: false,
+                buttons: [],
+                type: 'popup',
+                popupTpl: blikTpl,
+                keyEventHandlers: {},
+                modalClass: 'blik-modal',
+            }, $('<div />').html()),
+            callGPayPayment: function() {
+                var self = this;
+
+                console.log('getGPayTransactionData');
+                console.log(self.getGPayTransactionData());
+
+                self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
+                    self.placeOrderAfterValidation();
+
+                    var token = data.paymentMethodData.tokenizationData.token;
+                    var urlResponse = url.build('bluepayment/processing/create')
+                        + '?gateway_id='
+                        + self.selectedPaymentObject.gateway_id
+                        + '&automatic=true';
+
+                    $.ajax({
+                        showLoader: true,
+                        url: urlResponse,
+                        data: {'token': token},
+                        type: "POST",
+                        dataType: "json",
+                    }).done(function (response) {
+                        console.log(response);
+                        if (response.params) {
+                            if (response.params.paymentStatus) {
+                                console.log('handleGPayStatus');
+                                console.log(response.params.paymentStatus);
+                                self.handleGPayStatus(response.params.paymentStatus, response.params);
+                            } else {
+                                console.error('Payment has no paymentStatus.');
+                            }
+                        }
+                    });
+                })
+                    .catch(function (errorMessage) {
+                        console.error(errorMessage);
+                    });
+            },
+            getGPayTransactionData: function() {
+                console.log(quote.getCalculatedTotal());
+                console.log(window.checkoutConfig.quoteData.quote_currency_code);
+
+                return {
+                    apiVersion: 2,
+                    apiVersionMinor: 0,
+                    allowedPaymentMethods: [{
+                        type: 'CARD',
+                        parameters: {
+                            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                            allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"],
+                        },
+                        tokenizationSpecification: {
+                            type: 'PAYMENT_GATEWAY',
+                            parameters: {
+                                'gateway': 'bluemedia',
+                                'gatewayMerchantId': this.GPayServiceId
+                            }
+                        }
+                    }],
+                    merchantInfo: {
+                        merchantId: this.GPayMerchantId,
+                    },
+                    transactionInfo: {
+                        totalPriceStatus: 'FINAL',
+                        totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
+                        currencyCode: window.checkoutConfig.quoteData.quote_currency_code
+                    }
+                };
+            },
+            initGPay: function() {
+                var self = this;
+
+                self.GPayClient = new google.payments.api.PaymentsClient({
+                    environment: 'TEST'
+                });
+
+                console.log('GPay Initialized');
+
+                self.GPayClient.isReadyToPay({allowedPaymentMethods: ['CARD']})
+                    .then(function (response) {
+                        var transactionData = self.getGPayTransactionData();
+                        transactionData.transactionInfo.totalPriceStatus = 'NOT_CURRENTLY_KNOWN';
+
+                        if (response.result) {
+                            self.GPayClient.prefetchPaymentData(transactionData);
+                            self.GPayClient.createButton({onClick: function(){}});
+                            console.log('GPay button created');
+                        } else {
+                            console.error(response);
+                        }
+                    })
+                    .catch(function (errorMessage) {
+                        console.error(response);
+                    });
+            },
+            handleGPayStatus: function(status, params) {
+                var self = this;
+
+                if (status === 'SUCCESS') {
+                    redirectUrl = url.build('bluepayment/processing/back')
+                        + '?ServiceID=' + params.ServiceID
+                        + '&OrderID=' + params.OrderID
+                        + '&Hash=' + params.hash
+                        + '&Status=' + 'SUCCESS';
+
+                    window.location.href = redirectUrl;
+                } else if (status === 'FAILURE') {
+                    this.GPayModal.closeModal();
+                    console.error('GPay - status failure');
+                } else {
+                    if (this.GPayModal.options.isOpen !== true) {
+                        this.GPayModal.openModal();
+                        this.GPayModal._removeKeyListener();
+                    }
+
+                    console.log('setTimeout - updateGPayStatus');
+                    setTimeout(function() {
+                        self.updateGPayStatus(status);
+                    }, 2000);
+                }
+            },
+            updateGPayStatus: function() {
+                var urlResponse = url.build('bluepayment/processing/blik');
+                var self = this;
+
+                $.ajax({
+                    showLoader: false,
+                    url: urlResponse,
+                    type: 'GET',
+                    dataType: "json"
+                }).done(function (response) {
+                    self.handleGPayStatus(response.Status, response);
+                });
+            },
         });
     }
 );

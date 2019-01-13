@@ -180,7 +180,6 @@ class Gateways extends Data
                     && isset($gateway['gatewayName'])
                     && isset($gateway['gatewayType'])
                     && isset($gateway['bankName'])
-                    && isset($gateway['iconURL'])
                     && isset($gateway['statusDate'])
                 ) {
                     $currentlyActiveGatewayIDs[] = $gateway['gatewayID'];
@@ -199,7 +198,7 @@ class Gateways extends Data
                     $gatewayModel->setData('bank_name', $gateway['bankName']);
                     $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
-                    $gatewayModel->setData('gateway_logo_url', $gateway['iconURL']);
+                    $gatewayModel->setData('gateway_logo_url', isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
                     $gatewayModel->setData('status_date', $gateway['statusDate']);
                     try {
                         $gatewayModel->save();

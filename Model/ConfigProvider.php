@@ -15,6 +15,7 @@ class ConfigProvider implements ConfigProviderInterface
 {
     const IFRAME_GATEWAY_ID = 1500;
     const BLIK_GATEWAY_ID = 509;
+    const GPAY_GATEWAY_ID = 1512;
 
     /**
      * @var \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection
@@ -80,9 +81,7 @@ class ConfigProvider implements ConfigProviderInterface
 
         if (!isset($this->_activeGateways[$currency])) {
             $resultSeparated         = [];
-            $result             = [];
-            $automaticAvailable = false;
-            $blikAvailable      = false;
+            $result                  = [];
 
             $gatewaysCollection = $this->gatewaysCollection
                 ->addFilter('gateway_currency', $currency)
@@ -107,6 +106,8 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
+                'GPayMerchantId' => $this->scopeConfig->getValue("payment/bluepayment/gpay_merchant_id"),
+                'GPayServiceId' => $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id"),
             ];
 
             $this->_activeGateways[$currency] = $activeGateways;
@@ -130,6 +131,7 @@ class ConfigProvider implements ConfigProviderInterface
         $name = $gateway->getGatewayName();
         $isIframe = false;
         $isBlik = false;
+        $isGPay = false;
 
         if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')
             && $gateway->getGatewayId() == self::IFRAME_GATEWAY_ID) {
@@ -138,6 +140,8 @@ class ConfigProvider implements ConfigProviderInterface
         } elseif ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
             $name = $this->block->getTitleBlik();
             $isBlik = true;
+        } elseif ($gateway->getGatewayId() == self::GPAY_GATEWAY_ID) {
+            $isGPay = true;
         }
 
         return [
@@ -151,6 +155,7 @@ class ConfigProvider implements ConfigProviderInterface
             'is_separated_method' => $gateway->getIsSeparatedMethod(),
             'is_iframe'           => $isIframe,
             'is_blik'             => $isBlik,
+            'is_gpay'             => $isGPay,
         ];
     }
 
