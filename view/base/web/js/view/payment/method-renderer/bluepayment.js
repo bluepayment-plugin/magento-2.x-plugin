@@ -375,7 +375,7 @@ define([
             /* Google Pay */
             GPayClient: null,
             GPayMerchantId: window.checkoutConfig.payment.GPayMerchantId,
-            GPayServiceId: window.checkoutConfig.payment.GPayServiceId,
+            bluePaymentAcceptorId: window.checkoutConfig.payment.bluePaymentAcceptorId,
             GPayModal: modal({
                 title: 'Oczekiwanie na potwierdzenie transakcji.',
                 autoOpen: false,
@@ -388,25 +388,14 @@ define([
             callGPayPayment: function() {
                 var self = this;
 
-                console.log('getGPayTransactionData');
-                console.log(self.getGPayTransactionData());
-
                 self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
                     console.log('placeOrderAfterValidation');
-                    // self.placeOrderAfterValidation(function() {
-                        console.log('placeOrderAfterValidationCallback');
-
-                        var token = JSON.stringify({
-                            'tokenizationType': data.paymentMethodData.tokenizationData.type,
-                            'token': data.paymentMethodData.tokenizationData.token
-                        });
-                        console.log(token);
+                    self.placeOrderAfterValidation(function() {
+                        var token = JSON.stringify(data.paymentMethodToken);
                         var urlResponse = url.build('bluepayment/processing/create')
                             + '?gateway_id='
                             + self.selectedPaymentObject.gateway_id
                             + '&automatic=true';
-
-                        console.log('urlResponse', urlResponse);
 
                         $.ajax({
                             showLoader: true,
@@ -415,8 +404,6 @@ define([
                             type: "POST",
                             dataType: "json",
                         }).done(function (response) {
-                            console.log(response);
-
                             if (response.params) {
                                 if (response.params.redirectUrl) {
                                     window.location.href = response.params.redirectUrl;
@@ -429,15 +416,33 @@ define([
                                 }
                             }
                         });
-                    // });
+                    });
                 })
                     .catch(function (errorMessage) {
                         console.error(errorMessage);
                     });
             },
             getGPayTransactionData: function() {
-                console.log(quote.getCalculatedTotal());
-                console.log(window.checkoutConfig.quoteData.quote_currency_code);
+                return {
+                    allowedPaymentMethods: ['CARD'],
+                    cardRequirements: {
+                        allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
+                    },
+                    merchantId: this.GPayMerchantId,
+                    paymentMethodTokenizationParameters: {
+                        tokenizationType: 'PAYMENT_GATEWAY',
+                        parameters: {
+                            'gateway': 'bluemedia',
+                            'gatewayMerchantId': this.bluePaymentAcceptorId
+                        }
+                    },
+                    shippingAddressRequired: false,
+                    transactionInfo: {
+                        totalPriceStatus: 'FINAL',
+                        totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
+                        currencyCode: window.checkoutConfig.quoteData.quote_currency_code
+                    }
+                };
 
                 return {
                     apiVersion: 2,
@@ -452,7 +457,7 @@ define([
                             type: 'PAYMENT_GATEWAY',
                             parameters: {
                                 'gateway': 'bluemedia',
-                                'gatewayMerchantId': this.GPayServiceId
+                                'gatewayMerchantId': this.bluePaymentAcceptorId
                             }
                         }
                     }],
