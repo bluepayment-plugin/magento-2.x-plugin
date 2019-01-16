@@ -28,6 +28,8 @@ define([
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
             renderSeparatedOptions: window.checkoutConfig.payment.bluePaymentSeparated,
+            bluePaymentAcceptorId: window.checkoutConfig.payment.bluePaymentAcceptorId,
+            bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
             selectedPaymentObject: {},
             validationFailed: ko.observable(false),
             activeMethod: ko.computed(function () {
@@ -223,7 +225,7 @@ define([
 
                 return false;
             },
-            placeOrderAfterValidation: function () {
+            placeOrderAfterValidation: function (callback) {
                 var self = this;
 
                 if (!this.ordered) {
@@ -241,6 +243,8 @@ define([
                         function () {
                             self.ordered = true;
                             self.afterPlaceOrder();
+
+                            callback.call(this);
 
                             if (self.redirectAfterPlaceOrder) {
                                 redirectOnSuccessAction.execute();
@@ -373,7 +377,6 @@ define([
             /* Google Pay */
             GPayClient: null,
             GPayMerchantId: window.checkoutConfig.payment.GPayMerchantId,
-            GPayServiceId: window.checkoutConfig.payment.GPayServiceId,
             GPayModal: modal({
                 title: 'Oczekiwanie na potwierdzenie transakcji.',
                 autoOpen: false,
@@ -386,35 +389,34 @@ define([
             callGPayPayment: function() {
                 var self = this;
 
-                console.log('getGPayTransactionData');
-                console.log(self.getGPayTransactionData());
-
                 self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                    self.placeOrderAfterValidation();
+                    console.log('placeOrderAfterValidation');
+                    self.placeOrderAfterValidation(function() {
+                        var token = JSON.stringify(data.paymentMethodToken);
+                        var urlResponse = url.build('bluepayment/processing/create')
+                            + '?gateway_id='
+                            + self.selectedPaymentObject.gateway_id
+                            + '&automatic=true';
 
-                    var token = data.paymentMethodData.tokenizationData.token;
-                    var urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id='
-                        + self.selectedPaymentObject.gateway_id
-                        + '&automatic=true';
-
-                    $.ajax({
-                        showLoader: true,
-                        url: urlResponse,
-                        data: {'token': token},
-                        type: "POST",
-                        dataType: "json",
-                    }).done(function (response) {
-                        console.log(response);
-                        if (response.params) {
-                            if (response.params.paymentStatus) {
-                                console.log('handleGPayStatus');
-                                console.log(response.params.paymentStatus);
-                                self.handleGPayStatus(response.params.paymentStatus, response.params);
-                            } else {
-                                console.error('Payment has no paymentStatus.');
+                        $.ajax({
+                            showLoader: true,
+                            url: urlResponse,
+                            data: {'token': token},
+                            type: "POST",
+                            dataType: "json",
+                        }).done(function (response) {
+                            if (response.params) {
+                                if (response.params.redirectUrl) {
+                                    window.location.href = response.params.redirectUrl;
+                                } else {
+                                    if (response.params.paymentStatus) {
+                                        self.handleGPayStatus(response.params.paymentStatus, response.params);
+                                    } else {
+                                        console.error('Payment has no paymentStatus.');
+                                    }
+                                }
                             }
-                        }
+                        });
                     });
                 })
                     .catch(function (errorMessage) {
@@ -422,29 +424,20 @@ define([
                     });
             },
             getGPayTransactionData: function() {
-                console.log(quote.getCalculatedTotal());
-                console.log(window.checkoutConfig.quoteData.quote_currency_code);
-
                 return {
-                    apiVersion: 2,
-                    apiVersionMinor: 0,
-                    allowedPaymentMethods: [{
-                        type: 'CARD',
-                        parameters: {
-                            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                            allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"],
-                        },
-                        tokenizationSpecification: {
-                            type: 'PAYMENT_GATEWAY',
-                            parameters: {
-                                'gateway': 'bluemedia',
-                                'gatewayMerchantId': this.GPayServiceId
-                            }
-                        }
-                    }],
-                    merchantInfo: {
-                        merchantId: this.GPayMerchantId,
+                    allowedPaymentMethods: ['CARD'],
+                    cardRequirements: {
+                        allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
                     },
+                    merchantId: this.GPayMerchantId,
+                    paymentMethodTokenizationParameters: {
+                        tokenizationType: 'PAYMENT_GATEWAY',
+                        parameters: {
+                            'gateway': 'bluemedia',
+                            'gatewayMerchantId': this.bluePaymentAcceptorId
+                        }
+                    },
+                    shippingAddressRequired: false,
                     transactionInfo: {
                         totalPriceStatus: 'FINAL',
                         totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
@@ -456,10 +449,8 @@ define([
                 var self = this;
 
                 self.GPayClient = new google.payments.api.PaymentsClient({
-                    environment: 'TEST'
+                    environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
                 });
-
-                console.log('GPay Initialized');
 
                 self.GPayClient.isReadyToPay({allowedPaymentMethods: ['CARD']})
                     .then(function (response) {
@@ -498,7 +489,6 @@ define([
                         this.GPayModal._removeKeyListener();
                     }
 
-                    console.log('setTimeout - updateGPayStatus');
                     setTimeout(function() {
                         self.updateGPayStatus(status);
                     }, 2000);

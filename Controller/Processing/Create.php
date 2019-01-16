@@ -245,7 +245,8 @@ class Create extends Action
                     'OrderID' => $orderId,
                     'GatewayID' => $gatewayId,
                     'hash' => $hash,
-                    'paymentStatus' => $responseParams['paymentStatus']
+                    'paymentStatus' => $responseParams['paymentStatus'],
+                    'redirectUrl' => $responseParams['redirectUrl']
                 ];
                 $result = $this->prepareGPayJsonResponse($payment->getUrlGateway(), $params);
 
@@ -405,13 +406,15 @@ class Create extends Action
         $orderID = (string) $xml->orderID;
         $remoteID = (string) $xml->remoteID;
         $hash = (string) $xml->hash;
+        $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
 
         $this->logger->info('CREATE:' . __LINE__, ['$curlResponse' => $curlResponse]);
 
         $responseParams = [
             'orderID' => $orderID,
             'remoteID' => $remoteID,
-            'paymentStatus' => $paymentStatus
+            'paymentStatus' => $paymentStatus,
+            'redirectUrl' => $redirectUrl
         ];
 
         return $responseParams;
