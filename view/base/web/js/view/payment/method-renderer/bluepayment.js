@@ -223,7 +223,7 @@ define([
 
                 return false;
             },
-            placeOrderAfterValidation: function () {
+            placeOrderAfterValidation: function (callback) {
                 var self = this;
 
                 if (!this.ordered) {
@@ -241,6 +241,8 @@ define([
                         function () {
                             self.ordered = true;
                             self.afterPlaceOrder();
+
+                            callback.call(this);
 
                             if (self.redirectAfterPlaceOrder) {
                                 redirectOnSuccessAction.execute();
@@ -390,32 +392,44 @@ define([
                 console.log(self.getGPayTransactionData());
 
                 self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                    self.placeOrderAfterValidation();
+                    console.log('placeOrderAfterValidation');
+                    // self.placeOrderAfterValidation(function() {
+                        console.log('placeOrderAfterValidationCallback');
 
-                    var token = data.paymentMethodData.tokenizationData.token;
-                    var urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id='
-                        + self.selectedPaymentObject.gateway_id
-                        + '&automatic=true';
+                        var token = JSON.stringify({
+                            'tokenizationType': data.paymentMethodData.tokenizationData.type,
+                            'token': data.paymentMethodData.tokenizationData.token
+                        });
+                        console.log(token);
+                        var urlResponse = url.build('bluepayment/processing/create')
+                            + '?gateway_id='
+                            + self.selectedPaymentObject.gateway_id
+                            + '&automatic=true';
 
-                    $.ajax({
-                        showLoader: true,
-                        url: urlResponse,
-                        data: {'token': token},
-                        type: "POST",
-                        dataType: "json",
-                    }).done(function (response) {
-                        console.log(response);
-                        if (response.params) {
-                            if (response.params.paymentStatus) {
-                                console.log('handleGPayStatus');
-                                console.log(response.params.paymentStatus);
-                                self.handleGPayStatus(response.params.paymentStatus, response.params);
-                            } else {
-                                console.error('Payment has no paymentStatus.');
+                        console.log('urlResponse', urlResponse);
+
+                        $.ajax({
+                            showLoader: true,
+                            url: urlResponse,
+                            data: {'token': token},
+                            type: "POST",
+                            dataType: "json",
+                        }).done(function (response) {
+                            console.log(response);
+
+                            if (response.params) {
+                                if (response.params.redirectUrl) {
+                                    window.location.href = response.params.redirectUrl;
+                                } else {
+                                    if (response.params.paymentStatus) {
+                                        self.handleGPayStatus(response.params.paymentStatus, response.params);
+                                    } else {
+                                        console.error('Payment has no paymentStatus.');
+                                    }
+                                }
                             }
-                        }
-                    });
+                        });
+                    // });
                 })
                     .catch(function (errorMessage) {
                         console.error(errorMessage);
@@ -459,8 +473,6 @@ define([
                     environment: 'TEST'
                 });
 
-                console.log('GPay Initialized');
-
                 self.GPayClient.isReadyToPay({allowedPaymentMethods: ['CARD']})
                     .then(function (response) {
                         var transactionData = self.getGPayTransactionData();
@@ -498,7 +510,6 @@ define([
                         this.GPayModal._removeKeyListener();
                     }
 
-                    console.log('setTimeout - updateGPayStatus');
                     setTimeout(function() {
                         self.updateGPayStatus(status);
                     }, 2000);
