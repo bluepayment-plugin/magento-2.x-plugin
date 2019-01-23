@@ -111,7 +111,7 @@ class BackBlik extends Action
                 $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
             }
         } catch (\Exception $e) {
-            $this->messageManager->addError($e->getMessage());
+            $this->messageManager->addErrorMessage($e->getMessage());
             $this->logger->critical($e);
             $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
         }

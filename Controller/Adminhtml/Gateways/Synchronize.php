@@ -73,10 +73,10 @@ class Synchronize extends Action
 
         if (isset($result['error'])) {
             $errorMessage = $result['error'];
-            $this->_messageManager->addError($errorMessage);
+            $this->_messageManager->addErrorMessage($errorMessage);
         } else {
             $successMessage = __('Gateway list has been synchronized!');
-            $this->_messageManager->addSuccess($successMessage);
+            $this->_messageManager->addSuccessMessage($successMessage);
         }
         $resultRedirect = $this->resultRedirectFactory->create();
         $resultRedirect->setPath('adminbluepayment/gateways/index');

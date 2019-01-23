@@ -79,7 +79,7 @@ class Save extends Gateways
 
             try {
                 $gatewaysModel->save();
-                $this->messageManager->addSuccess(__('The gateway has been saved.'));
+                $this->messageManager->addSuccessMessage(__('The gateway has been saved.'));
                 if ($this->getRequest()->getParam('back')) {
                     $this->_redirect('*/*/edit', ['id' => $gatewaysModel->getId(), '_current' => true]);
 
@@ -90,7 +90,7 @@ class Save extends Gateways
 
                 return;
             } catch (\Exception $e) {
-                $this->messageManager->addError($e->getMessage());
+                $this->messageManager->addErrorMessage($e->getMessage());
             }
 
             $this->_getSession()->setFormData($formData);

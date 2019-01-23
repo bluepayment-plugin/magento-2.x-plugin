@@ -23,14 +23,14 @@ class Delete extends Gateways
             $gatewaysModel->load($gatewaysId);
 
             if (!$gatewaysModel->getId()) {
-                $this->messageManager->addError(__('This gateway no longer exists.'));
+                $this->messageManager->addErrorMessage(__('This gateway no longer exists.'));
             } else {
                 try {
                     $gatewaysModel->delete();
-                    $this->messageManager->addSuccess(__('The gateway has been deleted.'));
+                    $this->messageManager->addSuccessMessage(__('The gateway has been deleted.'));
                     $this->_redirect('*/*/');
                 } catch (\Exception $e) {
-                    $this->messageManager->addError($e->getMessage());
+                    $this->messageManager->addErrorMessage($e->getMessage());
                     $this->_redirect('*/*/edit', ['id' => $gatewaysModel->getId()]);
                 }
             }
