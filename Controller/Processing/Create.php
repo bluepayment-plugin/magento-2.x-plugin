@@ -122,8 +122,8 @@ class Create extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
-            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
             $orderId        = $order->getRealOrderId();
 
             if (!$order->getId()) {

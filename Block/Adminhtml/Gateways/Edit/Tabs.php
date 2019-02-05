@@ -22,7 +22,7 @@ class Tabs extends WidgetTabs
         parent::_construct();
         $this->setId('gateways_edit_tabs');
         $this->setDestElementId('edit_form');
-        $this->setTitle(__('Gateways Information'));
+        $this->setTitle(__('Ustawienia'));
     }
 
     /**

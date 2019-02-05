@@ -239,8 +239,8 @@ class Payment extends AbstractMethod
         $currency      = $order->getOrderCurrencyCode();
 
         // Config
-        $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-        $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+        $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
         $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
         $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
         $gpayGateway   = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
@@ -322,7 +322,7 @@ class Payment extends AbstractMethod
 
                 if ($automatic === true && $gpayGateway == $gatewayId) {
                     $paymentToken = base64_encode($paymentToken);
-                    $desc = 'Google Pay test';
+                    $desc = '';
                     $hashData  = [$serviceId, $orderId, $amount, $desc, $gatewayId, $currency, $customerEmail,
                         $paymentToken, $sharedKey];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
@@ -401,8 +401,8 @@ class Payment extends AbstractMethod
     {
         $currency = $response->transactions->transaction->currency;
 
-        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
         $hashSeparator  = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
         $hashAlgorithm  = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
 
@@ -630,8 +630,8 @@ class Payment extends AbstractMethod
     {
         $currency = $order->getOrderCurrencyCode();
 
-        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
         $hashData         = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 

@@ -156,7 +156,7 @@ class Refunds extends Data
     protected function getConfigValue($name, $currency = null)
     {
         if ($currency) {
-            return $this->scopeConfig->getValue('payment/bluepayment_'.strtolower($currency).'/'.$name);
+            return $this->scopeConfig->getValue('payment/bluepayment/'.strtolower($currency).'/'.$name);
         }
 
         return $this->scopeConfig->getValue('payment/bluepayment/'.$name);

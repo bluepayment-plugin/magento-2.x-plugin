@@ -14,7 +14,7 @@ class Edit extends Gateways
     const GATEWAYS_REGISTER_CODE = 'adminbluepayment_gateways';
 
     /**
-     * @return \Magento\Backend\Model\View\Result\Page|void
+     * @return \Magento\Backend\Model\View\Result\Page
      */
     public function execute()
     {
