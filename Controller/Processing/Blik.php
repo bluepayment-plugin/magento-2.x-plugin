@@ -112,8 +112,8 @@ class Blik extends Action
             $status = $payment->getAdditionalInformation('bluepayment_state');
 
             // Get ServiceID and SharedKey for order currency
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-            $sharedKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+            $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
 
             // Generate hash
             $hashData  = [$serviceId, $orderId, $sharedKey];

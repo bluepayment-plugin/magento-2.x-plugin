@@ -179,7 +179,7 @@ define([
                 return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method === "1";
             },
             isGPaySelected: function() {
-                return this.selectedPaymentObject.is_gpay === true && this.selectedPaymentObject.is_separated_method === "1";
+                return this.selectedPaymentObject.is_gpay === true;
             },
             /**
              * @return {Boolean}
@@ -390,7 +390,6 @@ define([
                 var self = this;
 
                 self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                    console.log('placeOrderAfterValidation');
                     self.placeOrderAfterValidation(function() {
                         var token = JSON.stringify(data.paymentMethodToken);
                         var urlResponse = url.build('bluepayment/processing/create')
@@ -460,7 +459,6 @@ define([
                         if (response.result) {
                             self.GPayClient.prefetchPaymentData(transactionData);
                             self.GPayClient.createButton({onClick: function(){}});
-                            console.log('GPay button created');
                         } else {
                             console.error(response);
                         }

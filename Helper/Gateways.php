@@ -91,9 +91,9 @@ class Gateways extends Data
         $gatewayListAPIUrl = $this->getGatewayListUrl();
 
         foreach ($this->currencies as $currency) {
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
+            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
             $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-            $hashKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+            $hashKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
 
             if ($serviceId) {
                 $tryCount = 0;
@@ -189,7 +189,7 @@ class Gateways extends Data
                         $gatewayModel->load($existingGateways[$currency][$gateway['gatewayID']]['entity_id']);
                     } else {
                         $gatewayModel = $this->_gatewaysFactory->create();
-                        $gatewayModel->setData('force_disable', 1);
+                        $gatewayModel->setData('force_disable', 0);
                     }
 
                     $gatewayModel->setData('gateway_currency', $currency);

@@ -77,8 +77,8 @@ class BackBlik extends Action
             $currency = $order->getOrderCurrencyCode();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/service_id");
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment_".strtolower($currency)."/shared_key");
+                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
