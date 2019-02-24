@@ -38,7 +38,18 @@ class Status extends Action
     ) {
         $this->logger         = $logger;
         $this->paymentFactory = $paymentFactory;
+
         parent::__construct($context);
+
+        // CsrfAwareAction Magento2.3 compatibility
+        if (interface_exists("\Magento\Framework\App\CsrfAwareActionInterface")) {
+            $request = $this->getRequest();
+
+            if ($request->isPost() && empty($request->getParam('form_key'))) {
+                $formKey = $this->_objectManager->get(\Magento\Framework\Data\Form\FormKey::class);
+                $request->setParam('form_key', $formKey->getFormKey());
+            }
+        }
     }
 
     /**
