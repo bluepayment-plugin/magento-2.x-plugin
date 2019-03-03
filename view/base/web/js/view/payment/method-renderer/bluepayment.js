@@ -261,6 +261,8 @@ define([
                     if (self.redirectAfterPlaceOrder) {
                         redirectOnSuccessAction.execute();
                     }
+
+                    callback.call(this);
                 }
             },
             afterPlaceOrder: function () {
