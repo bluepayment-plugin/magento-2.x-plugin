@@ -26,9 +26,8 @@ class Edit extends Gateways
             $model->load($gatewaysId);
             if (!$model->getId()) {
                 $this->messageManager->addError(__('This gateway no longer exists.'));
-                $this->_redirect('*/*/');
 
-                return;
+                return $this->_redirect('*/*/');
             }
         }
 

@@ -5,9 +5,9 @@ namespace BlueMedia\BluePayment\Setup;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\Ddl\Table;
-use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 
 /**
  * Class UpgradeSchema
@@ -375,7 +375,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
         $installer->endSetup();
     }
-
 
     /**
      * @param \Magento\Framework\Setup\SchemaSetupInterface $setup

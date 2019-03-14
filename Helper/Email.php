@@ -7,14 +7,14 @@
 
 namespace BlueMedia\BluePayment\Helper;
 
+use Magento\Backend\Model\Auth\Session;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Translate\Inline\StateInterface;
 use Magento\Framework\Mail\Template\TransportBuilder;
+use Magento\Framework\Translate\Inline\StateInterface;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Framework\App\Area;
-use Magento\Backend\Model\Auth\Session;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class Email

@@ -32,11 +32,11 @@ class Handler extends \Magento\Framework\Logger\Handler\Base
      *
      * @param DriverInterface $filesystem
      */
-    public function __construct(DriverInterface $filesystem/*, $filePath*/)
+    public function __construct(DriverInterface $filesystem)
     {
         $this->setLogFileName();
 
-        parent::__construct($filesystem/*, $filePath*/);
+        parent::__construct($filesystem);
     }
 
     /**

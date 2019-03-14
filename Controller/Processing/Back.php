@@ -3,12 +3,13 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Payment;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Model\OrderFactory;
-use BlueMedia\BluePayment\Logger\Logger;
+use Magento\Checkout\Model\Type\Onepage;
 
 /**
  * Class Back
@@ -20,23 +21,27 @@ class Back extends Action
     /**
      * @var \Psr\Log\LoggerInterface
      */
-    protected $logger;
+    public $logger;
 
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
-    protected $scopeConfig;
+    public $scopeConfig;
 
     /**
      * @var \BlueMedia\BluePayment\Helper\Data
      */
-    protected $helper;
+    public $helper;
 
     /**
-     *
      * @var\Magento\Sales\Model\OrderFactory
      */
-    protected $orderFactory;
+    public $orderFactory;
+
+    /**
+     * @var Onepage
+     */
+    public $onepage;
 
     /**
      * Back constructor.
@@ -48,16 +53,18 @@ class Back extends Action
      * @param \Magento\Sales\Model\OrderFactory                  $orderFactory
      */
     public function __construct(
-        Context              $context,
-        Logger               $logger,
+        Context $context,
+        Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Data                 $helper,
-        OrderFactory         $orderFactory
+        Data $helper,
+        OrderFactory $orderFactory,
+        Onepage $onepage
     ) {
         $this->helper       = $helper;
         $this->scopeConfig  = $scopeConfig;
         $this->logger       = $logger;
         $this->orderFactory = $orderFactory;
+        $this->onepage = $onepage;
 
         parent::__construct($context);
     }
@@ -94,14 +101,12 @@ class Back extends Action
                     'hashLocal' => $hashLocal
                 ]);
 
-                // @ToDo
                 /** @var \Magento\Checkout\Model\Session $session */
-                $session = $this->_objectManager->get(\Magento\Checkout\Model\Type\Onepage::class)->getCheckout();
+                $session = $this->onepage->getCheckout();
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
 
-                if (
-                    $hash == $hashLocal
+                if ($hash == $hashLocal
                     && ($status == 'SUCCESS' || $this->getBluePaymentState($payment) == Payment::PAYMENT_STATUS_SUCCESS)
                 ) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');

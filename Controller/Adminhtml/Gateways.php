@@ -2,11 +2,11 @@
 
 namespace BlueMedia\BluePayment\Controller\Adminhtml;
 
+use BlueMedia\BluePayment\Model\GatewaysFactory;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
-use BlueMedia\BluePayment\Model\GatewaysFactory;
 
 /**
  * Class Gateways
@@ -50,9 +50,9 @@ abstract class Gateways extends Action
      * @param GatewaysFactory $gatewaysFactory
      */
     public function __construct(
-        Context         $context,
-        Registry        $coreRegistry,
-        PageFactory     $resultPageFactory,
+        Context $context,
+        Registry $coreRegistry,
+        PageFactory $resultPageFactory,
         GatewaysFactory $gatewaysFactory
     ) {
         parent::__construct($context);

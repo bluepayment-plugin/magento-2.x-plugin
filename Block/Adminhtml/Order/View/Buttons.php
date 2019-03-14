@@ -100,7 +100,7 @@ class Buttons extends View
      *
      * @return bool
      */
-    protected function canShowButton($orderId): bool
+    protected function canShowButton($orderId)
     {
         /** @var Order $order */
         $order = $this->orderFactory->create()->load((int)$orderId);
@@ -116,7 +116,7 @@ class Buttons extends View
      *
      * @return bool
      */
-    protected function hasOrderFullRefund($order): bool
+    protected function hasOrderFullRefund($order)
     {
         $paymentTransaction = $this->transactionRepository->getSuccessTransactionFromOrder($order);
         $summaryRefund = $this->refundTransactionRepository->getTotalRefundAmountOnTransaction($paymentTransaction);
@@ -127,5 +127,4 @@ class Buttons extends View
 
         return false;
     }
-
 }

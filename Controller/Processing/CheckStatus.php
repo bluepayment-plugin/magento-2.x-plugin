@@ -3,16 +3,12 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
-use BlueMedia\BluePayment\Model\PaymentFactory;
+use BlueMedia\BluePayment\Logger\Logger;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\OrderFactory;
-use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
-use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Create
@@ -74,14 +70,14 @@ class CheckStatus extends Action
      * @param Data                 $helper
      */
     public function __construct(
-        Context              $context,
-        OrderSender          $orderSender,
-        PaymentFactory       $paymentFactory,
-        OrderFactory         $orderFactory,
-        Session              $session,
-        Logger               $logger,
+        Context $context,
+        OrderSender $orderSender,
+        PaymentFactory $paymentFactory,
+        OrderFactory $orderFactory,
+        Session $session,
+        Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Data                 $helper,
+        Data $helper,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
     ) {
         $this->paymentFactory    = $paymentFactory;
@@ -103,7 +99,7 @@ class CheckStatus extends Action
     {
         try {
             $payment       = $this->paymentFactory->create();
-            $session       = $this->_getCheckout();
+            $session       = $this->getCheckout();
             $quoteModuleId = $session->getBluePaymentQuoteId();
 
             $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
@@ -142,27 +138,6 @@ class CheckStatus extends Action
                 $resultJson->setData($responseParams);
 
                 return $resultJson;
-
-//                $hashData  = [$serviceId, $orderId, $sharedKey];
-//                $this->logger->info('CREATE:' . __LINE__, ['hashData' => $hashData]);
-//
-//                $hash = $this->helper->generateAndReturnHash($hashData);
-//                $this->logger->info('CREATE:' . __LINE__, ['hash' => $hash]);
-//
-//                $params = [
-//                    'ServiceID' => $serviceId,
-//                    'OrderID' => $orderId,
-//                    'GatewayID' => $blikGateway,
-//                    'hash' => $hash,
-//                    'confirmation' => $responseParams['confirmation'],
-//                    'paymentStatus' => $responseParams['paymentStatus']
-//                ];
-//                $result = $this->prepareBlikJsonResponse($payment->getUrlGateway(), $authorizationCode, $params);
-//
-//                /** @var \Magento\Framework\Controller\Result\Json $resultJson */
-//                $resultJson = $this->resultJsonFactory->create();
-//                $resultJson->setData($result);
-//                return $resultJson;
             }
 
             $resultJson = $this->resultJsonFactory->create();
@@ -173,8 +148,9 @@ class CheckStatus extends Action
 
         } catch (\Exception $e) {
             $this->logger->critical($e);
-            parent::_redirect('checkout/cart');
         }
+
+        parent::_redirect('checkout/cart');
     }
 
     /**
@@ -182,7 +158,7 @@ class CheckStatus extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function _getCheckout()
+    protected function getCheckout()
     {
         return $this->session;
     }

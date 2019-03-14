@@ -46,9 +46,9 @@ class Synchronize extends Action
      * @param \BlueMedia\BluePayment\Helper\Gateways     $gatewaysHelper
      */
     public function __construct(
-        Context     $context,
+        Context $context,
         PageFactory $resultPageFactory,
-        Gateways    $gatewaysHelper
+        Gateways $gatewaysHelper
     ) {
         parent::__construct($context);
         $this->_resultPageFactory = $resultPageFactory;

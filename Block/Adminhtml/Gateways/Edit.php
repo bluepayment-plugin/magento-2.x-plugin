@@ -3,8 +3,8 @@
 namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
-use Magento\Backend\Block\Widget\Form\Container;
 use Magento\Backend\Block\Widget\Context;
+use Magento\Backend\Block\Widget\Form\Container;
 use Magento\Framework\Registry;
 
 /**

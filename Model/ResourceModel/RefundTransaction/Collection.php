@@ -2,8 +2,8 @@
 
 namespace BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction;
 
-use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction as RefundTransactionResource;
 use BlueMedia\BluePayment\Model\RefundTransaction;
+use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction as RefundTransactionResource;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**

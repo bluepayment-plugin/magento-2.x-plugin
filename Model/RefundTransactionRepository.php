@@ -2,18 +2,17 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
-use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Model\RefundTransactionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction\CollectionFactory;
-
-use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Sales\Api\Data\OrderInterface;
 
 /**
@@ -182,7 +181,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
      *
      * @return float
      */
-    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction): float
+    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction)
     {
         $total = 0.00;
 

@@ -35,15 +35,13 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface    $timezone
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
-     * @param array                                                   $data
      */
     public function __construct(
         Context $context,
         Registry $registry,
         TimezoneInterface $timezone,
         AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        array $data = []
+        AbstractDb $resourceCollection = null
     ) {
         parent::__construct($context, $registry, $resource, $resourceCollection);
         $this->timezone = $timezone;
@@ -68,7 +66,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getOrderId(): string
+    public function getOrderId()
     {
         return $this->_getData(TransactionInterface::ORDER_ID);
     }
@@ -84,7 +82,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getRemoteId(): string
+    public function getRemoteId()
     {
         return $this->_getData(TransactionInterface::REMOTE_ID);
     }
@@ -100,7 +98,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getAmount(): float
+    public function getAmount()
     {
         return $this->_getData(TransactionInterface::AMOUNT);
     }
@@ -116,7 +114,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getCurrency(): string
+    public function getCurrency()
     {
         return $this->_getData(TransactionInterface::CURRENCY);
     }
@@ -132,7 +130,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getGatewayId(): int
+    public function getGatewayId()
     {
         return $this->_getData(TransactionInterface::GATEWAY_ID);
     }
@@ -166,7 +164,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getPaymentStatus(): string
+    public function getPaymentStatus()
     {
         return $this->_getData(TransactionInterface::PAYMENT_STATUS);
     }
@@ -182,7 +180,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function getPaymentStatusDetails(): string
+    public function getPaymentStatusDetails()
     {
         return $this->_getData(TransactionInterface::PAYMENT_STATUS_DETAILS);
     }

@@ -82,7 +82,7 @@ class Gateway extends Action
     public function execute()
     {
         $result  = $this->resultJsonFactory->create();
-        $session = $this->_getCheckout();
+        $session = $this->getCheckout();
         if ($this->getRequest()->isAjax()) {
             $data = $this->getRequest()->getParams();
 
@@ -119,7 +119,7 @@ class Gateway extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function _getCheckout()
+    protected function getCheckout()
     {
         return $this->session;
     }

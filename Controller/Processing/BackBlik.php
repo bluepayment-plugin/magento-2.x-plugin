@@ -3,11 +3,13 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Logger\Logger;
+use Magento\Checkout\Model\Type\Onepage;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Model\OrderFactory;
-use BlueMedia\BluePayment\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class BackBlik
@@ -16,47 +18,46 @@ use BlueMedia\BluePayment\Logger\Logger;
  */
 class BackBlik extends Action
 {
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    /** @var LoggerInterface */
+    public $logger;
+
+    /** @var ScopeConfigInterface */
+    public $scopeConfig;
+
+    /** @var Data */
+    public $helper;
+
+    /** @var OrderFactory */
+    public $orderFactory;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var Onepage
      */
-    protected $scopeConfig;
-
-    /**
-     * @var \BlueMedia\BluePayment\Helper\Data
-     */
-    protected $helper;
-
-    /**
-     *
-     * @var\Magento\Sales\Model\OrderFactory
-     */
-    protected $orderFactory;
+    public $onepage;
 
     /**
      * Back constructor.
      *
-     * @param \Magento\Framework\App\Action\Context              $context
-     * @param Logger|\Psr\Log\LoggerInterface                    $logger
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \BlueMedia\BluePayment\Helper\Data                 $helper
-     * @param \Magento\Sales\Model\OrderFactory                  $orderFactory
+     * @param Context              $context
+     * @param Logger|LoggerInterface                    $logger
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Data                 $helper
+     * @param OrderFactory                  $orderFactory
+     * @param Onepage $onepage
      */
     public function __construct(
-        Context              $context,
-        Logger               $logger,
+        Context $context,
+        Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Data                 $helper,
-        OrderFactory         $orderFactory
+        Data $helper,
+        OrderFactory $orderFactory,
+        Onepage $onepage
     ) {
         $this->helper       = $helper;
         $this->scopeConfig  = $scopeConfig;
         $this->logger       = $logger;
         $this->orderFactory = $orderFactory;
+        $this->onepage = $onepage;
         parent::__construct($context);
     }
 
@@ -89,9 +90,8 @@ class BackBlik extends Action
                     'hashLocal' => $hashLocal
                 ]);
 
-                // @ToDo
                 /** @var \Magento\Checkout\Model\Session $session */
-                $session = $this->_objectManager->get(\Magento\Checkout\Model\Type\Onepage::class)->getCheckout();
+                $session = $this->_objectManager->get(\::class)->getCheckout();
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
 

@@ -60,5 +60,5 @@ interface RefundTransactionRepositoryInterface
      *
      * @return float
      */
-    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction): float;
+    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction);
 }

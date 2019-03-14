@@ -193,7 +193,7 @@ class Refunds extends Data
             'RemoteID' => $remoteId
         ];
         if (!empty($amount)) {
-            $data['Amount'] = number_format((float)$amount, 2, '.', '');;
+            $data['Amount'] = number_format((float)$amount, 2, '.', '');
         }
         $hashSeparator = $this->getConfigValue('hash_separator') ?? self::DEFAULT_HASH_SEPARATOR;
         $data['Hash']  = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
@@ -266,7 +266,7 @@ class Refunds extends Data
      *
      * @return string
      */
-    protected function formatAmount($amount): string
+    protected function formatAmount($amount)
     {
         return sprintf('%.2f', $amount);
     }

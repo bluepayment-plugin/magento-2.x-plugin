@@ -43,9 +43,8 @@ class Client implements ClientInterface
      *
      * @return string
      */
-    protected function buildFields($data): string
+    protected function buildFields($data)
     {
         return (is_array($data)) ? http_build_query($data) : (string)$data;
     }
-
 }

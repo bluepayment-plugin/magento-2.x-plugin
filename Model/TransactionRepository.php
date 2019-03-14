@@ -2,17 +2,16 @@
 
 namespace BlueMedia\BluePayment\Model;
 
-use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
-use BlueMedia\BluePayment\Model\TransactionFactory;
+use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Transaction\CollectionFactory;
-
-use Magento\Framework\Api\SortOrder;
+use BlueMedia\BluePayment\Model\TransactionFactory;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Sales\Api\Data\OrderInterface;
 
 /**
@@ -75,7 +74,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      *
      * @return bool
      */
-    public function orderHasSuccessTransaction(OrderInterface $order): bool
+    public function orderHasSuccessTransaction(OrderInterface $order)
     {
         return !($this->getSuccessTransactionFromOrder($order) === null);
     }

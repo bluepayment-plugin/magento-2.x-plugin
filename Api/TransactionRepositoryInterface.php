@@ -52,7 +52,7 @@ interface TransactionRepositoryInterface
      *
      * @return bool
      */
-    public function orderHasSuccessTransaction(OrderInterface $order): bool;
+    public function orderHasSuccessTransaction(OrderInterface $order);
 
     /**
      * @param \Magento\Sales\Api\Data\OrderInterface $order

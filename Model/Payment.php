@@ -158,23 +158,23 @@ class Payment extends AbstractMethod
      * @param array                                                             $data
      */
     public function __construct(
-        CollectionFactory              $statusCollectionFactory,
-        OrderSender                    $orderSender,
-        Data                           $helper,
-        UrlInterface                   $url,
-        OrderFactory                   $orderFactory,
-        Context                        $context,
-        Registry                       $registry,
-        ExtensionAttributesFactory     $extensionFactory,
-        AttributeValueFactory          $customAttributeFactory,
-        PaymentData                    $paymentData,
-        ScopeConfigInterface           $scopeConfig,
-        Logger                         $logger,
-        TransactionFactory             $transactionFactory,
+        CollectionFactory $statusCollectionFactory,
+        OrderSender $orderSender,
+        Data $helper,
+        UrlInterface $url,
+        OrderFactory $orderFactory,
+        Context $context,
+        Registry $registry,
+        ExtensionAttributesFactory $extensionFactory,
+        AttributeValueFactory $customAttributeFactory,
+        PaymentData $paymentData,
+        ScopeConfigInterface $scopeConfig,
+        Logger $logger,
+        TransactionFactory $transactionFactory,
         TransactionRepositoryInterface $transactionRepository,
-        AbstractResource               $resource = null,
-        AbstractDb                     $resourceCollection = null,
-        array                          $data = []
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
+        array $data = []
     ) {
         $this->statusCollectionFactory = $statusCollectionFactory;
         $this->sender                  = $orderSender;
@@ -386,8 +386,10 @@ class Payment extends AbstractMethod
     {
         if ($this->_validAllTransaction($response)) {
             $transaction_xml = $response->transactions->transaction;
-            $this->updateStatusTransactionAndOrder($transaction_xml);
+            return $this->updateStatusTransactionAndOrder($transaction_xml);
         }
+
+        return null;
     }
 
     /**
@@ -461,7 +463,7 @@ class Payment extends AbstractMethod
      *
      * @param $transaction
      *
-     * @return void
+     * @return string
      * @throws \Exception
      */
     protected function updateStatusTransactionAndOrder($transaction)
@@ -598,7 +600,7 @@ class Payment extends AbstractMethod
             }
             $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
             $orderPayment->save();
-            $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
+            return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (\Exception $e) {
             $this->_logger->critical($e);
         }
@@ -659,7 +661,7 @@ class Payment extends AbstractMethod
 
         $dom->appendChild($confirmationList);
 
-        echo $dom->saveXML();
+        return $dom->saveXML();
     }
 
     /**

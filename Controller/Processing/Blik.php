@@ -3,16 +3,14 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
-use BlueMedia\BluePayment\Model\PaymentFactory;
+use BlueMedia\BluePayment\Logger\Logger;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Sales\Model\Order;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\OrderFactory;
-use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
-use BlueMedia\BluePayment\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Create
@@ -23,73 +21,48 @@ class Blik extends Action
 {
     const BLIK_CODE_LENGTH = 6;
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\PaymentFactory
-     */
-    protected $paymentFactory;
+    /** @var Session */
+    public $session;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    protected $orderFactory;
+    /** @var LoggerInterface */
+    public $logger;
 
-    /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    protected $session;
+    /** @var ScopeConfigInterface */
+    public $scopeConfig;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
-
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
-    protected $orderSender;
+    /** @var OrderSender */
+    public $orderSender;
 
     /** @var Data */
-    protected $helper;
+    public $helper;
 
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
+    /** @var JsonFactory */
+    public $resultJsonFactory;
 
     /**
      * Create constructor.
      *
      * @param Context              $context
      * @param OrderSender          $orderSender
-     * @param PaymentFactory       $paymentFactory
-     * @param OrderFactory         $orderFactory
      * @param Session              $session
      * @param Logger               $logger
      * @param ScopeConfigInterface $scopeConfig
      * @param Data                 $helper
+     * @param JsonFactory          $resultJsonFactory
      */
     public function __construct(
-        Context              $context,
-        OrderSender          $orderSender,
-        PaymentFactory       $paymentFactory,
-        OrderFactory         $orderFactory,
-        Session              $session,
-        Logger               $logger,
+        Context $context,
+        OrderSender $orderSender,
+        Session $session,
+        Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Data                 $helper,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
+        Data $helper,
+        JsonFactory $resultJsonFactory
     ) {
-        $this->paymentFactory    = $paymentFactory;
-        $this->scopeConfig       = $scopeConfig;
-        $this->logger            = $logger;
-        $this->session           = $session;
-        $this->orderFactory      = $orderFactory;
         $this->orderSender       = $orderSender;
+        $this->session           = $session;
+        $this->logger            = $logger;
+        $this->scopeConfig       = $scopeConfig;
         $this->helper            = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
 
@@ -128,11 +101,11 @@ class Blik extends Action
             ]);
 
             return $resultJson;
-
         } catch (\Exception $e) {
             $this->logger->critical($e);
-            parent::_redirect('checkout/cart');
         }
+
+        parent::_redirect('checkout/cart');
     }
 
     /**
@@ -140,7 +113,7 @@ class Blik extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function _getCheckout()
+    protected function getCheckout()
     {
         return $this->session;
     }
@@ -196,10 +169,10 @@ class Blik extends Action
     {
         $fields = (is_array($params)) ? http_build_query($params) : $params;
         $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
-        } else{
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        if (array_key_exists('ClientHash', $params)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
+        } else {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
         }
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -226,5 +199,4 @@ class Blik extends Action
 
         return $responseParams;
     }
-
 }

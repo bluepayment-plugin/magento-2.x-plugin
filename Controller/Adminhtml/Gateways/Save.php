@@ -3,11 +3,11 @@
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+use BlueMedia\BluePayment\Helper\Email as EmailHelper;
+use BlueMedia\BluePayment\Model\GatewaysFactory;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
-use BlueMedia\BluePayment\Model\GatewaysFactory;
-use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 
 /**
  * Class Save
@@ -31,11 +31,11 @@ class Save extends Gateways
      * @param EmailHelper     $emailHelper
      */
     public function __construct(
-        Context         $context,
-        Registry        $coreRegistry,
-        PageFactory     $resultPageFactory,
+        Context $context,
+        Registry $coreRegistry,
+        PageFactory $resultPageFactory,
         GatewaysFactory $gatewaysFactory,
-        EmailHelper     $emailHelper
+        EmailHelper $emailHelper
     ) {
         parent::__construct($context, $coreRegistry, $resultPageFactory, $gatewaysFactory);
         $this->_emailHelper = $emailHelper;

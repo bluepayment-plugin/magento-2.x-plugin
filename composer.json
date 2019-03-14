@@ -1,5 +1,5 @@
 {
-  "name": "bluemedia/module-bluepayment",
+  "name": "bm/bluepayment",
   "description": "N/A",
   "require": {
     "magento/module-backend": "100.1.*",
@@ -7,7 +7,7 @@
     "magento/framework": "100.1.*"
   },
   "type": "magento2-module",
-  "version": "100.0.2",
+  "version": "2.6.0",
   "autoload": {
     "files": [
       "registration.php"

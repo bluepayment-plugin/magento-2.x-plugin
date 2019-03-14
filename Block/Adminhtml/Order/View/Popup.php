@@ -72,7 +72,7 @@ class Popup extends Template
     /**
      * @return bool
      */
-    public function canShowFullRefund(): bool
+    public function canShowFullRefund()
     {
         $canShow     = false;
         $transaction = $this->getCurrentOrderTransaction();

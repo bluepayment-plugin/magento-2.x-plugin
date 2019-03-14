@@ -2,7 +2,7 @@
 
 namespace BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field;
 
-use \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 
 /**
  * Backend system config array field renderer

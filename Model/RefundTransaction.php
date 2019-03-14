@@ -37,7 +37,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getOrderId(): string
+    public function getOrderId()
     {
         return $this->_getData(RefundTransactionInterface::ORDER_ID);
     }
@@ -53,7 +53,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getRemoteId(): string
+    public function getRemoteId()
     {
         return $this->_getData(RefundTransactionInterface::REMOTE_ID);
     }
@@ -69,7 +69,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getAmount(): float
+    public function getAmount()
     {
         return $this->_getData(RefundTransactionInterface::AMOUNT);
     }
@@ -85,7 +85,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getCurrency(): string
+    public function getCurrency()
     {
         return $this->_getData(RefundTransactionInterface::CURRENCY);
     }
@@ -101,7 +101,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * @return string
      */
-    public function getRemoteOutId(): string
+    public function getRemoteOutId()
     {
         return $this->_getData(RefundTransactionInterface::REMOTE_OUT_ID);
     }
@@ -119,7 +119,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * @return bool
      */
-    public function isPartial(): bool
+    public function isPartial()
     {
         return (bool) $this->_getData(RefundTransactionInterface::IS_PARTIAL);
     }

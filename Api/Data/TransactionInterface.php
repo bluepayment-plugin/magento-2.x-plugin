@@ -35,7 +35,7 @@ interface TransactionInterface
     /**
      * @return string
      */
-    public function getOrderId(): string;
+    public function getOrderId();
 
     /**
      * @param string $orderId
@@ -47,7 +47,7 @@ interface TransactionInterface
     /**
      * @return string
      */
-    public function getRemoteId(): string;
+    public function getRemoteId();
 
     /**
      * @param string $remoteId
@@ -59,7 +59,7 @@ interface TransactionInterface
     /**
      * @return float
      */
-    public function getAmount(): float;
+    public function getAmount();
 
     /**
      * @param float $amount
@@ -71,7 +71,7 @@ interface TransactionInterface
     /**
      * @return string
      */
-    public function getCurrency(): string;
+    public function getCurrency();
 
     /**
      * @param string $currency
@@ -83,7 +83,7 @@ interface TransactionInterface
     /**
      * @return int
      */
-    public function getGatewayId(): int;
+    public function getGatewayId();
 
     /**
      * @param int $gatewayId
@@ -107,7 +107,7 @@ interface TransactionInterface
     /**
      * @return string
      */
-    public function getPaymentStatus(): string;
+    public function getPaymentStatus();
 
     /**
      * @param string $status
@@ -119,7 +119,7 @@ interface TransactionInterface
     /**
      * @return string
      */
-    public function getPaymentStatusDetails(): string;
+    public function getPaymentStatusDetails();
 
     /**
      * @param string $status

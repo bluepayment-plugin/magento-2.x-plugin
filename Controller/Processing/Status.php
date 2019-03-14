@@ -2,10 +2,10 @@
 
 namespace BlueMedia\BluePayment\Controller\Processing;
 
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Status
@@ -32,13 +32,24 @@ class Status extends Action
      * @param \BlueMedia\BluePayment\Model\PaymentFactory $paymentFactory
      */
     public function __construct(
-        Context        $context,
-        Logger         $logger,
+        Context $context,
+        Logger $logger,
         PaymentFactory $paymentFactory
     ) {
         $this->logger         = $logger;
         $this->paymentFactory = $paymentFactory;
+
         parent::__construct($context);
+
+        // CsrfAwareAction Magento2.3 compatibility
+        if (interface_exists("\Magento\Framework\App\CsrfAwareActionInterface")) {
+            $request = $this->getRequest();
+
+            if ($request->isPost() && empty($request->getParam('form_key'))) {
+                $formKey = $this->_objectManager->get(\Magento\Framework\Data\Form\FormKey::class);
+                $request->setParam('form_key', $formKey->getFormKey());
+            }
+        }
     }
 
     /**
@@ -56,7 +67,7 @@ class Status extends Action
                 $base64transactions = base64_decode($paramTransactions);
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
-                $this->paymentFactory->create()->processStatusPayment($simpleXml);
+                return $this->paymentFactory->create()->processStatusPayment($simpleXml);
             }
         } catch (\Exception $e) {
             $this->logger->critical('BlueMedia: ' . $e->getMessage());

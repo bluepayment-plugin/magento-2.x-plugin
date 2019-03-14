@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -12,7 +13,6 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
-use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Create
@@ -76,14 +76,14 @@ class Create extends Action
      * @param Data                 $helper
      */
     public function __construct(
-        Context              $context,
-        OrderSender          $orderSender,
-        PaymentFactory       $paymentFactory,
-        OrderFactory         $orderFactory,
-        Session              $session,
-        Logger               $logger,
+        Context $context,
+        OrderSender $orderSender,
+        PaymentFactory $paymentFactory,
+        OrderFactory $orderFactory,
+        Session $session,
+        Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Data                 $helper,
+        Data $helper,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
     ) {
         $this->paymentFactory    = $paymentFactory;
@@ -105,7 +105,7 @@ class Create extends Action
     {
         try {
             $payment       = $this->paymentFactory->create();
-            $session       = $this->_getCheckout();
+            $session       = $this->getCheckout();
             $quoteModuleId = $session->getBluePaymentQuoteId();
             $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
             $session->setQuoteId($quoteModuleId);
@@ -266,8 +266,9 @@ class Create extends Action
             $this->getResponse()->setRedirect($url);
         } catch (\Exception $e) {
             $this->logger->critical($e);
-            parent::_redirect('checkout/cart');
         }
+
+        parent::_redirect('checkout/cart');
     }
 
     /**
@@ -275,7 +276,7 @@ class Create extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function _getCheckout()
+    protected function getCheckout()
     {
         return $this->session;
     }
@@ -347,10 +348,10 @@ class Create extends Action
     {
         $fields = (is_array($params)) ? http_build_query($params) : $params;
         $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
-        } else{
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        if (array_key_exists('ClientHash', $params)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
+        } else {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
         }
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -386,10 +387,10 @@ class Create extends Action
     {
         $fields = (is_array($params)) ? http_build_query($params) : $params;
         $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
-        } else{
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        if (array_key_exists('ClientHash', $params)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
+        } else {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
         }
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
         curl_setopt($curl, CURLOPT_POST, 1);

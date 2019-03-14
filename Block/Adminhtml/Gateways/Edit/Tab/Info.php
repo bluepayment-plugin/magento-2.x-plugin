@@ -3,12 +3,12 @@
 namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit\Tab;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
+use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Form\Generic;
 use Magento\Backend\Block\Widget\Tab\TabInterface;
-use Magento\Backend\Block\Template\Context;
-use Magento\Framework\Registry;
-use Magento\Framework\Data\FormFactory;
 use Magento\Cms\Model\Wysiwyg\Config;
+use Magento\Framework\Data\FormFactory;
+use Magento\Framework\Registry;
 
 /**
  * Class Info
@@ -30,11 +30,11 @@ class Info extends Generic implements TabInterface
      * @param array       $data
      */
     public function __construct(
-        Context     $context,
-        Registry    $registry,
+        Context $context,
+        Registry $registry,
         FormFactory $formFactory,
-        Config      $wysiwygConfig,
-        array       $data = []
+        Config $wysiwygConfig,
+        array $data = []
     ) {
         $this->_wysiwygConfig = $wysiwygConfig;
         parent::__construct($context, $registry, $formFactory, $data);

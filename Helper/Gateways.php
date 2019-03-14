@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
+use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Magento\Framework\App\Config\Initial;
@@ -12,7 +13,6 @@ use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
-use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 
 /**
  * Class Gateways
