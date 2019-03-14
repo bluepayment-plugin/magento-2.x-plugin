@@ -131,7 +131,9 @@ class Refunds extends Data
                 $loadResult['remoteOutID'],
                 $sharedKey
             ];
-            $hashSeparator = $this->getConfigValue('hash_separator') ?? self::DEFAULT_HASH_SEPARATOR;
+            $hashSeparator = $this->getConfigValue('hash_separator') ? $this->getConfigValue('hash_separator') :
+                self::DEFAULT_HASH_SEPARATOR;
+
             if ($loadResult['hash'] != hash($hashMethod, implode($hashSeparator, $valuesForHash))) {
                 $result = [
                     'error' => true,

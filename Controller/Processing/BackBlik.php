@@ -91,7 +91,7 @@ class BackBlik extends Action
                 ]);
 
                 /** @var \Magento\Checkout\Model\Session $session */
-                $session = $this->_objectManager->get(\::class)->getCheckout();
+                $session = $this->onepage->getCheckout();
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
 
