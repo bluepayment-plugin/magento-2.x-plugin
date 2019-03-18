@@ -20,7 +20,7 @@ class Edit extends Gateways
     {
         $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
         /** @var \BlueMedia\BluePayment\Model\Gateways $model */
-        $model = $this->_gatewaysFactory->create();
+        $model = $this->gatewaysFactory->create();
 
         if ($gatewaysId) {
             $model->load($gatewaysId);
@@ -35,10 +35,10 @@ class Edit extends Gateways
         if (!empty($data)) {
             $model->setData($data);
         }
-        $this->_coreRegistry->register(self::GATEWAYS_REGISTER_CODE, $model);
+        $this->coreRegistry->register(self::GATEWAYS_REGISTER_CODE, $model);
 
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
-        $resultPage = $this->_resultPageFactory->create();
+        $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('BlueMedia_BluePayment::gateways');
         $resultPage->getConfig()->getTitle()->prepend(__('Gateways'));
 

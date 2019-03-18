@@ -126,7 +126,7 @@ class Back extends Action
         }
     }
 
-    protected function getBluePaymentState($payment)
+    public function getBluePaymentState($payment)
     {
         return $payment->getAdditionalInformation('bluepayment_state');
     }

@@ -113,7 +113,7 @@ class Blik extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function getCheckout()
+    public function getCheckout()
     {
         return $this->session;
     }

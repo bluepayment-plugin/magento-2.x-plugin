@@ -16,10 +16,8 @@ use Magento\Framework\View\Result\PageFactory;
  */
 class Save extends Gateways
 {
-    /**
-     * @var EmailHelper
-     */
-    protected $_emailHelper;
+    /** @var EmailHelper */
+    public $emailHelper;
 
     /**
      * Save constructor.
@@ -38,7 +36,7 @@ class Save extends Gateways
         EmailHelper $emailHelper
     ) {
         parent::__construct($context, $coreRegistry, $resultPageFactory, $gatewaysFactory);
-        $this->_emailHelper = $emailHelper;
+        $this->emailHelper = $emailHelper;
     }
 
     /**
@@ -49,7 +47,7 @@ class Save extends Gateways
         $isPost = $this->getRequest()->getPost();
 
         if ($isPost) {
-            $gatewaysModel = $this->_gatewaysFactory->create();
+            $gatewaysModel = $this->gatewaysFactory->create();
             $gatewaysId    = (int)$this->getRequest()->getParam('id', 0);
 
             $formData              = $this->getRequest()->getParam('gateways');
@@ -72,7 +70,7 @@ class Save extends Gateways
                         'gateway_id'   => $gatewaysModel->getData('gateway_id'),
                     ],
                 ];
-                $this->_emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
             }
 
             $gatewaysModel->setData($formData);

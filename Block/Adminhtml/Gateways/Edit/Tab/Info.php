@@ -17,10 +17,8 @@ use Magento\Framework\Registry;
  */
 class Info extends Generic implements TabInterface
 {
-    /**
-     * @var \Magento\Cms\Model\Wysiwyg\Config
-     */
-    protected $_wysiwygConfig;
+    /** @var \Magento\Cms\Model\Wysiwyg\Config */
+    public $wysiwygConfig;
 
     /**
      * @param Context     $context
@@ -36,7 +34,7 @@ class Info extends Generic implements TabInterface
         Config $wysiwygConfig,
         array $data = []
     ) {
-        $this->_wysiwygConfig = $wysiwygConfig;
+        $this->wysiwygConfig = $wysiwygConfig;
         parent::__construct($context, $registry, $formFactory, $data);
     }
 

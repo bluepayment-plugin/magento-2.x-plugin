@@ -144,8 +144,8 @@ class CheckStatus extends Action
             $resultJson->setData([
                 'status' => false
             ]);
-            return $resultJson;
 
+            return $resultJson;
         } catch (\Exception $e) {
             $this->logger->critical($e);
         }
@@ -214,10 +214,10 @@ class CheckStatus extends Action
     {
         $fields = (is_array($params)) ? http_build_query($params) : $params;
         $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
-        } else{
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        if (array_key_exists('ClientHash', $params)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
+        } else {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
         }
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -244,5 +244,4 @@ class CheckStatus extends Action
 
         return $responseParams;
     }
-
 }

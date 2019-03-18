@@ -13,39 +13,31 @@ use Magento\Framework\View\Element\Template\Context;
  */
 class Form extends \Magento\Payment\Block\Form
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $_template = 'BlueMedia_BluePayment::bluepayment/form.phtml';
 
-    /**
-     * @var array
-     */
-    protected $_gatewayList = [];
+    /** @var array */
+    protected $gatewayList = [];
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory
-     */
+    /** @var CollectionFactory */
     protected $collectionFactory;
 
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
+    /** @var ScopeConfigInterface */
     protected $scopeConfig;
 
     /**
      * Form constructor.
      *
-     * @param \Magento\Framework\View\Element\Template\Context                      $context
-     * @param \BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory $collectionFactory
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface                    $scopeConfig
+     * @param Context                      $context
+     * @param CollectionFactory $collectionFactory
+     * @param ScopeConfigInterface                    $scopeConfig
      * @param array                                                                 $data
      */
     public function __construct(
-        Context           $context,
+        Context $context,
         CollectionFactory $collectionFactory,
         ScopeConfigInterface $scopeConfig,
-        array             $data = []
+        array $data = []
     ) {
         parent::__construct($context, $data);
         $this->collectionFactory = $collectionFactory;
@@ -57,15 +49,15 @@ class Form extends \Magento\Payment\Block\Form
      */
     public function getGatewaysList()
     {
-        if (!$this->_gatewayList) {
-            $this->_gatewayList = $this->collectionFactory->create();
-            $this->_gatewayList
+        if (!$this->gatewayList) {
+            $this->gatewayList = $this->collectionFactory->create();
+            $this->gatewayList
                 ->addFieldToFilter('gateway_status', 1)
                 ->addFieldToFilter('force_disable', 0)
                 ->load();
         }
 
-        return $this->_gatewayList;
+        return $this->gatewayList;
     }
 
     /**

@@ -28,8 +28,8 @@ use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
  */
 class Payment extends AbstractMethod
 {
-    const METHOD_CODE                    = 'bluepayment';
-    const IFRAME_GATEWAY_ID              = 'IFRAME';
+    const METHOD_CODE = 'bluepayment';
+    const IFRAME_GATEWAY_ID = 'IFRAME';
     const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
     /**
@@ -39,17 +39,16 @@ class Payment extends AbstractMethod
     const PAYMENT_STATUS_SUCCESS = 'SUCCESS';
     const PAYMENT_STATUS_FAILURE = 'FAILURE';
 
-
     /**
      * Stałe potwierdzenia autentyczności transakcji
      */
-    const TRANSACTION_CONFIRMED    = "CONFIRMED";
+    const TRANSACTION_CONFIRMED = "CONFIRMED";
     const TRANSACTION_NOTCONFIRMED = "NOTCONFIRMED";
 
     /**
      * @var array
      */
-    private $_checkHashArray = [];
+    private $checkHashArray = [];
 
     /**
      * Unikatowy wewnętrzy identyfikator metody płatności
@@ -101,9 +100,7 @@ class Payment extends AbstractMethod
      */
     protected $_isInitializeNeeded = true;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
+    /** @var OrderFactory */
     protected $orderFactory;
 
     /**
@@ -139,23 +136,23 @@ class Payment extends AbstractMethod
     /**
      * Payment constructor.
      *
-     * @param \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory $statusCollectionFactory
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender               $orderSender
-     * @param \BlueMedia\BluePayment\Helper\Data                                $helper
-     * @param \Magento\Framework\UrlInterface                                   $url
-     * @param \Magento\Sales\Model\OrderFactory                                 $orderFactory
-     * @param \Magento\Framework\Model\Context                                  $context
-     * @param \Magento\Framework\Registry                                       $registry
-     * @param \Magento\Framework\Api\ExtensionAttributesFactory                 $extensionFactory
-     * @param \Magento\Framework\Api\AttributeValueFactory                      $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data                                      $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface                $scopeConfig
-     * @param \Magento\Payment\Model\Method\Logger                              $logger
-     * @param \BlueMedia\BluePayment\Model\TransactionFactory                   $transactionFactory
-     * @param \BlueMedia\BluePayment\Api\TransactionRepositoryInterface         $transactionRepository
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null      $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb|null                $resourceCollection
-     * @param array                                                             $data
+     * @param CollectionFactory                 $statusCollectionFactory
+     * @param OrderSender                       $orderSender
+     * @param Data                              $helper
+     * @param UrlInterface                      $url
+     * @param OrderFactory                      $orderFactory
+     * @param Context                           $context
+     * @param Registry                          $registry
+     * @param ExtensionAttributesFactory        $extensionFactory
+     * @param AttributeValueFactory             $customAttributeFactory
+     * @param PaymentData                       $paymentData
+     * @param ScopeConfigInterface              $scopeConfig
+     * @param Logger                            $logger
+     * @param TransactionFactory                $transactionFactory
+     * @param TransactionRepositoryInterface    $transactionRepository
+     * @param AbstractResource|null             $resource
+     * @param AbstractDb|null                   $resourceCollection
+     * @param array                             $data
      */
     public function __construct(
         CollectionFactory $statusCollectionFactory,
@@ -177,10 +174,10 @@ class Payment extends AbstractMethod
         array $data = []
     ) {
         $this->statusCollectionFactory = $statusCollectionFactory;
-        $this->sender                  = $orderSender;
-        $this->url                     = $url;
-        $this->helper                  = $helper;
-        $this->orderFactory            = $orderFactory;
+        $this->sender = $orderSender;
+        $this->url = $url;
+        $this->helper = $helper;
+        $this->orderFactory = $orderFactory;
 
         parent::__construct(
             $context,
@@ -195,7 +192,7 @@ class Payment extends AbstractMethod
             $data
         );
 
-        $this->transactionFactory    = $transactionFactory;
+        $this->transactionFactory = $transactionFactory;
         $this->transactionRepository = $transactionRepository;
     }
 
@@ -228,132 +225,174 @@ class Payment extends AbstractMethod
      *
      * @param object $order
      * @param int    $gatewayId
+     * @param bool   $automatic
      * @param string $authorizationCode
+     * @param string $paymentToken
+     *
      * @return array
      */
-    public function getFormRedirectFields($order, $gatewayId = 0, $automatic = false, $authorizationCode = 0,
-        $paymentToken = '')
-    {
-        $orderId       = $order->getRealOrderId();
-        $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-        $currency      = $order->getOrderCurrencyCode();
+    public function getFormRedirectFields(
+        $order,
+        $gatewayId = 0,
+        $automatic = false,
+        $authorizationCode = 0,
+        $paymentToken = ''
+    ) {
+        $orderId = $order->getRealOrderId();
+        $amount = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
+        $currency = $order->getOrderCurrencyCode();
 
         // Config
-        $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-        $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
-        $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
-        $gpayGateway   = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
+        $serviceId = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
+        $sharedKey = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
+        $cardGateway = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
+        $blikGateway = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
+        $gpayGateway = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
 
         $customerEmail = $order->getCustomerEmail();
-        $validityTime  = $this->getTransactionLifeHours();
+        $validityTime = $this->getTransactionLifeHours();
 
         if ($gatewayId === 0) {
             if ($validityTime) {
-                $hashData  = [$serviceId, $orderId, $amount, $currency, $customerEmail, $validityTime, $sharedKey];
+                $hashData = [$serviceId, $orderId, $amount, $currency, $customerEmail, $validityTime, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params    = [
-                    'ServiceID'     => $serviceId,
-                    'OrderID'       => $orderId,
-                    'Amount'        => $amount,
-                    'Currency'      => $currency,
+                $params = [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Amount' => $amount,
+                    'Currency' => $currency,
                     'CustomerEmail' => $customerEmail,
-                    'ValidityTime'  => $validityTime,
-                    'Hash'          => $hashLocal,
+                    'ValidityTime' => $validityTime,
+                    'Hash' => $hashLocal,
                 ];
             } else {
-                $hashData  = [$serviceId, $orderId, $amount, $currency, $customerEmail, $sharedKey];
+                $hashData = [$serviceId, $orderId, $amount, $currency, $customerEmail, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params    = [
-                    'ServiceID'     => $serviceId,
-                    'OrderID'       => $orderId,
-                    'Amount'        => $amount,
-                    'Currency'      => $currency,
+                $params = [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Amount' => $amount,
+                    'Currency' => $currency,
                     'CustomerEmail' => $customerEmail,
-                    'Hash'          => $hashLocal,
+                    'Hash' => $hashLocal,
                 ];
             }
         } else {
             if ($validityTime) {
-                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $validityTime, $sharedKey];
+                $hashData = [
+                    $serviceId,
+                    $orderId,
+                    $amount,
+                    $gatewayId,
+                    $currency,
+                    $customerEmail,
+                    $validityTime,
+                    $sharedKey,
+                ];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params    = [
-                    'ServiceID'     => $serviceId,
-                    'OrderID'       => $orderId,
-                    'Amount'        => $amount,
-                    'GatewayID'     => $gatewayId,
-                    'Currency'      => $currency,
+                $params = [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Amount' => $amount,
+                    'GatewayID' => $gatewayId,
+                    'Currency' => $currency,
                     'CustomerEmail' => $customerEmail,
-                    'ValidityTime'  => $validityTime,
-                    'Hash'          => $hashLocal,
+                    'ValidityTime' => $validityTime,
+                    'Hash' => $hashLocal,
                 ];
             } else {
                 if ($automatic === true && $cardGateway == $gatewayId) {
-                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, self::IFRAME_GATEWAY_ID, $sharedKey];
+                    $hashData = [
+                        $serviceId,
+                        $orderId,
+                        $amount,
+                        $gatewayId,
+                        $currency,
+                        $customerEmail,
+                        self::IFRAME_GATEWAY_ID,
+                        $sharedKey,
+                    ];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
 
                     return [
-                        'ServiceID'         => $serviceId,
-                        'OrderID'           => $orderId,
-                        'Amount'            => $amount,
-                        'GatewayID'         => $gatewayId,
-                        'Currency'          => $currency,
-                        'CustomerEmail'     => $customerEmail,
-                        'ScreenType'        => self::IFRAME_GATEWAY_ID,
-                        'Hash'              => $hashLocal,
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Amount' => $amount,
+                        'GatewayID' => $gatewayId,
+                        'Currency' => $currency,
+                        'CustomerEmail' => $customerEmail,
+                        'ScreenType' => self::IFRAME_GATEWAY_ID,
+                        'Hash' => $hashLocal,
                     ];
                 }
 
                 if ($automatic === true && $blikGateway == $gatewayId) {
-                    $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $authorizationCode, $sharedKey];
+                    $hashData = [
+                        $serviceId,
+                        $orderId,
+                        $amount,
+                        $gatewayId,
+                        $currency,
+                        $customerEmail,
+                        $authorizationCode,
+                        $sharedKey,
+                    ];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
 
                     return [
-                        'ServiceID'         => $serviceId,
-                        'OrderID'           => $orderId,
-                        'Amount'            => $amount,
-                        'GatewayID'         => $gatewayId,
-                        'Currency'          => $currency,
-                        'CustomerEmail'     => $customerEmail,
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Amount' => $amount,
+                        'GatewayID' => $gatewayId,
+                        'Currency' => $currency,
+                        'CustomerEmail' => $customerEmail,
                         'AuthorizationCode' => $authorizationCode,
-                        'Hash'              => $hashLocal,
+                        'Hash' => $hashLocal,
                     ];
                 }
 
                 if ($automatic === true && $gpayGateway == $gatewayId) {
                     $paymentToken = base64_encode($paymentToken);
                     $desc = '';
-                    $hashData  = [$serviceId, $orderId, $amount, $desc, $gatewayId, $currency, $customerEmail,
-                        $paymentToken, $sharedKey];
+                    $hashData = [
+                        $serviceId,
+                        $orderId,
+                        $amount,
+                        $desc,
+                        $gatewayId,
+                        $currency,
+                        $customerEmail,
+                        $paymentToken,
+                        $sharedKey,
+                    ];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
 
                     return [
-                        'ServiceID'         => $serviceId,
-                        'OrderID'           => $orderId,
-                        'Amount'            => $amount,
-                        'Description'       => $desc,
-                        'GatewayID'         => $gatewayId,
-                        'Currency'          => $currency,
-                        'CustomerEmail'     => $customerEmail,
-                        'PaymentToken'      => $paymentToken,
-                        'Hash'              => $hashLocal,
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Amount' => $amount,
+                        'Description' => $desc,
+                        'GatewayID' => $gatewayId,
+                        'Currency' => $currency,
+                        'CustomerEmail' => $customerEmail,
+                        'PaymentToken' => $paymentToken,
+                        'Hash' => $hashLocal,
                     ];
                 }
 
-                $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $sharedKey];
+                $hashData = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $sharedKey];
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params    = [
-                    'ServiceID'     => $serviceId,
-                    'OrderID'       => $orderId,
-                    'Amount'        => $amount,
-                    'GatewayID'     => $gatewayId,
-                    'Currency'      => $currency,
+                $params = [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Amount' => $amount,
+                    'GatewayID' => $gatewayId,
+                    'Currency' => $currency,
                     'CustomerEmail' => $customerEmail,
-                    'Hash'          => $hashLocal,
+                    'Hash' => $hashLocal,
                 ];
             }
         }
-
 
         return $params;
     }
@@ -381,6 +420,8 @@ class Payment extends AbstractMethod
      * z akcji 'statusAction'
      *
      * @param $response
+     *
+     * @return string|null
      */
     public function processStatusPayment($response)
     {
@@ -403,23 +444,23 @@ class Payment extends AbstractMethod
     {
         $currency = $response->transactions->transaction->currency;
 
-        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $hashSeparator  = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
-        $hashAlgorithm  = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+        $serviceId = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
+        $sharedKey = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
+        $hashSeparator = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
+        $hashAlgorithm = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
 
         if ($serviceId != $response->serviceID) {
             return false;
         }
-        $this->_checkHashArray   = [];
-        $hash                    = (string)$response->hash;
-        $this->_checkHashArray[] = (string)$response->serviceID;
+        $this->checkHashArray = [];
+        $hash = (string)$response->hash;
+        $this->checkHashArray[] = (string)$response->serviceID;
 
         foreach ($response->transactions->transaction as $trans) {
             $this->_checkInList($trans);
         }
-        $this->_checkHashArray[] = $sharedKey;
-        $connectedFields = implode($hashSeparator, $this->_checkHashArray);
+        $this->checkHashArray[] = $sharedKey;
+        $connectedFields = implode($hashSeparator, $this->checkHashArray);
 
         return hash($hashAlgorithm, $connectedFields) == $hash;
     }
@@ -433,8 +474,11 @@ class Payment extends AbstractMethod
      */
     public function isOrderChangable($order)
     {
-        $status        = $order->getStatus();
-        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue("payment/bluepayment/unchangeable_statuses"));
+        $status = $order->getStatus();
+        $unchangeableStatuses = explode(
+            ',',
+            $this->_scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
+        );
 
         if (in_array($status, $unchangeableStatuses)) {
             return false;
@@ -442,10 +486,10 @@ class Payment extends AbstractMethod
 
         $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
         if ($statusAcceptPayment == '') {
-            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
         }
 
-        $alreadyPaidBefore  = false;
+        $alreadyPaidBefore = false;
         $orderStatusHistory = $order->getAllStatusHistory();
         foreach ($orderStatusHistory as $historyStatus) {
             if ($historyStatus->getStatus() == $statusAcceptPayment) {
@@ -468,22 +512,22 @@ class Payment extends AbstractMethod
      */
     protected function updateStatusTransactionAndOrder($transaction)
     {
-        $paymentStatus     = (string)$transaction->paymentStatus;
+        $paymentStatus = (string)$transaction->paymentStatus;
 
-        $remoteId          = $transaction->remoteID;
-        $orderId           = $transaction->orderID;
+        $remoteId = $transaction->remoteID;
+        $orderId = $transaction->orderID;
         $transactionAmount = number_format(round($transaction->amount, 2), 2, '.', '');
-        $order             = $this->orderFactory->create()->loadByIncrementId($orderId);
-        $currency          = $transaction->currency;
+        $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+        $currency = $transaction->currency;
 
         $this->saveTransactionResponse($transaction);
 
         /**
          * @var \Magento\Sales\Model\Order\Payment $orderPayment
          */
-        $orderPayment      = $order->getPayment();
+        $orderPayment = $order->getPayment();
         $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-        $amount            = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
+        $amount = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
         $transactionAmount = $amount;
 
         $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
@@ -535,19 +579,19 @@ class Payment extends AbstractMethod
                 switch ($paymentStatus) {
                     case self::PAYMENT_STATUS_PENDING:
                         if ($paymentStatus != $orderPaymentState) {
-                        $transaction = $orderPayment->setTransactionId((string) $remoteId);
-                        $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
-                        $transaction->setIsTransactionPending(true);
-                        $transaction->save();
+                            $transaction = $orderPayment->setTransactionId((string)$remoteId);
+                            $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
+                            $transaction->setIsTransactionPending(true);
+                            $transaction->save();
 
-                        $order->setState($orderStatusWaitingState)
-                            ->setStatus($statusWaitingPayment)
-                            ->addStatusToHistory(
-                                $statusWaitingPayment,
-                                $orderComment,
-                                false
-                            )
-                            ->save();
+                            $order->setState($orderStatusWaitingState)
+                                ->setStatus($statusWaitingPayment)
+                                ->addStatusToHistory(
+                                    $statusWaitingPayment,
+                                    $orderComment,
+                                    false
+                                )
+                                ->save();
                         }
                         break;
                     case self::PAYMENT_STATUS_SUCCESS:
@@ -615,7 +659,7 @@ class Payment extends AbstractMethod
             if (is_object($row)) {
                 $this->_checkInList($row);
             } else {
-                $this->_checkHashArray[] = $row;
+                $this->checkHashArray[] = $row;
             }
         }
     }
@@ -626,15 +670,15 @@ class Payment extends AbstractMethod
      * @param Order $order
      * @param string $confirmation
      *
-     * @return XML
+     * @return string
      */
-    protected function returnConfirmation($order, $confirmation)
+    public function returnConfirmation($order, $confirmation)
     {
         $currency = $order->getOrderCurrencyCode();
 
-        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $hashData         = [$serviceId, $order->getId(), $confirmation, $sharedKey];
+        $serviceId = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
+        $sharedKey = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
+        $hashData = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
@@ -669,7 +713,7 @@ class Payment extends AbstractMethod
      */
     private function saveTransactionResponse($transactionResponse)
     {
-        /** @var \BlueMedia\BluePayment\Model\Transaction $transaction */
+        /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
         $transaction->setOrderId($transactionResponse->orderID)
             ->setRemoteId($transactionResponse->remoteID)

@@ -1,9 +1,4 @@
 <?php
-/**
- * @package     BlueMedia_BluePayment
- * @copyright   Copyright ⓒ 2017 BOLD BRAND COMMERCE SP. Z O.O. (http://bold.net.pl/)
- * @author      Piotr Koziol <piotr.koziol@bold.net.pl>
- */
 
 namespace BlueMedia\BluePayment\Helper;
 
@@ -23,38 +18,31 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Email extends AbstractHelper
 {
-    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD       = 'payment/bluepayment/disabled_gateways_notification_active';
-    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD  = 'payment/bluepayment/disabled_gateways_notification_sender_name';
-    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD = 'trans_email/ident_general/email';
-    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_RECEIVERS_FIELD    = 'payment/bluepayment/disabled_gateways_notification_receivers';
-    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD     = 'payment/bluepayment/disabled_gateways_notification_template';
+    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD
+        = 'payment/bluepayment/disabled_gateways_notification_active';
+    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD
+        = 'payment/bluepayment/disabled_gateways_notification_sender_name';
+    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD
+        = 'trans_email/ident_general/email';
+    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_RECEIVERS_FIELD
+        = 'payment/bluepayment/disabled_gateways_notification_receivers';
+    const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD
+        = 'payment/bluepayment/disabled_gateways_notification_template';
 
-    /**
-     * @var StoreManagerInterface
-     */
-    protected $_storeManager;
+    /** @var StoreManagerInterface */
+    public $storeManager;
 
-    /**
-     * @var StateInterface
-     */
-    protected $inlineTranslation;
+    /** @var StateInterface */
+    public $inlineTranslation;
 
-    /**
-     * @var TransportBuilder
-     */
-    protected $_transportBuilder;
+    /** @var TransportBuilder */
+    public $transportBuilder;
 
-    /**
-     * @var Session
-     */
-    protected $_authSession;
+    /** @var Session */
+    public $authSession;
 
-    /**
-     * Logger
-     *
-     * @var \Zend\Log\Logger
-     */
-    protected $_logger;
+    /** @var \Zend\Log\Logger */
+    public $logger;
 
     /**
      * Email constructor.
@@ -66,21 +54,21 @@ class Email extends AbstractHelper
      * @param Session               $authSession
      */
     public function __construct(
-        Context               $context,
+        Context $context,
         StoreManagerInterface $storeManager,
-        StateInterface        $inlineTranslation,
-        TransportBuilder      $transportBuilder,
-        Session               $authSession
+        StateInterface $inlineTranslation,
+        TransportBuilder $transportBuilder,
+        Session $authSession
     ) {
         parent::__construct($context);
-        $this->_storeManager     = $storeManager;
+        $this->storeManager     = $storeManager;
         $this->inlineTranslation = $inlineTranslation;
-        $this->_transportBuilder = $transportBuilder;
-        $this->_authSession      = $authSession;
+        $this->transportBuilder = $transportBuilder;
+        $this->authSession      = $authSession;
 
-        $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia_notificator.log');
-        $this->_logger = new \Zend\Log\Logger();
-        $this->_logger->addWriter($writer);
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia_notificator.log');
+        $this->logger = new \Zend\Log\Logger();
+        $this->logger->addWriter($writer);
     }
 
     /**
@@ -105,7 +93,7 @@ class Email extends AbstractHelper
      */
     public function getStore()
     {
-        return $this->_storeManager->getStore();
+        return $this->storeManager->getStore();
     }
 
     /**
@@ -142,9 +130,8 @@ class Email extends AbstractHelper
         }
 
         $currentUser = $this->getCurrentUser();
-        if (!is_null($currentUser)) {
+        if ($currentUser !== null) {
             $source = $currentUser->getFirstName() . ' ' . $currentUser->getLastName();
-
         } else {
             $source = __('CRON Service');
         }
@@ -161,13 +148,13 @@ class Email extends AbstractHelper
                 $receiverInfo
             );
 
-            $transport = $this->_transportBuilder->getTransport();
+            $transport = $this->transportBuilder->getTransport();
             $transport->sendMessage();
             $this->inlineTranslation->resume();
 
             return true;
         } catch (\Exception $e) {
-            $this->_logger->info('Error has occurred during sending an email. Message: ' . $e->getMessage());
+            $this->logger->info('Error has occurred during sending an email. Message: ' . $e->getMessage());
         }
 
         return false;
@@ -243,7 +230,10 @@ class Email extends AbstractHelper
      */
     public function getTemplateId()
     {
-        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD, $this->getStore()->getStoreId());
+        return $this->getConfigValue(
+            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD,
+            $this->getStore()->getStoreId()
+        );
     }
 
     /**
@@ -256,21 +246,21 @@ class Email extends AbstractHelper
      */
     public function generateTemplate($templateId, $emailTemplateVariables, $senderInfo, $receiverInfo)
     {
-        $this->_transportBuilder->setTemplateIdentifier($templateId)
+        $this->transportBuilder->setTemplateIdentifier($templateId)
             ->setTemplateOptions(
                 [
                     'area'  => Area::AREA_FRONTEND,
-                    'store' => $this->_storeManager->getStore()->getId(),
+                    'store' => $this->storeManager->getStore()->getId(),
                 ]
             )
             ->setTemplateVars($emailTemplateVariables)
             ->setFrom($senderInfo);
         foreach ($receiverInfo as $receiver) {
             if (isset($receiver['email']) && isset($receiver['name'])) {
-                $this->_transportBuilder->addTo($receiver['email'], $receiver['name']);
+                $this->transportBuilder->addTo($receiver['email'], $receiver['name']);
             }
         }
-        $this->_transportBuilder->getMessageText();
+        $this->transportBuilder->getMessageText();
     }
 
     /**
@@ -278,6 +268,6 @@ class Email extends AbstractHelper
      */
     public function getCurrentUser()
     {
-        return $this->_authSession->getUser();
+        return $this->authSession->getUser();
     }
 }

@@ -20,26 +20,26 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @var \BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection
      */
-    protected $gatewaysCollection;
+    public $gatewaysCollection;
 
     /**
      * @var array
      */
-    protected $_activeGateways = [];
+    public $activeGateways = [];
 
     /**
      * @var array
      */
-    protected $_activeGatewaysResponse;
+    public $activeGatewaysResponse;
 
     /** @var Form  */
-    protected $block;
+    public $block;
 
-    protected $priceCurrency;
+    public $priceCurrency;
 
-    protected $logger;
+    public $logger;
 
-    protected $scopeConfig;
+    public $scopeConfig;
 
     /**
      * ConfigProvider constructor.
@@ -79,7 +79,7 @@ class ConfigProvider implements ConfigProviderInterface
     {
         $currency = $this->getCurrentCurrencyCode();
 
-        if (!isset($this->_activeGateways[$currency])) {
+        if (!isset($this->activeGateways[$currency])) {
             $resultSeparated         = [];
             $result                  = [];
 
@@ -107,14 +107,15 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
                 'GPayMerchantId' => $this->scopeConfig->getValue("payment/bluepayment/gpay/merchant_id"),
-                'bluePaymentAcceptorId' => $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/acceptor_id"),
+                'bluePaymentAcceptorId' =>
+                    $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/acceptor_id"),
                 'bluePaymentTestMode' => $this->scopeConfig->getValue("payment/bluepayment/test_mode"),
             ];
 
-            $this->_activeGateways[$currency] = $activeGateways;
+            $this->activeGateways[$currency] = $activeGateways;
         }
 
-        return $this->_activeGateways[$currency];
+        return $this->activeGateways[$currency];
     }
 
     /**
@@ -122,7 +123,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return array
      */
-    protected function prepareGatewayStructure($gateway)
+    public function prepareGatewayStructure($gateway)
     {
         $logoUrl = $gateway->getGatewayLogoUrl();
         if ((int)$gateway->getUseOwnLogo()) {
@@ -141,8 +142,7 @@ class ConfigProvider implements ConfigProviderInterface
         } elseif ($gateway->getGatewayId() == self::BLIK_GATEWAY_ID) {
             $name = $this->block->getTitleBlik();
             $isBlik = true;
-        } elseif (
-            $this->scopeConfig->getValue('payment/bluepayment/gpay/direct')
+        } elseif ($this->scopeConfig->getValue('payment/bluepayment/gpay/direct')
             && $gateway->getGatewayId() == self::GPAY_GATEWAY_ID) {
             $isGPay = true;
         }

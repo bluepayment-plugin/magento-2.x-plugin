@@ -205,5 +205,4 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         return $searchResults;
     }
-
 }

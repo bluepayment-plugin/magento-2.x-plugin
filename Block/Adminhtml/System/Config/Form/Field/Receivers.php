@@ -2,7 +2,10 @@
 
 namespace BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Framework\Data\Form\Element\Factory;
+use Magento\Framework\View\Design\Theme\LabelFactory;
 
 /**
  * Backend system config array field renderer
@@ -11,30 +14,26 @@ use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
  */
 class Receivers extends AbstractFieldArray
 {
-    /**
-     * @var \Magento\Framework\Data\Form\Element\Factory
-     */
-    protected $_elementFactory;
+    /** @var Factory */
+    public $elementFactory;
+
+    /** @var LabelFactory */
+    public $labelFactory;
 
     /**
-     * @var \Magento\Framework\View\Design\Theme\LabelFactory
-     */
-    protected $_labelFactory;
-
-    /**
-     * @param \Magento\Backend\Block\Template\Context           $context
-     * @param \Magento\Framework\Data\Form\Element\Factory      $elementFactory
-     * @param \Magento\Framework\View\Design\Theme\LabelFactory $labelFactory
-     * @param array                                             $data
+     * @param Context       $context
+     * @param Factory       $elementFactory
+     * @param LabelFactory  $labelFactory
+     * @param array         $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context           $context,
-        \Magento\Framework\Data\Form\Element\Factory      $elementFactory,
-        \Magento\Framework\View\Design\Theme\LabelFactory $labelFactory,
-        array                                             $data = []
+        Context $context,
+        Factory $elementFactory,
+        LabelFactory $labelFactory,
+        array $data = []
     ) {
-        $this->_elementFactory = $elementFactory;
-        $this->_labelFactory   = $labelFactory;
+        $this->elementFactory = $elementFactory;
+        $this->labelFactory   = $labelFactory;
         parent::__construct($context, $data);
     }
 

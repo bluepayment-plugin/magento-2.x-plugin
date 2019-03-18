@@ -15,33 +15,17 @@ use Magento\Framework\View\Result\PageFactory;
  */
 abstract class Gateways extends Action
 {
-    /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
-     */
-    protected $_coreRegistry;
+    /** @var Registry */
+    public $coreRegistry;
 
-    /**
-     * Result page factory
-     *
-     * @var \Magento\Framework\View\Result\PageFactory
-     */
-    protected $_resultPageFactory;
+    /** @var PageFactory */
+    public $resultPageFactory;
 
-    /**
-     * Gateways model factory
-     *
-     * @var \BlueMedia\BluePayment\Model\GatewaysFactory
-     */
-    protected $_gatewaysFactory;
+    /** @var GatewaysFactory */
+    public $gatewaysFactory;
 
-    /**
-     * Used for creating logs
-     *
-     * @var \Zend\Log\Logger
-     */
-    protected $_logger;
+    /** @var Logger */
+    public $logger;
 
     /**
      * @param Context         $context
@@ -56,13 +40,13 @@ abstract class Gateways extends Action
         GatewaysFactory $gatewaysFactory
     ) {
         parent::__construct($context);
-        $this->_coreRegistry      = $coreRegistry;
-        $this->_resultPageFactory = $resultPageFactory;
-        $this->_gatewaysFactory   = $gatewaysFactory;
+        $this->coreRegistry      = $coreRegistry;
+        $this->resultPageFactory = $resultPageFactory;
+        $this->gatewaysFactory   = $gatewaysFactory;
 
-        $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->_logger = new \Zend\Log\Logger();
-        $this->_logger->addWriter($writer);
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new \Zend\Log\Logger();
+        $this->logger->addWriter($writer);
     }
 
     /**

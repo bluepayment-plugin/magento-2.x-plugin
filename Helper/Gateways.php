@@ -8,11 +8,12 @@ use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
 /**
  * Class Gateways
@@ -25,60 +26,68 @@ class Gateways extends Data
     const MESSAGE_ID_STRING_LENGTH      = 32;
     const UPLOAD_PATH                   = '/BlueMedia/';
 
+    /** @var array Available currencies */
     public $currencies = [
         'PLN', 'EUR', 'GBP', 'USD'
     ];
 
-    /**
-     * Gateways model factory
-     *
-     * @var \BlueMedia\BluePayment\Model\GatewaysFactory
-     */
-    protected $_gatewaysFactory;
+    /** @var GatewaysFactory */
+    public $gatewaysFactory;
 
     /**
      * Logger
      *
      * @var \Zend\Log\Logger
      */
-    protected $_logger;
+    public $logger;
 
+    /** @var Email */
+    public $emailHelper;
 
-    /**
-     * @var Email
-     */
-    protected $_emailHelper;
+    /** @var Collection */
+    public $collection;
 
     /**
      * Gateways constructor.
      *
-     * @param \Magento\Framework\App\Helper\Context        $context
-     * @param \Magento\Framework\View\LayoutFactory        $layoutFactory
-     * @param \Magento\Payment\Model\Method\Factory        $paymentMethodFactory
-     * @param \Magento\Store\Model\App\Emulation           $appEmulation
-     * @param \Magento\Payment\Model\Config                $paymentConfig
-     * @param \Magento\Framework\App\Config\Initial        $initialConfig
-     * @param \BlueMedia\BluePayment\Model\GatewaysFactory $gatewaysFactory
-     * @param \BlueMedia\BluePayment\Api\Client            $apiClient
-     * @param EmailHelper                                  $emailHelper
+     * @param Context           $context
+     * @param LayoutFactory     $layoutFactory
+     * @param Factory           $paymentMethodFactory
+     * @param Emulation         $appEmulation
+     * @param Config            $paymentConfig
+     * @param Initial           $initialConfig
+     * @param GatewaysFactory   $gatewaysFactory
+     * @param Client            $apiClient
+     * @param EmailHelper       $emailHelper
      */
     public function __construct(
-        Context         $context,
-        LayoutFactory   $layoutFactory,
-        Factory         $paymentMethodFactory,
-        Emulation       $appEmulation,
-        Config          $paymentConfig,
-        Initial         $initialConfig,
+        Context $context,
+        LayoutFactory $layoutFactory,
+        Factory $paymentMethodFactory,
+        Emulation $appEmulation,
+        Config $paymentConfig,
+        Initial $initialConfig,
         GatewaysFactory $gatewaysFactory,
-        Client          $apiClient,
-        EmailHelper     $emailHelper
+        Client $apiClient,
+        EmailHelper $emailHelper,
+        Collection $collection
     ) {
-        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig, $apiClient);
-        $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->_logger = new \Zend\Log\Logger();
-        $this->_logger->addWriter($writer);
-        $this->_gatewaysFactory = $gatewaysFactory;
-        $this->_emailHelper     = $emailHelper;
+        parent::__construct(
+            $context,
+            $layoutFactory,
+            $paymentMethodFactory,
+            $appEmulation,
+            $paymentConfig,
+            $initialConfig,
+            $apiClient
+        );
+
+        $writer  = new Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new Logger();
+        $this->logger->addWriter($writer);
+        $this->gatewaysFactory = $gatewaysFactory;
+        $this->emailHelper = $emailHelper;
+        $this->collection = $collection;
     }
 
     /**
@@ -99,8 +108,13 @@ class Gateways extends Data
                 $tryCount = 0;
                 $loadResult = false;
                 while (!$loadResult) {
-                    $loadResult = $this->loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey,
-                        $gatewayListAPIUrl);
+                    $loadResult = $this->loadGatewaysFromAPI(
+                        $hashMethod,
+                        $serviceId,
+                        $messageId,
+                        $hashKey,
+                        $gatewayListAPIUrl
+                    );
 
                     if ($loadResult) {
                         $result['success'] = $this->saveGateways((array)$loadResult, $currency);
@@ -153,7 +167,7 @@ class Gateways extends Data
         try {
             return $this->apiClient->call($gatewayListAPIUrl, $data);
         } catch (\Exception $e) {
-            $this->_logger->info($e->getMessage());
+            $this->logger->info($e->getMessage());
 
             return false;
         }
@@ -161,8 +175,9 @@ class Gateways extends Data
 
     /**
      * @param array $gatewayList
+     * @param string $currency
      */
-    private function saveGateways($gatewayList, $currency = 'PLN')
+    public function saveGateways($gatewayList, $currency = 'PLN')
     {
         $existingGateways          = $this->getSimpleGatewaysList();
         $currentlyActiveGatewayIDs = [];
@@ -185,10 +200,10 @@ class Gateways extends Data
                     $currentlyActiveGatewayIDs[] = $gateway['gatewayID'];
 
                     if (isset($existingGateways[$currency][$gateway['gatewayID']])) {
-                        $gatewayModel = $this->_gatewaysFactory->create();
+                        $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->load($existingGateways[$currency][$gateway['gatewayID']]['entity_id']);
                     } else {
-                        $gatewayModel = $this->_gatewaysFactory->create();
+                        $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
                     }
 
@@ -203,7 +218,7 @@ class Gateways extends Data
                     try {
                         $gatewayModel->save();
                     } catch (\Exception $e) {
-                        $this->_logger->info($e->getMessage());
+                        $this->logger->info($e->getMessage());
                     }
                 }
             }
@@ -213,7 +228,7 @@ class Gateways extends Data
                 if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
                     && $existingGatewayData['gateway_status'] != 0
                 ) {
-                    $gatewayModel = $this->_gatewaysFactory->create()->load($existingGatewayData['entity_id']);
+                    $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
                     $gatewayModel->setData('gateway_status', 0);
                     try {
                         $gatewayModel->save();
@@ -222,12 +237,12 @@ class Gateways extends Data
                             'gateway_id'   => $existingGatewayId,
                         ];
                     } catch (\Exception $e) {
-                        $this->_logger->info($e->getMessage());
+                        $this->logger->info($e->getMessage());
                     }
                 }
             }
             if (!empty($disabledGateways)) {
-                $this->_emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
             }
         }
     }
@@ -237,8 +252,8 @@ class Gateways extends Data
      */
     public function getSimpleGatewaysList()
     {
-        $objectManager          = ObjectManager::getInstance();
-        $bluegatewaysCollection = $objectManager->create(Collection::class);
+        $objectManager = $this->collection;
+        $bluegatewaysCollection = $objectManager->create();
         $bluegatewaysCollection->load();
 
         $existingGateways = [];

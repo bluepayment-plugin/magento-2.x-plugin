@@ -127,5 +127,4 @@ interface TransactionInterface
      * @return $this
      */
     public function setPaymentStatusDetails(string $status);
-
 }

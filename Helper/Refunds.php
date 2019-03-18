@@ -13,6 +13,7 @@ use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\App\Emulation;
+use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 
 /**
  * Class Gateways
@@ -22,34 +23,28 @@ class Refunds extends Data
 {
     const DEFAULT_HASH_SEPARATOR = '|';
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\RefundTransactionFactory
-     */
+    /** @var RefundTransactionFactory */
     private $refundTransactionFactory;
 
-    /**
-     * @var \BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface
-     */
+    /** @var RefundTransactionRepositoryInterface */
     private $refundTransactionRepository;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
+    /** @var OrderFactory */
     private $orderFactory;
 
     /**
      * Gateways constructor.
      *
-     * @param \Magento\Framework\App\Helper\Context                           $context
-     * @param \Magento\Framework\View\LayoutFactory                           $layoutFactory
-     * @param \Magento\Payment\Model\Method\Factory                           $paymentMethodFactory
-     * @param \Magento\Store\Model\App\Emulation                              $appEmulation
-     * @param \Magento\Payment\Model\Config                                   $paymentConfig
-     * @param \Magento\Framework\App\Config\Initial                           $initialConfig
-     * @param \BlueMedia\BluePayment\Api\Client                               $apiClient
-     * @param \Magento\Sales\Model\OrderFactory                               $orderFactory
-     * @param \BlueMedia\BluePayment\Model\RefundTransactionFactory           $refundTransactionFactory
-     * @param \BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface $refundTransactionRepository
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param Client $apiClient
+     * @param OrderFactory $orderFactory
+     * @param RefundTransactionFactory $refundTransactionFactory
+     * @param RefundTransactionRepositoryInterface $refundTransactionRepository
      */
     public function __construct(
         Context $context,
@@ -78,11 +73,11 @@ class Refunds extends Data
     }
 
     /**
-     * @param \BlueMedia\BluePayment\Api\Data\TransactionInterface $transaction
-     * @param null                                                 $amount
+     * @param TransactionInterface $transaction
+     * @param null$amount
      *
      * @return array
-     * @throws \BlueMedia\BluePayment\Exception\EmptyRemoteIdException
+     * @throws EmptyRemoteIdException
      */
     public function makeRefund($transaction, $amount = null)
     {
@@ -155,7 +150,7 @@ class Refunds extends Data
      *
      * @return mixed
      */
-    protected function getConfigValue($name, $currency = null)
+    public function getConfigValue($name, $currency = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue('payment/bluepayment/'.strtolower($currency).'/'.$name);
@@ -167,7 +162,7 @@ class Refunds extends Data
     /**
      * @return mixed
      */
-    protected function getRefundUrl()
+    public function getRefundUrl()
     {
         if ($this->getConfigValue('test_mode')) {
             return $this->getConfigValue('test_address_refunds_url');
@@ -187,7 +182,7 @@ class Refunds extends Data
      *
      * @return bool|array
      */
-    protected function callRefundAPI($hashMethod, $serviceId, $messageId, $remoteId, $amount, $hashKey, $refundAPIUrl)
+    public function callRefundAPI($hashMethod, $serviceId, $messageId, $remoteId, $amount, $hashKey, $refundAPIUrl)
     {
         $data = [
             'ServiceID' => $serviceId,
@@ -203,20 +198,20 @@ class Refunds extends Data
         try {
             return (array)$this->apiClient->call($refundAPIUrl, $data);
         } catch (\Exception $e) {
-            $this->_logger->info($e->getMessage());
+            $this->logger->info($e->getMessage());
 
             return false;
         }
     }
 
     /**
-     * @param array                                                $loadResult
-     * @param float                                                $amount
-     * @param \BlueMedia\BluePayment\Api\Data\TransactionInterface $transaction
+     * @param array                 $loadResult
+     * @param float                 $amount
+     * @param TransactionInterface  $transaction
      *
      * @return void
      */
-    protected function processResponse($loadResult, $amount, $transaction)
+    public function processResponse($loadResult, $amount, TransactionInterface $transaction)
     {
         $this->saveRefundTransaction($loadResult, $amount, $transaction);
         $this->updateOrderOnRefund($loadResult, $amount, $transaction);
@@ -227,7 +222,7 @@ class Refunds extends Data
      * @param $amount
      * @param $transaction
      */
-    protected function saveRefundTransaction($loadResult, $amount, $transaction)
+    public function saveRefundTransaction($loadResult, $amount, $transaction)
     {
         /** @var \BlueMedia\BluePayment\Api\Data\RefundTransactionInterface $refund */
         $refund = $this->refundTransactionFactory->create();
@@ -245,7 +240,7 @@ class Refunds extends Data
      * @param $amount
      * @param $transaction
      */
-    protected function updateOrderOnRefund($loadResult, $amount, $transaction)
+    public function updateOrderOnRefund($loadResult, $amount, $transaction)
     {
         if ($amount < $transaction->getAmount()) {
             $status = $this->getConfigValue('status_partial_refund');
@@ -268,7 +263,7 @@ class Refunds extends Data
      *
      * @return string
      */
-    protected function formatAmount($amount)
+    public function formatAmount($amount)
     {
         return sprintf('%.2f', $amount);
     }

@@ -25,12 +25,12 @@ class Data extends \Magento\Payment\Helper\Data
      *
      * @var \Zend\Log\Logger
      */
-    protected $_logger;
+    public $logger;
 
     /**
      * @var \BlueMedia\BluePayment\Api\Client
      */
-    protected $apiClient;
+    public $apiClient;
 
     /**
      * Gateways constructor.
@@ -52,10 +52,18 @@ class Data extends \Magento\Payment\Helper\Data
         Initial $initialConfig,
         Client $apiClient
     ) {
-        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
-        $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->_logger = new \Zend\Log\Logger();
-        $this->_logger->addWriter($writer);
+        parent::__construct(
+            $context,
+            $layoutFactory,
+            $paymentMethodFactory,
+            $appEmulation,
+            $paymentConfig,
+            $initialConfig
+        );
+
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new \Zend\Log\Logger();
+        $this->logger->addWriter($writer);
         $this->apiClient = $apiClient;
     }
 
@@ -82,7 +90,7 @@ class Data extends \Magento\Payment\Helper\Data
      *
      * @return string
      */
-    protected function randomString($length)
+    public function randomString($length)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randomString = '';

@@ -5,9 +5,12 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
+use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
 /**
  * Class Gateway
@@ -16,60 +19,45 @@ use Magento\Sales\Model\OrderFactory;
  */
 class Gateway extends Action
 {
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
+    /** @var JsonFactory */
+    public $resultJsonFactory;
 
-    /**
-     * @var
-     */
-    protected $paymentFactory;
+    /** @var OrderFactory */
+    public $orderFactory;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    protected $orderFactory;
+    /** @var Session */
+    public $session;
 
-    /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    protected $session;
+    /** @var Logger */
+    public $logger;
 
-    /**
-     * @var \Zend\Log\Logger
-     */
-    protected $_logger;
-
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
-    protected $orderSender;
+    /** @var OrderSender */
+    public $orderSender;
 
     /**
      * Gateway constructor.
      *
-     * @param \Magento\Framework\App\Action\Context               $context
-     * @param \Magento\Framework\Controller\Result\JsonFactory    $resultJsonFactory
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
-     * @param \Magento\Sales\Model\OrderFactory                   $orderFactory
-     * @param \Magento\Checkout\Model\Session                     $session
+     * @param Context               $context
+     * @param JsonFactory    $resultJsonFactory
+     * @param OrderSender $orderSender
+     * @param OrderFactory                   $orderFactory
+     * @param Session                     $session
      */
     public function __construct(
-        Context      $context,
-        JsonFactory  $resultJsonFactory,
-        OrderSender  $orderSender,
+        Context $context,
+        JsonFactory $resultJsonFactory,
+        OrderSender $orderSender,
         OrderFactory $orderFactory,
-        Session      $session
+        Session $session
     ) {
         $this->resultJsonFactory = $resultJsonFactory;
         $this->session           = $session;
         $this->orderFactory      = $orderFactory;
         $this->orderSender       = $orderSender;
 
-        $writer        = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->_logger = new \Zend\Log\Logger();
-        $this->_logger->addWriter($writer);
+        $writer = new Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new Logger();
+        $this->logger->addWriter($writer);
 
         parent::__construct($context);
     }
@@ -77,7 +65,7 @@ class Gateway extends Action
     /**
      * Used only to set in session selected gateway ID
      *
-     * @return $this
+     * @return Json
      */
     public function execute()
     {
@@ -96,7 +84,7 @@ class Gateway extends Action
                 $session->setBluepaymentGatewayId($gatewayId);
                 $response = ['success' => true, 'session_gateway_id' => $session->getBluepaymentGatewayId()];
             } catch (\Exception $e) {
-                $this->_logger->info([__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
+                $this->logger->info('Error', [__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
                 $response = ['success' => false, 'session_gateway_id' => 0];
             }
 
@@ -107,7 +95,7 @@ class Gateway extends Action
             $session->setBluepaymentGatewayId(0);
             $response = ['success' => true, 'session_gateway_id' => 0];
         } catch (\Exception $e) {
-            $this->_logger->info([__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
+            $this->logger->info('Error', [__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
             $response = ['success' => false, 'session_gateway_id' => 0];
         }
 
@@ -117,9 +105,9 @@ class Gateway extends Action
     /**
      * Zwraca singleton dla Checkout Session Model
      *
-     * @return \Magento\Checkout\Model\Session
+     * @return Session
      */
-    protected function getCheckout()
+    public function getCheckout()
     {
         return $this->session;
     }

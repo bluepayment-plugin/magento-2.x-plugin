@@ -14,22 +14,18 @@ use Magento\Framework\App\Action\Context;
  */
 class Status extends Action
 {
-    /**
-     * @var \BlueMedia\BluePayment\Model\PaymentFactory
-     */
-    protected $paymentFactory;
+    /** @var PaymentFactory */
+    public $paymentFactory;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    /** @var Logger */
+    public $logger;
 
     /**
      * Status constructor.
      *
-     * @param \Magento\Framework\App\Action\Context       $context
-     * @param \BlueMedia\BluePayment\Logger\Logger        $logger
-     * @param \BlueMedia\BluePayment\Model\PaymentFactory $paymentFactory
+     * @param Context $context
+     * @param Logger $logger
+     * @param PaymentFactory $paymentFactory
      */
     public function __construct(
         Context $context,

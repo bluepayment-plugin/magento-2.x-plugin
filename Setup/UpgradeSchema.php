@@ -16,15 +16,14 @@ use Magento\Framework\Setup\UpgradeSchemaInterface;
  */
 class UpgradeSchema implements UpgradeSchemaInterface
 {
-    protected $scopeConfig;
-    protected $resourceConfig;
+    private $scopeConfig;
+    private $resourceConfig;
 
     public function __construct(ScopeConfigInterface $scopeConfig, ConfigInterface $resourceConfig)
     {
         $this->scopeConfig = $scopeConfig;
         $this->resourceConfig = $resourceConfig;
     }
-
 
     /**
      * Function that upgrades module
@@ -388,23 +387,95 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $scope = \Magento\Framework\App\Config\ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeId = \Magento\Store\Model\Store::DEFAULT_STORE_ID;
 
-        $this->resourceConfig->saveConfig($path.'/pln/service_id', $this->scopeConfig->getValue($path.'_pln/service_id'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/pln/shared_key', $this->scopeConfig->getValue($path.'_pln/shared_key'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/eur/service_id', $this->scopeConfig->getValue($path .'_eur/service_id'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/eur/shared_key', $this->scopeConfig->getValue($path .'_eur/shared_key'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/gbp/service_id', $this->scopeConfig->getValue($path .'_gbp/service_id'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/gbp/shared_key', $this->scopeConfig->getValue($path .'_gbp/shared_key'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/usd/service_id', $this->scopeConfig->getValue($path .'_usd/service_id'), $scope, $scopeId);
-        $this->resourceConfig->saveConfig($path.'/usd/shared_key', $this->scopeConfig->getValue($path .'_usd/shared_key'), $scope, $scopeId);
+        $this->resourceConfig->saveConfig(
+            $path.'/pln/service_id',
+            $this->scopeConfig->getValue($path.'_pln/service_id'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/pln/shared_key',
+            $this->scopeConfig->getValue($path.'_pln/shared_key'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/eur/service_id',
+            $this->scopeConfig->getValue($path .'_eur/service_id'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/eur/shared_key',
+            $this->scopeConfig->getValue($path .'_eur/shared_key'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/gbp/service_id',
+            $this->scopeConfig->getValue($path .'_gbp/service_id'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/gbp/shared_key',
+            $this->scopeConfig->getValue($path .'_gbp/shared_key'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/usd/service_id',
+            $this->scopeConfig->getValue($path .'_usd/service_id'),
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->saveConfig(
+            $path.'/usd/shared_key',
+            $this->scopeConfig->getValue($path .'_usd/shared_key'),
+            $scope,
+            $scopeId
+        );
 
-        $this->resourceConfig->deleteConfig($path.'_pln/service_id', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_pln/shared_key', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_eur/service_id', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_eur/shared_key', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_gbp/service_id', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_gbp/shared_key', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_usd/service_id', $scope, $scopeId);
-        $this->resourceConfig->deleteConfig($path.'_usd/shared_key', $scope, $scopeId);
+        $this->resourceConfig->deleteConfig(
+            $path.'_pln/service_id',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_pln/shared_key',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_eur/service_id',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_eur/shared_key',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_gbp/service_id',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_gbp/shared_key',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_usd/service_id',
+            $scope,
+            $scopeId
+        );
+        $this->resourceConfig->deleteConfig(
+            $path.'_usd/shared_key',
+            $scope,
+            $scopeId
+        );
 
         $installer->endSetup();
     }

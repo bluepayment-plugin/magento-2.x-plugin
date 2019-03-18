@@ -19,7 +19,7 @@ class Delete extends Gateways
         $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
         if ($gatewaysId) {
             /** @var $gatewaysModel \BlueMedia\BluePayment\Model\Gateways */
-            $gatewaysModel = $this->_gatewaysFactory->create();
+            $gatewaysModel = $this->gatewaysFactory->create();
             $gatewaysModel->load($gatewaysId);
 
             if (!$gatewaysModel->getId()) {

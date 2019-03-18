@@ -19,7 +19,7 @@ class Edit extends Container
      *
      * @var \Magento\Framework\Registry
      */
-    protected $_coreRegistry = null;
+    public $coreRegistry = null;
 
     /**
      * @param Context  $context
@@ -27,11 +27,11 @@ class Edit extends Container
      * @param array    $data
      */
     public function __construct(
-        Context  $context,
+        Context $context,
         Registry $registry,
-        array    $data = []
+        array $data = []
     ) {
-        $this->_coreRegistry = $registry;
+        $this->coreRegistry = $registry;
         parent::__construct($context, $data);
     }
 
@@ -71,7 +71,7 @@ class Edit extends Container
      */
     public function getHeaderText()
     {
-        $gatewaysRegistry = $this->_coreRegistry->registry(GatewaysController::GATEWAYS_REGISTER_CODE);
+        $gatewaysRegistry = $this->coreRegistry->registry(GatewaysController::GATEWAYS_REGISTER_CODE);
         if ($gatewaysRegistry->getId()) {
             $gatewaysTitle = $this->escapeHtml($gatewaysRegistry->getTitle());
 

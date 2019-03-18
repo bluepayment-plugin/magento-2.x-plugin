@@ -8,6 +8,7 @@ use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use Magento\Backend\Block\Template;
 use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
+use \Magento\Framework\View\Element\Template\Context;
 
 /**
  * Class Popup
@@ -15,32 +16,26 @@ use Magento\Sales\Api\Data\OrderInterface;
  */
 class Popup extends Template
 {
-    /**
-     * @var \Magento\Framework\Registry
-     */
+    /** @var Registry */
     private $coreRegistry;
 
-    /**
-     * @var \BlueMedia\BluePayment\Api\TransactionRepositoryInterface
-     */
+    /** @var TransactionRepositoryInterface */
     private $transactionRepository;
 
-    /**
-     * @var \BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface
-     */
+    /** @var RefundTransactionRepositoryInterface */
     private $refundTransactionRepository;
 
     /**
      * Popup constructor.
      *
-     * @param \Magento\Backend\Block\Template\Context                         $context
-     * @param \Magento\Framework\Registry                                     $coreRegistry
-     * @param \BlueMedia\BluePayment\Api\TransactionRepositoryInterface       $transactionRepository
-     * @param \BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface $refundTransactionRepository
-     * @param array                                                           $data
+     * @param Context                               $context
+     * @param Registry                              $coreRegistry
+     * @param TransactionRepositoryInterface        $transactionRepository
+     * @param RefundTransactionRepositoryInterface  $refundTransactionRepository
+     * @param array                                 $data
      */
     public function __construct(
-        Template\Context $context,
+        Context $context,
         Registry $coreRegistry,
         TransactionRepositoryInterface $transactionRepository,
         RefundTransactionRepositoryInterface $refundTransactionRepository,
@@ -96,15 +91,15 @@ class Popup extends Template
     /**
      * @return null|OrderInterface
      */
-    protected function getCurrentOrder()
+    public function getCurrentOrder()
     {
         return $this->coreRegistry->registry('current_order');
     }
 
     /**
-     * @return \BlueMedia\BluePayment\Api\Data\TransactionInterface|null
+     * @return TransactionInterface|null
      */
-    protected function getCurrentOrderTransaction()
+    public function getCurrentOrderTransaction()
     {
         $order       = $this->getCurrentOrder();
         return $this->transactionRepository->getSuccessTransactionFromOrder($order);

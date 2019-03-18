@@ -9,6 +9,7 @@ use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
@@ -25,43 +26,32 @@ class Create extends Action
     const BLIK_STATUS_SUCCESS = 'SUCCESS';
     const BLIK_CODE_LENGTH = 6;
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\PaymentFactory
-     */
-    protected $paymentFactory;
+    /** @var PaymentFactory */
+    public $paymentFactory;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    protected $orderFactory;
+    /** @var OrderFactory */
+    public $orderFactory;
 
-    /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    protected $session;
+    /** @var Session */
+    public $session;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    /** @var LoggerInterface */
+    public $logger;
 
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
+    /** @var ScopeConfigInterface */
+    public $scopeConfig;
 
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
-    protected $orderSender;
+    /** @var OrderSender */
+    public $orderSender;
 
     /** @var Data */
-    protected $helper;
+    public $helper;
 
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
+    /** @var JsonFactory */
+    public $resultJsonFactory;
+
+    /** @var Collection  */
+    public $collection;
 
     /**
      * Create constructor.
@@ -74,6 +64,8 @@ class Create extends Action
      * @param Logger               $logger
      * @param ScopeConfigInterface $scopeConfig
      * @param Data                 $helper
+     * @param JsonFactory          $resultJsonFactory
+     * @param Collection           $collection
      */
     public function __construct(
         Context $context,
@@ -84,7 +76,8 @@ class Create extends Action
         Logger $logger,
         ScopeConfigInterface $scopeConfig,
         Data $helper,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory,
+        Collection $collection
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -94,6 +87,7 @@ class Create extends Action
         $this->orderSender       = $orderSender;
         $this->helper            = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->collection        = $collection;
 
         parent::__construct($context);
     }
@@ -132,14 +126,17 @@ class Create extends Action
             $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
 
-            $unchangeableStatuses = explode(',', $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses"));
+            $unchangeableStatuses = explode(
+                ',',
+                $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
+            );
             $statusWaitingPayment = $this->scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
 
             if ($statusWaitingPayment != '') {
                 /**
-                 * @var \Magento\Sales\Model\ResourceModel\Order\Status\Collection $statusCollection
+                 * @var Collection $statusCollection
                  */
-                $statusCollection        = $this->_objectManager->create(Collection::class);
+                $statusCollection  = $this->collection;
                 $orderStatusWaitingState = Order::STATE_NEW;
                 foreach ($statusCollection->joinStates() as $status) {
                     /** @var \Magento\Sales\Model\Order\Status $status */
@@ -151,7 +148,6 @@ class Create extends Action
                 $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
                 $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
             }
-
 
             if (!in_array($order->getStatus(), $unchangeableStatuses)) {
                 $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
@@ -276,7 +272,7 @@ class Create extends Action
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function getCheckout()
+    public function getCheckout()
     {
         return $this->session;
     }
@@ -343,6 +339,8 @@ class Create extends Action
     /**
      * @param $urlGateway
      * @param $params
+     *
+     * @return array
      */
     private function sendRequestBlik($urlGateway, $params)
     {
@@ -382,6 +380,8 @@ class Create extends Action
     /**
      * @param $urlGateway
      * @param $params
+     *
+     * @return array
      */
     private function sendRequestGPay($urlGateway, $params)
     {
