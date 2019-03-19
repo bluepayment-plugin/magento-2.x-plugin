@@ -192,7 +192,8 @@ class Refunds extends Data
         if (!empty($amount)) {
             $data['Amount'] = number_format((float)$amount, 2, '.', '');
         }
-        $hashSeparator = $this->getConfigValue('hash_separator') ?? self::DEFAULT_HASH_SEPARATOR;
+        $hashSeparator = $this->getConfigValue('hash_separator') ? $this->getConfigValue('hash_separator') :
+            self::DEFAULT_HASH_SEPARATOR;
         $data['Hash']  = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
 
         try {
