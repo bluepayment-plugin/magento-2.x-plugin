@@ -1,0 +1,47 @@
+<?php
+
+use BlueMedia\BluePayment\Block\Customer\Card;
+
+/** @var Card $block */
+?>
+
+<tr>
+    <td data-th="<?= $block->escapeHtml(__('Card Number')) ?>" class="col card-number">
+        <?= /* @noEscape */ $block->getNumber() ?>
+    </td>
+    <td data-th="<?= $block->escapeHtml(__('Expiration Date')) ?>" class="col card-expire">
+        <?= $block->escapeHtml($block->getExpDate()) ?>
+    </td>
+    <td data-th="<?= $block->escapeHtml(__('Type')) ?>" class="col card-type">
+        <?= $block->escapeHtml($block->getIssuer()) ?>
+    </td>
+    <td data-th="<?= $block->escapeHtml(__('Actions')) ?>" class="col actions">
+        <form
+            class="form"
+            action="<?= $block->escapeUrl($block->getUrl('bluepayment/customer/deletecard')) ?>"
+            method="post"
+        >
+            <?= $block->getBlockHtml('formkey') ?>
+            <input
+                name="card_index"
+                value="<?= /* @noEscape */ $block->getCardIndex() ?>"
+                type="hidden"/>
+
+            <button type="submit"
+                class="action delete"
+                data-mage-init='{
+                    "BlueMedia_BluePayment/js/customer/deleteWidget":{
+                        "type": "popup",
+                        "modalClass": "my-credit-cards-popup",
+                        "toggleEvent": "click",
+                        "title": "<?= $block->escapeHtml(__('Delete')) ?>",
+                        "content": "<?=
+                            /* @noEscape */ __('Are you sure you want to delete this card: ').$block->getNumber()
+                        .'?' ?>"
+                    }
+                }'>
+                <span><?= $block->escapeHtml(__('Delete')) ?></span>
+            </button>
+        </form>
+    </td>
+</tr>

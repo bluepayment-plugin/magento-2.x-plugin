@@ -176,6 +176,7 @@ class Gateways extends Data
 
             foreach ($gatewayXMLObjects as $gatewayXMLObject) {
                 $gateway = (array)$gatewayXMLObject;
+
                 if (isset($gateway['gatewayID'])
                     && isset($gateway['gatewayName'])
                     && isset($gateway['gatewayType'])

@@ -25,6 +25,7 @@
                 <gpay_gateway>1512</gpay_gateway>
                 <transaction_life_hours></transaction_life_hours>
                 <info_automatic_payment>You will be redirected to the Blue Media secure service payment after submitting the order.</info_automatic_payment>
+                <autopay_agreement>Wyrażam zgodnę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Blue Media S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
             </bluepayment>
         </payment>
     </default>

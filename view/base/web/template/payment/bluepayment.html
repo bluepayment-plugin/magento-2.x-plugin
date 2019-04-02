@@ -138,6 +138,44 @@
             <!--/ko-->
         </div>
         <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
+            <!-- ko if: $data.is_autopay -->
+            <fieldset class="fieldset">
+                <div class="payment-method-note">
+                    <div>
+                        <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
+                            <li data-bind="attr:{class: 'payment-option'}">
+                                <input required
+                                       data-bind="
+                                            attr:{id: 'bluepayment_card_' + index, value: index },
+                                            click: $parents[1].selectAutopayCardIndex.bind($parents[1])
+                                       "
+                                       name="payment_method_bluepayment_card_index"
+                                       class="radio"
+                                       type="radio" />
+
+                                <label data-bind="attr:{for: 'bluepayment_card_' + index }">
+                                    <img data-bind="attr:{src: logo}" class="payment-logo"/>
+
+                                    <span class="details">
+                                        <span class="title" data-bind="text: number"></span>
+                                    </span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="autopay-card-error mage-error" generated="yes" style="display: none; clear: both;">Musisz wybrać kartę płatniczą.</div>
+                </div>
+            </fieldset>
+            
+            <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
+                <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement">
+                <label for="autopay-agreement">
+                    <span data-bind="text: $parent.bluePaymentAutopayAgreement"></span>
+                </label>
+                <div class="autopay-agreement-error mage-error" generated="yes" style="display: none; clear: both;">Musisz wyrazić zgodę.</div>
+            </div>
+            <!--/ko-->
+
             <div class="payment-method-billing-address">
                 <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
                 <!-- ko template: getTemplate() --><!-- /ko -->

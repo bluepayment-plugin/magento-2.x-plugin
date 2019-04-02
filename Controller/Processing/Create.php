@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -118,6 +119,7 @@ class Create extends Action
             $cardGateway = $this->scopeConfig->getValue("payment/bluepayment/card_gateway");
             $blikGateway = $this->scopeConfig->getValue('payment/bluepayment/blik_gateway');
             $gpayGateway = $this->scopeConfig->getValue('payment/bluepayment/gpay_gateway');
+            $autopayGateway = $this->scopeConfig->getValue('payment/bluepayment/autopay_gateway');
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
@@ -131,6 +133,7 @@ class Create extends Action
             }
             $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
+            $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
 
             $unchangeableStatuses = explode(',', $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses"));
             $statusWaitingPayment = $this->scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
@@ -151,7 +154,6 @@ class Create extends Action
                 $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
                 $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
             }
-
 
             if (!in_array($order->getStatus(), $unchangeableStatuses)) {
                 $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
@@ -254,6 +256,22 @@ class Create extends Action
                 $resultJson = $this->resultJsonFactory->create();
                 $resultJson->setData($result);
                 return $resultJson;
+            }
+
+            if ($autopayGateway == $gatewayId) {
+                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, null, null, $cardIndex);
+                $result = $this->sendAutopayRequest($payment->getUrlGateway(), $params);
+
+                if ($result['redirectUrl'] !== null) {
+                    $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
+                    return $this->getResponse()->setRedirect($result['redirectUrl']);
+                }
+
+                if ($result['paymentStatus'] == Payment::PAYMENT_STATUS_SUCCESS) {
+                    return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                }
+
+                return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
             }
 
             $url = $this->_url->getUrl(
@@ -414,6 +432,47 @@ class Create extends Action
             'orderID' => $orderID,
             'remoteID' => $remoteID,
             'paymentStatus' => $paymentStatus,
+            'redirectUrl' => $redirectUrl
+        ];
+
+        return $responseParams;
+    }
+
+    private function sendAutopayRequest($urlGateway, $params)
+    {
+        $fields = (is_array($params)) ? http_build_query($params) : $params;
+
+        $curl = curl_init($urlGateway);
+        if (array_key_exists('ClientHash', $params)){
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
+        } else{
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        }
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+        $curlResponse = curl_exec($curl);
+        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $response = curl_getinfo($curl);
+        curl_close($curl);
+
+        $xml = simplexml_load_string($curlResponse);
+
+        $paymentStatus = (string) $xml->status;
+        $orderID = (string) $xml->orderID;
+        $remoteID = (string) $xml->remoteID;
+        $hash = (string) $xml->hash;
+        $confirmation = property_exists($xml, 'confirmation') ? (string) $xml->confirmation : null;
+        $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+
+        $this->logger->info('CREATE:' . __LINE__, ['$curlResponse' => $curlResponse]);
+
+        $responseParams = [
+            'orderID' => $orderID,
+            'remoteID' => $remoteID,
+            'paymentStatus' => $paymentStatus,
+            'confirmation' => $confirmation,
             'redirectUrl' => $redirectUrl
         ];
 

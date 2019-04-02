@@ -1,0 +1,30 @@
+<?php
+// @codingStandardsIgnoreFile
+/** @var \BlueMedia\BluePayment\Block\Customer\Cards $block */
+$cards = $block->getCards();
+?>
+<?php if (count($cards) !== 0): ?>
+    <div class="table-wrapper my-credit-cards">
+        <table class="data table table-credit-cards" id="my-orders-table">
+            <caption class="table-caption"><?= /* @noEscape */ __('Stored Payment Cards') ?></caption>
+            <thead>
+            <tr>
+                <th scope="col" class="col card-number"><?= /* @noEscape */ __('Card Number') ?></th>
+                <th scope="col" class="col expire"><?= /* @noEscape */ __('Expiration Date') ?></th>
+                <th scope="col" class="col card-type"><?= /* @noEscape */ __('Type') ?></th>
+                <th scope="col" class="col actions">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($cards as $card) {
+                echo $block->renderCardHtml($card);
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
+
+<?php else: ?>
+    <div class="message info empty"><span><?= /* @noEscape */ __('You have no stored payment cards.') ?></span></div>
+<?php endif ?>
