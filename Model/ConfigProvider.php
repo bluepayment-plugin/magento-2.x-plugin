@@ -104,10 +104,13 @@ class ConfigProvider implements ConfigProviderInterface
             /** @var Gateways $gateway */
             foreach ($gatewaysCollection as $gateway) {
                 if ($gateway->isActive()) {
-                    if ($gateway->getIsSeparatedMethod()) {
-                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
-                    } else {
-                        $result[] = $this->prepareGatewayStructure($gateway);
+                    // AutoPay only for logger users
+                    if ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->session->isLoggedIn()) {
+                        if ($gateway->getIsSeparatedMethod()) {
+                            $resultSeparated[] = $this->prepareGatewayStructure($gateway);
+                        } else {
+                            $result[] = $this->prepareGatewayStructure($gateway);
+                        }
                     }
                 }
             }
