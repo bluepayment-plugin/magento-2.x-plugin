@@ -367,6 +367,10 @@ class Payment extends AbstractMethod
                         $array['ClientHash'] = $card->getClientHash();
                     }
 
+                    if ($automatic === true) {
+                        $array['ScreenType'] = self::IFRAME_GATEWAY_ID;
+                    }
+
                     $array = $this->sortParams($array);
 
                     $hashArray = array_values($array);

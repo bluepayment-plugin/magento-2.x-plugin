@@ -260,6 +260,19 @@ class Create extends Action
 
             if ($autopayGateway == $gatewayId) {
                 $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, null, null, $cardIndex);
+
+                if ($automatic === true) {
+                    $hashData  = [$serviceId, $orderId, $sharedKey];
+                    $redirectHash = $this->helper->generateAndReturnHash($hashData);
+
+                    $result = $this->prepareIframeJsonResponse($payment->getUrlGateway(), $redirectHash, $params);
+
+                    /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+                    $resultJson = $this->resultJsonFactory->create();
+                    $resultJson->setData($result);
+                    return $resultJson;
+                }
+
                 $result = $this->sendAutopayRequest($payment->getUrlGateway(), $params);
 
                 if ($result['redirectUrl'] !== null) {

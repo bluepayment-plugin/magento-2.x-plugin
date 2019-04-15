@@ -186,16 +186,24 @@ define([
                     return null;
                 });
             },
-            isIframeSelected: function() {
-                return this.selectedPaymentObject.is_iframe === true && this.selectedPaymentObject.is_separated_method === "1";
+            isIframeSelected: function () {
+                if (this.isAutopaySelected()) {
+                    var cardIndex = checkoutData.getCardIndex();
+
+                    if (cardIndex != -1) {
+                        return false;
+                    }
+                }
+
+                return this.selectedPaymentObject.is_iframe === true && this.selectedPaymentObject.is_separated_method == "1";
             },
-            isBlikSelected: function() {
-                return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method === "1";
+            isBlikSelected: function () {
+                return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method == "1";
             },
-            isGPaySelected: function() {
+            isGPaySelected: function () {
                 return this.selectedPaymentObject.is_gpay === true;
             },
-            isAutopaySelected: function() {
+            isAutopaySelected: function () {
                 return this.selectedPaymentObject.is_autopay === true;
             },
             /**
@@ -276,7 +284,9 @@ define([
                             self.ordered = true;
                             self.afterPlaceOrder();
 
-                            callback.call(this);
+                            if (typeof callback == 'function') {
+                                callback.call(this);
+                            }
 
                             if (self.redirectAfterPlaceOrder) {
                                 redirectOnSuccessAction.execute();
@@ -324,6 +334,11 @@ define([
                     + '?gateway_id='
                     + this.selectedPaymentObject.gateway_id
                     + '&automatic=true';
+
+                if (this.isAutopaySelected()) {
+                    urlResponse += '&card_index=' + checkoutData.getCardIndex();
+                }
+                console.log(urlResponse);
 
                 $.ajax({
                     showLoader: true,
