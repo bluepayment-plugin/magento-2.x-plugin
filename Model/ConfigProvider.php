@@ -170,7 +170,9 @@ class ConfigProvider implements ConfigProviderInterface
                 $isBlik = true;
                 break;
             case self::GPAY_GATEWAY_ID:
-                $isGPay = true;
+                if ($this->scopeConfig->getValue('payment/bluepayment/gpay/direct') == 1) {
+                    $isGPay = true;
+                }
                 break;
         }
 
