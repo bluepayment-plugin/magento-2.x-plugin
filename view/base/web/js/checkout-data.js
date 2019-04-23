@@ -30,7 +30,7 @@ define([
             obj.blueMediaSelectedPaymentMethod = data;
             saveData(obj);
         },
-        getBlueMediaPaymentMethod: function() {
+        getBlueMediaPaymentMethod: function () {
             return getData().blueMediaSelectedPaymentMethod;
         },
         setIndividualGatewayFlag: function (data) {
@@ -40,6 +40,14 @@ define([
         },
         getIndividualGatewayFlag: function () {
             return getData().individual_gateway;
+        },
+        setCardIndex: function (index) {
+            var obj = getData();
+            obj.card_index = index;
+            saveData(obj);
+        },
+        getCardIndex: function () {
+            return getData().card_index;
         }
     });
 });

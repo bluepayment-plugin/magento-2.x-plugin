@@ -61,6 +61,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(), '2.6.0') < 0) {
             $this->updateConfigs($setup);
         }
+
+        if (version_compare($context->getVersion(), '2.7.0') < 0) {
+            $this->addCardTable($setup);
+        }
     }
 
     /**
@@ -408,5 +412,49 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $this->resourceConfig->deleteConfig($path.'_usd/shared_key', $scope, $scopeId);
 
         $installer->endSetup();
+    }
+
+    /**
+     * @param $installer
+     */
+    private function addCardTable(SchemaSetupInterface $installer)
+    {
+        $table = $installer->getConnection()->newTable(
+            $installer->getTable('blue_card')
+        )
+            ->addColumn('card_id', Table::TYPE_INTEGER, null, ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true], 'Entity ID')
+            ->addColumn('customer_id', Table::TYPE_INTEGER, null, ['unsigned' => true, 'nullable' => false], 'Customer ID')
+            ->addColumn('card_index', Table::TYPE_INTEGER, null, ['unsigned' => true, 'nullable' => false], 'Card index')
+            ->addColumn('validity_year', Table::TYPE_TEXT, 4, ['nullable' => false], 'Validity year')
+            ->addColumn('validity_month', Table::TYPE_TEXT, 2, ['nullable' => false], 'Validity month')
+            ->addColumn('issuer', Table::TYPE_TEXT, 100, ['nullable' => false], 'Card issuer')
+            ->addColumn('mask', Table::TYPE_TEXT, null, ['nullable' => false], 'Card mask')
+            ->addColumn('client_hash', Table::TYPE_TEXT, 64, ['nullable' => false,], 'Client hash')
+            ->addIndex(
+                $installer->getIdxName(
+                    'blue_card_client_hash_unique_index',
+                    ['client_hash'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['client_hash'],
+                ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
+            )
+            ->addForeignKey(
+                $installer->getFkName(
+                    $installer->getTable('blue_card'),
+                    'customer_id',
+                    $installer->getTable('customer_entity'),
+                    'entity_id'
+                ),
+                'customer_id',
+                $installer->getTable('customer_entity'),
+                'entity_id',
+                Table::ACTION_CASCADE
+            )
+            ->setOption('type', 'INNODB')
+            ->setOption('charset', 'utf8')
+            ->setOption('collate', 'utf8_general_ci');
+
+        $installer->getConnection()->createTable($table);
     }
 }

@@ -62,12 +62,19 @@ class Status extends Action
         try {
             $params = $this->getRequest()->getParams();
             $this->logger->info('STATUS:' . __LINE__, ['params' => $params]);
+
             if (array_key_exists('transactions', $params)) {
                 $paramTransactions  = $params['transactions'];
                 $base64transactions = base64_decode($paramTransactions);
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
                 $this->paymentFactory->create()->processStatusPayment($simpleXml);
+            } elseif (array_key_exists('recurring', $params)) {
+                $paramRecurring = $params['recurring'];
+                $base64recurring = base64_decode($paramRecurring);
+                $simpleXml = simplexml_load_string($base64recurring);
+                $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
+                $this->paymentFactory->create()->processRecurring($simpleXml);
             }
         } catch (\Exception $e) {
             $this->logger->critical('BlueMedia: ' . $e->getMessage());

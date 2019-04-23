@@ -4,10 +4,13 @@ namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
@@ -39,12 +42,14 @@ class Payment extends AbstractMethod
     const PAYMENT_STATUS_SUCCESS = 'SUCCESS';
     const PAYMENT_STATUS_FAILURE = 'FAILURE';
 
-
     /**
      * Stałe potwierdzenia autentyczności transakcji
      */
     const TRANSACTION_CONFIRMED    = "CONFIRMED";
     const TRANSACTION_NOTCONFIRMED = "NOTCONFIRMED";
+
+    private $orderParams = ['ServiceID', 'OrderID', 'Amount', 'GatewayID', 'Currency',
+        'CustomerEmail', 'CustomerIP', 'RecurringAcceptanceState', 'RecurringAction', 'ClientHash', 'ScreenType'];
 
     /**
      * @var array
@@ -106,6 +111,18 @@ class Payment extends AbstractMethod
      */
     protected $orderFactory;
 
+    /** @var CardFactory */
+    private $cardFactory;
+
+    /** @var CardCollectionFactory */
+    private $cardCollectionFactory;
+
+    /** @var CardResource */
+    private $cardResource;
+
+    /** @var EncryptorInterface */
+    private $encryptor;
+
     /**
      * @var \BlueMedia\BluePayment\Helper\Data
      */
@@ -153,6 +170,9 @@ class Payment extends AbstractMethod
      * @param \Magento\Payment\Model\Method\Logger                              $logger
      * @param \BlueMedia\BluePayment\Model\TransactionFactory                   $transactionFactory
      * @param \BlueMedia\BluePayment\Api\TransactionRepositoryInterface         $transactionRepository
+     * @param CardFactory                                                       $cardFactory
+     * @param CardCollectionFactory                                             $cardCollectionFactory
+     * @param CardResource                                                      $cardResource
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null      $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null                $resourceCollection
      * @param array                                                             $data
@@ -172,6 +192,10 @@ class Payment extends AbstractMethod
         Logger                         $logger,
         TransactionFactory             $transactionFactory,
         TransactionRepositoryInterface $transactionRepository,
+        CardFactory                    $cardFactory,
+        CardCollectionFactory          $cardCollectionFactory,
+        CardResource                   $cardResource,
+        EncryptorInterface             $encryptor,
         AbstractResource               $resource = null,
         AbstractDb                     $resourceCollection = null,
         array                          $data = []
@@ -181,6 +205,10 @@ class Payment extends AbstractMethod
         $this->url                     = $url;
         $this->helper                  = $helper;
         $this->orderFactory            = $orderFactory;
+        $this->cardFactory             = $cardFactory;
+        $this->cardCollectionFactory   = $cardCollectionFactory;
+        $this->cardResource            = $cardResource;
+        $this->encryptor               = $encryptor;
 
         parent::__construct(
             $context,
@@ -226,14 +254,22 @@ class Payment extends AbstractMethod
     /**
      * Tablica z parametrami do wysłania metodą GET do bramki
      *
-     * @param object $order
+     * @param Order $order
      * @param int    $gatewayId
-     * @param string $authorizationCode
+     * @param bool   $automatic
+     * @param string|int $authorizationCode
+     * @param string $paymentToken
+     *
      * @return array
      */
-    public function getFormRedirectFields($order, $gatewayId = 0, $automatic = false, $authorizationCode = 0,
-        $paymentToken = '')
-    {
+    public function getFormRedirectFields(
+        $order,
+        $gatewayId = 0,
+        $automatic = false,
+        $authorizationCode = 0,
+        $paymentToken = '',
+        $cardIndex = -1
+    ) {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
         $currency      = $order->getOrderCurrencyCode();
@@ -244,6 +280,7 @@ class Payment extends AbstractMethod
         $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
         $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
         $gpayGateway   = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
+        $autopayGateway = $this->_scopeConfig->getValue('payment/bluepayment/autopay_gateway');
 
         $customerEmail = $order->getCustomerEmail();
         $validityTime  = $this->getTransactionLifeHours();
@@ -304,6 +341,46 @@ class Payment extends AbstractMethod
                     ];
                 }
 
+                /* Automatic payment */
+                if ($autopayGateway == $gatewayId) {
+                    $array = [
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Amount' => $amount,
+                        'GatewayID' => $gatewayId,
+                        'Currency' => $currency,
+                        'CustomerEmail' => $customerEmail,
+                    ];
+
+                    /** @var Card $card */
+                    $card = $this->cardCollectionFactory
+                        ->create()
+                        ->addFieldToFilter('card_index', $cardIndex)
+                        ->addFieldToFilter('customer_id', $order->getCustomerId())
+                        ->getFirstItem();
+
+                    if ($cardIndex == -1 || $card == null) {
+                        $array['RecurringAcceptanceState'] = 'ACCEPTED';
+                        $array['RecurringAction'] = 'INIT_WITH_PAYMENT';
+                    } else {
+                        $array['RecurringAction'] = 'MANUAL';
+                        $array['ClientHash'] = $card->getClientHash();
+                    }
+
+                    if ($automatic === true) {
+                        $array['ScreenType'] = self::IFRAME_GATEWAY_ID;
+                    }
+
+                    $array = $this->sortParams($array);
+
+                    $hashArray = array_values($array);
+                    $hashArray[] = $sharedKey;
+
+                    $array['Hash'] = $this->helper->generateAndReturnHash($hashArray);
+
+                    return $array;
+                }
+
                 if ($automatic === true && $blikGateway == $gatewayId) {
                     $hashData  = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $authorizationCode, $sharedKey];
                     $hashLocal = $this->helper->generateAndReturnHash($hashData);
@@ -354,8 +431,19 @@ class Payment extends AbstractMethod
             }
         }
 
-
         return $params;
+    }
+
+    public function sortParams(array $params)
+    {
+        $ordered = [];
+        foreach ($this->orderParams as $value) {
+            if (array_key_exists($value, $params)) {
+                $ordered[$value] = $params[$value];
+                unset($params[$value]);
+            }
+        }
+        return $ordered + $params;
     }
 
     /**
@@ -391,15 +479,89 @@ class Payment extends AbstractMethod
     }
 
     /**
+     * Procesuje zapis/usunięcie automatycznej płatności
+     *
+     * @param \SimpleXMLElement $response
+     */
+    public function processRecurring($response)
+    {
+        $currency = $response->transaction->currency;
+
+        if ($this->_validAllTransaction($response, $currency)) {
+            switch ($response->getName()) {
+                case 'recurringActivation':
+                    return $this->saveCardData($response);
+                case 'recurringDeactivation':
+                    return $this->deleteCardData($response);
+                default:
+                    break;
+            }
+        }
+    }
+
+    private function saveCardData($data)
+    {
+        $orderId = $data->transaction->orderID;
+
+        /** @var Order $order */
+        $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+        $customerId = $order->getCustomerId();
+
+        $status = self::TRANSACTION_NOTCONFIRMED;
+        $clientHash = (string)$data->recurringData->clientHash;
+
+        if ($customerId) {
+            $cardData = $data->cardData;
+
+            $cardCollection = $this->cardCollectionFactory->create();
+            $card = $cardCollection->getItemByColumnValue('card_index', (int)$cardData->index);
+
+            if ($card === null) {
+                $card = $this->cardFactory->create();
+                $card->setData('card_index', (int)$cardData->index);
+            }
+
+            $card->setData('customer_id', $customerId);
+            $card->setData('validity_year', $cardData->validityYear);
+            $card->setData('validity_month', $cardData->validityMonth);
+            $card->setData('issuer', $cardData->issuer);
+            $card->setData('mask', $cardData->mask);
+            $card->setData('client_hash', $clientHash);
+
+            $this->cardResource->save($card);
+            $status = self::TRANSACTION_CONFIRMED;
+        }
+
+        return $this->recurringResponse($clientHash, $status);
+    }
+
+    private function deleteCardData($data)
+    {
+        $clientHash = (string)$data->recurringData->clientHash;
+
+        $cardCollection = $this->cardCollectionFactory->create();
+        $card = $cardCollection->getItemByColumnValue('client_hash', $clientHash);
+
+        if ($card !== null) {
+            $this->cardResource->delete($card);
+        }
+
+        $this->recurringResponse($clientHash, self::TRANSACTION_CONFIRMED);
+    }
+
+    /**
      * Waliduje zgodność otrzymanego XML'a
      *
      * @param $response
+     * @param string $currency
      *
      * @return bool
      */
-    public function _validAllTransaction($response)
+    public function _validAllTransaction($response, $currency = null)
     {
-        $currency = $response->transactions->transaction->currency;
+        if ($currency === null) {
+            $currency = $response->transactions->transaction->currency;
+        }
 
         $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
         $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
@@ -409,17 +571,15 @@ class Payment extends AbstractMethod
         if ($serviceId != $response->serviceID) {
             return false;
         }
-        $this->_checkHashArray   = [];
-        $hash                    = (string)$response->hash;
-        $this->_checkHashArray[] = (string)$response->serviceID;
 
-        foreach ($response->transactions->transaction as $trans) {
-            $this->_checkInList($trans);
-        }
+        $this->_checkHashArray = [];
+        $hash = (string)$response->hash;
+        $response->hash = null;
+
+        $this->_checkInList($response);
         $this->_checkHashArray[] = $sharedKey;
-        $connectedFields = implode($hashSeparator, $this->_checkHashArray);
 
-        return hash($hashAlgorithm, $connectedFields) == $hash;
+        return hash($hashAlgorithm, implode($hashSeparator, $this->_checkHashArray)) == $hash;
     }
 
     /**
@@ -653,6 +813,40 @@ class Payment extends AbstractMethod
 
         $domConfirmation = $dom->createElement('confirmation', $confirmation);
         $domTransactionConfirmed->appendChild($domConfirmation);
+
+        $domHash = $dom->createElement('hash', $hashConfirmation);
+        $confirmationList->appendChild($domHash);
+
+        $dom->appendChild($confirmationList);
+
+        echo $dom->saveXML();
+    }
+
+    private function recurringResponse($clientHash, $status)
+    {
+        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment/pln/service_id");
+        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment/pln/shared_key");
+        $hashData = [$serviceId, $clientHash, $status, $sharedKey];
+        $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+
+        $confirmationList = $dom->createElement('confirmationList');
+
+        $domServiceID = $dom->createElement('serviceID', $serviceId);
+        $confirmationList->appendChild($domServiceID);
+
+        $recurringConfirmations = $dom->createElement('recurringConfirmations');
+        $confirmationList->appendChild($recurringConfirmations);
+
+        $recurringConfirmed = $dom->createElement('recurringConfirmed');
+        $recurringConfirmations->appendChild($recurringConfirmed);
+
+        $clientHash = $dom->createElement('clientHash', $clientHash);
+        $recurringConfirmed->appendChild($clientHash);
+
+        $domConfirmation = $dom->createElement('confirmation', $status);
+        $recurringConfirmed->appendChild($domConfirmation);
 
         $domHash = $dom->createElement('hash', $hashConfirmation);
         $confirmationList->appendChild($domHash);

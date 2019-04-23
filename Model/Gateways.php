@@ -21,7 +21,6 @@ use Magento\Framework\Model\AbstractModel;
  * @method string getGatewayType()
  * @method string getGatewayLogoUrl()
  * @method int getUseOwnLogo()
- * @method int getIsSeparatedMethod()
  * @method string getGatewayLogoPath()
  *
  * @package BlueMedia\BluePayment\Model
@@ -31,6 +30,8 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     const FORCE_DISABLE   = 1;
     const STATUS_ACTIVE   = 1;
     const STATUS_INACTIVE = 0;
+
+    const AUTOPAY_GATEWAY_ID = 1503;
 
     /**
      *
@@ -77,5 +78,17 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     public function isActive()
     {
         return $this->getGatewayStatus() == self::STATUS_ACTIVE && $this->getForceDisable() != self::FORCE_DISABLE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsSeparatedMethod()
+    {
+        if ($this->getGatewayId() == self::AUTOPAY_GATEWAY_ID) {
+            return true;
+        }
+
+        return $this->getData('is_separated_method');
     }
 }

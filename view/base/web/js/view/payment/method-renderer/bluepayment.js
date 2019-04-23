@@ -30,7 +30,10 @@ define([
             renderSeparatedOptions: window.checkoutConfig.payment.bluePaymentSeparated,
             bluePaymentAcceptorId: window.checkoutConfig.payment.bluePaymentAcceptorId,
             bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
+            bluePaymentCards: window.checkoutConfig.payment.bluePaymentCards,
+            bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluePaymentAutopayAgreement,
             selectedPaymentObject: {},
+            selectedAutopayGatewayIndex: null,
             validationFailed: ko.observable(false),
             activeMethod: ko.computed(function () {
                 if (checkoutData.getBlueMediaPaymentMethod() && quote.paymentMethod()) {
@@ -93,15 +96,15 @@ define([
                     }
                 };
 
-                PayBmCheckout.transactionSuccess = function(status) {
+                PayBmCheckout.transactionSuccess = function (status) {
                     window.location.href = redirectUrl;
                 };
 
-                PayBmCheckout.transactionDeclined = function(status) {
+                PayBmCheckout.transactionDeclined = function (status) {
                     // window.location.href = redirectUrl;
                 };
 
-                PayBmCheckout.transactionError = function(status) {
+                PayBmCheckout.transactionError = function (status) {
                     // window.location.href = redirectUrl;
                 };
 
@@ -139,6 +142,18 @@ define([
 
                 return true;
             },
+            selectAutopayCardIndex: function (card) {
+                this.selectedAutopayGatewayIndex = card.index;
+
+                if (card.index === -1) {
+                    $('.autopay-agreement').show();
+                } else {
+                    $('.autopay-agreement').hide();
+                }
+
+                $('.autopay-card-error').hide();
+                return true;
+            },
             setBlueMediaGatewayMethod: function (value) {
                 this.validationFailed(false);
                 this.selectedPaymentObject = value;
@@ -164,7 +179,6 @@ define([
                             }
 
                             return false;
-
                         } else {
                             return false;
                         }
@@ -172,19 +186,46 @@ define([
                     return null;
                 });
             },
-            isIframeSelected: function() {
-                return this.selectedPaymentObject.is_iframe === true && this.selectedPaymentObject.is_separated_method === "1";
+            isIframeSelected: function () {
+                if (this.isAutopaySelected()) {
+                    var cardIndex = checkoutData.getCardIndex();
+
+                    if (cardIndex != -1) {
+                        return false;
+                    }
+                }
+
+                return this.selectedPaymentObject.is_iframe === true && this.selectedPaymentObject.is_separated_method == "1";
             },
-            isBlikSelected: function() {
-                return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method === "1";
+            isBlikSelected: function () {
+                return this.selectedPaymentObject.is_blik === true && this.selectedPaymentObject.is_separated_method == "1";
             },
-            isGPaySelected: function() {
+            isGPaySelected: function () {
                 return this.selectedPaymentObject.is_gpay === true;
+            },
+            isAutopaySelected: function () {
+                return this.selectedPaymentObject.is_autopay === true;
             },
             /**
              * @return {Boolean}
              */
             validate: function () {
+                if (this.isAutopaySelected()) {
+                    var card_index = jQuery("input[name='payment_method_bluepayment_card_index']:checked").val();
+
+                    if (card_index !== undefined) {
+                        checkoutData.setCardIndex(card_index);
+
+                        if (card_index == -1 && !jQuery('#autopay-agreement').is(':checked')) {
+                            $('.autopay-agreement-error').show();
+                            return false;
+                        }
+                    } else {
+                        $('.autopay-card-error').show();
+                        return false;
+                    }
+                }
+
                 if (this.isGPaySelected()) {
                     this.callGPayPayment();
                     return false;
@@ -239,18 +280,18 @@ define([
                             function () {
                                 self.isPlaceOrderActionAllowed(true);
                             }
-                        ).done(
-                        function () {
+                        ).done(function () {
                             self.ordered = true;
                             self.afterPlaceOrder();
 
-                            callback.call(this);
+                            if (typeof callback == 'function') {
+                                callback.call(this);
+                            }
 
                             if (self.redirectAfterPlaceOrder) {
                                 redirectOnSuccessAction.execute();
                             }
-                        }
-                    );
+                        });
 
                     return true;
                 } else {
@@ -280,13 +321,24 @@ define([
                     return false;
                 }
 
-                window.location.href = url.build('bluepayment/processing/create') + '?gateway_id=' + this.selectedPaymentObject.gateway_id;
+                var href = url.build('bluepayment/processing/create') + '?gateway_id=' + this.selectedPaymentObject.gateway_id;
+
+                if (this.isAutopaySelected()) {
+                    href += '&card_index=' + checkoutData.getCardIndex();
+                }
+
+                window.location.href = href;
             },
-            callIframePayment: function() {
+            callIframePayment: function () {
                 var urlResponse = url.build('bluepayment/processing/create')
                     + '?gateway_id='
                     + this.selectedPaymentObject.gateway_id
                     + '&automatic=true';
+
+                if (this.isAutopaySelected()) {
+                    urlResponse += '&card_index=' + checkoutData.getCardIndex();
+                }
+                console.log(urlResponse);
 
                 $.ajax({
                     showLoader: true,
@@ -302,7 +354,7 @@ define([
 
                 return false;
             },
-            callBlikPayment: function() {
+            callBlikPayment: function () {
                 var self = this;
 
                 var urlResponse = url.build('bluepayment/processing/create')
@@ -334,7 +386,7 @@ define([
 
                 return false;
             },
-            handleBlikStatus: function(status, params) {
+            handleBlikStatus: function (status, params) {
                 var self = this;
 
                 if (status === 'PENDING') {
@@ -343,7 +395,7 @@ define([
                         this.blikModal._removeKeyListener();
                     }
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         self.updateBlikStatus(status);
                     }, 2000);
                 } else if (status === 'SUCCESS') {
@@ -360,7 +412,7 @@ define([
                 }
             },
 
-            updateBlikStatus: function() {
+            updateBlikStatus: function () {
                 var urlResponse = url.build('bluepayment/processing/blik');
                 var self = this;
 

@@ -63,19 +63,15 @@
                     <label>Disabled gateways notification Template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
                 </field>
-
-                <field id="title_automatic" translate="label" type="text" sortOrder="540" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Title Automatic Gateway</label>
-                </field>
                 <field id="iframe_payment" translate="label comment" type="select" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Iframe Payment</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <comment><![CDATA[Payment without redirecting to BM gateway.]]></comment>
                 </field>
-                <!--<field id="auto_payment" translate="label comment" type="select" sortOrder="555" showInDefault="1" showInWebsite="0" showInStore="1">-->
-                    <!--<label>Auto Payment</label>-->
-                    <!--<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
-                <!--</field>-->
+
+                <field id="autopay_agreement" translate="label comment" type="editor" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Autopay Agreement</label>
+                </field>
 
                 <group id="pln" translate="label" type="text" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>PLN configuration</label>
