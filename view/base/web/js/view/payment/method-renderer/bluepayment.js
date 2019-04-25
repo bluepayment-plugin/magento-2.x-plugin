@@ -52,6 +52,7 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             }, $('<div />').html('Potwierdź płatność w aplikacji swojego banku.')),
+            blikTimeout: null,
 
             /**
              * Get payment method data
@@ -393,12 +394,23 @@ define([
                     if (this.blikModal.options.isOpen !== true) {
                         this.blikModal.openModal();
                         this.blikModal._removeKeyListener();
+
+                        console.log('setTimeout');
+                        this.blikTimeout = setTimeout(function () {
+                            self.blikModal.closeModal();
+                            $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                            console.log('timeout executed');
+                        }, 120000); /* 2 minutes */
                     }
 
                     setTimeout(function () {
-                        self.updateBlikStatus(status);
+                        if (self.blikModal.options.isOpen) {
+                            self.updateBlikStatus(status);
+                        }
                     }, 2000);
                 } else if (status === 'SUCCESS') {
+                    clearTimeout(self.blikTimeout);
+
                     redirectUrl = url.build('bluepayment/processing/back')
                         + '?ServiceID=' + params.ServiceID
                         + '&OrderID=' + params.OrderID
@@ -407,8 +419,10 @@ define([
 
                     window.location.href = redirectUrl;
                 } else if (status === 'FAILURE') {
+                    clearTimeout(self.blikTimeout);
+
                     this.blikModal.closeModal();
-                    $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                    $('.blik-error').text('Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności.').show();
                 }
             },
 
