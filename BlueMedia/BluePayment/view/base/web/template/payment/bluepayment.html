@@ -1,0 +1,205 @@
+<!--ko if: renderSubOptions.length > 0 || renderSeparatedOptions.length == 0-->
+<div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label data-bind="attr: {'for': getCode()}" class="label">
+            <!-- BM Logo -->
+            <img src=""
+                 data-bind="attr: {alt: $t('Acceptance Mark'), src: logoUrl}"
+                 class="payment-icon"/>
+            <!-- BM Logo -->
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+    <!--ko if: getCode() == isChecked()-->
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <!-- ko if: renderSubOptions.length > 0 -->
+        <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
+            <div class="payment-method-note">
+                <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
+                    <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}">
+                            <input required
+                                   data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+                                   name="payment_method_bluepayment_gateway"
+                                   class="radio"
+                                   data-validate="{'validate-one-required-by-name':true}"
+                                   type="radio"/>
+                            <label data-bind="attr:{for:  $parent.getCode() + gateway_id }">
+                                <img data-bind="attr:{src: logo_url,alt: name}"
+                                     class="payment-logo"/>
+                                <span class="details">
+                                    <span class="title" data-bind="text: name"></span>
+                                    <span class="desc" data-bind="text: description"></span>
+                                </span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <!--/ko-->
+        <!-- ko ifnot: renderSubOptions.length > 0-->
+        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-empty-gateway" data-bind="{visible: validationFailed}">
+            <p><!-- ko i18n: 'No gateway was selected.' --><!-- /ko --></p>
+        </div>
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button class="action primary checkout"
+                        type="submit"
+                        data-bind="
+                        click: placeOrder,
+                        enable: (getCode() == isChecked() && renderSubOptions.length > 0),
+                        attr:{
+                            'data-payment-method-name': $data.index
+                        }"
+                        disabled>
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!--/ko-->
+</div>
+<!--/ko-->
+
+<div id="gpay_button"></div>
+
+<!-- ko if: renderSeparatedOptions.length > 0-->
+<div class="separated-payments-wrapper" data-bind="foreach: renderSeparatedOptions">
+    <div
+         data-bind="
+           attr:{
+             class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card')
+           },
+           css:{'_active': $parent.isSeparatedChecked($data)}
+        ">
+        <div class="payment-method-title field choice">
+            <input type="radio"
+                   name="payment_method_bluepayment_gateway"
+                   class="radio"
+                   data-bind="
+                     attr:{
+                       id:  $parent.getCode() + $data.gateway_id,
+                       value: $data.gateway_id,
+                       class: 'radio ' + ($data.is_blik ? 'payment_method_bluepayment_blik' : '')
+                     },
+                     checked: $parent.isSeparatedChecked($data),
+                     click: $parent.selectPaymentMethodCard.bind($parent),
+                     visible: $parent.isRadioButtonVisible()
+                   "/>
+
+            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
+                <!-- ko ifnot: $data.is_blik -->
+                <img src=""
+                     data-bind="attr: {src: logo_url,alt: name}"
+                     class="payment-icon"/>
+                <!--/ko -->
+
+                <span data-bind="text: name"></span>
+            </label>
+
+            <!-- ko if: $data.is_blik -->
+                <hr style="margin-bottom: 0;">
+
+                <!-- BLIK Logo -->
+                <img src="https://platnosci.bm.pl/pomoc/grafika/509.gif"
+                     class="blik-logo"/>
+                <!-- BLIK Logo -->
+
+                <input type="number"
+                       name="payment_method_bluepayment_code"
+                       class="blik-code"
+                       min="000000"
+                       max="999999"
+                       data-validate="{required:true, 'pattern':'000000'}"
+                       placeholder="Wprowadź kod BLIK" />
+                <div class="blik-error mage-error" generated="yes" style="display: none; clear: both;">Niepoprawny kod BLIK.</div>
+
+                <div style="clear: both;"></div>
+            <!--/ko-->
+        </div>
+        <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
+            <!-- ko if: $data.is_autopay -->
+            <fieldset class="fieldset">
+                <div class="payment-method-note">
+                    <div>
+                        <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
+                            <li data-bind="attr:{class: 'payment-option'}">
+                                <input required
+                                       data-bind="
+                                            attr:{id: 'bluepayment_card_' + index, value: index },
+                                            click: $parents[1].selectAutopayCardIndex.bind($parents[1])
+                                       "
+                                       name="payment_method_bluepayment_card_index"
+                                       class="radio"
+                                       type="radio" />
+
+                                <label data-bind="attr:{for: 'bluepayment_card_' + index }">
+                                    <img data-bind="attr:{src: logo}" class="payment-logo"/>
+
+                                    <span class="details">
+                                        <span class="title" data-bind="text: number"></span>
+                                    </span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="autopay-card-error mage-error" generated="yes" style="display: none; clear: both;">Musisz wybrać kartę płatniczą.</div>
+                </div>
+            </fieldset>
+            
+            <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
+                <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement">
+                <label for="autopay-agreement">
+                    <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
+                </label>
+                <div class="autopay-agreement-error mage-error" generated="yes" style="display: none; clear: both;">Musisz wyrazić zgodę.</div>
+            </div>
+            <!--/ko-->
+
+            <div class="payment-method-billing-address">
+                <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button class="action primary checkout"
+                            type="submit"
+                            data-bind="
+                            click: $parent.placeOrder.bind($parent),
+                            attr:{
+                            'data-payment-method-name': $parent.index + '_'+ $data.bank
+                            }">
+                        <span data-bind="i18n: 'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ko-->
