@@ -25,7 +25,8 @@ if [ $COMPOSER_VERSION == $PACKAGE_VERSION ]; then
       -x *.idea* \
       -x *.git* \
       -x *.DS_Store* \
-      -x *create_package.sh*
+      -x *create_package.sh* \
+      -x *.doc*
 
     echo "======================================================================================================"
     echo "${green}Package ${bold}bm-bluepayment-$PACKAGE_VERSION.zip${normal}${green} created"
