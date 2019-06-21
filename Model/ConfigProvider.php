@@ -8,8 +8,8 @@ use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardColl
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Customer\Model\Session;
-use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 /**
  * Class ConfigProvider

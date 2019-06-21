@@ -2,8 +2,8 @@
 
 namespace BlueMedia\BluePayment\Model;
 
-use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\Model\AbstractModel;
 
 /**
  * Class Card

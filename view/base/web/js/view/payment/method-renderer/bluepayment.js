@@ -55,6 +55,12 @@ define([
             blikTimeout: null,
 
             /**
+             * Fix for change
+             * https://github.com/magento/magento2/commit/d48060e82e286e69137ba784a61d262914d19765#diff-fc9fca2d61f78cb2b5297e08dcd9eb06
+             */
+            blueMediaPaymentMethod: null,
+
+            /**
              * Get payment method data
              */
             getData: function () {
@@ -164,12 +170,24 @@ define([
             },
             isChecked: ko.computed(function () {
                 var paymentMethod = quote.paymentMethod();
+
                 if (paymentMethod) {
                     return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
                 }
                 return null;
             }),
             isSeparatedChecked: function (context) {
+                if (
+                    !checkoutData.getBlueMediaPaymentMethod()
+                    && this.blueMediaPaymentMethod
+                    && this.selectedPaymentObject
+                    && this.blueMediaPaymentMethod.gateway_id == this.selectedPaymentObject.gateway_id
+                ) {
+                    // quote.setBlueMediaPaymentMethod(this.selectedPaymentObject);
+                    checkoutData.setBlueMediaPaymentMethod(this.selectedPaymentObject);
+                    checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
+                }
+
                 return ko.pureComputed(function () {
                     var paymentMethod = quote.paymentMethod();
                     var individualFlag = checkoutData.getIndividualGatewayFlag();
@@ -257,6 +275,12 @@ define([
             placeOrder: function (data, event) {
                 var self = this;
 
+                /**
+                 * Fix for change
+                 * https://github.com/magento/magento2/commit/d48060e82e286e69137ba784a61d262914d19765#diff-fc9fca2d61f78cb2b5297e08dcd9eb06
+                 */
+                self.blueMediaPaymentMethod = checkoutData.getBlueMediaPaymentMethod();
+
                 if (event) {
                     event.preventDefault();
                 }
@@ -282,17 +306,17 @@ define([
                                 self.isPlaceOrderActionAllowed(true);
                             }
                         ).done(function () {
-                            self.ordered = true;
-                            self.afterPlaceOrder();
+                        self.ordered = true;
+                        self.afterPlaceOrder();
 
-                            if (typeof callback == 'function') {
-                                callback.call(this);
-                            }
+                        if (typeof callback == 'function') {
+                            callback.call(this);
+                        }
 
-                            if (self.redirectAfterPlaceOrder) {
-                                redirectOnSuccessAction.execute();
-                            }
-                        });
+                        if (self.redirectAfterPlaceOrder) {
+                            redirectOnSuccessAction.execute();
+                        }
+                    });
 
                     return true;
                 } else {

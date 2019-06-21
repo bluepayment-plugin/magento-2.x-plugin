@@ -2,9 +2,9 @@
 
 namespace BlueMedia\BluePayment\Model\ResourceModel\Card;
 
-use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use BlueMedia\BluePayment\Model\Card as Card;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 class Collection extends AbstractCollection
 {

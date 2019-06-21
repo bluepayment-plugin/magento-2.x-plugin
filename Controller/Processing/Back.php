@@ -5,11 +5,11 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Payment;
+use Magento\Checkout\Model\Type\Onepage;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Checkout\Model\Type\Onepage;
 
 /**
  * Class Back

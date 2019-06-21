@@ -492,9 +492,15 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $table = $installer->getConnection()->newTable(
             $installer->getTable('blue_card')
         )
-            ->addColumn('card_id', Table::TYPE_INTEGER, null, ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true], 'Entity ID')
-            ->addColumn('customer_id', Table::TYPE_INTEGER, null, ['unsigned' => true, 'nullable' => false], 'Customer ID')
-            ->addColumn('card_index', Table::TYPE_INTEGER, null, ['unsigned' => true, 'nullable' => false], 'Card index')
+            ->addColumn('card_id', Table::TYPE_INTEGER, null, [
+                'identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true
+            ], 'Entity ID')
+            ->addColumn('customer_id', Table::TYPE_INTEGER, null, [
+                'unsigned' => true, 'nullable' => false
+            ], 'Customer ID')
+            ->addColumn('card_index', Table::TYPE_INTEGER, null, [
+                'unsigned' => true, 'nullable' => false
+            ], 'Card index')
             ->addColumn('validity_year', Table::TYPE_TEXT, 4, ['nullable' => false], 'Validity year')
             ->addColumn('validity_month', Table::TYPE_TEXT, 2, ['nullable' => false], 'Validity month')
             ->addColumn('issuer', Table::TYPE_TEXT, 100, ['nullable' => false], 'Card issuer')

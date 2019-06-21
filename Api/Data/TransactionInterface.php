@@ -42,7 +42,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setOrderId(string $orderId);
+    public function setOrderId($orderId);
 
     /**
      * @return string
@@ -54,7 +54,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setRemoteId(string $remoteId);
+    public function setRemoteId($remoteId);
 
     /**
      * @return float
@@ -66,7 +66,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setAmount(float $amount);
+    public function setAmount($amount);
 
     /**
      * @return string
@@ -78,7 +78,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setCurrency(string $currency);
+    public function setCurrency($currency);
 
     /**
      * @return int
@@ -90,7 +90,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setGatewayId(int $gatewayId);
+    public function setGatewayId($gatewayId);
 
     /**
      * @return string
@@ -114,7 +114,7 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setPaymentStatus(string $status);
+    public function setPaymentStatus($status);
 
     /**
      * @return string
@@ -126,5 +126,5 @@ interface TransactionInterface
      *
      * @return $this
      */
-    public function setPaymentStatusDetails(string $status);
+    public function setPaymentStatusDetails($status);
 }

@@ -4,11 +4,15 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\OrderFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Create
@@ -19,43 +23,29 @@ class CheckStatus extends Action
 {
     const BLIK_CODE_LENGTH = 6;
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\PaymentFactory
-     */
-    protected $paymentFactory;
+    /** @var PaymentFactory */
+    private $paymentFactory;
 
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    protected $orderFactory;
+    /** @var \Magento\Sales\Model\OrderFactory */
+    private $orderFactory;
 
-    /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    protected $session;
+    /** @var Session */
+    private $session;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    /** @var LoggerInterface */
+    private $logger;
 
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
+    /** @var ScopeConfigInterface */
+    private $scopeConfig;
 
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
-    protected $orderSender;
+    /** \Magento\Sales\Model\Order\Email\Sender\OrderSender */
+    private $orderSender;
 
     /** @var Data */
-    protected $helper;
+    private $helper;
 
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
+    /** @var JsonFactory */
+    private $resultJsonFactory;
 
     /**
      * Create constructor.
@@ -68,6 +58,7 @@ class CheckStatus extends Action
      * @param Logger               $logger
      * @param ScopeConfigInterface $scopeConfig
      * @param Data                 $helper
+     * @param JsonFactory          $resultJsonFactory
      */
     public function __construct(
         Context $context,
@@ -78,7 +69,7 @@ class CheckStatus extends Action
         Logger $logger,
         ScopeConfigInterface $scopeConfig,
         Data $helper,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -113,11 +104,6 @@ class CheckStatus extends Action
             $blikGateway = $this->scopeConfig->getValue('payment/bluepayment/blik_gateway');
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
-
-            $currency       = $order->getOrderCurrencyCode();
-            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-            $orderId        = $order->getRealOrderId();
 
             if (!$order->getId()) {
                 $this->logger->info('CREATE:' . __LINE__, ['Zamówienie bez identyfikatora']);
@@ -156,45 +142,11 @@ class CheckStatus extends Action
     /**
      * Zwraca singleton dla Checkout Session Model
      *
-     * @return \Magento\Checkout\Model\Session
+     * @return Session
      */
-    protected function getCheckout()
+    private function getCheckout()
     {
         return $this->session;
-    }
-
-    /**
-     * @param string $gatewayUrl
-     * @param array  $params
-     * @return array
-     */
-    private function prepareIframeJsonResponse($gatewayUrl, $redirectHash, $params)
-    {
-        $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
-        $params['GatewayID'] = (string) $params['GatewayID'];
-
-        return [
-            'gateway_url' => $gatewayUrl,
-            'redirectHash' => $redirectHash,
-            'params' => $params,
-        ];
-    }
-
-    /**
-     * @param string $gatewayUrl
-     * @param string $authorizationCode
-     * @param array  $params
-     * @return array
-     */
-    private function prepareBlikJsonResponse($gatewayUrl, $authorizationCode, $params)
-    {
-        $params['GatewayID'] = (string) $params['GatewayID'];
-        $params['AuthorizationCode'] = $authorizationCode;
-
-        return [
-            'gateway_url' => $gatewayUrl,
-            'params' => $params,
-        ];
     }
 
     /**
@@ -207,8 +159,10 @@ class CheckStatus extends Action
     }
 
     /**
-     * @param $urlGateway
-     * @param $params
+     * @param string $urlGateway
+     * @param array|string $params
+     *
+     * @return array
      */
     private function sendRequestBlik($urlGateway, $params)
     {

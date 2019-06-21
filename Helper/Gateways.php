@@ -253,8 +253,7 @@ class Gateways extends Data
      */
     public function getSimpleGatewaysList()
     {
-        $objectManager = $this->collection;
-        $bluegatewaysCollection = $objectManager->create();
+        $bluegatewaysCollection = $this->collection;
         $bluegatewaysCollection->load();
 
         $existingGateways = [];

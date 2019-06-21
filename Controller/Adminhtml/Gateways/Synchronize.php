@@ -6,8 +6,8 @@ use BlueMedia\BluePayment\Helper\Gateways;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
-use Zend\Log\Writer\Stream;
 use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
 /**
  * Class Synchronize

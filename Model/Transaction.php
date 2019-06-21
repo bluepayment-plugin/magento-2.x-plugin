@@ -74,7 +74,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setOrderId(string $orderId)
+    public function setOrderId($orderId)
     {
         return $this->setData(TransactionInterface::ORDER_ID, $orderId);
     }
@@ -90,7 +90,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setRemoteId(string $remoteId)
+    public function setRemoteId($remoteId)
     {
         return $this->setData(TransactionInterface::REMOTE_ID, $remoteId);
     }
@@ -106,7 +106,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setAmount(float $amount)
+    public function setAmount($amount)
     {
         return $this->setData(TransactionInterface::AMOUNT, $amount);
     }
@@ -122,7 +122,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setCurrency(string $currency)
+    public function setCurrency($currency)
     {
         return $this->setData(TransactionInterface::CURRENCY, $currency);
     }
@@ -138,7 +138,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setGatewayId(int $gatewayId)
+    public function setGatewayId($gatewayId)
     {
         return $this->setData(TransactionInterface::GATEWAY_ID, $gatewayId);
     }
@@ -172,7 +172,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setPaymentStatus(string $status)
+    public function setPaymentStatus($status)
     {
         return $this->setData(TransactionInterface::PAYMENT_STATUS, $status);
     }
@@ -188,7 +188,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    public function setPaymentStatusDetails(string $status)
+    public function setPaymentStatusDetails($status)
     {
         return $this->setData(TransactionInterface::PAYMENT_STATUS_DETAILS, $status);
     }

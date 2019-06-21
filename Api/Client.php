@@ -29,6 +29,7 @@ class Client implements ClientInterface
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         $curlResponse = curl_exec($curl);
+
         curl_close($curl);
 
         if ($curlResponse == 'ERROR') {
@@ -43,7 +44,7 @@ class Client implements ClientInterface
      *
      * @return string
      */
-    protected function buildFields($data)
+    private function buildFields($data)
     {
         return (is_array($data)) ? http_build_query($data) : (string)$data;
     }

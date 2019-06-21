@@ -2,9 +2,9 @@
 
 namespace BlueMedia\BluePayment\Block\Customer;
 
+use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use Magento\Customer\Model\Session;
 use Magento\Framework\View\Element\Template;
-use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 
 class Cards extends Template
 {

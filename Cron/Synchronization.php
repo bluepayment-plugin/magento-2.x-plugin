@@ -2,9 +2,9 @@
 
 namespace BlueMedia\BluePayment\Cron;
 
+use BlueMedia\BluePayment\Helper\Gateways;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
-use BlueMedia\BluePayment\Helper\Gateways;
 
 /**
  * Class Synchronization

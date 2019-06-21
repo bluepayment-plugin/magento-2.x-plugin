@@ -32,7 +32,7 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setOrderId(string $orderId);
+    public function setOrderId($orderId);
 
     /**
      * @return string
@@ -44,7 +44,7 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setRemoteId(string $remoteId);
+    public function setRemoteId($remoteId);
 
     /**
      * @return string
@@ -56,7 +56,7 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setRemoteOutId(string $remoteId);
+    public function setRemoteOutId($remoteId);
 
     /**
      * @return float
@@ -68,7 +68,7 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setAmount(float $amount);
+    public function setAmount($amount);
 
     /**
      * @return string
@@ -80,7 +80,7 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setCurrency(string $currency);
+    public function setCurrency($currency);
 
     /**
      * @return bool
@@ -92,6 +92,6 @@ interface RefundTransactionInterface
      *
      * @return $this
      */
-    public function setIsPartial(bool $isPartial);
+    public function setIsPartial($isPartial);
 
 }

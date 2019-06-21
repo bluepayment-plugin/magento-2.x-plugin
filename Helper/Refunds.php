@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
+use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
 use BlueMedia\BluePayment\Model\RefundTransactionFactory;
@@ -13,7 +14,6 @@ use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\App\Emulation;
-use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 
 /**
  * Class Gateways

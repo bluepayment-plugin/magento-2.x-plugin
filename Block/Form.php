@@ -3,7 +3,6 @@
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
@@ -17,31 +16,25 @@ class Form extends \Magento\Payment\Block\Form
     protected $_template = 'BlueMedia_BluePayment::bluepayment/form.phtml';
 
     /** @var array */
-    protected $gatewayList = [];
+    private $gatewayList = [];
 
     /** @var CollectionFactory */
-    protected $collectionFactory;
-
-    /** @var ScopeConfigInterface */
-    protected $scopeConfig;
+    private $collectionFactory;
 
     /**
      * Form constructor.
      *
-     * @param Context                      $context
+     * @param Context $context
      * @param CollectionFactory $collectionFactory
-     * @param ScopeConfigInterface                    $scopeConfig
-     * @param array                                                                 $data
+     * @param array $data
      */
     public function __construct(
         Context $context,
         CollectionFactory $collectionFactory,
-        ScopeConfigInterface $scopeConfig,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->collectionFactory = $collectionFactory;
-        $this->scopeConfig  = $scopeConfig;
     }
 
     /**

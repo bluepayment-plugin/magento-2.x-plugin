@@ -5,7 +5,6 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
-use BlueMedia\BluePayment\Model\RefundTransactionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction\CollectionFactory;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;

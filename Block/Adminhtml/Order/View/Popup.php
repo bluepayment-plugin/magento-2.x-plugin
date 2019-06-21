@@ -6,9 +6,9 @@ use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
-use \Magento\Framework\View\Element\Template\Context;
 
 /**
  * Class Popup

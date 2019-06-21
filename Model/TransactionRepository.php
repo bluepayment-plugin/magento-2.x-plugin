@@ -5,7 +5,6 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Transaction\CollectionFactory;
-use BlueMedia\BluePayment\Model\TransactionFactory;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
@@ -23,17 +22,17 @@ class TransactionRepository implements TransactionRepositoryInterface
     /**
      * @var \BlueMedia\BluePayment\Model\TransactionFactory
      */
-    protected $transactionFactory;
+    private $transactionFactory;
 
     /**
      * @var \BlueMedia\BluePayment\Model\ResourceModel\Transaction\CollectionFactory
      */
-    protected $transactionCollectionFactory;
+    private $transactionCollectionFactory;
 
     /**
      * @var \Magento\Framework\Api\SearchResultsInterfaceFactory
      */
-    protected $searchResultsFactory;
+    private $searchResultsFactory;
 
     /**
      * TransactionRepository constructor.

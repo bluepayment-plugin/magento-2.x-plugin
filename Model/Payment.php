@@ -4,8 +4,8 @@ namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Helper\Data;
-use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
+use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -107,7 +107,7 @@ class Payment extends AbstractMethod
     protected $_isInitializeNeeded = true;
 
     /** @var OrderFactory */
-    protected $orderFactory;
+    private $orderFactory;
 
     /** @var CardFactory */
     private $cardFactory;
@@ -124,32 +124,32 @@ class Payment extends AbstractMethod
     /**
      * @var \BlueMedia\BluePayment\Helper\Data
      */
-    protected $helper;
+    private $helper;
 
     /**
      * @var \Magento\Framework\UrlInterface
      */
-    protected $url;
+    private $url;
 
     /**
      * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
      */
-    protected $sender;
+    private $sender;
 
     /**
      * @var \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory
      */
-    protected $statusCollectionFactory;
+    private $statusCollectionFactory;
 
     /**
      * @var \BlueMedia\BluePayment\Model\TransactionFactory
      */
-    protected $transactionFactory;
+    private $transactionFactory;
 
     /**
      * @var \BlueMedia\BluePayment\Api\TransactionRepositoryInterface
      */
-    protected $transactionRepository;
+    private $transactionRepository;
 
     /**
      * Payment constructor.
@@ -601,25 +601,23 @@ class Payment extends AbstractMethod
             $currency = $response->transactions->transaction->currency;
         }
 
-        $serviceId = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
-        $sharedKey = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
-        $hashSeparator = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
-        $hashAlgorithm = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+        $hashSeparator  = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
+        $hashAlgorithm  = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
 
         if ($serviceId != $response->serviceID) {
             return false;
         }
+
         $this->checkHashArray = [];
         $hash = (string)$response->hash;
-        $this->checkHashArray[] = (string)$response->serviceID;
+        $response->hash = null;
 
-        foreach ($response->transactions->transaction as $trans) {
-            $this->_checkInList($trans);
-        }
+        $this->_checkInList($response);
         $this->checkHashArray[] = $sharedKey;
-        $connectedFields = implode($hashSeparator, $this->checkHashArray);
 
-        return hash($hashAlgorithm, implode($hashSeparator, $this->_checkHashArray)) == $hash;
+        return hash($hashAlgorithm, implode($hashSeparator, $this->checkHashArray)) == $hash;
     }
 
     /**
@@ -862,7 +860,7 @@ class Payment extends AbstractMethod
 
         $dom->appendChild($confirmationList);
 
-        echo $dom->saveXML();
+        return $dom->saveXML();
     }
 
     private function recurringResponse($clientHash, $status)
