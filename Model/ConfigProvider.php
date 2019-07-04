@@ -47,6 +47,49 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var CardCollectionFactory */
     private $cardCollectionFactory;
 
+    /** @var array */
+    private $defaultSortOrder = [
+        '', // Avoid pushing first element to the end
+        509, // BLIK
+        1503, // Kartowa płatność automatyczna
+        1500, // Płatność kartą
+        1512, // Google Pay
+        1511, // Visa Checkout
+        106, // Tylko na teście
+        68, // Płać z ING
+        3, // mTransfer
+        1063, // Płacę z IPKO
+        27, // Santander online
+        52, // Pekao24 PBL
+        85, // Millennium Bank PBL
+        95, // Płacę z Alior Bankiem
+        59, // CA przelew online
+        79, // Eurobank - płatność online
+        1064, // Płacę z Inteligo
+        1035, // BNP Paribas - płacę z Pl@net
+        513, // Getin Bank
+        1010, // T-Mobile Usługi Bankowe
+        90, // Płacę z Citi Handlowy
+        76, // BNP Paribas-Płacę z żółty online
+        108, // e-transfer Pocztowy24
+        517, // NestPrzelew
+        131, //
+        86, // Płać z BOŚ Bank
+        98, // PBS Bank - przelew 24
+        117, // Toyota Bank Pay Way
+        1050, // Płacę z neoBANK
+        514, // Noble Bank
+        109, // EnveloBank
+        1507, // Bank Spółdzielczy w Sztumie PBL
+        1510, // Bank Spółdzielczy Lututów PBL
+        1515, // Bank Spółdzielczy w Toruniu PBL
+        1517, // Bank Spółdzielczy w Rumi PBL
+        21, // Przelew Volkswagen Bank
+        35, // Spółdzielcza Grupa Bankowa
+        9, // Mam konto w innym banku
+        1506, // Alior Raty
+    ];
+
     /**
      * ConfigProvider constructor.
      *
@@ -115,9 +158,8 @@ class ConfigProvider implements ConfigProviderInterface
                 }
             }
 
-            usort($result, function ($a, $b) {
-                return (int)$a['sort_order'] > (int)$b['sort_order'];
-            });
+            $this->sortGateways($result);
+            $this->sortGateways($resultSeparated);
 
             $activeGateways = [
                 'bluePaymentOptions' => $result,
@@ -134,6 +176,28 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $this->activeGateways[$currency];
+    }
+
+    private function sortGateways(&$array) {
+        $defaultSortOrder = $this->defaultSortOrder;
+
+        usort($array, function ($a, $b) use ($defaultSortOrder) {
+            $aPos = (int)$a['sort_order'];
+            $bPos = (int)$b['sort_order'];
+
+            if ($aPos == $bPos) {
+                $aPos = array_search($a["gateway_id"], $defaultSortOrder);
+                $bPos = array_search($b["gateway_id"], $defaultSortOrder);
+            } elseif ($aPos == 0) {
+                return true;
+            } elseif ($bPos == 0) {
+                return false;
+            }
+
+            return $aPos >= $bPos;
+        });
+
+        return $array;
     }
 
     /**
