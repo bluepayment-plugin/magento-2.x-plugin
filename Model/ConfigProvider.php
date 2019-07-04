@@ -158,23 +158,8 @@ class ConfigProvider implements ConfigProviderInterface
                 }
             }
 
-            $defaultSortOrder = $this->defaultSortOrder;
-
-            usort($result, function ($a, $b) use ($defaultSortOrder) {
-                $aPos = (int)$a['sort_order'];
-                $bPos = (int)$b['sort_order'];
-
-                if ($aPos == $bPos) {
-                    $aPos = array_search($a["gateway_id"], $defaultSortOrder);
-                    $bPos = array_search($b["gateway_id"], $defaultSortOrder);
-                } elseif ($aPos == 0) {
-                    return true;
-                } elseif ($bPos == 0) {
-                    return false;
-                }
-
-                return $aPos >= $bPos;
-            });
+            $this->sortGateways($result);
+            $this->sortGateways($resultSeparated);
 
             $activeGateways = [
                 'bluePaymentOptions' => $result,
@@ -191,6 +176,28 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $this->activeGateways[$currency];
+    }
+
+    private function sortGateways(&$array) {
+        $defaultSortOrder = $this->defaultSortOrder;
+
+        usort($array, function ($a, $b) use ($defaultSortOrder) {
+            $aPos = (int)$a['sort_order'];
+            $bPos = (int)$b['sort_order'];
+
+            if ($aPos == $bPos) {
+                $aPos = array_search($a["gateway_id"], $defaultSortOrder);
+                $bPos = array_search($b["gateway_id"], $defaultSortOrder);
+            } elseif ($aPos == 0) {
+                return true;
+            } elseif ($bPos == 0) {
+                return false;
+            }
+
+            return $aPos >= $bPos;
+        });
+
+        return $array;
     }
 
     /**
