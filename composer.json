@@ -1,0 +1,17 @@
+{
+  "name": "bm/bluepayment",
+  "description": "BM payment gateway.",
+  "require": {
+    "ext-curl": "*"
+  },
+  "type": "magento2-module",
+  "version": "2.7.2",
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "BlueMedia\\BluePayment\\": ""
+    }
+  }
+}
