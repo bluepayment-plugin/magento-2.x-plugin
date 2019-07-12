@@ -291,7 +291,7 @@ class Create extends Action
             );
 
             $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $url]);
-            $this->getResponse()->setRedirect($url);
+            return $this->getResponse()->setRedirect($url);
         } catch (\Exception $e) {
             $this->logger->critical($e);
         }
