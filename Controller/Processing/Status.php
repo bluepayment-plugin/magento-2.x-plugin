@@ -6,6 +6,7 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Controller\Result\RawFactory;
 
 /**
  * Class Status
@@ -20,6 +21,9 @@ class Status extends Action
     /** @var Logger */
     public $logger;
 
+    /** @var RawFactory */
+    protected $rawFactory;
+
     /**
      * Status constructor.
      *
@@ -30,10 +34,12 @@ class Status extends Action
     public function __construct(
         Context $context,
         Logger $logger,
-        PaymentFactory $paymentFactory
+        PaymentFactory $paymentFactory,
+        RawFactory $rawFactory
     ) {
-        $this->logger         = $logger;
+        $this->logger = $logger;
         $this->paymentFactory = $paymentFactory;
+        $this->rawFactory = $rawFactory;
 
         parent::__construct($context);
 
@@ -55,6 +61,8 @@ class Status extends Action
      */
     public function execute()
     {
+        $result = $this->rawFactory->create();
+
         try {
             $params = $this->getRequest()->getParams();
             $this->logger->info('STATUS:' . __LINE__, ['params' => $params]);
@@ -64,16 +72,29 @@ class Status extends Action
                 $base64transactions = base64_decode($paramTransactions);
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
-                return $this->paymentFactory->create()->processStatusPayment($simpleXml);
+
+                $xml = $this->paymentFactory->create()->processStatusPayment($simpleXml);
+
+                $result->setHeader('Content-Type', 'text/xml');
+                $result->setContents($xml);
+                return $result;
             } elseif (array_key_exists('recurring', $params)) {
                 $paramRecurring = $params['recurring'];
                 $base64recurring = base64_decode($paramRecurring);
                 $simpleXml = simplexml_load_string($base64recurring);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
-                return $this->paymentFactory->create()->processRecurring($simpleXml);
+
+                $xml = $this->paymentFactory->create()->processRecurring($simpleXml);
+
+                $result->setHeader('Content-Type', 'text/xml');
+                $result->setContents($xml);
+                return $result;
             }
         } catch (\Exception $e) {
             $this->logger->critical('BlueMedia: ' . $e->getMessage());
+
+            $result->setContents('Error');
+            return $result;
         }
     }
 }
