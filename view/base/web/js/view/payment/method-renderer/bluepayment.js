@@ -399,7 +399,7 @@ define([
                         console.log('setTimeout');
                         this.blikTimeout = setTimeout(function () {
                             self.blikModal.closeModal();
-                            $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                            $('.blik-error').text('Kod BLIK wygasł. Spróbuj ponownie.').show();
                             console.log('timeout executed');
                         }, 120000); /* 2 minutes */
                     }
