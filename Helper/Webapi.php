@@ -4,21 +4,14 @@ namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
-use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
-use BlueMedia\BluePayment\Helper\Email as EmailHelper;
-use BlueMedia\BluePayment\Model\GatewaysFactory;
-use BlueMedia\BluePayment\Model\RefundTransactionFactory;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
-use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\App\Emulation;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class Gateways
@@ -28,6 +21,9 @@ use Zend\Log\Writer\Stream;
 class Webapi extends Data
 {
     const DEFAULT_HASH_SEPARATOR = '|';
+
+    /** @var StoreManagerInterface */
+    public $storeManager;
 
     /**
      * Gateways constructor.
@@ -39,9 +35,7 @@ class Webapi extends Data
      * @param Config $paymentConfig
      * @param Initial $initialConfig
      * @param Client $apiClient
-     * @param OrderFactory $orderFactory
-     * @param RefundTransactionFactory $refundTransactionFactory
-     * @param RefundTransactionRepositoryInterface $refundTransactionRepository
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         Context $context,
@@ -50,7 +44,8 @@ class Webapi extends Data
         Emulation $appEmulation,
         Config $paymentConfig,
         Initial $initialConfig,
-        Client $apiClient
+        Client $apiClient,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct(
             $context,
@@ -61,6 +56,8 @@ class Webapi extends Data
             $initialConfig,
             $apiClient
         );
+
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -72,20 +69,30 @@ class Webapi extends Data
      */
     public function googlePayMerchantInfo()
     {
+        $store = $this->storeManager->getStore();
+
         $hashMethod   = $this->getConfigValue('hash_algorithm');
-        $refundAPIUrl = $this->getGPayMerchantInfoURL();
+        $GPayMerchantInfoURL = $this->getGPayMerchantInfoURL();
 
-//        $order     = $this->orderFactory->create()->loadByIncrementId($transaction->getOrderId());
-        $serviceId = $this->getConfigValue('service_id', 'PLN');
-        $sharedKey = $this->getConfigValue('shared_key', 'PLN');
+        $url = $store->getBaseUrl();
+        $merchantDomain = parse_url($url)['host'];
 
-        return $this->callAPI(
-            $hashMethod,
-            $serviceId,
-            'magento2.bm.devmouse.pl',
-            $sharedKey,
-            $refundAPIUrl
-        );
+        $currency = $store->getCurrentCurrency()->getCode();
+
+        if ($currency == 'PLN') {
+            $serviceId = $this->getConfigValue('service_id', $currency);
+            $sharedKey = $this->getConfigValue('shared_key', $currency);
+
+            return $this->callAPI(
+                $hashMethod,
+                $serviceId,
+                $merchantDomain,
+                $sharedKey,
+                $GPayMerchantInfoURL
+            );
+        } else {
+            return null;
+        }
     }
 
     /**

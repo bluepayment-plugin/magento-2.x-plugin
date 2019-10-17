@@ -4,6 +4,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Checkout\Model\Session;
@@ -110,9 +111,9 @@ class Create extends Action
                 'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
             ]);
 
-            $cardGateway = $this->scopeConfig->getValue("payment/bluepayment/card_gateway");
-            $blikGateway = $this->scopeConfig->getValue('payment/bluepayment/blik_gateway');
-            $gpayGateway = $this->scopeConfig->getValue('payment/bluepayment/gpay_gateway');
+            $cardGateway = ConfigProvider::IFRAME_GATEWAY_ID;
+            $blikGateway = ConfigProvider::BLIK_GATEWAY_ID;
+            $gpayGateway = ConfigProvider::GPAY_GATEWAY_ID;
             $autopayGateway = $this->scopeConfig->getValue('payment/bluepayment/autopay_gateway');
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);

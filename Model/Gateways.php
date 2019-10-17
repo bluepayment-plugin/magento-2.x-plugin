@@ -31,8 +31,6 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     const STATUS_ACTIVE   = 1;
     const STATUS_INACTIVE = 0;
 
-    const AUTOPAY_GATEWAY_ID = 1503;
-
     /**
      *
      */
@@ -85,7 +83,9 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
      */
     public function getIsSeparatedMethod()
     {
-        if ($this->getGatewayId() == self::AUTOPAY_GATEWAY_ID) {
+        if ($this->getGatewayId() == ConfigProvider::AUTOPAY_GATEWAY_ID) {
+            return true;
+        } else if ($this->getGatewayId() == ConfigProvider::GPAY_GATEWAY_ID) {
             return true;
         }
 

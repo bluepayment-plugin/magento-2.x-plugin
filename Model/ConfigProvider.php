@@ -165,8 +165,6 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'GPayMerchantId' => $this->scopeConfig->getValue("payment/bluepayment/gpay/merchant_id"),
-                'bluePaymentAcceptorId' => $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/acceptor_id"),
                 'bluePaymentTestMode' => $this->scopeConfig->getValue("payment/bluepayment/test_mode"),
                 'bluePaymentCards' => $this->prepareCards(),
                 'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement")
@@ -234,9 +232,7 @@ class ConfigProvider implements ConfigProviderInterface
                 $isBlik = true;
                 break;
             case self::GPAY_GATEWAY_ID:
-                if ($this->scopeConfig->getValue('payment/bluepayment/gpay/direct') == 1) {
-                    $isGPay = true;
-                }
+                $isGPay = true;
                 break;
         }
 

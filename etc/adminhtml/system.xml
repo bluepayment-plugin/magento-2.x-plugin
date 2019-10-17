@@ -81,10 +81,6 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Shared key</label>
                     </field>
-                    <field id="acceptor_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>BM acceptor ID</label>
-                        <comment><![CDATA[Used only for Google Pay.]]></comment>
-                    </field>
                 </group>
                 <group id="eur" translate="label" type="text" sortOrder="610" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>EUR configuration</label>
@@ -93,10 +89,6 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Shared key</label>
-                    </field>
-                    <field id="acceptor_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>BM acceptor ID</label>
-                        <comment><![CDATA[Used only for Google Pay.]]></comment>
                     </field>
                 </group>
                 <group id="gbp" translate="label" type="text" sortOrder="620" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -107,10 +99,6 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Shared key</label>
                     </field>
-                    <field id="acceptor_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>BM acceptor ID</label>
-                        <comment><![CDATA[Used only for Google Pay.]]></comment>
-                    </field>
                 </group>
                 <group id="usd" translate="label" type="text" sortOrder="630" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>USD configuration</label>
@@ -119,23 +107,6 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Shared key</label>
-                    </field>
-                    <field id="acceptor_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>BM acceptor ID</label>
-                        <comment><![CDATA[Used only for Google Pay.]]></comment>
-                    </field>
-                </group>
-
-                <group id="gpay" translate="label" type="text" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Google Pay</label>
-
-                    <field id="direct" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Direct Payment</label>
-                        <comment><![CDATA[Payment without redirecting to BM gateway. In order to activate, <a href="https://developers.google.com/pay/api/web/guides/test-and-deploy/integration-checklist#request-production-access" target="_blank">contact Google for <i>merchant ID</i></a> and fill field below and acceptor ID for specific currencies.]]></comment>
-                        <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    </field>
-                    <field id="merchant_id" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Merchant ID</label>
                     </field>
                 </group>
             </group>

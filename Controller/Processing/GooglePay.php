@@ -44,14 +44,24 @@ class GooglePay extends Action
         $info = $this->webapi->googlePayMerchantInfo();
 
         $resultJson = $this->resultJsonFactory->create();
-        $resultJson->setData([
-            'merchantId' => $info['merchantId'],
-//            'acceptorId' => $info['acceptorId'],
-            'merchantOrigin' => $info['merchantOrigin'],
-            'merchantName' => $info['merchantName'],
-            'authJwt' => $info['authJwt'],
-        ]);
 
+        if ($info !== null) {
+            $resultJson->setData([
+                'acceptorId' => $info['acceptorId'],
+                'merchantInfo' => [
+                    'merchantId' => $info['merchantId'],
+                    'merchantOrigin' => $info['merchantOrigin'],
+                    'merchantName' => $info['merchantName'],
+                    'authJwt' => $info['authJwt'],
+                ]
+            ]);
+
+            return $resultJson;
+        }
+
+        $resultJson->setData([
+            'error' => 'Currency is not supported.',
+        ]);
         return $resultJson;
     }
 }
