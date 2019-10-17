@@ -444,7 +444,7 @@ define([
             },
 
             /* Google Pay */
-            GPayClient: null,
+            GPayMerchantInfo: null,
             GPayMerchantId: window.checkoutConfig.payment.GPayMerchantId,
             GPayModal: modal({
                 title: 'Oczekiwanie na potwierdzenie transakcji.',
@@ -493,48 +493,81 @@ define([
             },
             getGPayTransactionData: function() {
                 return {
-                    allowedPaymentMethods: ['CARD'],
-                    cardRequirements: {
-                        allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
-                    },
-                    merchantId: this.GPayMerchantId,
-                    paymentMethodTokenizationParameters: {
-                        tokenizationType: 'PAYMENT_GATEWAY',
-                        parameters: {
-                            'gateway': 'bluemedia',
-                            'gatewayMerchantId': this.bluePaymentAcceptorId
+                    apiVersion: 2,
+                    apiVersionMinor: 0,
+                    merchantInfo: this.GPayMerchantInfo,
+
+                    allowedPaymentMethods: [
+                        {
+                            type: 'CARD',
+                            parameters: {
+                                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                                allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
+                            },
+                            tokenizationSpecification: {
+                                type: 'PAYMENT_GATEWAY',
+                                parameters: {
+                                    'gateway': 'bluemedia',
+                                    'gatewayMerchantId': this.bluePaymentAcceptorId
+                                }
+                            }
                         }
-                    },
+                    ],
                     shippingAddressRequired: false,
                     transactionInfo: {
                         totalPriceStatus: 'FINAL',
                         totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
                         currencyCode: window.checkoutConfig.quoteData.quote_currency_code
-                    }
+                    },
                 };
             },
             initGPay: function() {
+                var urlResponse = url.build('bluepayment/processing/googlepay');
                 var self = this;
 
-                self.GPayClient = new google.payments.api.PaymentsClient({
-                    environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
-                });
+                $.ajax({
+                    showLoader: false,
+                    url: urlResponse,
+                    type: 'GET',
+                    dataType: "json"
+                }).done(function (response) {
+                    console.log('Merchant info fetched...');
+                    console.log(response);
 
-                self.GPayClient.isReadyToPay({allowedPaymentMethods: ['CARD']})
-                    .then(function (response) {
-                        var transactionData = self.getGPayTransactionData();
-                        transactionData.transactionInfo.totalPriceStatus = 'NOT_CURRENTLY_KNOWN';
+                    self.GPayMerchantInfo = response;
 
-                        if (response.result) {
-                            self.GPayClient.prefetchPaymentData(transactionData);
-                            self.GPayClient.createButton({onClick: function(){}});
-                        } else {
-                            console.error(response);
-                        }
-                    })
-                    .catch(function (errorMessage) {
-                        console.error(response);
+                    self.GPayClient = self.GPayClient = new google.payments.api.PaymentsClient({
+                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
                     });
+                    self.GPayClient.isReadyToPay({
+                        apiVersion: 2,
+                        apiVersionMinor: 0,
+                        merchantInfo: this.GPayMerchantInfo,
+                        allowedPaymentMethods: [
+                            {
+                                type: "CARD",
+                                parameters: {
+                                    allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                                    allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
+                                }
+                            }
+                        ]
+                    })
+                        .then(function (response) {
+                            var transactionData = self.getGPayTransactionData();
+                            transactionData.transactionInfo.totalPriceStatus = 'NOT_CURRENTLY_KNOWN';
+
+                            if (response.result) {
+                                self.GPayClient.prefetchPaymentData(transactionData);
+                                self.GPayClient.createButton({onClick: function(){}});
+                            } else {
+                                console.error(response);
+                            }
+                        })
+                        .catch(function (errorMessage) {
+                            console.error(response);
+                        });
+                });
             },
             handleGPayStatus: function(status, params) {
                 var self = this;

@@ -39,6 +39,28 @@ class Client implements ClientInterface
         return simplexml_load_string($curlResponse);
     }
 
+    public function callJson($endPoint, $data)
+    {
+        $fields = $this->buildFields($data);
+
+        $curl = curl_init($endPoint);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
+
+        $curlResponse = curl_exec($curl);
+
+        curl_close($curl);
+
+        if ($curlResponse == 'ERROR') {
+            throw new ResponseException();
+        }
+
+        return json_decode($curlResponse);
+    }
+
     /**
      * @param string|array $data
      *
