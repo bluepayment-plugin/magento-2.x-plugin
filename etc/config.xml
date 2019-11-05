@@ -17,6 +17,8 @@
                 <prod_address_gateways_url>https://pay.bm.pl/paywayList</prod_address_gateways_url>
                 <test_address_refunds_url>https://pay-accept.bm.pl/transactionRefund</test_address_refunds_url>
                 <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
+                <test_address_gpay_merchant_info_url>https://pay-accept.bm.pl/webapi/googlePayMerchantInfo</test_address_gpay_merchant_info_url>
+                <prod_address_gpay_merchant_info_url>https://pay.bm.pl/webapi/googlePayMerchantInfo</prod_address_gpay_merchant_info_url>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <autopay_gateway>1503</autopay_gateway>

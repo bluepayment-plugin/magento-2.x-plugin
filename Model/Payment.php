@@ -275,10 +275,10 @@ class Payment extends AbstractMethod
         // Config
         $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
         $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $cardGateway   = $this->_scopeConfig->getValue('payment/bluepayment/card_gateway');
-        $blikGateway   = $this->_scopeConfig->getValue('payment/bluepayment/blik_gateway');
-        $gpayGateway   = $this->_scopeConfig->getValue('payment/bluepayment/gpay_gateway');
-        $autopayGateway = $this->_scopeConfig->getValue('payment/bluepayment/autopay_gateway');
+        $cardGateway   = ConfigProvider::IFRAME_GATEWAY_ID;
+        $blikGateway   = ConfigProvider::BLIK_GATEWAY_ID;
+        $gpayGateway   = ConfigProvider::GPAY_GATEWAY_ID;
+        $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
 
         $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifeHours();
