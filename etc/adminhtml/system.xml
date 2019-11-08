@@ -15,27 +15,27 @@
                 </field>
                 <field id="status_waiting_payment" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Status waiting payment</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <field id="status_accept_payment" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Status accept payment</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <field id="status_error_payment" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Status error payment</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <field id="status_full_refund" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Status full refund</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <field id="status_partial_refund" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Status partial refund</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <field id="unchangeable_statuses" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Unchangeable statuses</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                     <comment><![CDATA[Orders with this statuses won't have an automatic status change.]]></comment>
                 </field>
                 <field id="transaction_life_hours" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
