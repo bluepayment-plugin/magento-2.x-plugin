@@ -109,6 +109,15 @@
                         <label>Shared key</label>
                     </field>
                 </group>
+                <group id="czk" translate="label" type="text" sortOrder="640" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>CZK configuration</label>
+                    <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Service partner ID</label>
+                    </field>
+                    <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Shared key</label>
+                    </field>
+                </group>
             </group>
         </section>
     </system>

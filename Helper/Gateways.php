@@ -28,7 +28,7 @@ class Gateways extends Data
 
     /** @var array Available currencies */
     public $currencies = [
-        'PLN', 'EUR', 'GBP', 'USD'
+        'PLN', 'EUR', 'GBP', 'USD', 'CZK'
     ];
 
     /** @var GatewaysFactory */
