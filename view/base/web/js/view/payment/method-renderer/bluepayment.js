@@ -375,10 +375,8 @@ define([
                         if (response.params) {
                             if (response.params.confirmation && response.params.confirmation == 'NOTCONFIRMED') {
                                 $('.blik-error').text('Niepoprawny kod BLIK.').show();
-                            } else if (response.params.confirmation && response.params.confirmation == 'CONFIRMED') {
-                                if (response.params.paymentStatus) {
-                                    self.handleBlikStatus(response.params.paymentStatus, response.params);
-                                }
+                            } else {
+                                self.handleBlikStatus(response.params.paymentStatus, response.params);
                             }
                         }
                     });
@@ -389,7 +387,22 @@ define([
             handleBlikStatus: function (status, params) {
                 var self = this;
 
-                if (status === 'PENDING') {
+                if (status === 'SUCCESS') {
+                    clearTimeout(self.blikTimeout);
+
+                    redirectUrl = url.build('bluepayment/processing/back')
+                        + '?ServiceID=' + params.ServiceID
+                        + '&OrderID=' + params.OrderID
+                        + '&Hash=' + params.hash
+                        + '&Status=' + 'SUCCESS';
+
+                    window.location.href = redirectUrl;
+                } else if (status === 'FAILURE') {
+                    clearTimeout(self.blikTimeout);
+
+                    this.blikModal.closeModal();
+                    $('.blik-error').text('Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności.').show();
+                } else {
                     if (this.blikModal.options.isOpen !== true) {
                         this.blikModal.openModal();
                         this.blikModal._removeKeyListener();
@@ -405,21 +418,6 @@ define([
                             self.updateBlikStatus(status);
                         }
                     }, 2000);
-                } else if (status === 'SUCCESS') {
-                    clearTimeout(self.blikTimeout);
-
-                    redirectUrl = url.build('bluepayment/processing/back')
-                        + '?ServiceID=' + params.ServiceID
-                        + '&OrderID=' + params.OrderID
-                        + '&Hash=' + params.hash
-                        + '&Status=' + 'SUCCESS';
-
-                    window.location.href = redirectUrl;
-                } else if (status === 'FAILURE') {
-                    clearTimeout(self.blikTimeout);
-
-                    this.blikModal.closeModal();
-                    $('.blik-error').text('Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności.').show();
                 }
             },
 
@@ -433,7 +431,7 @@ define([
                     type: 'GET',
                     dataType: "json"
                 }).done(function (response) {
-                    if (response.Status) {
+                    if (typeof response.Status !== 'undefined') {
                         self.handleBlikStatus(response.Status, response);
                     }
                 });
