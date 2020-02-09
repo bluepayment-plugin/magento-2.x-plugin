@@ -431,7 +431,7 @@ define([
                     type: 'GET',
                     dataType: "json"
                 }).done(function (response) {
-                    if (response.Status) {
+                    if (typeof response.Status !== 'undefined') {
                         self.handleBlikStatus(response.Status, response);
                     }
                 });
