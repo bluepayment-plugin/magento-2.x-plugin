@@ -205,16 +205,11 @@ class Email extends AbstractHelper
      */
     private function unserialize($data)
     {
-        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
-            // For Magento 2.2+
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
-            return $serializer->unserialize($data);
-        }
-
-        return \unserialize($data);
+        // For Magento 2.2+
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
+        return $serializer->unserialize($data);
     }
-
 
     /**
      * Get configured sender name
