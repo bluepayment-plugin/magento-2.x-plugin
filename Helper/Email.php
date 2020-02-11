@@ -179,7 +179,7 @@ class Email extends AbstractHelper
     public function geEmailReceivers()
     {
         $result       = [];
-        $unserialized = unserialize(
+        $unserialized = $this->unserialize(
             $this->getConfigValue(
                 self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_RECEIVERS_FIELD,
                 $this->getStore()->getStoreId()
@@ -196,6 +196,25 @@ class Email extends AbstractHelper
 
         return $result;
     }
+
+    /**
+     * Backward compatibility for unserializer
+     *
+     * @param string $data
+     * @return mixed
+     */
+    private function unserialize($data)
+    {
+        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
+            // For Magento 2.2+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
+            return $serializer->unserialize($data);
+        }
+
+        return \unserialize($data);
+    }
+
 
     /**
      * Get configured sender name
