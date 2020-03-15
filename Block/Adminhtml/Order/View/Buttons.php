@@ -73,7 +73,7 @@ class Buttons extends View
     {
         if ($this->isCreateButtonRequired()) {
             $this->getToolbar()->addChild('bluemedia_return', Button::class, [
-                'label' => __('Return BM'),
+                'label' => __('Refund BM'),
                 'onclick' => 'BlueMedia.BluePayment.showPopup();'
             ]);
         }

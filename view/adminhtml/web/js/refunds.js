@@ -105,7 +105,7 @@ define([
 
             var isPartialReturn = $(this).parents('form').find('[name="' + self.options.form.radioName + '"]:checked');
             if (!isPartialReturn.is(':checked')) {
-                errorContainer.append($('<li />').html($.mage.__('Return type is not selected.')));
+                errorContainer.append($('<li />').html($.mage.__('Refund type is not selected.')));
                 return false;
             }
             if (parseInt(isPartialReturn.val()) === 1
