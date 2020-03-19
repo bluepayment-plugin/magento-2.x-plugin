@@ -121,6 +121,13 @@ class Back extends Action
 
                 if ($hash == $hashLocal) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
+                    $status = $this->getBluePaymentState($payment);
+
+                    if ($status == Payment::PAYMENT_STATUS_SUCCESS) {
+                        return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    } elseif ($status == Payment::PAYMENT_STATUS_FAILURE) {
+                        return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+                    }
 
                     $block->addData([
                         'ServiceID' => $serviceId,

@@ -5,7 +5,6 @@
 <?php if ($block->hasError()): ?>
     Wystąpił problem z Twoim zapytaniem.
 <?php else: ?>
-
     <div class="back"
         data-mage-init='{
             "BlueMedia_BluePayment/js/customer/back":{
@@ -15,30 +14,15 @@
                 "Hash": "<?php echo $block->getHash() ?>"
             }
         }'>
-        <?php if ($block->getOrderStatus() == 'SUCCESS'): ?>
-            <h2>Zamówienie przyjęte - <strong>Opłacone</strong></h2>
+        <?php if ($block->getOrderStatus() == 'PENDING'): ?>
+            <img src="<?php echo $block->getViewFileUrl('BlueMedia_BluePayment::images/pending.png') ?>"
+                 style="float: left; margin-right: 20px; " />
+
+            <h2>Zamówienie przyjęte - status transakcji: <strong>w trakcie weryfikacji</strong>.</h2>
 
             <p>
-                <strong>
-                    Płatność za Twoje zamówienie przebiegła pomyślnie! Twoje zamówienie zostało przyjęte i przekazane do
-                    realizacji.</strong>
-            </p>
-
-        <?php elseif ($block->getOrderStatus() == 'PENDING'): ?>
-            <h2>Zamówienie przyjęte - <strong>Nieopłacone</strong></h2>
-
-            <p>
-                <strong>Twoje zamówienie zostało przyjęte i oczekuje na płatność.</strong>
-            </p>
-
-            <p>
-                Strona automatycznie się przeładuje, jak tylko otrzymamy potwierdzenie Twojej płatności.
-            </p>
-        <?php elseif ($block->getOrderStatus() == 'FAILURE'): ?>
-            <h2>Zamówienie przyjęte - <strong>Błąd płatności</strong></h2>
-
-            <p>
-                <strong>Twoje zamówienie zostało przyjęte, natomiast płatność nie powiodła się.</strong>
+                Twoje zamówienie zostało przyjęte - oczekujemy na płatność.<br>
+                Jak tylko otrzymamy pozytywną informację - zamówienie zostanie przekazane do realizacji.
             </p>
         <?php endif; ?>
 
