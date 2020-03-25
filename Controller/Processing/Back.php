@@ -9,6 +9,7 @@ use Magento\Checkout\Model\Type\Onepage;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\OrderFactory;
 
 /**
@@ -18,6 +19,11 @@ use Magento\Sales\Model\OrderFactory;
  */
 class Back extends Action
 {
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
+    public $pageFactory;
+
     /**
      * @var \Psr\Log\LoggerInterface
      */
@@ -47,6 +53,7 @@ class Back extends Action
      * Back constructor.
      *
      * @param \Magento\Framework\App\Action\Context              $context
+     * @param \Magento\Framework\View\Result\PageFactory         $pageFactory
      * @param Logger|\Psr\Log\LoggerInterface                    $logger
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \BlueMedia\BluePayment\Helper\Data                 $helper
@@ -54,6 +61,7 @@ class Back extends Action
      */
     public function __construct(
         Context $context,
+        PageFactory $pageFactory,
         Logger $logger,
         ScopeConfigInterface $scopeConfig,
         Data $helper,
@@ -61,6 +69,7 @@ class Back extends Action
         Onepage $onepage
     ) {
         $this->helper       = $helper;
+        $this->pageFactory  = $pageFactory;
         $this->scopeConfig  = $scopeConfig;
         $this->logger       = $logger;
         $this->orderFactory = $orderFactory;
@@ -76,20 +85,24 @@ class Back extends Action
      */
     public function execute()
     {
-        $this->logger->info('BACK:' . __LINE__, ['params' => $this->getRequest()->getParams()]);
+        $page = $this->pageFactory->create();
+        /** @var \BlueMedia\BluePayment\Block\Processing\Back $block */
+        $block = $page->getLayout()->getBlock('bluepayment.processing.back');
+
+        $params = $this->getRequest()->getParams();
+
+        $this->logger->info('BACK:' . __LINE__, ['params' => $params]);
         try {
             $params     = $this->getRequest()->getParams();
             $orderId    = $params['OrderID'];
             $hash       = $params['Hash'];
-            $status     = isset($params['Status']) ? $params['Status'] : null;
-            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
-
-            $currency = $order->getOrderCurrencyCode();
-            $payment = $order->getPayment();
+            $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
+            $currency   = strtolower($order->getOrderCurrencyCode());
+            $payment    = $order->getPayment();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/service_id");
+                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/shared_key");
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
 
@@ -106,24 +119,51 @@ class Back extends Action
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
 
-                if ($hash == $hashLocal
-                    && ($status == 'SUCCESS' || $this->getBluePaymentState($payment) == Payment::PAYMENT_STATUS_SUCCESS)
-                ) {
+                if ($hash == $hashLocal) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
-                    $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    $status = $this->getBluePaymentState($payment);
+
+                    if ($status == Payment::PAYMENT_STATUS_SUCCESS) {
+                        return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    } elseif ($status == Payment::PAYMENT_STATUS_FAILURE) {
+                        return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+                    }
+
+                    $block->addData([
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Hash' => $hash,
+
+                        'order' => $order,
+                        'status' => $this->getBluePaymentState($payment)
+                    ]);
                 } else {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
-                    $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+
+                    $block->addData([
+                        'error' => true,
+                        'message' => 'Klucz autoryzacji jest nieprawidłowy.'
+                    ]);
                 }
             } else {
                 $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji nie istnieje');
-                $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+
+                $block->addData([
+                    'error' => true,
+                    'message' => 'Klucz autoryzacji nie istnieje.'
+                ]);
             }
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             $this->logger->critical($e);
-            $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+
+            $block->addData([
+                'error' => true,
+                'message' => 'Wystąpił błąd.'
+            ]);
         }
+
+        return $page;
     }
 
     public function getBluePaymentState($payment)

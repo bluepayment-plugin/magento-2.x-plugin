@@ -1,0 +1,34 @@
+<?php
+/** @var \BlueMedia\BluePayment\Block\Processing\Back $block */
+?>
+
+<?php if ($block->hasError()): ?>
+    Wystąpił problem z Twoim zapytaniem.
+<?php else: ?>
+    <div class="back"
+        data-mage-init='{
+            "BlueMedia_BluePayment/js/customer/back":{
+                "Status": "<?php echo $block->getOrderStatus() ?>",
+                "OrderID": "<?php echo $block->getOrderId() ?>",
+                "ServiceID": "<?php echo $block->getServiceId() ?>",
+                "Hash": "<?php echo $block->getHash() ?>"
+            }
+        }'>
+        <?php if ($block->getOrderStatus() == 'PENDING'): ?>
+            <img src="<?php echo $block->getViewFileUrl('BlueMedia_BluePayment::images/pending.png') ?>"
+                 style="float: left; margin-right: 20px; " />
+
+            <h2>Zamówienie przyjęte - status transakcji: <strong>w trakcie weryfikacji</strong>.</h2>
+
+            <p>
+                Twoje zamówienie zostało przyjęte - oczekujemy na płatność.<br>
+                Jak tylko otrzymamy pozytywną informację - zamówienie zostanie przekazane do realizacji.
+            </p>
+        <?php endif; ?>
+
+        <p>
+            Numer zamówienia: <strong><?php echo $block->getOrderId(); ?></strong>
+        </p>
+
+    </div>
+<?php endif; ?>
