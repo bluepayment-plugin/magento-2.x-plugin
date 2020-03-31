@@ -184,7 +184,7 @@ class Create extends Action
             }
 
             if ($blikGateway == $gatewayId && $automatic === true) {
-                $authorizationCode = (int)$this->getRequest()->getParam('code', 0);
+                $authorizationCode = $this->getRequest()->getParam('code', 0);
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
                 if ($this->validateBlikCode($authorizationCode)) {
@@ -216,9 +216,12 @@ class Create extends Action
                     return $resultJson;
                 }
 
+                $this->logger->info('CREATE: ' . __LINE__ . 'Invalid BLIK code');
+
                 $resultJson = $this->resultJsonFactory->create();
                 $resultJson->setData([
-                    'status' => false
+                    'status' => false,
+                    'code' => $authorizationCode
                 ]);
                 return $resultJson;
             }

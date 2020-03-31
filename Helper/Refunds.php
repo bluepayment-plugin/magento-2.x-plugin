@@ -151,7 +151,11 @@ class Refunds extends Data
             }
         } elseif (is_array($loadResult) && isset($loadResult['statusCode'])) {
             // For error
-            [$errorCode, $errorText] = explode(" - ", $loadResult['description']);
+            $errorText = $loadResult['description'];
+
+            if (strpos($errorText, " - ") !== false) {
+                list($errorCode, $errorText) = explode(" - ", $loadResult['description']);
+            }
 
             $result = [
                 'error' => true,
@@ -224,8 +228,14 @@ class Refunds extends Data
             self::DEFAULT_HASH_SEPARATOR;
         $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
 
+        $this->logger->info('REFUNDS:' . __LINE__, ['data' => $data]);
+
         try {
-            return (array)$this->apiClient->call($refundAPIUrl, $data);
+            $response = (array)$this->apiClient->call($refundAPIUrl, $data);
+
+            $this->logger->info('REFUNDS:' . __LINE__, ['response' => $response]);
+
+            return $response;
         } catch (\Exception $e) {
             $this->logger->info($e->getMessage());
 
