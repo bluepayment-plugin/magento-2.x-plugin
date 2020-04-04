@@ -106,6 +106,11 @@ class Refunds extends Data
         $sharedKey = $this->getConfigValue('shared_key', $order->getOrderCurrencyCode());
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
 
+        if ($amount === null) {
+            // Full refund
+            $amount = $order->getGrandTotal();
+        }
+
         $refundAmount = $this->refundTransactionRepository->getTotalRefundAmountOnTransaction($transaction);
         $availableRefundAmount = $transaction->getAmount() - $refundAmount;
         if ($amount > ($availableRefundAmount)) {
@@ -247,7 +252,6 @@ class Refunds extends Data
      * @param array                $loadResult
      * @param float                $amount
      * @param TransactionInterface $transaction
-     *
      * @param Order                $order
      *
      * @return void
@@ -331,9 +335,10 @@ class Refunds extends Data
     }
 
     /**
-     * @param $loadResult
-     * @param $amount
-     * @param $transaction
+     * @param array                $loadResult
+     * @param float                $amount
+     * @param TransactionInterface $transaction
+     * @param Order                $order
      */
     public function updateOrderOnRefund($loadResult, $amount, $transaction, $order)
     {
