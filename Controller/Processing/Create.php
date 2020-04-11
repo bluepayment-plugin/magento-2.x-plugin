@@ -277,15 +277,30 @@ class Create extends Action
                 $result = $this->sendAutopayRequest($payment->getUrlGateway(), $params);
 
                 if ($result['redirectUrl'] !== null) {
+                    // 3DS
+
                     $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
                     return $this->getResponse()->setRedirect($result['redirectUrl']);
                 }
 
                 if ($result['paymentStatus'] == Payment::PAYMENT_STATUS_SUCCESS) {
+                    // Got success status
+
                     return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                 }
 
-                return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+                // Otherwise - redirect to "waiting" page
+                $hashData  = [$serviceId, $orderId, $sharedKey];
+                $redirectHash = $this->helper->generateAndReturnHash($hashData);
+
+                return $this->_redirect('bluepayment/processing/back', [
+                    '_secure' => true,
+                    '_query' => [
+                        'ServiceID' => $serviceId,
+                        'OrderID' => $orderId,
+                        'Hash' => $redirectHash
+                    ]
+                ]);
             }
 
             $url = $this->_url->getUrl(

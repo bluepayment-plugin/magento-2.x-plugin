@@ -695,127 +695,130 @@ class Payment extends AbstractMethod
          * @var \Magento\Sales\Model\Order\Payment $orderPayment
          */
         $orderPayment = $order->getPayment();
-        $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-        $amount = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-        $transactionAmount = $amount;
 
-        $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+        if ($orderPayment !== null) {
+            $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
+            $amount = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
+            $transactionAmount = $amount;
 
-        $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
-        if ($statusWaitingPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var \Magento\Sales\Model\Order\Status $status */
-                if ($status->getStatus() == $statusWaitingPayment) {
-                    $orderStatusWaitingState = $status->getState();
-                }
-            }
-        } else {
-            $statusWaitingPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
-        }
+            $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
 
-        $orderStatusAcceptState = Order::STATE_PROCESSING;
-        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
-        if ($statusAcceptPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var \Magento\Sales\Model\Order\Status $status */
-                if ($status->getStatus() == $statusAcceptPayment) {
-                    $orderStatusAcceptState = $status->getState();
-                }
-            }
-        } else {
-            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
-        }
-
-        $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
-        $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
-        if ($statusErrorPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var \Magento\Sales\Model\Order\Status $status */
-                if ($status->getStatus() == $statusErrorPayment) {
-                    $orderStatusErrorState = $status->getState();
-                }
-            }
-        } else {
-            $statusErrorPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PAYMENT_REVIEW);
-        }
-
-        try {
-            if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
-                $orderComment =
-                    '[BM] Transaction ID: ' . (string)$remoteId
-                    . ' | Amount: ' . $transactionAmount
-                    . ' | Status: ' . $paymentStatus;
-                switch ($paymentStatus) {
-                    case self::PAYMENT_STATUS_PENDING:
-                        if ($paymentStatus != $orderPaymentState) {
-                            $transaction = $orderPayment->setTransactionId((string)$remoteId);
-                            $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
-                            $transaction->setIsTransactionPending(true);
-                            $transaction->save();
-
-                            $order->setState($orderStatusWaitingState)
-                                ->setStatus($statusWaitingPayment)
-                                ->addStatusToHistory(
-                                    $statusWaitingPayment,
-                                    $orderComment,
-                                    false
-                                )
-                                ->save();
-                        }
-                        break;
-                    case self::PAYMENT_STATUS_SUCCESS:
-                        $transaction = $orderPayment->setTransactionId((string)$remoteId);
-                        $transaction->prependMessage('[' . self::PAYMENT_STATUS_SUCCESS . ']');
-                        $transaction->registerCaptureNotification($transactionAmount)
-                            ->setIsTransactionApproved(true)
-                            ->setIsTransactionClosed(true)
-                            ->save();
-                        $order->setState($orderStatusAcceptState)
-                            ->setStatus($statusAcceptPayment)
-                            ->addStatusToHistory(
-                                $statusAcceptPayment,
-                                $orderComment,
-                                false
-                            )
-                            ->save();
-                        break;
-                    case self::PAYMENT_STATUS_FAILURE:
-                        if ($orderPaymentState != $paymentStatus) {
-                            $order
-                                ->setState($orderStatusErrorState)
-                                ->setStatus($statusErrorPayment)
-                                ->addStatusToHistory(
-                                    $orderStatusErrorState,
-                                    $orderComment,
-                                    false
-                                )
-                                ->save();
-                        }
-                        break;
-                    default:
-                        break;
+            $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
+            if ($statusWaitingPayment != '') {
+                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusWaitingPayment) {
+                        $orderStatusWaitingState = $status->getState();
+                    }
                 }
             } else {
-                $orderComment =
-                    '[BM] Transaction ID: ' . (string)$remoteId
-                    . ' | Amount: ' . $transactionAmount
-                    . ' | Status: ' . $paymentStatus . ' [IGNORED]';
+                $statusWaitingPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+            }
 
-                $order->addStatusToHistory(
-                    $order->getStatus(),
-                    $orderComment,
-                    false
-                )
-                    ->save();
+            $orderStatusAcceptState = Order::STATE_PROCESSING;
+            $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
+            if ($statusAcceptPayment != '') {
+                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusAcceptPayment) {
+                        $orderStatusAcceptState = $status->getState();
+                    }
+                }
+            } else {
+                $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
             }
-            if (!$order->getEmailSent()) {
-                $this->sender->send($order);
+
+            $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
+            $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
+            if ($statusErrorPayment != '') {
+                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusErrorPayment) {
+                        $orderStatusErrorState = $status->getState();
+                    }
+                }
+            } else {
+                $statusErrorPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PAYMENT_REVIEW);
             }
-            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-            $orderPayment->save();
-            return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
-        } catch (\Exception $e) {
-            $this->_logger->critical($e);
+
+            try {
+                if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
+                    $orderComment =
+                        '[BM] Transaction ID: ' . (string)$remoteId
+                        . ' | Amount: ' . $transactionAmount
+                        . ' | Status: ' . $paymentStatus;
+                    switch ($paymentStatus) {
+                        case self::PAYMENT_STATUS_PENDING:
+                            if ($paymentStatus != $orderPaymentState) {
+                                $transaction = $orderPayment->setTransactionId((string)$remoteId);
+                                $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
+                                $transaction->setIsTransactionPending(true);
+                                $transaction->save();
+
+                                $order->setState($orderStatusWaitingState)
+                                    ->setStatus($statusWaitingPayment)
+                                    ->addStatusToHistory(
+                                        $statusWaitingPayment,
+                                        $orderComment,
+                                        false
+                                    )
+                                    ->save();
+                            }
+                            break;
+                        case self::PAYMENT_STATUS_SUCCESS:
+                            $transaction = $orderPayment->setTransactionId((string)$remoteId);
+                            $transaction->prependMessage('[' . self::PAYMENT_STATUS_SUCCESS . ']');
+                            $transaction->registerCaptureNotification($transactionAmount)
+                                ->setIsTransactionApproved(true)
+                                ->setIsTransactionClosed(true)
+                                ->save();
+                            $order->setState($orderStatusAcceptState)
+                                ->setStatus($statusAcceptPayment)
+                                ->addStatusToHistory(
+                                    $statusAcceptPayment,
+                                    $orderComment,
+                                    false
+                                )
+                                ->save();
+                            break;
+                        case self::PAYMENT_STATUS_FAILURE:
+                            if ($orderPaymentState != $paymentStatus) {
+                                $order
+                                    ->setState($orderStatusErrorState)
+                                    ->setStatus($statusErrorPayment)
+                                    ->addStatusToHistory(
+                                        $orderStatusErrorState,
+                                        $orderComment,
+                                        false
+                                    )
+                                    ->save();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    $orderComment =
+                        '[BM] Transaction ID: ' . (string)$remoteId
+                        . ' | Amount: ' . $transactionAmount
+                        . ' | Status: ' . $paymentStatus . ' [IGNORED]';
+
+                    $order->addStatusToHistory(
+                        $order->getStatus(),
+                        $orderComment,
+                        false
+                    )
+                        ->save();
+                }
+                if (!$order->getEmailSent()) {
+                    $this->sender->send($order);
+                }
+                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->save();
+                return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
+            } catch (\Exception $e) {
+                $this->_logger->critical($e);
+            }
         }
     }
 
