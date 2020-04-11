@@ -27,7 +27,7 @@ class Gateways extends Data
     const UPLOAD_PATH                   = '/BlueMedia/';
 
     /** @var array Available currencies */
-    public $currencies = [
+    public static $currencies = [
         'PLN', 'EUR', 'GBP', 'USD', 'CZK', 'RON', 'HUF', 'BGN', 'UAH'
     ];
 
@@ -99,7 +99,7 @@ class Gateways extends Data
         $hashMethod        = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
         $gatewayListAPIUrl = $this->getGatewayListUrl();
 
-        foreach ($this->currencies as $currency) {
+        foreach (self::$currencies as $currency) {
             $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
             $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
             $hashKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
@@ -258,7 +258,7 @@ class Gateways extends Data
 
         $existingGateways = [];
 
-        foreach ($this->currencies as $currency) {
+        foreach (self::$currencies as $currency) {
             $existingGateways[$currency] = [];
         }
 
@@ -288,5 +288,15 @@ class Gateways extends Data
     public function showGatewayLogo()
     {
         return $this->scopeConfig->getValue("payment/bluepayment/show_gateway_logo") == 1;
+    }
+
+    /**
+     * Get available currencies list.
+     *
+     * @return array|string[] Currencies list
+     */
+    public static function getCurrencies()
+    {
+        return self::$currencies;
     }
 }

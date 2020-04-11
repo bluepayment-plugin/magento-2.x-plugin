@@ -585,7 +585,7 @@ class Payment extends AbstractMethod
             $this->cardResource->delete($card);
         }
 
-        $this->recurringResponse($clientHash, self::TRANSACTION_CONFIRMED);
+        return $this->recurringResponse($clientHash, self::TRANSACTION_CONFIRMED);
     }
 
     /**
@@ -599,7 +599,20 @@ class Payment extends AbstractMethod
     public function _validAllTransaction($response, $currency = null)
     {
         if ($currency === null) {
-            $currency = $response->transactions->transaction->currency;
+            if (property_exists($response, 'transactions')) {
+                // If we have transactions element
+                $currency = $response->transactions->transaction->currency;
+            } else {
+                // Otherwise - find correct currency
+                $currencies = \BlueMedia\BluePayment\Helper\Gateways::getCurrencies();
+
+                foreach ($currencies as $c) {
+                    if ($this->_scopeConfig->getValue("payment/bluepayment/".strtolower($c)."/service_id") == $response->serviceID) {
+                        $currency = $c;
+                        break;
+                    }
+                }
+            }
         }
 
         $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");

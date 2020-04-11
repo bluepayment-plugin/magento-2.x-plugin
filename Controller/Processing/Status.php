@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
@@ -63,6 +64,9 @@ class Status extends Action
     {
         $result = $this->rawFactory->create();
 
+        /** @var Payment $payment */
+        $payment = $this->paymentFactory->create();
+
         try {
             $params = $this->getRequest()->getParams();
             $this->logger->info('STATUS:' . __LINE__, ['params' => $params]);
@@ -73,7 +77,7 @@ class Status extends Action
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
 
-                $xml = $this->paymentFactory->create()->processStatusPayment($simpleXml);
+                $xml = $payment->processStatusPayment($simpleXml);
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);
@@ -84,7 +88,7 @@ class Status extends Action
                 $simpleXml = simplexml_load_string($base64recurring);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
 
-                $xml = $this->paymentFactory->create()->processRecurring($simpleXml);
+                $xml = $payment->processRecurring($simpleXml);
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);
