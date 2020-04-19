@@ -4,7 +4,6 @@ namespace BlueMedia\BluePayment\Api\Data;
 
 /**
  * Interface TransactionInterface
- * @package BlueMedia\BluePayment\Api\Data
  */
 interface TransactionInterface
 {
@@ -98,7 +97,7 @@ interface TransactionInterface
     public function getPaymentDate();
 
     /**
-     * @param $date
+     * @param string $date
      *
      * @return $this
      */
@@ -127,4 +126,18 @@ interface TransactionInterface
      * @return $this
      */
     public function setPaymentStatusDetails($status);
+
+    /**
+     * Save object data
+     *
+     * @return $this
+     */
+    public function save();
+
+    /**
+     * Delete object from database
+     *
+     * @return $this
+     */
+    public function delete();
 }

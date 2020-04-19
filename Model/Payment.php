@@ -3,9 +3,12 @@
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
+use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
+use DOMDocument;
+use Exception;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -17,18 +20,17 @@ use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentData;
-use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\Order\Status;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
+use SimpleXMLElement;
 
 /**
- * Class Payment
- *
- * @package BlueMedia\BluePayment\Model
+ * BluePayment class
  */
 class Payment extends AbstractMethod
 {
@@ -49,11 +51,27 @@ class Payment extends AbstractMethod
     const TRANSACTION_CONFIRMED = "CONFIRMED";
     const TRANSACTION_NOTCONFIRMED = "NOTCONFIRMED";
 
-    private $orderParams = ['ServiceID', 'OrderID', 'Amount', 'GatewayID', 'Currency',
-        'CustomerEmail', 'CustomerIP', 'RecurringAcceptanceState', 'RecurringAction', 'ClientHash', 'ScreenType'];
+    /** @var string[] */
+    private $orderParams = [
+        'ServiceID',
+        'OrderID',
+        'Amount',
+        'GatewayID',
+        'Currency',
+        'CustomerEmail',
+        'CustomerIP',
+        'Title',
+        'ValidityTime',
+        'RecurringAcceptanceState',
+        'RecurringAction',
+        'ClientHash',
+        'AuthorizationCode',
+        'ScreenType',
+        'PaymentToken',
+    ];
 
     /**
-     * @var array
+     * @var string[]
      */
     private $checkHashArray = [];
 
@@ -69,7 +87,7 @@ class Payment extends AbstractMethod
      *
      * @var string
      */
-    protected $_formBlockType = 'BlueMedia\BluePayment\Block\Form';
+    protected $_formBlockType = Form::class;
 
     /**
      * Czy ta opcja płatności może być pokazywana na stronie
@@ -254,18 +272,19 @@ class Payment extends AbstractMethod
      * Tablica z parametrami do wysłania metodą GET do bramki
      *
      * @param Order $order
-     * @param int    $gatewayId
-     * @param bool   $automatic
-     * @param string|int $authorizationCode
+     * @param int $gatewayId
+     * @param bool $automatic
+     * @param string $authorizationCode
      * @param string $paymentToken
+     * @param int $cardIndex
      *
-     * @return array
+     * @return string[]
      */
     public function getFormRedirectFields(
         $order,
         $gatewayId = 0,
         $automatic = false,
-        $authorizationCode = 0,
+        $authorizationCode = '',
         $paymentToken = '',
         $cardIndex = -1
     ) {
@@ -281,194 +300,64 @@ class Payment extends AbstractMethod
         $gpayGateway   = ConfigProvider::GPAY_GATEWAY_ID;
         $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
 
+        $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifeHours();
 
-        if ($gatewayId === 0) {
-            if ($validityTime) {
-                $hashData = [$serviceId, $orderId, $amount, $currency, $customerEmail, $validityTime, $sharedKey];
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params = [
-                    'ServiceID' => $serviceId,
-                    'OrderID' => $orderId,
-                    'Amount' => $amount,
-                    'Currency' => $currency,
-                    'CustomerEmail' => $customerEmail,
-                    'ValidityTime' => $validityTime,
-                    'Hash' => $hashLocal,
-                ];
-            } else {
-                $hashData = [$serviceId, $orderId, $amount, $currency, $customerEmail, $sharedKey];
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params = [
-                    'ServiceID' => $serviceId,
-                    'OrderID' => $orderId,
-                    'Amount' => $amount,
-                    'Currency' => $currency,
-                    'CustomerEmail' => $customerEmail,
-                    'Hash' => $hashLocal,
-                ];
-            }
-        } else {
-            if ($validityTime) {
-                $hashData = [
-                    $serviceId,
-                    $orderId,
-                    $amount,
-                    $gatewayId,
-                    $currency,
-                    $customerEmail,
-                    $validityTime,
-                    $sharedKey,
-                ];
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params = [
-                    'ServiceID' => $serviceId,
-                    'OrderID' => $orderId,
-                    'Amount' => $amount,
-                    'GatewayID' => $gatewayId,
-                    'Currency' => $currency,
-                    'CustomerEmail' => $customerEmail,
-                    'ValidityTime' => $validityTime,
-                    'Hash' => $hashLocal,
-                ];
-            } else {
-                if ($automatic === true && $cardGateway == $gatewayId) {
-                    $hashData = [
-                        $serviceId,
-                        $orderId,
-                        $amount,
-                        $gatewayId,
-                        $currency,
-                        $customerEmail,
-                        self::IFRAME_GATEWAY_ID,
-                        $sharedKey,
-                    ];
-                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
+        $params = [
+            'ServiceID' => $serviceId,
+            'OrderID' => $orderId,
+            'Amount' => $amount,
+            'Currency' => $currency,
+            'CustomerEmail' => $customerEmail,
+        ];
 
-                    return [
-                        'ServiceID' => $serviceId,
-                        'OrderID' => $orderId,
-                        'Amount' => $amount,
-                        'GatewayID' => $gatewayId,
-                        'Currency' => $currency,
-                        'CustomerEmail' => $customerEmail,
-                        'ScreenType' => self::IFRAME_GATEWAY_ID,
-                        'Hash' => $hashLocal,
-                    ];
-                }
-
-                /* Automatic payment */
-                if ($autopayGateway == $gatewayId) {
-                    $array = [
-                        'ServiceID' => $serviceId,
-                        'OrderID' => $orderId,
-                        'Amount' => $amount,
-                        'GatewayID' => $gatewayId,
-                        'Currency' => $currency,
-                        'CustomerEmail' => $customerEmail,
-                    ];
-
-                    /** @var Card $card */
-                    $card = $this->cardCollectionFactory
-                        ->create()
-                        ->addFieldToFilter('card_index', $cardIndex)
-                        ->addFieldToFilter('customer_id', $order->getCustomerId())
-                        ->getFirstItem();
-
-                    if ($cardIndex == -1 || $card == null) {
-                        $array['RecurringAcceptanceState'] = 'ACCEPTED';
-                        $array['RecurringAction'] = 'INIT_WITH_PAYMENT';
-                    } else {
-                        $array['RecurringAction'] = 'MANUAL';
-                        $array['ClientHash'] = $card->getClientHash();
-                    }
-
-                    if ($automatic === true) {
-                        $array['ScreenType'] = self::IFRAME_GATEWAY_ID;
-                    }
-
-                    $array = $this->sortParams($array);
-
-                    $hashArray = array_values($array);
-                    $hashArray[] = $sharedKey;
-
-                    $array['Hash'] = $this->helper->generateAndReturnHash($hashArray);
-
-                    return $array;
-                }
-
-                if ($automatic === true && $blikGateway == $gatewayId) {
-                    $hashData = [
-                        $serviceId,
-                        $orderId,
-                        $amount,
-                        $gatewayId,
-                        $currency,
-                        $customerEmail,
-                        $authorizationCode,
-                        $sharedKey,
-                    ];
-                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
-
-                    return [
-                        'ServiceID' => $serviceId,
-                        'OrderID' => $orderId,
-                        'Amount' => $amount,
-                        'GatewayID' => $gatewayId,
-                        'Currency' => $currency,
-                        'CustomerEmail' => $customerEmail,
-                        'AuthorizationCode' => $authorizationCode,
-                        'Hash' => $hashLocal,
-                    ];
-                }
-
-                if ($automatic === true && $gpayGateway == $gatewayId) {
-                    $paymentToken = base64_encode($paymentToken);
-                    $desc = '';
-                    $hashData = [
-                        $serviceId,
-                        $orderId,
-                        $amount,
-                        $desc,
-                        $gatewayId,
-                        $currency,
-                        $customerEmail,
-                        $paymentToken,
-                        $sharedKey,
-                    ];
-                    $hashLocal = $this->helper->generateAndReturnHash($hashData);
-
-                    return [
-                        'ServiceID' => $serviceId,
-                        'OrderID' => $orderId,
-                        'Amount' => $amount,
-                        'Description' => $desc,
-                        'GatewayID' => $gatewayId,
-                        'Currency' => $currency,
-                        'CustomerEmail' => $customerEmail,
-                        'PaymentToken' => $paymentToken,
-                        'Hash' => $hashLocal,
-                    ];
-                }
-
-                $hashData = [$serviceId, $orderId, $amount, $gatewayId, $currency, $customerEmail, $sharedKey];
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
-                $params = [
-                    'ServiceID' => $serviceId,
-                    'OrderID' => $orderId,
-                    'Amount' => $amount,
-                    'GatewayID' => $gatewayId,
-                    'Currency' => $currency,
-                    'CustomerEmail' => $customerEmail,
-                    'Hash' => $hashLocal,
-                ];
-            }
+        /* Ustawiona ważność linku */
+        if ($validityTime) {
+            $params['ValidityTime'] = $validityTime;
         }
+
+        /* Wybrana bramka płatnicza */
+        if ($gatewayId !== 0) {
+            $params['GatewayID'] = $gatewayId;
+        }
+
+        /* Płatność iFrame */
+        if ($automatic === true && $cardGateway == $gatewayId) {
+            $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+        }
+
+        /* Automatic payment */
+        if ($autopayGateway == $gatewayId) {
+            $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
+        }
+
+        /* BLIK */
+        if ($automatic === true && $blikGateway == $gatewayId) {
+            $params['AuthorizationCode'] = $authorizationCode;
+        }
+
+        /* Google Pay */
+        if ($automatic === true && $gpayGateway == $gatewayId) {
+            $desc = '';
+
+            $params['Description'] = $desc;
+            $params['PaymentToken'] = base64_encode($paymentToken);
+        }
+
+        $hashArray = array_values($this->sortParams($params));
+        $hashArray[] = $sharedKey;
+
+        $params['Hash'] = $this->helper->generateAndReturnHash($hashArray);
 
         return $params;
     }
 
+    /**
+     * @param array $params
+     *
+     * @return array
+     */
     public function sortParams(array $params)
     {
         $ordered = [];
@@ -478,6 +367,7 @@ class Payment extends AbstractMethod
                 unset($params[$value]);
             }
         }
+
         return $ordered + $params;
     }
 
@@ -491,9 +381,13 @@ class Payment extends AbstractMethod
         $hours = $this->getConfigData('transaction_life_hours');
         if ($hours && is_int($hours) && $hours >= 1 && $hours <= 720) {
             date_default_timezone_set('Europe/Warsaw');
-            $expirationTime = date('Y-m-d H:i:s', strtotime("+" . $hours . " hour"));
+            $time = strtotime("+" . $hours . " hour");
 
-            return $expirationTime;
+            if ($time) {
+                return date('Y-m-d H:i:s', $time);
+            }
+
+            return date('Y-m-d H:i:s', time() + $hours*3600);
         }
 
         return self::DEFAULT_TRANSACTION_LIFE_HOURS;
@@ -503,11 +397,11 @@ class Payment extends AbstractMethod
      * Ustawia odpowiedni status transakcji/płatności zgodnie z uzyskaną informacją
      * z akcji 'statusAction'
      *
-     * @param $response
+     * @param SimpleXMLElement $response
      *
      * @return string|null
      */
-    public function processStatusPayment($response)
+    public function processStatusPayment(SimpleXMLElement $response)
     {
         if ($this->_validAllTransaction($response)) {
             $transaction_xml = $response->transactions->transaction;
@@ -520,24 +414,38 @@ class Payment extends AbstractMethod
     /**
      * Procesuje zapis/usunięcie automatycznej płatności
      *
-     * @param \SimpleXMLElement $response
+     * @param SimpleXMLElement $response
+     *
+     * @return string|null
      */
     public function processRecurring($response)
     {
         $currency = $response->transaction->currency;
 
-        if ($this->_validAllTransaction($response, $currency)) {
-            switch ($response->getName()) {
-                case 'recurringActivation':
-                    return $this->saveCardData($response);
-                case 'recurringDeactivation':
-                    return $this->deleteCardData($response);
-                default:
-                    break;
+        try {
+            if ($this->_validAllTransaction($response, $currency)) {
+                switch ($response->getName()) {
+                    case 'recurringActivation':
+                        return $this->saveCardData($response);
+                    case 'recurringDeactivation':
+                        return $this->deleteCardData($response);
+                    default:
+                        break;
+                }
             }
+        } catch (\Exception $e) {
+            return null;
         }
+
+        return null;
     }
 
+    /**
+     * @param SimpleXMLElement $data
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     */
     private function saveCardData($data)
     {
         $orderId = $data->transaction->orderID;
@@ -574,11 +482,20 @@ class Payment extends AbstractMethod
         return $this->recurringResponse($clientHash, $status);
     }
 
+    /**
+     * @param SimpleXMLElement $data
+     *
+     * @return string
+     * @throws Exception
+     */
     private function deleteCardData($data)
     {
         $clientHash = (string)$data->recurringData->clientHash;
 
+        /** @var CardResource\Collection $cardCollection */
         $cardCollection = $this->cardCollectionFactory->create();
+
+        /** @var Card $card */
         $card = $cardCollection->getItemByColumnValue('client_hash', $clientHash);
 
         if ($card !== null) {
@@ -591,12 +508,12 @@ class Payment extends AbstractMethod
     /**
      * Waliduje zgodność otrzymanego XML'a
      *
-     * @param $response
+     * @param SimpleXMLElement $response
      * @param string $currency
      *
      * @return bool
      */
-    public function _validAllTransaction($response, $currency = null)
+    public function _validAllTransaction(SimpleXMLElement $response, $currency = null)
     {
         if ($currency === null) {
             if (property_exists($response, 'transactions')) {
@@ -604,10 +521,11 @@ class Payment extends AbstractMethod
                 $currency = $response->transactions->transaction->currency;
             } else {
                 // Otherwise - find correct currency
-                $currencies = \BlueMedia\BluePayment\Helper\Gateways::getCurrencies();
+                $currencies = \BlueMedia\BluePayment\Helper\Gateways::$currencies;
 
                 foreach ($currencies as $c) {
-                    if ($this->_scopeConfig->getValue("payment/bluepayment/".strtolower($c)."/service_id") == $response->serviceID) {
+                    if ($this->_scopeConfig->getValue("payment/bluepayment/".strtolower($c)."/service_id")
+                        == $response->serviceID) {
                         $currency = $c;
                         break;
                     }
@@ -626,7 +544,7 @@ class Payment extends AbstractMethod
 
         $this->checkHashArray = [];
         $hash = (string)$response->hash;
-        $response->hash = null;
+        $response->hash = '';
 
         $this->_checkInList($response);
         $this->checkHashArray[] = $sharedKey;
@@ -637,7 +555,7 @@ class Payment extends AbstractMethod
     /**
      * Sprawdza czy można zmienić status zamówienia oraz czy nie zostało już opłacone.
      *
-     * @param object $order
+     * @param Order $order
      *
      * @return boolean
      */
@@ -674,156 +592,101 @@ class Payment extends AbstractMethod
     /**
      * Aktualizacja statusu zamówienia, transakcji oraz wysyłka maila do klienta
      *
-     * @param $transaction
+     * @param SimpleXMLElement $transaction
      *
      * @return string
-     * @throws \Exception
      */
-    protected function updateStatusTransactionAndOrder($transaction)
+    protected function updateStatusTransactionAndOrder(SimpleXMLElement $transaction)
     {
         $paymentStatus = (string)$transaction->paymentStatus;
 
         $remoteId = $transaction->remoteID;
         $orderId = $transaction->orderID;
-        $transactionAmount = number_format(round($transaction->amount, 2), 2, '.', '');
+        /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
-        $currency = $transaction->currency;
 
         $this->saveTransactionResponse($transaction);
 
-        /**
-         * @var \Magento\Sales\Model\Order\Payment $orderPayment
-         */
+        /** @var \Magento\Sales\Model\Order\Payment|mixed|null $orderPayment */
         $orderPayment = $order->getPayment();
 
-        if ($orderPayment !== null) {
-            $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-            $amount = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-            $transactionAmount = $amount;
-
-            $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-
-            $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
-            if ($statusWaitingPayment != '') {
-                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                    /** @var \Magento\Sales\Model\Order\Status $status */
-                    if ($status->getStatus() == $statusWaitingPayment) {
-                        $orderStatusWaitingState = $status->getState();
-                    }
-                }
-            } else {
-                $statusWaitingPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
-            }
-
-            $orderStatusAcceptState = Order::STATE_PROCESSING;
-            $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
-            if ($statusAcceptPayment != '') {
-                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                    /** @var \Magento\Sales\Model\Order\Status $status */
-                    if ($status->getStatus() == $statusAcceptPayment) {
-                        $orderStatusAcceptState = $status->getState();
-                    }
-                }
-            } else {
-                $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
-            }
-
-            $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
-            $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
-            if ($statusErrorPayment != '') {
-                foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                    /** @var \Magento\Sales\Model\Order\Status $status */
-                    if ($status->getStatus() == $statusErrorPayment) {
-                        $orderStatusErrorState = $status->getState();
-                    }
-                }
-            } else {
-                $statusErrorPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PAYMENT_REVIEW);
-            }
-
-            try {
-                if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . (string)$remoteId
-                        . ' | Amount: ' . $transactionAmount
-                        . ' | Status: ' . $paymentStatus;
-                    switch ($paymentStatus) {
-                        case self::PAYMENT_STATUS_PENDING:
-                            if ($paymentStatus != $orderPaymentState) {
-                                $transaction = $orderPayment->setTransactionId((string)$remoteId);
-                                $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
-                                $transaction->setIsTransactionPending(true);
-                                $transaction->save();
-
-                                $order->setState($orderStatusWaitingState)
-                                    ->setStatus($statusWaitingPayment)
-                                    ->addStatusToHistory(
-                                        $statusWaitingPayment,
-                                        $orderComment,
-                                        false
-                                    )
-                                    ->save();
-                            }
-                            break;
-                        case self::PAYMENT_STATUS_SUCCESS:
-                            $transaction = $orderPayment->setTransactionId((string)$remoteId);
-                            $transaction->prependMessage('[' . self::PAYMENT_STATUS_SUCCESS . ']');
-                            $transaction->registerCaptureNotification($transactionAmount)
-                                ->setIsTransactionApproved(true)
-                                ->setIsTransactionClosed(true)
-                                ->save();
-                            $order->setState($orderStatusAcceptState)
-                                ->setStatus($statusAcceptPayment)
-                                ->addStatusToHistory(
-                                    $statusAcceptPayment,
-                                    $orderComment,
-                                    false
-                                )
-                                ->save();
-                            break;
-                        case self::PAYMENT_STATUS_FAILURE:
-                            if ($orderPaymentState != $paymentStatus) {
-                                $order
-                                    ->setState($orderStatusErrorState)
-                                    ->setStatus($statusErrorPayment)
-                                    ->addStatusToHistory(
-                                        $orderStatusErrorState,
-                                        $orderComment,
-                                        false
-                                    )
-                                    ->save();
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                } else {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . (string)$remoteId
-                        . ' | Amount: ' . $transactionAmount
-                        . ' | Status: ' . $paymentStatus . ' [IGNORED]';
-
-                    $order->addStatusToHistory(
-                        $order->getStatus(),
-                        $orderComment,
-                        false
-                    )
-                        ->save();
-                }
-                if (!$order->getEmailSent()) {
-                    $this->sender->send($order);
-                }
-                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-                $orderPayment->save();
-                return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
-            } catch (\Exception $e) {
-                $this->_logger->critical($e);
-            }
+        if ($orderPayment === null) {
+            return $this->returnConfirmation($order, self::TRANSACTION_NOTCONFIRMED);
         }
+
+        /** @var string $orderPaymentState */
+        $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
+        $amount = $order->getGrandTotal();
+        $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+        try {
+            if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $formaattedAmount
+                    . ' | Status: ' . $paymentStatus;
+
+                switch ($paymentStatus) {
+                    case self::PAYMENT_STATUS_PENDING:
+                        $this->processPending(
+                            $order,
+                            $paymentStatus,
+                            $orderPaymentState,
+                            $orderPayment,
+                            $remoteId,
+                            $orderComment
+                        );
+                        break;
+                    case self::PAYMENT_STATUS_SUCCESS:
+                        $this->processSuccess(
+                            $order,
+                            $orderPayment,
+                            $remoteId,
+                            $amount,
+                            $orderComment
+                        );
+                        break;
+                    case self::PAYMENT_STATUS_FAILURE:
+                        $this->processFailure(
+                            $order,
+                            $orderPaymentState,
+                            $paymentStatus,
+                            $orderComment
+                        );
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $amount
+                    . ' | Status: ' . $paymentStatus . ' [IGNORED]';
+
+                $order->addStatusToHistory(
+                    $order->getStatus(),
+                    $orderComment,
+                    false
+                )
+                    ->save();
+            }
+            if (!$order->getEmailSent()) {
+                $this->sender->send($order);
+            }
+            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+            $orderPayment->save();
+            return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
+        } catch (Exception $e) {
+            $this->_logger->critical($e);
+        }
+
+        return $this->returnConfirmation($order, self::TRANSACTION_NOTCONFIRMED);
     }
 
     /**
-     * @param $list
+     * @param object|array $list
+     *
+     * @return void
      */
     private function _checkInList($list)
     {
@@ -853,7 +716,7 @@ class Payment extends AbstractMethod
         $hashData = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
-        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom = new DOMDocument('1.0', 'UTF-8');
 
         $confirmationList = $dom->createElement('confirmationList');
 
@@ -877,9 +740,17 @@ class Payment extends AbstractMethod
 
         $dom->appendChild($confirmationList);
 
-        return $dom->saveXML();
+        $xml = $dom->saveXML();
+
+        return $xml ? $xml : '';
     }
 
+    /**
+     * @param string $clientHash
+     * @param string $status
+     *
+     * @return string
+     */
     private function recurringResponse($clientHash, $status)
     {
         $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment/pln/service_id");
@@ -887,7 +758,7 @@ class Payment extends AbstractMethod
         $hashData = [$serviceId, $clientHash, $status, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
-        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom = new DOMDocument('1.0', 'UTF-8');
 
         $confirmationList = $dom->createElement('confirmationList');
 
@@ -911,13 +782,17 @@ class Payment extends AbstractMethod
 
         $dom->appendChild($confirmationList);
 
-        return $dom->saveXML();
+        $xml = $dom->saveXML();
+
+        return $xml ? $xml : '';
     }
 
     /**
-     * @param $transactionResponse
+     * @param SimpleXMLElement $transactionResponse
+     *
+     * @return void
      */
-    private function saveTransactionResponse($transactionResponse)
+    private function saveTransactionResponse(SimpleXMLElement $transactionResponse)
     {
         /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
@@ -937,4 +812,170 @@ class Payment extends AbstractMethod
         }
     }
 
+    /**
+     * @param array $params
+     * @param bool $automatic
+     * @param int $customerId
+     * @param int $cardIndex
+     *
+     * @return array
+     */
+    private function autopayGateway(array $params, $automatic, $customerId, $cardIndex)
+    {
+        /** @var Card $card */
+        $card = $this->cardCollectionFactory
+            ->create()
+            ->addFieldToFilter('card_index', (string) $cardIndex)
+            ->addFieldToFilter('customer_id', (string) $customerId)
+            ->getFirstItem();
+
+        if ($cardIndex == -1 || $card == null) {
+            $params['RecurringAcceptanceState'] = 'ACCEPTED';
+            $params['RecurringAction'] = 'INIT_WITH_PAYMENT';
+        } else {
+            $params['RecurringAction'] = 'MANUAL';
+            $params['ClientHash'] = $card->getClientHash();
+        }
+
+        if ($automatic === true) {
+            $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+        }
+        return $params;
+    }
+
+    /**
+     * @param Order $order
+     * @param string $orderPaymentState
+     * @param string $paymentStatus
+     * @param string $orderComment
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function processFailure(
+        Order $order,
+        $orderPaymentState,
+        $paymentStatus,
+        $orderComment
+    ) {
+        $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
+        $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
+        if ($statusErrorPayment != '') {
+            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                /** @var Status $status */
+                if ($status->getStatus() == $statusErrorPayment) {
+                    $orderStatusErrorState = $status->getState();
+                }
+            }
+        } else {
+            $statusErrorPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PAYMENT_REVIEW);
+        }
+
+        if ($orderPaymentState != $paymentStatus) {
+            $order
+                ->setState($orderStatusErrorState)
+                ->setStatus($statusErrorPayment)
+                ->addStatusToHistory(
+                    $orderStatusErrorState,
+                    $orderComment,
+                    false
+                )
+                ->save();
+        }
+    }
+
+    /**
+     * @param Order $order
+     * @param Order\Payment $orderPayment
+     * @param string $remoteId
+     * @param float $transactionAmount
+     * @param string $orderComment
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function processSuccess(
+        Order $order,
+        Order\Payment $orderPayment,
+        $remoteId,
+        $transactionAmount,
+        $orderComment
+    ) {
+        $orderStatusAcceptState = Order::STATE_PROCESSING;
+        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
+        if ($statusAcceptPayment != '') {
+            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                /** @var Status $status */
+                if ($status->getStatus() == $statusAcceptPayment) {
+                    $orderStatusAcceptState = $status->getState();
+                }
+            }
+        } else {
+            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
+        }
+
+        $transaction = $orderPayment->setTransactionId((string)$remoteId);
+        $transaction->prependMessage('[' . self::PAYMENT_STATUS_SUCCESS . ']');
+        $transaction->registerCaptureNotification($transactionAmount)
+            ->setIsTransactionApproved(true)
+            ->setIsTransactionClosed(true)
+            ->save();
+        $order->setState($orderStatusAcceptState)
+            ->setStatus($statusAcceptPayment)
+            ->addStatusToHistory(
+                $statusAcceptPayment,
+                $orderComment,
+                false
+            )
+            ->save();
+    }
+
+    /**
+     * @param Order $order
+     * @param string $paymentStatus
+     * @param string $orderPaymentState
+     * @param Order\Payment $orderPayment
+     * @param string $remoteId
+     * @param string $orderComment
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function processPending(
+        Order $order,
+        $paymentStatus,
+        $orderPaymentState,
+        Order\Payment $orderPayment,
+        $remoteId,
+        $orderComment
+    ) {
+        $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+        $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
+        if ($statusWaitingPayment != '') {
+            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
+                /** @var Status $status */
+                if ($status->getStatus() == $statusWaitingPayment) {
+                    $orderStatusWaitingState = $status->getState();
+                }
+            }
+        } else {
+            $statusWaitingPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+        }
+
+        if ($paymentStatus != $orderPaymentState) {
+            $transaction = $orderPayment->setTransactionId((string)$remoteId);
+            $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
+            $transaction->setIsTransactionPending(true);
+            $transaction->save();
+
+            $order->setState($orderStatusWaitingState)
+                ->setStatus($statusWaitingPayment)
+                ->addStatusToHistory(
+                    $statusWaitingPayment,
+                    $orderComment,
+                    false
+                )
+                ->save();
+        }
+    }
 }

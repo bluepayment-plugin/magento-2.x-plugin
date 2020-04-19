@@ -5,17 +5,21 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Payment;
+use Exception;
+use Magento\Checkout\Model\Session;
 use Magento\Checkout\Model\Type\Onepage;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use Psr\Log\LoggerInterface;
 
 /**
- * Class Back
- *
- * @package BlueMedia\BluePayment\Controller\Processing
+ * Controller for returning user
  */
 class Back extends Action
 {
@@ -25,7 +29,7 @@ class Back extends Action
     public $pageFactory;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var Logger
      */
     public $logger;
 
@@ -52,12 +56,12 @@ class Back extends Action
     /**
      * Back constructor.
      *
-     * @param \Magento\Framework\App\Action\Context              $context
-     * @param \Magento\Framework\View\Result\PageFactory         $pageFactory
-     * @param Logger|\Psr\Log\LoggerInterface                    $logger
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
+     * @param Logger $logger
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \BlueMedia\BluePayment\Helper\Data                 $helper
-     * @param \Magento\Sales\Model\OrderFactory                  $orderFactory
+     * @param \BlueMedia\BluePayment\Helper\Data $helper
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
      */
     public function __construct(
         Context $context,
@@ -81,23 +85,29 @@ class Back extends Action
     /**
      * Sprawdzenie danych po powrocie z bramki płatniczej
      *
-     * @throws \Exception
+     * @return Page|ResponseInterface
+     * @throws Exception
      */
     public function execute()
     {
         $page = $this->pageFactory->create();
+
         /** @var \BlueMedia\BluePayment\Block\Processing\Back $block */
         $block = $page->getLayout()->getBlock('bluepayment.processing.back');
 
+        /** @var array $params */
         $params = $this->getRequest()->getParams();
 
         $this->logger->info('BACK:' . __LINE__, ['params' => $params]);
         try {
-            $params     = $this->getRequest()->getParams();
             $orderId    = $params['OrderID'];
             $hash       = $params['Hash'];
+
+            /** @var Order $order */
             $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
             $currency   = strtolower($order->getOrderCurrencyCode());
+
+            /** @var Order\Payment $payment */
             $payment    = $order->getPayment();
 
             if (array_key_exists('Hash', $params)) {
@@ -114,7 +124,7 @@ class Back extends Action
                     'hashLocal' => $hashLocal
                 ]);
 
-                /** @var \Magento\Checkout\Model\Session $session */
+                /** @var Session $session */
                 $session = $this->onepage->getCheckout();
                 $session->setQuoteId($orderId);
                 $session->setLastSuccessQuoteId($orderId);
@@ -153,7 +163,7 @@ class Back extends Action
                     'message' => 'Klucz autoryzacji nie istnieje.'
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             $this->logger->critical($e);
 
@@ -166,6 +176,11 @@ class Back extends Action
         return $page;
     }
 
+    /**
+     * @param Order\Payment $payment
+     *
+     * @return string
+     */
     public function getBluePaymentState($payment)
     {
         return $payment->getAdditionalInformation('bluepayment_state');

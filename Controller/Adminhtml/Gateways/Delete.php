@@ -3,22 +3,19 @@
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+use Exception;
+use Magento\Framework\Controller\ResultInterface;
 
-/**
- * Class Delete
- *
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
- */
 class Delete extends Gateways
 {
     /**
-     * @return void
+     * @return void|ResultInterface
      */
     public function execute()
     {
         $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
         if ($gatewaysId) {
-            /** @var $gatewaysModel \BlueMedia\BluePayment\Model\Gateways */
+            /** @var \BlueMedia\BluePayment\Model\Gateways $gatewaysModel */
             $gatewaysModel = $this->gatewaysFactory->create();
             $gatewaysModel->load($gatewaysId);
 
@@ -29,7 +26,7 @@ class Delete extends Gateways
                     $gatewaysModel->delete();
                     $this->messageManager->addSuccessMessage(__('The gateway has been deleted.'));
                     $this->_redirect('*/*/');
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->messageManager->addErrorMessage($e->getMessage());
                     $this->_redirect('*/*/edit', ['id' => $gatewaysModel->getId()]);
                 }

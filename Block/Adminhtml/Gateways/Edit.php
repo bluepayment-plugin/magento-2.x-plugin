@@ -6,11 +6,10 @@ use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysControll
 use Magento\Backend\Block\Widget\Context;
 use Magento\Backend\Block\Widget\Form\Container;
 use Magento\Framework\Registry;
+use Magento\Framework\View\Element\AbstractBlock;
 
 /**
- * Class Edit
- *
- * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways
+ * Edit gateway block
  */
 class Edit extends Container
 {
@@ -84,7 +83,7 @@ class Edit extends Container
     /**
      * Prepare layout
      *
-     * @return \Magento\Framework\View\Element\AbstractBlock
+     * @return AbstractBlock
      */
     protected function _prepareLayout()
     {

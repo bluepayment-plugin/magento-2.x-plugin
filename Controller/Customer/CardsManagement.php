@@ -38,7 +38,7 @@ abstract class CardsManagement extends Action
     public function dispatch(RequestInterface $request)
     {
         if (!$this->customerSession->authenticate()) {
-            $this->_actionFlag->set('', 'no-dispatch', true);
+            $this->_actionFlag->set('', 'no-dispatch', 'true');
         }
         return parent::dispatch($request);
     }

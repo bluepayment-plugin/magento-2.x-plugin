@@ -10,8 +10,6 @@ namespace BlueMedia\BluePayment\Api\Data;
 
 /**
  * Interface GatewaysInterface
- *
- * @package BlueMedia\BluePayment\Api\Data
  */
 interface GatewaysInterface
 {

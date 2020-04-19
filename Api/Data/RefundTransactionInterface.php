@@ -4,7 +4,6 @@ namespace BlueMedia\BluePayment\Api\Data;
 
 /**
  * Interface TransactionInterface
- * @package BlueMedia\BluePayment\Api\Data
  */
 interface RefundTransactionInterface
 {
@@ -94,4 +93,17 @@ interface RefundTransactionInterface
      */
     public function setIsPartial($isPartial);
 
+    /**
+     * Save object data
+     *
+     * @return $this
+     */
+    public function save();
+
+    /**
+     * Delete object from database
+     *
+     * @return $this
+     */
+    public function delete();
 }

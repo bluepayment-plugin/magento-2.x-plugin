@@ -1,22 +1,28 @@
 <?php /** @var \BlueMedia\BluePayment\Block\Adminhtml\Order\View\Popup $block */ ?>
 
 <script type="text/html" id="bluemedia_refund_popup">
-    <p><?php echo __('You are about to perform a refund from Blue Media service. You can do full or partial return.') ?></p>
+    <p><?=
+        /* @noEscape */
+        __('You are about to perform a refund from Blue Media service. You can do full or partial return.')
+    ?></p>
     <form>
-        <input type="hidden" name="order_id" value="<?php echo $block->getOrderId() ?>">
+        <input type="hidden" name="order_id" value="<?= /* @noEscape */$block->getOrderId() ?>">
         <?php if ($block->canShowFullRefund()): ?>
             <div class="bm_partial_option">
                 <input type="radio" name="is_partial" value="0" id="bm_partial_no"/>
-                <label for="bm_partial_no"><?php echo __('Full refund') ?></label>
+                <label for="bm_partial_no"><?= /* @noEscape */__('Full refund') ?></label>
             </div>
         <?php endif; ?>
         <div class="bm_partial_option">
             <input type="radio" name="is_partial" value="1" id="bm_partial_yes"/>
-            <label for="bm_partial_yes"><?php echo __('Partial refund') ?></label>
+            <label for="bm_partial_yes"><?= /* @noEscape */__('Partial refund') ?></label>
             <br/>
-            <label for="bm_partial_amount"><?php echo __('Refund amount') ?></label>
+            <label for="bm_partial_amount"><?= /* @noEscape */__('Refund amount') ?></label>
             <input type="text" name="partial_amount" value id="bm_partial_amount" readonly
-            placeholder="<?php echo __('Max %1', number_format((float)$block->getAmountToReturn(), 2, '.', '')) ?>"/>
+            placeholder="<?=
+            /* @noEscape */
+            __('Max %1', number_format((float)$block->getAmountToReturn(), 2, '.', ''))
+            ?>"/>
         </div>
         <div>
             <ul id="bm_error_container">
@@ -25,7 +31,7 @@
         <div class="bm_buttons">
             <button id="bm_return_confirmation" >
                 <span>
-                    <span><?php echo __('Send') ?></span>
+                    <span><?= /* @noEscape */__('Send') ?></span>
                 </span>
             </button>
         </div>
@@ -33,11 +39,11 @@
 </script>
 
 <script type="text/html" id="bluemedia_refund_confirm">
-    <p><?php echo __('Are you sure you want to perform a refund?') ?></p>
+    <p><?= /* @noEscape */__('Are you sure you want to perform a refund?') ?></p>
 </script>
 
 <script type="text/html" id="bluemedia_refund_success">
-    <p><?php echo __('Refund request has been successfully sent to Blue Media.') ?></p>
+    <p><?= /* @noEscape */__('Refund request has been successfully sent to Blue Media.') ?></p>
 </script>
 
 <script type="text/x-magento-init">
@@ -53,7 +59,7 @@
                     "submitId": "bm_return_confirmation",
                     "errorContainerId": "bm_error_container"
                 },
-                "refundUrl": "<?php echo $block->getUrl('adminbluepayment/refunds/place')?>"
+                "refundUrl": "<?= /* @noEscape */ $block->getUrl('adminbluepayment/refunds/place')?>"
             }
         }
     }

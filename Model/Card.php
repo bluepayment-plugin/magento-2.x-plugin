@@ -6,7 +6,7 @@ use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;
 
 /**
- * Class Card
+ * User saved card model
  *
  * @method int getCardId()
  * @method int getCustomerId()
@@ -16,8 +16,6 @@ use Magento\Framework\Model\AbstractModel;
  * @method string getIssuer()
  * @method string getMask()
  * @method string getClientHash()
- *
- * @package BlueMedia\BluePayment\Model
  */
 class Card extends AbstractModel implements IdentityInterface
 {
@@ -28,14 +26,20 @@ class Card extends AbstractModel implements IdentityInterface
 
     protected function _construct()
     {
-        $this->_init('BlueMedia\BluePayment\Model\ResourceModel\Card');
+        $this->_init(ResourceModel\Card::class);
     }
 
+    /**
+     * @return string[]
+     */
     public function getIdentities()
     {
         return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
+    /**
+     * @return array
+     */
     public function getDefaultValues()
     {
         $values = [];
@@ -43,6 +47,9 @@ class Card extends AbstractModel implements IdentityInterface
         return $values;
     }
 
+    /**
+     * @return string
+     */
     public function getNumber()
     {
         return '**** **** **** '.$this->getMask();

@@ -3,13 +3,9 @@
 namespace BlueMedia\BluePayment\Logger;
 
 use Magento\Framework\Filesystem\DriverInterface;
+use Magento\Framework\Logger\Handler\Base;
 
-/**
- * Class Handler
- *
- * @package BlueMedia\BluePayment\Logger
- */
-class Handler extends \Magento\Framework\Logger\Handler\Base
+class Handler extends Base
 {
     const LOG_FILE_NAME_PREFIX = 'BlueMedia';
     const LOG_MAIN_DIR         = '/var/log';

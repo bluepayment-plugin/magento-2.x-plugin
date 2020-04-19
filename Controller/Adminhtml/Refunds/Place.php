@@ -6,6 +6,8 @@ use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
 use BlueMedia\BluePayment\Helper\Refunds as RefundsHelper;
 use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\InputException;
@@ -14,7 +16,6 @@ use Magento\Sales\Model\OrderRepository;
 
 /**
  * Class Edit
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Returns
  */
 class Place extends Action
 {
@@ -40,14 +41,14 @@ class Place extends Action
     /**
      * Ajax constructor.
      *
-     * @param \Magento\Backend\App\Action\Context                       $context
+     * @param Context                       $context
      * @param \BlueMedia\BluePayment\Helper\Refunds                     $refunds
      * @param \Magento\Sales\Model\OrderRepository                      $orderRepository
      * @param \BlueMedia\BluePayment\Api\TransactionRepositoryInterface $transactionRepository
      * @param \Magento\Framework\Controller\Result\JsonFactory          $resultJsonFactory
      */
     public function __construct(
-        Action\Context $context,
+        Context $context,
         RefundsHelper $refunds,
         OrderRepository $orderRepository,
         TransactionRepositoryInterface $transactionRepository,
@@ -61,7 +62,7 @@ class Place extends Action
     }
 
     /**
-     * @return \Magento\Framework\Controller\Result\Json
+     * @return Json
      */
     public function execute()
     {
@@ -93,7 +94,7 @@ class Place extends Action
             ]);
         }
 
-        /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+        /** @var Json $resultJson */
         $resultJson = $this->resultJsonFactory->create();
 
         return $resultJson->setData($resultObject->getData());

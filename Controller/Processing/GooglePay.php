@@ -9,8 +9,6 @@ use Magento\Framework\Controller\Result\JsonFactory;
 
 /**
  * Class Create
- *
- * @package BlueMedia\BluePayment\Controller\Processing
  */
 class GooglePay extends Action
 {
@@ -38,6 +36,8 @@ class GooglePay extends Action
 
     /**
      * Pobranie merchantInfo
+     *
+     * @return \Magento\Framework\Controller\Result\Json
      */
     public function execute()
     {
@@ -45,7 +45,7 @@ class GooglePay extends Action
 
         $resultJson = $this->resultJsonFactory->create();
 
-        if ($info !== null) {
+        if (is_array($info)) {
             $resultJson->setData([
                 'acceptorId' => $info['acceptorId'],
                 'merchantInfo' => [

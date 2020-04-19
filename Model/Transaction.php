@@ -5,6 +5,8 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Transaction as TransactionResource;
+use DateTime;
+use DateTimeZone;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;
@@ -13,15 +15,8 @@ use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 
-/**
- * Class Transaction
- * @package BlueMedia\BluePayment\Model
- */
 class Transaction extends AbstractModel implements TransactionInterface, IdentityInterface
 {
-    /**
-     *
-     */
     const CACHE_TAG = 'blue_transaction';
 
     /**
@@ -156,7 +151,7 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
      */
     public function setPaymentDate($date)
     {
-        $dateTime = $this->timezone->date(new \DateTime($date, new \DateTimeZone(Client::RESPONSE_TIMEZONE)));
+        $dateTime = $this->timezone->date(new DateTime($date, new DateTimeZone(Client::RESPONSE_TIMEZONE)));
 
         return $this->setData(TransactionInterface::PAYMENT_DATE, $dateTime->getTimestamp());
     }

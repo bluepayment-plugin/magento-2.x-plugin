@@ -7,25 +7,27 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Response\Http;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\HTTP\Client\Curl;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 
 /**
- * Class Create
- *
- * @package BlueMedia\BluePayment\Controller\Processing
+ * Create payment (BM transaction) controller
  */
 class Create extends Action
 {
     const IFRAME_GATEWAY_ID = 'IFRAME';
-    const BLIK_STATUS_SUCCESS = 'SUCCESS';
     const BLIK_CODE_LENGTH = 6;
 
     /** @var PaymentFactory */
@@ -37,7 +39,7 @@ class Create extends Action
     /** @var Session */
     public $session;
 
-    /** @var LoggerInterface */
+    /** @var Logger */
     public $logger;
 
     /** @var ScopeConfigInterface */
@@ -55,19 +57,23 @@ class Create extends Action
     /** @var Collection  */
     public $collection;
 
+    /** @var Curl */
+    public $curl;
+
     /**
      * Create constructor.
      *
-     * @param Context              $context
-     * @param OrderSender          $orderSender
-     * @param PaymentFactory       $paymentFactory
-     * @param OrderFactory         $orderFactory
-     * @param Session              $session
-     * @param Logger               $logger
+     * @param Context $context
+     * @param OrderSender $orderSender
+     * @param PaymentFactory $paymentFactory
+     * @param OrderFactory $orderFactory
+     * @param Session $session
+     * @param Logger $logger
      * @param ScopeConfigInterface $scopeConfig
-     * @param Data                 $helper
-     * @param JsonFactory          $resultJsonFactory
-     * @param Collection           $collection
+     * @param Data $helper
+     * @param JsonFactory $resultJsonFactory
+     * @param Collection $collection
+     * @param Curl $curl
      */
     public function __construct(
         Context $context,
@@ -79,7 +85,8 @@ class Create extends Action
         ScopeConfigInterface $scopeConfig,
         Data $helper,
         JsonFactory $resultJsonFactory,
-        Collection $collection
+        Collection $collection,
+        Curl $curl
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -90,17 +97,22 @@ class Create extends Action
         $this->helper            = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->collection        = $collection;
+        $this->curl              = $curl;
 
         parent::__construct($context);
     }
 
     /**
      * Rozpoczęcie procesu płatności
+     *
+     * @return ResponseInterface|Json
      */
     public function execute()
     {
         try {
+            /** @var Payment $payment */
             $payment       = $this->paymentFactory->create();
+
             $session       = $this->getCheckout();
             $quoteModuleId = $session->getBluePaymentQuoteId();
             $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
@@ -129,6 +141,9 @@ class Create extends Action
             $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
+
+            /** @var Json $resultJson */
+            $resultJson = $this->resultJsonFactory->create();
 
             $unchangeableStatuses = explode(
                 ',',
@@ -164,7 +179,7 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
                 try {
                     $this->orderSender->send($order);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->logger->critical($e);
                 }
             }
@@ -177,8 +192,6 @@ class Create extends Action
 
                 $result = $this->prepareIframeJsonResponse($payment->getUrlGateway(), $redirectHash, $params);
 
-                /** @var \Magento\Framework\Controller\Result\Json $resultJson */
-                $resultJson = $this->resultJsonFactory->create();
                 $resultJson->setData($result);
                 return $resultJson;
             }
@@ -193,6 +206,13 @@ class Create extends Action
 
                     $responseParams = $this->sendRequestBlik($payment->getUrlGateway(), $params);
                     $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
+
+                    if ($responseParams === false) {
+                        $resultJson->setData([
+                            'error' => true
+                        ]);
+                        return $resultJson;
+                    }
 
                     $hashData  = [$serviceId, $orderId, $sharedKey];
                     $this->logger->info('CREATE:' . __LINE__, ['hashData' => $hashData]);
@@ -210,15 +230,12 @@ class Create extends Action
                     ];
                     $result = $this->prepareBlikJsonResponse($payment->getUrlGateway(), $authorizationCode, $params);
 
-                    /** @var \Magento\Framework\Controller\Result\Json $resultJson */
-                    $resultJson = $this->resultJsonFactory->create();
                     $resultJson->setData($result);
                     return $resultJson;
                 }
 
                 $this->logger->info('CREATE: ' . __LINE__ . 'Invalid BLIK code');
 
-                $resultJson = $this->resultJsonFactory->create();
                 $resultJson->setData([
                     'status' => false,
                     'code' => $authorizationCode
@@ -231,11 +248,18 @@ class Create extends Action
 
                 $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);
 
-                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, 0, $token);
+                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, '', $token);
                 $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
                 $responseParams = $this->sendRequestGPay($payment->getUrlGateway(), $params);
                 $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
+
+                if ($responseParams === false) {
+                    $resultJson->setData([
+                        'error' => true
+                    ]);
+                    return $resultJson;
+                }
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $this->logger->info('CREATE:' . __LINE__, ['hashData' => $hashData]);
@@ -253,14 +277,12 @@ class Create extends Action
                 ];
                 $result = $this->prepareGPayJsonResponse($payment->getUrlGateway(), $params);
 
-                /** @var \Magento\Framework\Controller\Result\Json $resultJson */
-                $resultJson = $this->resultJsonFactory->create();
                 $resultJson->setData($result);
                 return $resultJson;
             }
 
             if ($autopayGateway == $gatewayId) {
-                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, null, null, $cardIndex);
+                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, '', '', $cardIndex);
 
                 if ($automatic === true) {
                     $hashData  = [$serviceId, $orderId, $sharedKey];
@@ -268,19 +290,27 @@ class Create extends Action
 
                     $result = $this->prepareIframeJsonResponse($payment->getUrlGateway(), $redirectHash, $params);
 
-                    /** @var \Magento\Framework\Controller\Result\Json $resultJson */
-                    $resultJson = $this->resultJsonFactory->create();
                     $resultJson->setData($result);
                     return $resultJson;
                 }
 
                 $result = $this->sendAutopayRequest($payment->getUrlGateway(), $params);
 
+                if ($result === false) {
+                    $resultJson->setData([
+                        'error' => true
+                    ]);
+                    return $resultJson;
+                }
+
                 if ($result['redirectUrl'] !== null) {
                     // 3DS
 
                     $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
-                    return $this->getResponse()->setRedirect($result['redirectUrl']);
+
+                    /** @var Http $response */
+                    $response = $this->getResponse();
+                    return $response->setRedirect($result['redirectUrl']);
                 }
 
                 if ($result['paymentStatus'] == Payment::PAYMENT_STATUS_SUCCESS) {
@@ -310,12 +340,15 @@ class Create extends Action
             );
 
             $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $url]);
-            return $this->getResponse()->setRedirect($url);
-        } catch (\Exception $e) {
+
+            /** @var Http $response */
+            $response = $this->getResponse();
+            return $response->setRedirect($url);
+        } catch (Exception $e) {
             $this->logger->critical($e);
         }
 
-        parent::_redirect('checkout/cart');
+        return parent::_redirect('checkout/cart');
     }
 
     /**
@@ -330,6 +363,7 @@ class Create extends Action
 
     /**
      * @param string $gatewayUrl
+     * @param string $redirectHash
      * @param array  $params
      * @return array
      */
@@ -364,7 +398,6 @@ class Create extends Action
 
     /**
      * @param string $gatewayUrl
-     * @param string $authorizationCode
      * @param array  $params
      * @return array
      */
@@ -384,132 +417,98 @@ class Create extends Action
      */
     private function validateBlikCode($code)
     {
-        return (false === empty($code) && self::BLIK_CODE_LENGTH === strlen($code))? true : false;
+        return false === empty($code) && self::BLIK_CODE_LENGTH === strlen($code);
     }
 
     /**
-     * @param $urlGateway
-     * @param $params
+     * @param string $urlGateway
+     * @param array $params
      *
-     * @return array
+     * @return array|false
      */
     private function sendRequestBlik($urlGateway, $params)
     {
-        $fields = (is_array($params)) ? http_build_query($params) : $params;
-        $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
-        } else {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
+        $xml = $this->sendRequest($params, $urlGateway);
+
+        if ($xml !== false) {
+            return [
+                'orderID' => (string)$xml->orderID,
+                'remoteID' => (string)$xml->remoteID,
+                'confirmation' => (string)$xml->confirmation,
+                'paymentStatus' => (string)$xml->paymentStatus
+            ];
         }
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        $curlResponse = curl_exec($curl);
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $response = curl_getinfo($curl);
-        curl_close($curl);
 
-        $xml = simplexml_load_string($curlResponse);
-        $paymentStatus = (string) $xml->paymentStatus;
-        $orderID = (string) $xml->orderID;
-        $remoteID = (string) $xml->remoteID;
-        $confirmation = (string) $xml->confirmation;
-        $hash = (string) $xml->hash;
-
-        $responseParams = [
-            'orderID' => $orderID,
-            'remoteID' => $remoteID,
-            'confirmation' => $confirmation,
-            'paymentStatus' => $paymentStatus
-        ];
-
-        return $responseParams;
+        return false;
     }
 
     /**
-     * @param $urlGateway
-     * @param $params
+     * @param string $urlGateway
+     * @param array $params
      *
-     * @return array
+     * @return array|false
      */
     private function sendRequestGPay($urlGateway, $params)
     {
-        $fields = (is_array($params)) ? http_build_query($params) : $params;
-        $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
-        } else {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm-continue-transaction-url']);
+        $xml = $this->sendRequest($params, $urlGateway);
+
+        if ($xml !== false) {
+            return [
+                'orderID' => (string)$xml->orderID,
+                'remoteID' => (string)$xml->remoteID,
+                'paymentStatus' => (string)$xml->status,
+                'redirectUrl' => property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null
+            ];
         }
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        $curlResponse = curl_exec($curl);
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $response = curl_getinfo($curl);
-        curl_close($curl);
 
-        $xml = simplexml_load_string($curlResponse);
-
-        $paymentStatus = (string) $xml->status;
-        $orderID = (string) $xml->orderID;
-        $remoteID = (string) $xml->remoteID;
-        $hash = (string) $xml->hash;
-        $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
-
-        $this->logger->info('CREATE:' . __LINE__, ['$curlResponse' => $curlResponse]);
-
-        $responseParams = [
-            'orderID' => $orderID,
-            'remoteID' => $remoteID,
-            'paymentStatus' => $paymentStatus,
-            'redirectUrl' => $redirectUrl
-        ];
-
-        return $responseParams;
+        return false;
     }
 
+    /**
+     * @param string $urlGateway
+     * @param array $params
+     *
+     * @return array|false
+     */
     private function sendAutopayRequest($urlGateway, $params)
     {
-        $fields = (is_array($params)) ? http_build_query($params) : $params;
+        $xml = $this->sendRequest($params, $urlGateway);
 
-        $curl = curl_init($urlGateway);
-        if (array_key_exists('ClientHash', $params)){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm'));
-        } else{
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('BmHeader: pay-bm-continue-transaction-url'));
+        if ($xml !== false) {
+            return [
+                'orderID' => (string)$xml->orderID,
+                'remoteID' => (string)$xml->remoteID,
+                'paymentStatus' => (string)$xml->status,
+                'confirmation' => property_exists($xml, 'confirmation') ? (string)$xml->confirmation : null,
+                'redirectUrl' => property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null
+            ];
         }
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        $curlResponse = curl_exec($curl);
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $response = curl_getinfo($curl);
-        curl_close($curl);
 
-        $xml = simplexml_load_string($curlResponse);
+        return false;
+    }
 
-        $paymentStatus = (string) $xml->status;
-        $orderID = (string) $xml->orderID;
-        $remoteID = (string) $xml->remoteID;
-        $hash = (string) $xml->hash;
-        $confirmation = property_exists($xml, 'confirmation') ? (string) $xml->confirmation : null;
-        $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+    /**
+     * @param string $urlGateway
+     * @param array $params
+     *
+     * @return \SimpleXMLElement|false
+     */
+    private function sendRequest($params, $urlGateway)
+    {
+        if (array_key_exists('ClientHash', $params)) {
+            $this->curl->addHeader('BmHeader', 'pay-bm');
+        } else {
+            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
+        }
 
-        $this->logger->info('CREATE:' . __LINE__, ['$curlResponse' => $curlResponse]);
+        $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
-        $responseParams = [
-            'orderID' => $orderID,
-            'remoteID' => $remoteID,
-            'paymentStatus' => $paymentStatus,
-            'confirmation' => $confirmation,
-            'redirectUrl' => $redirectUrl
-        ];
+        $this->curl->post($urlGateway, $params);
+        $response = $this->curl->getBody();
 
-        return $responseParams;
+        $this->logger->info('CREATE:' . __LINE__, ['response' => $response]);
+        $xml = simplexml_load_string($response);
+
+        return $xml;
     }
 }

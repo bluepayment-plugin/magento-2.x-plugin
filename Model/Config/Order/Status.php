@@ -8,7 +8,7 @@ namespace BlueMedia\BluePayment\Model\Config\Order;
 class Status extends \Magento\Sales\Model\Config\Source\Order\Status
 {
     /**
-     * @var string
+     * @var string|bool
      */
     protected $_stateStatuses = false;
 }

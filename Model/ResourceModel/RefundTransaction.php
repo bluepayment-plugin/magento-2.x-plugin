@@ -6,7 +6,6 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
  * Class Transaction
- * @package BlueMedia\BluePayment\Model\ResourceModel
  */
 class RefundTransaction extends AbstractDb
 {

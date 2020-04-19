@@ -2,9 +2,11 @@
 
 namespace BlueMedia\BluePayment\Controller\Processing;
 
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -12,11 +14,6 @@ use Magento\Sales\Model\OrderFactory;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
-/**
- * Class Gateway
- *
- * @package BlueMedia\BluePayment\Controller\Processing
- */
 class Gateway extends Action
 {
     /** @var JsonFactory */
@@ -71,8 +68,12 @@ class Gateway extends Action
     {
         $result  = $this->resultJsonFactory->create();
         $session = $this->getCheckout();
-        if ($this->getRequest()->isAjax()) {
-            $data = $this->getRequest()->getParams();
+
+        /** @var Http $request */
+        $request = $this->getRequest();
+
+        if ($request->isAjax()) {
+            $data = $request->getParams();
 
             if (isset($data['gateway_id'])) {
                 $gatewayId = (int)$data['gateway_id'];
@@ -83,7 +84,7 @@ class Gateway extends Action
             try {
                 $session->setBluepaymentGatewayId($gatewayId);
                 $response = ['success' => true, 'session_gateway_id' => $session->getBluepaymentGatewayId()];
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->info('Error', [__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
                 $response = ['success' => false, 'session_gateway_id' => 0];
             }
@@ -94,7 +95,7 @@ class Gateway extends Action
         try {
             $session->setBluepaymentGatewayId(0);
             $response = ['success' => true, 'session_gateway_id' => 0];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->info('Error', [__METHOD__ => __LINE__, 'error' => $e->getMessage()]);
             $response = ['success' => false, 'session_gateway_id' => 0];
         }

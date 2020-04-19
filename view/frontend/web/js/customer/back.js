@@ -5,7 +5,8 @@ define([
     'use strict';
 
     return function (config) {
-        function handleStatus(status, params) {
+        function handleStatus(status, params)
+        {
             if (status === 'SUCCESS' || status === 'FAILURE') {
                 window.location.href = urlBuilder.build('bluepayment/processing/back')
                     + '?ServiceID=' + params.ServiceID
@@ -13,7 +14,7 @@ define([
                     + '&Hash=' + params.hash;
 
             } else {
-                setTimeout(function() {
+                setTimeout(function () {
                     updateStatus();
                 }, 2000);
             }

@@ -3,23 +3,25 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
+use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
 use BlueMedia\BluePayment\Model\RefundTransactionFactory;
+use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\Builder as TransactionBuilder;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\App\Emulation;
 
 /**
  * Class Gateways
- * @package BlueMedia\BluePayment\Helper
  */
 class Refunds extends Data
 {
@@ -81,8 +83,8 @@ class Refunds extends Data
     }
 
     /**
-     * @param TransactionInterface $transaction
-     * @param null                 $amount
+     * @param TransactionInterface|null $transaction
+     * @param null $amount
      *
      * @return array
      * @throws EmptyRemoteIdException
@@ -199,7 +201,7 @@ class Refunds extends Data
     }
 
     /**
-     * @param $amount
+     * @param float $amount
      *
      * @return string
      */
@@ -209,13 +211,13 @@ class Refunds extends Data
     }
 
     /**
-     * @param $hashMethod
-     * @param $serviceId
-     * @param $messageId
-     * @param $remoteId
-     * @param $amount
-     * @param $hashKey
-     * @param $refundAPIUrl
+     * @param string $hashMethod
+     * @param string $serviceId
+     * @param string $messageId
+     * @param string $remoteId
+     * @param float $amount
+     * @param string $hashKey
+     * @param string $refundAPIUrl
      *
      * @return bool|array
      */
@@ -241,7 +243,7 @@ class Refunds extends Data
             $this->logger->info('REFUNDS:' . __LINE__, ['response' => $response]);
 
             return $response;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->info($e->getMessage());
 
             return false;
@@ -249,10 +251,10 @@ class Refunds extends Data
     }
 
     /**
-     * @param array                $loadResult
-     * @param float                $amount
+     * @param array $loadResult
+     * @param float $amount
      * @param TransactionInterface $transaction
-     * @param Order                $order
+     * @param Order $order
      *
      * @return void
      */
@@ -268,10 +270,12 @@ class Refunds extends Data
     }
 
     /**
-     * @param                      $loadResult
-     * @param                      $amount
+     * @param array $loadResult
+     * @param float $amount
      * @param TransactionInterface $transaction
-     * @param Order                $order
+     * @param Order $order
+     *
+     * @return void
      */
     public function saveRefundTransaction(
         $loadResult,
@@ -279,7 +283,7 @@ class Refunds extends Data
         TransactionInterface $transaction,
         Order $order
     ) {
-        /** @var \BlueMedia\BluePayment\Api\Data\RefundTransactionInterface $refund */
+        /** @var RefundTransactionInterface $refund */
         $refund = $this->refundTransactionFactory->create();
 
         $refund
@@ -294,10 +298,12 @@ class Refunds extends Data
     }
 
     /**
-     * @param                      $loadResult
-     * @param                      $amount
+     * @param array $loadResult
+     * @param float $amount
      * @param TransactionInterface $transaction
-     * @param Order                $order
+     * @param Order $order
+     *
+     * @return int|false
      */
     public function saveTransaction(
         $loadResult,
@@ -307,31 +313,37 @@ class Refunds extends Data
     ) {
         $parent = $transaction;
 
-        // Prepare payment object
+        /** @var Order\Payment|null */
         $payment = $order->getPayment();
-        $payment->setLastTransId($loadResult['remoteOutID']);
-        $payment->setTransactionId($loadResult['remoteOutID']);
-        $payment->setAdditionalInformation([
-            \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $loadResult
-        ]);
-        $payment->setParentTransactionId($parent->getRemoteId());
 
-        // Prepare transaction
-        $transaction = $this->transactionBuilder->setPayment($payment)
-            ->setOrder($order)
-            ->setTransactionId($loadResult['remoteOutID'])
-            ->setAdditionalInformation([
-                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $loadResult
-            ])
-            ->setFailSafe(true)
-            ->build(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_REFUND);
+        if ($payment !== null) {
+            $payment->setLastTransId($loadResult['remoteOutID']);
+            $payment->setTransactionId($loadResult['remoteOutID']);
+            $payment->setAdditionalInformation([
+                Transaction::RAW_DETAILS => (array)$loadResult
+            ]);
+            $payment->setParentTransactionId($parent->getRemoteId());
 
-        // Save payment, transaction and order
-        $payment->save();
-        $order->save();
-        $transaction->save();
+            // Prepare transaction
+            /** @var Transaction $transaction */
+            $transaction = $this->transactionBuilder->setPayment($payment)
+                ->setOrder($order)
+                ->setTransactionId($loadResult['remoteOutID'])
+                ->setAdditionalInformation([
+                    Transaction::RAW_DETAILS => (array)$loadResult
+                ])
+                ->setFailSafe(true)
+                ->build(Transaction::TYPE_REFUND);
 
-        return $transaction->getTransactionId();
+            // Save payment, transaction and order
+            $payment->save();
+            $order->save();
+            $transaction->save();
+
+            return $transaction->getTransactionId();
+        }
+
+        return false;
     }
 
     /**
@@ -339,6 +351,8 @@ class Refunds extends Data
      * @param float                $amount
      * @param TransactionInterface $transaction
      * @param Order                $order
+     *
+     * @return void
      */
     public function updateOrderOnRefund($loadResult, $amount, $transaction, $order)
     {

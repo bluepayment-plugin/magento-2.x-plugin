@@ -2,20 +2,16 @@
 
 namespace BlueMedia\BluePayment\Block;
 
+use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
 use Magento\Framework\View\Element\Template\Context;
 
-/**
- * Class Form
- *
- * @package BlueMedia\BluePayment\Block
- */
 class Form extends \Magento\Payment\Block\Form
 {
     /** @var string */
     protected $_template = 'BlueMedia_BluePayment::bluepayment/form.phtml';
 
-    /** @var array */
+    /** @var array|Collection */
     private $gatewayList = [];
 
     /** @var CollectionFactory */
@@ -38,15 +34,15 @@ class Form extends \Magento\Payment\Block\Form
     }
 
     /**
-     * @return array
+     * @return array|Collection
      */
     public function getGatewaysList()
     {
         if (!$this->gatewayList) {
             $this->gatewayList = $this->collectionFactory->create();
             $this->gatewayList
-                ->addFieldToFilter('gateway_status', 1)
-                ->addFieldToFilter('force_disable', 0)
+                ->addFieldToFilter('gateway_status', (string)1)
+                ->addFieldToFilter('force_disable', (string)0)
                 ->load();
         }
 

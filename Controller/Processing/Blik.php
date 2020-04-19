@@ -4,10 +4,13 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -16,8 +19,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class Create
- *
- * @package BlueMedia\BluePayment\Controller\Processing
  */
 class Blik extends Action
 {
@@ -77,6 +78,8 @@ class Blik extends Action
 
     /**
      * Rozpoczęcie procesu płatności
+     *
+     * @return Json|ResponseInterface
      */
     public function execute()
     {
@@ -129,6 +132,7 @@ class Blik extends Action
             $currency = $order->getOrderCurrencyCode();
 
             // Get payment info
+            /** @var Order\Payment $payment */
             $payment = $order->getPayment();
             $status = $payment->getAdditionalInformation('bluepayment_state');
 
@@ -148,11 +152,11 @@ class Blik extends Action
             ]);
 
             return $resultJson;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->critical($e);
         }
 
-        parent::_redirect('checkout/cart');
+        return parent::_redirect('checkout/cart');
     }
 
     /**
