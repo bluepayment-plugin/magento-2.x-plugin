@@ -4,19 +4,19 @@ namespace BlueMedia\BluePayment\Setup;
 
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Store\Model\Store;
 
-/**
- * Class UpgradeSchema
- *
- * @package BlueMedia\BluePayment\Setup
- */
 class UpgradeSchema implements UpgradeSchemaInterface
 {
+    /** @var ScopeConfigInterface */
     private $scopeConfig;
+
+    /** @var ConfigInterface */
     private $resourceConfig;
 
     public function __construct(ScopeConfigInterface $scopeConfig, ConfigInterface $resourceConfig)
@@ -30,6 +30,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
      *
      * @param SchemaSetupInterface   $setup
      * @param ModuleContextInterface $context
+     *
+     * @return void
      */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
@@ -70,6 +72,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * creates table blue_gateways in database
      *
      * @param SchemaSetupInterface $setup
+     *
+     * @return void
      */
     private function installBlueMediaTable(SchemaSetupInterface $setup)
     {
@@ -161,7 +165,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $installer
+     * @param SchemaSetupInterface $installer
+     *
+     * @return void
      */
     private function addCardFlagToBlueMediaTable(SchemaSetupInterface $installer)
     {
@@ -181,7 +187,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @param SchemaSetupInterface $setup
+     *
+     * @return void
      */
     private function addForceDisabledToBlueMediaGatewaysTable(SchemaSetupInterface $setup)
     {
@@ -205,7 +213,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @param SchemaSetupInterface $setup
+     *
+     * @return void
      */
     private function addTransactionAndRefundTables(SchemaSetupInterface $setup)
     {
@@ -218,7 +228,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param $installer
+     * @param SchemaSetupInterface $installer
+     *
+     * @return void
      */
     private function createTransactionTable(SchemaSetupInterface $installer)
     {
@@ -289,7 +301,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param $installer
+     * @param SchemaSetupInterface $installer
+     *
+     * @return void
      */
     private function createRefundTable(SchemaSetupInterface $installer)
     {
@@ -354,7 +368,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @param SchemaSetupInterface $setup
+     *
+     * @return void
      */
     private function addCurrencyToGateways(SchemaSetupInterface $setup)
     {
@@ -380,7 +396,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @param SchemaSetupInterface $setup
+     *
+     * @return void
      */
     private function updateConfigs(SchemaSetupInterface $setup)
     {
@@ -388,8 +406,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $installer->startSetup();
 
         $path = 'payment/bluepayment';
-        $scope = \Magento\Framework\App\Config\ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
-        $scopeId = \Magento\Store\Model\Store::DEFAULT_STORE_ID;
+        $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
+        $scopeId = Store::DEFAULT_STORE_ID;
 
         $this->resourceConfig->saveConfig(
             $path.'/pln/service_id',
@@ -485,7 +503,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
-     * @param $installer
+     * @param SchemaSetupInterface $installer
+     *
+     * @return void
      */
     private function addCardTable(SchemaSetupInterface $installer)
     {
@@ -510,10 +530,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $installer->getIdxName(
                     'blue_card_client_hash_unique_index',
                     ['client_hash'],
-                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                    AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
                 ['client_hash'],
-                ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
+                ['type' => AdapterInterface::INDEX_TYPE_UNIQUE]
             )
             ->addForeignKey(
                 $installer->getFkName(

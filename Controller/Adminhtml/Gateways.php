@@ -7,6 +7,8 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
+use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
 /**
  * Class Gateways
@@ -44,8 +46,8 @@ abstract class Gateways extends Action
         $this->resultPageFactory = $resultPageFactory;
         $this->gatewaysFactory   = $gatewaysFactory;
 
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new \Zend\Log\Logger();
+        $writer = new Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new Logger();
         $this->logger->addWriter($writer);
     }
 

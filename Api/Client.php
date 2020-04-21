@@ -3,62 +3,62 @@
 namespace BlueMedia\BluePayment\Api;
 
 use BlueMedia\BluePayment\Exception\ResponseException;
+use SimpleXMLElement;
 
 /**
- * Class Client
- * @package BlueMedia\BluePayment\Model\Api
+ * BM API Client
  */
 class Client implements ClientInterface
 {
     const RESPONSE_TIMEZONE = 'Europe/Warsaw';
 
     /**
-     * @param $endPoint
-     * @param $data
+     * @var \Magento\Framework\HTTP\Client\Curl
+     */
+    private $curl;
+
+    public function __construct(\Magento\Framework\HTTP\Client\Curl $curl)
+    {
+        $this->curl = $curl;
+    }
+
+    /**
+     * @param string $endPoint
+     * @param array $data
      *
-     * @return \SimpleXMLElement
-     * @throws \BlueMedia\BluePayment\Exception\ResponseException
+     * @return SimpleXMLElement|false
+     * @throws ResponseException
      */
     public function call($endPoint, $data)
     {
-        $fields = $this->buildFields($data);
+        $this->curl->post($endPoint, $data);
+        $response = $this->curl->getBody();
 
-        $curl = curl_init($endPoint);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        $curlResponse = curl_exec($curl);
-
-        curl_close($curl);
-
-        if ($curlResponse == 'ERROR') {
+        if ($response == 'ERROR') {
             throw new ResponseException();
         }
 
-        return simplexml_load_string($curlResponse);
+        return simplexml_load_string($response);
     }
 
+    /**
+     * @param string $endPoint
+     * @param array $data
+     *
+     * @return mixed
+     * @throws ResponseException
+     */
     public function callJson($endPoint, $data)
     {
-        $fields = $this->buildFields($data);
+        $this->curl->addHeader('BmHeader', 'pay-bm');
+        $this->curl->post($endPoint, $data);
+        $response = $this->curl->getBody();
 
-        $curl = curl_init($endPoint);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, ['BmHeader: pay-bm']);
-
-        $curlResponse = curl_exec($curl);
-
-        curl_close($curl);
-
-        if ($curlResponse == 'ERROR') {
+        if ($response == 'ERROR') {
             throw new ResponseException();
         }
 
-        return json_decode($curlResponse);
+        return json_decode($response);
     }
 
     /**

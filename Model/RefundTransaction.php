@@ -9,13 +9,9 @@ use Magento\Framework\Model\AbstractModel;
 
 /**
  * Class Transaction
- * @package BlueMedia\BluePayment\Model
  */
 class RefundTransaction extends AbstractModel implements RefundTransactionInterface, IdentityInterface
 {
-    /**
-     *
-     */
     const CACHE_TAG = 'blue_refund';
 
     /**

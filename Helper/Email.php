@@ -2,20 +2,23 @@
 
 namespace BlueMedia\BluePayment\Helper;
 
+use Exception;
 use Magento\Backend\Model\Auth\Session;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Mail\Template\TransportBuilder;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Translate\Inline\StateInterface;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\User\Model\User;
+use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
-/**
- * Class Email
- *
- * @package BlueMedia\BluePayment\Helper
- */
 class Email extends AbstractHelper
 {
     const XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD
@@ -41,7 +44,7 @@ class Email extends AbstractHelper
     /** @var Session */
     public $authSession;
 
-    /** @var \Zend\Log\Logger */
+    /** @var Logger */
     public $logger;
 
     /**
@@ -66,8 +69,8 @@ class Email extends AbstractHelper
         $this->transportBuilder = $transportBuilder;
         $this->authSession      = $authSession;
 
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia_notificator.log');
-        $this->logger = new \Zend\Log\Logger();
+        $writer = new Stream(BP . '/var/log/bluemedia_notificator.log');
+        $this->logger = new Logger();
         $this->logger->addWriter($writer);
     }
 
@@ -89,11 +92,14 @@ class Email extends AbstractHelper
     /**
      * Get Store
      *
-     * @return \Magento\Store\Api\Data\StoreInterface
+     * @return Store
      */
     public function getStore()
     {
-        return $this->storeManager->getStore();
+        /** @var Store $store */
+        $store = $this->storeManager->getStore();
+
+        return $store;
     }
 
     /**
@@ -153,7 +159,7 @@ class Email extends AbstractHelper
             $this->inlineTranslation->resume();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->info('Error has occurred during sending an email. Message: ' . $e->getMessage());
         }
 
@@ -179,7 +185,7 @@ class Email extends AbstractHelper
     public function geEmailReceivers()
     {
         $result       = [];
-        $unserialized = unserialize(
+        $unserialized = $this->unserialize(
             $this->getConfigValue(
                 self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_RECEIVERS_FIELD,
                 $this->getStore()->getStoreId()
@@ -195,6 +201,20 @@ class Email extends AbstractHelper
         }
 
         return $result;
+    }
+
+    /**
+     * Backward compatibility for unserializer
+     *
+     * @param string $data
+     * @return mixed
+     */
+    private function unserialize($data)
+    {
+        // For Magento 2.2+
+        $objectManager = ObjectManager::getInstance();
+        $serializer = $objectManager->create(SerializerInterface::class);
+        return $serializer->unserialize($data);
     }
 
     /**
@@ -240,13 +260,13 @@ class Email extends AbstractHelper
      * @param int          $templateId
      * @param array        $emailTemplateVariables
      * @param array|string $senderInfo
-     * @param array|string $receiverInfo
+     * @param array $receiverInfo
      *
      * @return void
      */
     public function generateTemplate($templateId, $emailTemplateVariables, $senderInfo, $receiverInfo)
     {
-        $this->transportBuilder->setTemplateIdentifier($templateId)
+        $this->transportBuilder->setTemplateIdentifier((string) $templateId)
             ->setTemplateOptions(
                 [
                     'area'  => Area::AREA_FRONTEND,
@@ -255,16 +275,16 @@ class Email extends AbstractHelper
             )
             ->setTemplateVars($emailTemplateVariables)
             ->setFrom($senderInfo);
+
         foreach ($receiverInfo as $receiver) {
             if (isset($receiver['email']) && isset($receiver['name'])) {
                 $this->transportBuilder->addTo($receiver['email'], $receiver['name']);
             }
         }
-        $this->transportBuilder->getMessageText();
     }
 
     /**
-     * @return \Magento\User\Model\User|null
+     * @return User|null
      */
     public function getCurrentUser()
     {

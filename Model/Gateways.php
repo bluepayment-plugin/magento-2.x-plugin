@@ -8,8 +8,6 @@ use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;
 
 /**
- * Class Gateways
- *
  * @method int getGatewayStatus()
  * @method string getGatewayCurrency()
  * @method int getForceDisable()
@@ -22,8 +20,6 @@ use Magento\Framework\Model\AbstractModel;
  * @method string getGatewayLogoUrl()
  * @method int getUseOwnLogo()
  * @method string getGatewayLogoPath()
- *
- * @package BlueMedia\BluePayment\Model
  */
 class Gateways extends AbstractModel implements IdentityInterface, GatewaysInterface
 {
@@ -31,9 +27,6 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     const STATUS_ACTIVE   = 1;
     const STATUS_INACTIVE = 0;
 
-    /**
-     *
-     */
     const CACHE_TAG = 'blue_gateways';
 
     /**
@@ -85,7 +78,7 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
     {
         if ($this->getGatewayId() == ConfigProvider::AUTOPAY_GATEWAY_ID) {
             return true;
-        } else if ($this->getGatewayId() == ConfigProvider::GPAY_GATEWAY_ID) {
+        } elseif ($this->getGatewayId() == ConfigProvider::GPAY_GATEWAY_ID) {
             return true;
         }
 

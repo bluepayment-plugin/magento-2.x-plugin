@@ -10,10 +10,6 @@ use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
 
-/**
- * Class Popup
- * @package BlueMedia\BluePayment\Block\Adminhtml\Order\View
- */
 class Popup extends Template
 {
     /** @var Registry */
@@ -79,13 +75,13 @@ class Popup extends Template
     }
 
     /**
-     * @return int|null|string
+     * @return bool|int
      */
     public function getOrderId()
     {
         $order = $this->getCurrentOrder();
 
-        return $order instanceof OrderInterface ? $order->getEntityId() : '';
+        return $order instanceof OrderInterface ? $order->getEntityId() : false;
     }
 
     /**

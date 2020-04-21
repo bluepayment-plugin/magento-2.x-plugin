@@ -5,9 +5,7 @@ namespace BlueMedia\BluePayment\Block\Adminhtml;
 use Magento\Backend\Block\Widget\Grid\Container;
 
 /**
- * Class Gateways
- *
- * @package BlueMedia\BluePayment\Block\Adminhtml
+ * Gateways list table
  */
 class Gateways extends Container
 {

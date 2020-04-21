@@ -3,18 +3,15 @@
 namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit\Tab;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
+use BlueMedia\BluePayment\Model\Gateways;
 use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget\Form;
 use Magento\Backend\Block\Widget\Form\Generic;
 use Magento\Backend\Block\Widget\Tab\TabInterface;
 use Magento\Cms\Model\Wysiwyg\Config;
 use Magento\Framework\Data\FormFactory;
 use Magento\Framework\Registry;
 
-/**
- * Class Info
- *
- * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit\Tab
- */
 class Info extends Generic implements TabInterface
 {
     /** @var \Magento\Cms\Model\Wysiwyg\Config */
@@ -77,11 +74,11 @@ class Info extends Generic implements TabInterface
     /**
      * Prepare form fields
      *
-     * @return \Magento\Backend\Block\Widget\Form
+     * @return Form
      */
     protected function _prepareForm()
     {
-        /** @var $model \BlueMedia\BluePayment\Model\Gateways */
+        /** @var Gateways $model */
         $model = $this->_coreRegistry->registry(GatewaysController::GATEWAYS_REGISTER_CODE);
 
         /** @var \Magento\Framework\Data\Form $form */

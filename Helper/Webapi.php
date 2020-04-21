@@ -5,18 +5,19 @@ namespace BlueMedia\BluePayment\Helper;
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
+use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Zend\Uri\Http;
 
 /**
  * Class Gateways
- *
- * @package BlueMedia\BluePayment\Helper
  */
 class Webapi extends Data
 {
@@ -24,6 +25,9 @@ class Webapi extends Data
 
     /** @var StoreManagerInterface */
     public $storeManager;
+
+    /** @var Http */
+    public $zendUri;
 
     /**
      * Gateways constructor.
@@ -36,6 +40,7 @@ class Webapi extends Data
      * @param Initial $initialConfig
      * @param Client $apiClient
      * @param StoreManagerInterface $storeManager
+     * @parama Http $zendUri
      */
     public function __construct(
         Context $context,
@@ -45,7 +50,8 @@ class Webapi extends Data
         Config $paymentConfig,
         Initial $initialConfig,
         Client $apiClient,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        Http $zendUri
     ) {
         parent::__construct(
             $context,
@@ -58,24 +64,22 @@ class Webapi extends Data
         );
 
         $this->storeManager = $storeManager;
+        $this->zendUri = $zendUri;
     }
 
     /**
-     * @param TransactionInterface $transaction
-     * @param null$amount
-     *
-     * @return array
-     * @throws EmptyRemoteIdException
+     * @return array|bool
      */
     public function googlePayMerchantInfo()
     {
+        /** @var Store $store */
         $store = $this->storeManager->getStore();
 
         $hashMethod   = $this->getConfigValue('hash_algorithm');
         $GPayMerchantInfoURL = $this->getGPayMerchantInfoURL();
 
         $url = $store->getBaseUrl();
-        $merchantDomain = parse_url($url)['host'];
+        $merchantDomain = $this->zendUri->parse($url)->getHost();
 
         $currency = $store->getCurrentCurrency()->getCode();
 
@@ -91,12 +95,13 @@ class Webapi extends Data
                 $GPayMerchantInfoURL
             );
         } else {
-            return null;
+            return false;
         }
     }
 
     /**
-     * @param $name
+     * @param string $name
+     * @param string $currency
      *
      * @return mixed
      */
@@ -122,13 +127,11 @@ class Webapi extends Data
     }
 
     /**
-     * @param $hashMethod
-     * @param $serviceId
-     * @param $messageId
-     * @param $remoteId
-     * @param $amount
-     * @param $hashKey
-     * @param $refundAPIUrl
+     * @param string $hashMethod
+     * @param string $serviceId
+     * @param string $merchantDomain
+     * @param string $hashKey
+     * @param string $apiUrl
      *
      * @return bool|array
      */
@@ -144,10 +147,8 @@ class Webapi extends Data
 
         try {
             return (array)$this->apiClient->callJson($apiUrl, $data);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->info($e->getMessage());
-            var_dump($e->getMessage());
-
             return false;
         }
     }

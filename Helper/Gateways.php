@@ -6,20 +6,17 @@ use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
+use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use SimpleXMLElement;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
-/**
- * Class Gateways
- *
- * @package BlueMedia\BluePayment\Helper
- */
 class Gateways extends Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
@@ -27,8 +24,8 @@ class Gateways extends Data
     const UPLOAD_PATH                   = '/BlueMedia/';
 
     /** @var array Available currencies */
-    public $currencies = [
-        'PLN', 'EUR', 'GBP', 'USD', 'CZK'
+    public static $currencies = [
+        'PLN', 'EUR', 'GBP', 'USD', 'CZK', 'RON', 'HUF', 'BGN', 'UAH'
     ];
 
     /** @var GatewaysFactory */
@@ -99,7 +96,7 @@ class Gateways extends Data
         $hashMethod        = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
         $gatewayListAPIUrl = $this->getGatewayListUrl();
 
-        foreach ($this->currencies as $currency) {
+        foreach (self::$currencies as $currency) {
             $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
             $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
             $hashKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
@@ -149,11 +146,11 @@ class Gateways extends Data
     /**
      * @param string $hashMethod
      * @param string $serviceId
-     * @param int    $messageId
+     * @param string $messageId
      * @param string $hashKey
      * @param string $gatewayListAPIUrl
      *
-     * @return bool|\SimpleXMLElement
+     * @return bool|SimpleXMLElement
      */
     private function loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl)
     {
@@ -166,7 +163,7 @@ class Gateways extends Data
 
         try {
             return $this->apiClient->call($gatewayListAPIUrl, $data);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->info($e->getMessage());
 
             return false;
@@ -176,6 +173,8 @@ class Gateways extends Data
     /**
      * @param array $gatewayList
      * @param string $currency
+     * 
+     * @return bool
      */
     public function saveGateways($gatewayList, $currency = 'PLN')
     {
@@ -218,7 +217,7 @@ class Gateways extends Data
                     $gatewayModel->setData('status_date', $gateway['statusDate']);
                     try {
                         $gatewayModel->save();
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $this->logger->info($e->getMessage());
                     }
                 }
@@ -237,7 +236,7 @@ class Gateways extends Data
                             'gateway_name' => $existingGatewayData['gateway_name'],
                             'gateway_id'   => $existingGatewayId,
                         ];
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $this->logger->info($e->getMessage());
                     }
                 }
@@ -246,6 +245,8 @@ class Gateways extends Data
                 $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
             }
         }
+
+        return true;
     }
 
     /**
@@ -258,7 +259,7 @@ class Gateways extends Data
 
         $existingGateways = [];
 
-        foreach ($this->currencies as $currency) {
+        foreach (self::$currencies as $currency) {
             $existingGateways[$currency] = [];
         }
 

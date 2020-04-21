@@ -15,10 +15,10 @@ define(
 
         return $.extend(quote, {
             blueMediaMethod: blueMediaMethod,
-            setBlueMediaPaymentMethod: function(paymentMethodCode) {
+            setBlueMediaPaymentMethod: function (paymentMethodCode) {
                 blueMediaMethod(paymentMethodCode);
             },
-            getBlueMediaPaymentMethod: function() {
+            getBlueMediaPaymentMethod: function () {
                 return blueMediaMethod;
             }
         });

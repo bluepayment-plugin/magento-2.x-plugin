@@ -4,7 +4,9 @@ namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
+use BlueMedia\BluePayment\Model\ResourceModel\Transaction\Collection;
 use BlueMedia\BluePayment\Model\ResourceModel\Transaction\CollectionFactory;
+use Exception;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
@@ -13,10 +15,6 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 
-/**
- * Class TransactionRepository
- * @package BlueMedia\BluePayment\Model
- */
 class TransactionRepository implements TransactionRepositoryInterface
 {
     /**
@@ -61,7 +59,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         try {
             $object->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
 
@@ -102,7 +100,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     /**
      * @param \Magento\Sales\Api\Data\OrderInterface $order
      *
-     * @return \BlueMedia\BluePayment\Model\ResourceModel\Transaction\Collection
+     * @return Collection
      */
     public function getListForOrder(OrderInterface $order)
     {
@@ -115,7 +113,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
      * @return bool
      */
@@ -134,7 +132,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         try {
             $object->delete();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
 
@@ -142,7 +140,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
      * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException

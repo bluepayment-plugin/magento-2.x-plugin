@@ -7,11 +7,6 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 
-/**
- * Class Gateways
- *
- * @package BlueMedia\BluePayment\Model\ResourceModel
- */
 class Gateways extends AbstractDb
 {
     /**
@@ -72,9 +67,16 @@ class Gateways extends AbstractDb
     public function getGatewayNameById($id)
     {
         $adapter = $this->getConnection();
-        $select  = $adapter->select()->from($this->getMainTable(), 'gateway_name')->where('entity_id = :entity_id');
-        $binds   = ['entity_id' => (int)$id];
 
-        return $adapter->fetchOne($select, $binds);
+        if ($adapter) {
+            $select = $adapter->select()
+                ->from($this->getMainTable(), 'gateway_name')
+                ->where('entity_id = :entity_id');
+            $binds = ['entity_id' => (int)$id];
+
+            return $adapter->fetchOne($select, $binds);
+        }
+
+        return false;
     }
 }

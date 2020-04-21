@@ -3,16 +3,16 @@
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
+use Exception;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Controller\Result\RawFactory;
+use Magento\Framework\Data\Form\FormKey;
 
-/**
- * Class Status
- *
- * @package BlueMedia\BluePayment\Controller\Processing
- */
 class Status extends Action
 {
     /** @var PaymentFactory */
@@ -43,12 +43,15 @@ class Status extends Action
 
         parent::__construct($context);
 
-        // CsrfAwareAction Magento2.3 compatibility
+        /**
+         * CsrfAwareAction Magento2.3 compatibility
+         */
         if (interface_exists("\Magento\Framework\App\CsrfAwareActionInterface")) {
+            /** @var Http $request */
             $request = $this->getRequest();
 
             if ($request->isPost() && empty($request->getParam('form_key'))) {
-                $formKey = $this->_objectManager->get(\Magento\Framework\Data\Form\FormKey::class);
+                $formKey = $this->_objectManager->get(FormKey::class);
                 $request->setParam('form_key', $formKey->getFormKey());
             }
         }
@@ -57,11 +60,15 @@ class Status extends Action
     /**
      * ITN - sprawdzenie statusu natychmiastowego powiadomienia o transakcji
      *
-     * @throws \Exception
+     * @return Raw
+     * @throws Exception
      */
     public function execute()
     {
         $result = $this->rawFactory->create();
+
+        /** @var Payment $payment */
+        $payment = $this->paymentFactory->create();
 
         try {
             $params = $this->getRequest()->getParams();
@@ -73,7 +80,11 @@ class Status extends Action
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
 
-                $xml = $this->paymentFactory->create()->processStatusPayment($simpleXml);
+                if ($simpleXml) {
+                    $xml = $payment->processStatusPayment($simpleXml);
+                } else {
+                    $xml = '';
+                }
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);
@@ -84,17 +95,21 @@ class Status extends Action
                 $simpleXml = simplexml_load_string($base64recurring);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
 
-                $xml = $this->paymentFactory->create()->processRecurring($simpleXml);
+                if ($simpleXml) {
+                    $xml = $payment->processRecurring($simpleXml);
+                } else {
+                    $xml = '';
+                }
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);
                 return $result;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->critical('BlueMedia: ' . $e->getMessage());
-
-            $result->setContents('Error');
-            return $result;
         }
+
+        $result->setContents('Error');
+        return $result;
     }
 }

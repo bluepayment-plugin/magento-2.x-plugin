@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Block\Customer;
 
+use BlueMedia\BluePayment\Model\ResourceModel\Card\Collection;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use Magento\Customer\Model\Session;
 use Magento\Framework\View\Element\Template;
@@ -25,17 +26,24 @@ class Cards extends Template
         $this->session = $session;
     }
 
+    /**
+     * @return Collection
+     */
     public function getCards()
     {
         $collection = $this->cardCollectionFactory->create();
 
         $collection
-            ->addFieldToFilter('customer_id', $this->session->getCustomerId())
+            ->addFieldToFilter('customer_id', (string) $this->session->getCustomerId())
             ->load();
 
         return $collection;
     }
 
+    /**
+     * @param \BlueMedia\BluePayment\Model\Card $card
+     * @return string
+     */
     public function renderCardHtml($card)
     {
         foreach ($this->getChildNames() as $childName) {

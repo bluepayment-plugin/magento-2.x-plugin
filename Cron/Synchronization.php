@@ -7,9 +7,7 @@ use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
 /**
- * Class Synchronization
- *
- * @package BlueMedia\BluePayment\Cron
+ * Gateway synchronization CRON Job
  */
 class Synchronization
 {
@@ -17,7 +15,7 @@ class Synchronization
     public $logger;
 
     /**
-     * @var \BlueMedia\BluePayment\Helper\Gateways
+     * @var Gateways
      */
     public $gatewayHelper;
 

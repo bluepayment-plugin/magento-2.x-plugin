@@ -8,8 +8,11 @@ use Magento\Framework\View\Element\Template\Context;
 
 class Head extends Template
 {
+    /**
+     * @return boolean
+     */
     public function isTest()
     {
-        return $this->_scopeConfig->getValue('payment/bluepayment/test_mode');
+        return (bool) $this->_scopeConfig->getValue('payment/bluepayment/test_mode');
     }
 }

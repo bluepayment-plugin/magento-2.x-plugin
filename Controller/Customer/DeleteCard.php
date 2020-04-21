@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Controller\Customer;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
+use Exception;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Request\Http;
@@ -35,31 +36,37 @@ class DeleteCard extends CardsManagement
         $this->cardResource = $cardResource;
     }
 
+    /**
+     * @return \Magento\Framework\Controller\ResultInterface
+     */
     public function execute()
     {
+        $redirect = $this->resultRedirectFactory->create();
+        $redirect->setPath('bluepayment/customer/cards');
+
         $request = $this->_request;
         if (!$request instanceof Http) {
-            return $this->createErrorResponse('Wrong request.');
+            $this->createErrorResponse('Wrong request.');
+            return $redirect;
         }
 
         if (!$this->validator->validate($request)) {
-            return $this->createErrorResponse('Wrong request.');
+            $this->createErrorResponse('Wrong request.');
+            return $redirect;
         }
 
         $card = $this->getCard($request);
         if ($card === null) {
-            return $this->createErrorResponse('Wrong card index.');
+            $this->createErrorResponse('Wrong card index.');
+            return $redirect;
         }
 
         try {
             $this->cardResource->delete($card);
             $this->createSuccessMessage();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->createErrorResponse('Deletion failure. Please try again.');
         }
-
-        $redirect = $this->resultRedirectFactory->create();
-        $redirect->setPath('bluepayment/customer/cards');
 
         return $redirect;
     }
@@ -76,15 +83,20 @@ class DeleteCard extends CardsManagement
             return null;
         }
 
-        return $this->cardCollectionFactory
+        /** @var Card $card */
+        $card = $this->cardCollectionFactory
             ->create()
-            ->addFieldToFilter('card_index', $cardIndex)
-            ->addFieldToFilter('customer_id', $this->customerSession->getCustomerId())
+            ->addFieldToFilter('card_index', (string)$cardIndex)
+            ->addFieldToFilter('customer_id', (string)$this->customerSession->getCustomerId())
             ->getFirstItem();
+
+        return $card;
     }
 
     /**
      * @param string $errorMessage
+     *
+     * @return void
      */
     private function createErrorResponse($errorMessage)
     {
@@ -93,11 +105,13 @@ class DeleteCard extends CardsManagement
         );
     }
 
+    /**
+     * @return void
+     */
     private function createSuccessMessage()
     {
         $this->messageManager->addSuccessMessage(
             __('Payment card was successfully removed.')
         );
     }
-
 }

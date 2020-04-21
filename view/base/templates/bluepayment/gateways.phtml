@@ -1,10 +1,5 @@
-<?php
-/**
- * Gateways view template
- *
- * @var $block \BlueMedia\BluePayment\Block\Gateways
- */
-?>
-<?php
-/* @escapeNotVerified */ echo $block->getActiveGateways();
+<?=
+/** @var Magento\Framework\View\Element\Template $block */
+/* @noEscape */
+$block->getActiveGateways();
 ?>

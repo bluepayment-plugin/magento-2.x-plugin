@@ -3,18 +3,15 @@
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Framework\App\ResponseInterface;
 
-/**
- * Class Edit
- *
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
- */
 class Edit extends Gateways
 {
     const GATEWAYS_REGISTER_CODE = 'adminbluepayment_gateways';
 
     /**
-     * @return \Magento\Backend\Model\View\Result\Page
+     * @return Page|ResponseInterface
      */
     public function execute()
     {
@@ -37,7 +34,7 @@ class Edit extends Gateways
         }
         $this->coreRegistry->register(self::GATEWAYS_REGISTER_CODE, $model);
 
-        /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
+        /** @var Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('BlueMedia_BluePayment::gateways');
         $resultPage->getConfig()->getTitle()->prepend(__('Gateways'));

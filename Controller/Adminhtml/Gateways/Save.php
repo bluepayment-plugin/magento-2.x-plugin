@@ -5,15 +5,13 @@ namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
+use Exception;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
 
-/**
- * Class Save
- *
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
- */
 class Save extends Gateways
 {
     /** @var EmailHelper */
@@ -40,11 +38,14 @@ class Save extends Gateways
     }
 
     /**
-     * @return void
+     * @return void|ResultInterface
      */
     public function execute()
     {
-        $isPost = $this->getRequest()->getPost();
+        /** @var Http $request */
+        $request = $this->getRequest();
+
+        $isPost = $request->getPost();
 
         if ($isPost) {
             $gatewaysModel = $this->gatewaysFactory->create();
@@ -87,7 +88,7 @@ class Save extends Gateways
                 $this->_redirect('*/*/');
 
                 return;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             }
 

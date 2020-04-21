@@ -4,14 +4,9 @@ namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Magento\Framework\View\Result\Page;
+use Magento\Backend\Model\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 
-/**
- * Class Index
- *
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
- */
 class Index extends Action
 {
     /** @var PageFactory */
@@ -45,7 +40,7 @@ class Index extends Action
     /**
      * Call page factory to render layout and page content
      *
-     * @return \Magento\Framework\View\Result\Page
+     * @return Page
      */
     public function execute()
     {
@@ -77,7 +72,10 @@ class Index extends Action
     public function getResultPage()
     {
         if ($this->resultPage === null) {
-            $this->resultPage = $this->resultPageFactory->create();
+            /** @var Page $resultPage */
+            $resultPage = $this->resultPageFactory->create();
+
+            $this->resultPage = $resultPage;
         }
 
         return $this->resultPage;

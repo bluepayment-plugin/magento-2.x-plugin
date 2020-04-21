@@ -5,15 +5,12 @@ namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 use BlueMedia\BluePayment\Helper\Gateways;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
-/**
- * Class Synchronize
- *
- * @package BlueMedia\BluePayment\Controller\Adminhtml\Gateways
- */
 class Synchronize extends Action
 {
     /** @var PageFactory */
@@ -52,7 +49,7 @@ class Synchronize extends Action
     }
 
     /**
-     * @return \Magento\Framework\Controller\Result\Redirect
+     * @return Redirect
      *
      * Synchronizes gateways
      *
@@ -73,5 +70,4 @@ class Synchronize extends Action
 
         return $resultRedirect;
     }
-
 }

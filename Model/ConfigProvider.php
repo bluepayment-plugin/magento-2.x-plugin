@@ -11,11 +11,6 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 
-/**
- * Class ConfigProvider
- *
- * @package BlueMedia\BluePayment\Model
- */
 class ConfigProvider implements ConfigProviderInterface
 {
     const IFRAME_GATEWAY_ID = 1500;
@@ -176,7 +171,12 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->activeGateways[$currency];
     }
 
-    private function sortGateways(&$array) {
+    /**
+     * @param array $array
+     * @return array
+     */
+    private function sortGateways(&$array)
+    {
         $defaultSortOrder = $this->defaultSortOrder;
 
         usort($array, function ($a, $b) use ($defaultSortOrder) {
@@ -252,18 +252,24 @@ class ConfigProvider implements ConfigProviderInterface
         ];
     }
 
+    /**
+     * @return string
+     */
     public function getCurrentCurrencyCode()
     {
         return $this->priceCurrency->getCurrency()->getCurrencyCode();
     }
 
+    /**
+     * @return array
+     */
     private function prepareCards()
     {
         $collection = $this->cardCollectionFactory->create();
 
         /** @var Card[] $cards */
         $cards = $collection
-            ->addFieldToFilter('customer_id', $this->session->getCustomerId())
+            ->addFieldToFilter('customer_id', (string) $this->session->getCustomerId())
             ->load();
 
         $return = [];

@@ -5,9 +5,7 @@ namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit;
 use Magento\Backend\Block\Widget\Form\Generic;
 
 /**
- * Class Form
- *
- * @package BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit
+ * Edit gateway form
  */
 class Form extends Generic
 {

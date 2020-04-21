@@ -9,12 +9,9 @@ use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use Zend\Log\Logger;
+use Zend\Log\Writer\Stream;
 
-/**
- * Class Data
- *
- * @package BlueMedia\BluePayment\Helper
- */
 class Data extends \Magento\Payment\Helper\Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
@@ -23,7 +20,7 @@ class Data extends \Magento\Payment\Helper\Data
     /**
      * Logger
      *
-     * @var \Zend\Log\Logger
+     * @var Logger
      */
     public $logger;
 
@@ -61,8 +58,8 @@ class Data extends \Magento\Payment\Helper\Data
             $initialConfig
         );
 
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new \Zend\Log\Logger();
+        $writer = new Stream(BP . '/var/log/bluemedia.log');
+        $this->logger = new Logger();
         $this->logger->addWriter($writer);
         $this->apiClient = $apiClient;
     }
@@ -86,11 +83,11 @@ class Data extends \Magento\Payment\Helper\Data
     }
 
     /**
-     * @param $length
+     * @param int $length
      *
      * @return string
      */
-    public function randomString($length)
+    public function randomString($length = 8)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randomString = '';

@@ -29,5 +29,4 @@ class Cards extends CardsManagement
 
         return $resultPage;
     }
-
 }

@@ -2,18 +2,20 @@
 
 namespace BlueMedia\BluePayment\Api;
 
+use BlueMedia\BluePayment\Exception\ResponseException;
+use SimpleXMLElement;
+
 /**
  * Interface ClientInterface
- * @package BlueMedia\BluePayment\Model\Api
  */
 interface ClientInterface
 {
     /**
-     * @param $endPoint
-     * @param $data
+     * @param string $endPoint
+     * @param array $data
      *
-     * @return \SimpleXMLElement
-     * @throws \BlueMedia\BluePayment\Exception\ResponseException
+     * @return SimpleXMLElement
+     * @throws ResponseException
      */
     public function call($endPoint, $data);
 }

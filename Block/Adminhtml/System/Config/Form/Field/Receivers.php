@@ -9,8 +9,6 @@ use Magento\Framework\View\Design\Theme\LabelFactory;
 
 /**
  * Backend system config array field renderer
- *
- * @package BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field
  */
 class Receivers extends AbstractFieldArray
 {

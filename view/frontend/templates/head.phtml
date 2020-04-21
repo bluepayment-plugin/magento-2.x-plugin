@@ -1,5 +1,8 @@
-<?php if ($this->isTest()): ?>
-    <script src="https://cards-accept.bm.pl/integration/checkout.js" />
-<?php else: ?>
-    <script src="https://cards.bm.pl/integration/checkout.js" />
-<?php endif; ?>
+<?php
+/** @var \BlueMedia\BluePayment\Block\Head $block */
+
+if ($block->isTest()) {
+    echo '<script src="https://cards-accept.bm.pl/integration/checkout.js" />';
+} else {
+    echo '<script src="https://cards.bm.pl/integration/checkout.js" />';
+}
