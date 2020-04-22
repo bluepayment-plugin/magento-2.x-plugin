@@ -186,6 +186,17 @@ class ConfigProvider implements ConfigProviderInterface
             if ($aPos == $bPos) {
                 $aPos = array_search($a["gateway_id"], $defaultSortOrder);
                 $bPos = array_search($b["gateway_id"], $defaultSortOrder);
+
+                if ($aPos === false) {
+                    // New gateway
+                    return true;
+                }
+
+                if ($bPos === false) {
+                    // New gateway
+                    return false;
+                }
+
             } elseif ($aPos == 0) {
                 return true;
             } elseif ($bPos == 0) {
