@@ -31,6 +31,7 @@ define([
             bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
             bluePaymentCards: window.checkoutConfig.payment.bluePaymentCards,
             bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluePaymentAutopayAgreement,
+            bluePaymentCollapsible: window.checkoutConfig.payment.bluePaymentCollapsible === '1',
             selectedPaymentObject: {},
             selectedAutopayGatewayIndex: null,
             validationFailed: ko.observable(false),
@@ -52,6 +53,7 @@ define([
                 modalClass: 'blik-modal',
             }, $('<div />').html('Potwierdź płatność w aplikacji swojego banku.')),
             blikTimeout: null,
+            collapsed: ko.observable(true),
 
             /**
              * Get payment method data
@@ -603,7 +605,7 @@ define([
                 }).done(function (response) {
                     self.handleGPayStatus(response.Status, response);
                 });
-            },
+            }
         });
     }
 );

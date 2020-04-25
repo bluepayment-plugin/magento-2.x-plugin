@@ -162,7 +162,8 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
                 'bluePaymentTestMode' => $this->scopeConfig->getValue("payment/bluepayment/test_mode"),
                 'bluePaymentCards' => $this->prepareCards(),
-                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement")
+                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement"),
+                'bluePaymentCollapsible' => $this->scopeConfig->getValue("payment/bluepayment/collapsible")
             ];
 
             $this->activeGateways[$currency] = $activeGateways;
