@@ -24,23 +24,31 @@
             <div class="payment-method-note">
                 <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
                     <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
-                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}">
+                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
                             <input required
                                    data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
                                    name="payment_method_bluepayment_gateway"
                                    class="radio"
                                    data-validate="{'validate-one-required-by-name':true}"
                                    type="radio"/>
-                            <label data-bind="attr:{for:  $parent.getCode() + gateway_id }">
+                            <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                 <img data-bind="attr:{src: logo_url,alt: name}"
                                      class="payment-logo"/>
-                                <span class="details">
-                                    <span class="title" data-bind="text: name"></span>
-                                    <span class="desc" data-bind="text: description"></span>
-                                </span>
                             </label>
                         </li>
                     </ul>
+
+                    <!-- ko if: bluePaymentCollapsible -->
+                    <div class="gateway-collapsible">
+                        <a href="#" class="expand" data-bind="{visible: collapsed(), click: function() {this.collapsed(false)}}">
+                            <!-- ko i18n: 'Show all' --><!-- /ko -->
+                        </a>
+
+                        <a href="#" class="collapse" data-bind="{visible: !collapsed(), click: function() {this.collapsed(true)}}">
+                            <!-- ko i18n: 'Collapse' --><!-- /ko -->
+                        </a>
+                    </div>
+                    <!--/ko-->
                 </div>
             </div>
         </fieldset>
