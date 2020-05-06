@@ -103,6 +103,22 @@ and open the template in the editor.
                 }
             }
 
+            .card-option {
+                float: left;
+                width: 50%;
+                height: 84px;
+                position: relative;
+                border: 1px solid #e6e6e6;
+                margin: -1px 0 0 -1px;
+                box-sizing: border-box;
+
+                &._active {
+                    outline: 2px solid #a6a6a6;
+                    outline-offset: -2px;
+                    z-index: 1;
+                }
+            }
+
             .payment-logo {
                 max-height: 80px;
                 display: inline-block;
