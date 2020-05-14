@@ -75,7 +75,7 @@ class Status extends Action
             $this->logger->info('STATUS:' . __LINE__, ['params' => $params]);
 
             if (array_key_exists('transactions', $params)) {
-                $paramTransactions  = $params['transactions'];
+                $paramTransactions  = str_replace(' ', '+', $params['transactions']);
                 $base64transactions = base64_decode($paramTransactions);
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
@@ -90,7 +90,7 @@ class Status extends Action
                 $result->setContents($xml);
                 return $result;
             } elseif (array_key_exists('recurring', $params)) {
-                $paramRecurring = $params['recurring'];
+                $paramRecurring = str_replace(' ', '+', $params['recurring']);
                 $base64recurring = base64_decode($paramRecurring);
                 $simpleXml = simplexml_load_string($base64recurring);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
