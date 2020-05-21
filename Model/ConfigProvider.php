@@ -52,17 +52,28 @@ class ConfigProvider implements ConfigProviderInterface
         1511, // Visa Checkout
         106, // Tylko na teście
         68, // Płać z ING
+        1808, // Płatność z ING
         3, // mTransfer
+        1800, // Płatność z mBank
         1063, // Płacę z IPKO
+        1803, // Płatność z PKOBP
         27, // Santander online
+        1806, // Płatność z Santander
         52, // Pekao24 PBL
+        1805, // Płatność z PekaoSA
         85, // Millennium Bank PBL
+        1807, // Płatność z Millenium
         95, // Płacę z Alior Bankiem
+        1802, // Płatność z Alior
         59, // CA przelew online
+        1809, // Płatność z Credit Agricole
         79, // Eurobank - płatność online
         1064, // Płacę z Inteligo
+        1810, // Płatność z Inteligo
         1035, // BNP Paribas - płacę z Pl@net
+        1804, // Płatność z BNP Paribas
         513, // Getin Bank
+        1801, // Płatność z Getin
         1010, // T-Mobile Usługi Bankowe
         90, // Płacę z Citi Handlowy
         76, // BNP Paribas-Płacę z żółty online
@@ -162,7 +173,8 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
                 'bluePaymentTestMode' => $this->scopeConfig->getValue("payment/bluepayment/test_mode"),
                 'bluePaymentCards' => $this->prepareCards(),
-                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement")
+                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement"),
+                'bluePaymentCollapsible' => $this->scopeConfig->getValue("payment/bluepayment/collapsible")
             ];
 
             $this->activeGateways[$currency] = $activeGateways;
@@ -186,6 +198,17 @@ class ConfigProvider implements ConfigProviderInterface
             if ($aPos == $bPos) {
                 $aPos = array_search($a["gateway_id"], $defaultSortOrder);
                 $bPos = array_search($b["gateway_id"], $defaultSortOrder);
+
+                if ($aPos === false) {
+                    // New gateway
+                    return true;
+                }
+
+                if ($bPos === false) {
+                    // New gateway
+                    return false;
+                }
+
             } elseif ($aPos == 0) {
                 return true;
             } elseif ($bPos == 0) {

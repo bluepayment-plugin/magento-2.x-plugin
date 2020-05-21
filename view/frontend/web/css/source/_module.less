@@ -85,6 +85,26 @@ and open the template in the editor.
 
             .payment-option {
                 float: left;
+                width: 25%;
+                height: 84px;
+                position: relative;
+                border: 1px solid #e6e6e6;
+                margin: -1px 0 0 -1px;
+                box-sizing: border-box;
+
+                &._active {
+                    outline: 2px solid #a6a6a6;
+                    outline-offset: -2px;
+                    z-index: 1;
+                }
+
+                .radio {
+                    display: none;
+                }
+            }
+
+            .card-option {
+                float: left;
                 width: 50%;
                 height: 84px;
                 position: relative;
@@ -93,7 +113,7 @@ and open the template in the editor.
                 box-sizing: border-box;
 
                 &._active {
-                    outline: 2px solid black;
+                    outline: 2px solid #a6a6a6;
                     outline-offset: -2px;
                     z-index: 1;
                 }
@@ -105,7 +125,6 @@ and open the template in the editor.
                 vertical-align: middle;
                 position: relative;
                 top: 1px;
-                left: 10px;
             }
 
             input.radio {
@@ -147,6 +166,38 @@ and open the template in the editor.
                     line-height: 2.2rem;
                     padding: 14px 17px;
                     font-size: 1.8rem;
+                }
+            }
+        }
+
+        .gateway-collapsible {
+            text-align: center;
+            margin-top: 10px;
+
+            a {
+                text-decoration: none;
+
+                &::after {
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                    font-size: 14px;
+                    line-height: 16px;
+                    color: #757575;
+                    content: '\e622';
+                    font-family: 'luma-icons';
+                    margin: 0 0 0 10px;
+                    vertical-align: middle;
+                    display: inline-block;
+                    font-weight: normal;
+                    overflow: hidden;
+                    speak: none;
+                    text-align: center;
+                }
+
+                &.collapse {
+                    &::after {
+                        content: '\e621';
+                    }
                 }
             }
         }
