@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use DOMDocument;
@@ -14,20 +15,24 @@ use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentData;
+use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Status;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
 use SimpleXMLElement;
+use Magento\Framework\HTTP\Client\Curl;
 
 /**
  * BluePayment class
@@ -116,14 +121,18 @@ class Payment extends AbstractMethod
      *
      * @var boolean
      */
-    protected $_canUseInternal = false;
+    protected $_canUseInternal = true;
 
     /**
      * Czy wymagana jest inicjalizacja ?
      *
      * @var boolean
      */
-    protected $_isInitializeNeeded = true;
+    protected $_isInitializeNeeded = false;
+
+    protected $_canAuthorize = true;
+
+    protected $_canCapture = false;
 
     /** @var OrderFactory */
     private $orderFactory;
@@ -140,59 +149,60 @@ class Payment extends AbstractMethod
     /** @var EncryptorInterface */
     private $encryptor;
 
-    /**
-     * @var \BlueMedia\BluePayment\Helper\Data
-     */
+    /** @var Curl */
+    private $curl;
+
+    /** @var BMLogger */
+    private $bmLooger;
+
+    /** @var Collection */
+    private $collection;
+
+    /** @var Data */
     private $helper;
 
-    /**
-     * @var \Magento\Framework\UrlInterface
-     */
+    /** @var UrlInterface */
     private $url;
 
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
+    /** @var OrderSender */
     private $sender;
 
-    /**
-     * @var \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory
-     */
+    /** @var CollectionFactory */
     private $statusCollectionFactory;
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\TransactionFactory
-     */
+    /** @var TransactionFactory */
     private $transactionFactory;
 
-    /**
-     * @var \BlueMedia\BluePayment\Api\TransactionRepositoryInterface
-     */
+    /** @var TransactionRepositoryInterface */
     private $transactionRepository;
 
     /**
      * Payment constructor.
      *
-     * @param CollectionFactory                 $statusCollectionFactory
-     * @param OrderSender                       $orderSender
-     * @param Data                              $helper
-     * @param UrlInterface                      $url
-     * @param OrderFactory                      $orderFactory
-     * @param Context                           $context
-     * @param Registry                          $registry
-     * @param ExtensionAttributesFactory        $extensionFactory
-     * @param AttributeValueFactory             $customAttributeFactory
-     * @param PaymentData                       $paymentData
-     * @param ScopeConfigInterface              $scopeConfig
-     * @param Logger                            $logger
-     * @param TransactionFactory                $transactionFactory
-     * @param TransactionRepositoryInterface    $transactionRepository
-     * @param CardFactory                                                       $cardFactory
-     * @param CardCollectionFactory                                             $cardCollectionFactory
-     * @param CardResource
-     * @param AbstractResource|null             $resource
-     * @param AbstractDb|null                   $resourceCollection
-     * @param array                             $data
+     * @param CollectionFactory $statusCollectionFactory
+     * @param OrderSender $orderSender
+     * @param Data $helper
+     * @param UrlInterface $url
+     * @param OrderFactory $orderFactory
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param PaymentData $paymentData
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Logger $logger
+     * @param TransactionFactory $transactionFactory
+     * @param TransactionRepositoryInterface $transactionRepository
+     * @param CardFactory $cardFactory
+     * @param CardCollectionFactory $cardCollectionFactory
+     * @param CardResource $cardResource
+     * @param EncryptorInterface $encryptor
+     * @param Curl $curl
+     * @param BMLogger $bmLogger
+     * @param Collection $collection
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param array $data
      */
     public function __construct(
         CollectionFactory $statusCollectionFactory,
@@ -213,6 +223,9 @@ class Payment extends AbstractMethod
         CardCollectionFactory $cardCollectionFactory,
         CardResource $cardResource,
         EncryptorInterface $encryptor,
+        Curl $curl,
+        BMLogger $bmLogger,
+        Collection $collection,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -226,6 +239,9 @@ class Payment extends AbstractMethod
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->cardResource = $cardResource;
         $this->encryptor = $encryptor;
+        $this->curl = $curl;
+        $this->bmLooger = $bmLogger;
+        $this->collection = $collection;
 
         parent::__construct(
             $context,
@@ -433,7 +449,7 @@ class Payment extends AbstractMethod
                         break;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
 
@@ -444,7 +460,7 @@ class Payment extends AbstractMethod
      * @param SimpleXMLElement $data
      *
      * @return string
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws AlreadyExistsException
      */
     private function saveCardData($data)
     {
@@ -607,7 +623,7 @@ class Payment extends AbstractMethod
 
         $this->saveTransactionResponse($transaction);
 
-        /** @var \Magento\Sales\Model\Order\Payment|mixed|null $orderPayment */
+        /** @var Order\Payment|mixed|null $orderPayment */
         $orderPayment = $order->getPayment();
 
         if ($orderPayment === null) {
@@ -977,5 +993,92 @@ class Payment extends AbstractMethod
                 )
                 ->save();
         }
+    }
+
+    public function authorize(InfoInterface $payment, $amount)
+    {
+        /** @var Order $order */
+        $order = $payment->getOrder();
+        $ip = $order->getRemoteIp();
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, ['ip' => $ip]);
+
+        /** Orders from admin panel has empty remote ip */
+        if ($order->getRemoteIp() === null) {
+            $params = $this->getFormRedirectFields($order);
+            $url = $this->getUrlGateway();
+
+            $response = $this->sendRequest($params, $url);
+            $remoteId = $response->traansactionId;
+            $redirecturl = $response->redirecturl;
+            $orderStatus = $response->status;
+
+            $unchangeableStatuses = explode(
+                ',',
+                $this->_scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
+            );
+            $statusWaitingPayment = $this->_scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
+
+            if ($statusWaitingPayment != '') {
+                $statusCollection = $this->collection;
+                $orderStatusWaitingState = Order::STATE_NEW;
+                foreach ($statusCollection->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusWaitingPayment) {
+                        $orderStatusWaitingState = $status->getState();
+                    }
+                }
+            } else {
+                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
+            }
+
+            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+                $amount = $order->getGrandTotal();
+                $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $formaattedAmount
+                    . ' | Status: ' . $orderStatus
+                    . ' | URL: ' . $redirecturl;
+
+                $order->setState($orderStatusWaitingState)
+                    ->setStatus($statusWaitingPayment)
+                    ->addStatusToHistory(
+                        $statusWaitingPayment,
+                        $orderComment,
+                        false
+                    )
+                    ->save();
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $urlGateway
+     * @param array $params
+     *
+     * @return SimpleXMLElement|false
+     */
+    private function sendRequest($params, $urlGateway)
+    {
+        if (array_key_exists('ClientHash', $params)) {
+            $this->curl->addHeader('BmHeader', 'pay-bm');
+        } else {
+            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
+        }
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, ['params' => $params]);
+
+        $this->curl->post($urlGateway, $params);
+        $response = $this->curl->getBody();
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, ['response' => $response]);
+        $xml = simplexml_load_string($response);
+
+        return $xml;
     }
 }
