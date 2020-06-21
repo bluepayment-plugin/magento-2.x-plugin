@@ -333,17 +333,32 @@ class Create extends Action
                 ]);
             }
 
-            $url = $this->_url->getUrl(
-                $payment->getUrlGateway()
-                . '?'
-                . http_build_query($payment->getFormRedirectFields($order, $gatewayId))
-            );
+            $params = $payment->getFormRedirectFields($order, $gatewayId);
+            $xml = $this->sendRequest($params, $payment->getUrlGateway());
 
-            $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $url]);
+            $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
 
-            /** @var Http $response */
-            $response = $this->getResponse();
-            return $response->setRedirect($url);
+            if ($redirectUrl !== null) {
+                // 3DS
+                $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
+
+                /** @var Http $response */
+                $response = $this->getResponse();
+                return $response->setRedirect($redirectUrl);
+            }
+
+            // Otherwise - redirect to "waiting" page
+            $hashData  = [$serviceId, $orderId, $sharedKey];
+            $redirectHash = $this->helper->generateAndReturnHash($hashData);
+
+            return $this->_redirect('bluepayment/processing/back', [
+                '_secure' => true,
+                '_query' => [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Hash' => $redirectHash
+                ]
+            ]);
         } catch (Exception $e) {
             $this->logger->critical($e);
         }
