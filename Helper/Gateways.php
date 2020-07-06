@@ -205,13 +205,13 @@ class Gateways extends Data
                     } else {
                         $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
+                        $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     }
 
                     $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
                     $gatewayModel->setData('gateway_status', 1);
                     $gatewayModel->setData('bank_name', $gateway['bankName']);
-                    $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
                     $gatewayModel->setData('gateway_logo_url', isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
                     $gatewayModel->setData('status_date', $gateway['statusDate']);
