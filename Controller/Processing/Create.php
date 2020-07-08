@@ -123,9 +123,6 @@ class Create extends Action
                 'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
             ]);
 
-            $cardGateway = ConfigProvider::IFRAME_GATEWAY_ID;
-            $blikGateway = ConfigProvider::BLIK_GATEWAY_ID;
-            $gpayGateway = ConfigProvider::GPAY_GATEWAY_ID;
             $autopayGateway = $this->scopeConfig->getValue('payment/bluepayment/autopay_gateway');
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
@@ -184,7 +181,7 @@ class Create extends Action
                 }
             }
 
-            if ($cardGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic);
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
@@ -196,7 +193,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if ($blikGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::BLIK_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $authorizationCode = $this->getRequest()->getParam('code', 0);
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
@@ -243,7 +240,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if ($gpayGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::GPAY_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $token = $this->getRequest()->getParam('token', null);
 
                 $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);

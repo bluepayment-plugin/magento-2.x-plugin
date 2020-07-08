@@ -295,10 +295,6 @@ class Payment extends AbstractMethod
         // Config
         $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
         $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $cardGateway   = ConfigProvider::IFRAME_GATEWAY_ID;
-        $blikGateway   = ConfigProvider::BLIK_GATEWAY_ID;
-        $gpayGateway   = ConfigProvider::GPAY_GATEWAY_ID;
-        $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
 
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
@@ -323,26 +319,24 @@ class Payment extends AbstractMethod
         }
 
         /* Płatność iFrame */
-        if ($automatic === true && $cardGateway == $gatewayId) {
-            $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+        if ($automatic === true && ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId) {
+            switch ($gatewayId) {
+                case ConfigProvider::IFRAME_GATEWAY_ID:
+                    $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+                    break;
+                case ConfigProvider::BLIK_GATEWAY_ID == $gatewayId:
+                    $params['AuthorizationCode'] = $authorizationCode;
+                    break;
+                case ConfigProvider::GPAY_GATEWAY_ID == $gatewayId:
+                    $params['Description'] = '';
+                    $params['PaymentToken'] = base64_encode($paymentToken);
+                    break;
+            }
         }
 
         /* Automatic payment */
-        if ($autopayGateway == $gatewayId) {
+        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
             $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
-        }
-
-        /* BLIK */
-        if ($automatic === true && $blikGateway == $gatewayId) {
-            $params['AuthorizationCode'] = $authorizationCode;
-        }
-
-        /* Google Pay */
-        if ($automatic === true && $gpayGateway == $gatewayId) {
-            $desc = '';
-
-            $params['Description'] = $desc;
-            $params['PaymentToken'] = base64_encode($paymentToken);
         }
 
         $hashArray = array_values($this->sortParams($params));
