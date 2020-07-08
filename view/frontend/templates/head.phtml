@@ -6,3 +6,8 @@ if ($block->isTest()) {
 } else {
     echo '<script src="https://cards.bm.pl/integration/checkout.js"></script>';
 }
+
+if ($block->hasGPay())
+{
+    echo '<script src="https://pay.google.com/gp/p/js/pay.js"></script>';
+}

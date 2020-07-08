@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-<!--        <script src="https://cards-accept.bm.pl/integration/checkout.js" src_type="url" />-->
-        <script src="https://pay.google.com/gp/p/js/pay.js" src_type="url" />
     </head>
     <body>
         <referenceBlock name="head.additional">
