@@ -146,6 +146,23 @@
             <!--/ko-->
         </div>
         <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
+            <!-- ko if: $data.is_apple_pay -->
+            <fieldset class="fieldset">
+                <div class="payment-method-note">
+                    <div>
+                        Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
+                        autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
+                        o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
+
+                        Więcej informacji o płatności
+                        <a href="https://support.apple.com/pl-pl/HT201239#safari">
+                            Apple Pay w przeglądarce.
+                        </a>
+                    </div>
+                </div>
+            </fieldset>
+            <!--/ko-->
+
             <!-- ko if: $data.is_autopay -->
             <fieldset class="fieldset">
                 <div class="payment-method-note">
@@ -174,7 +191,7 @@
                     <div class="autopay-card-error mage-error" generated="yes" style="display: none; clear: both;">Musisz wybrać kartę płatniczą.</div>
                 </div>
             </fieldset>
-            
+
             <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
                 <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement">
                 <label for="autopay-agreement">

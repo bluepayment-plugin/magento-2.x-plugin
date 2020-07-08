@@ -16,6 +16,7 @@ class ConfigProvider implements ConfigProviderInterface
     const IFRAME_GATEWAY_ID = 1500;
     const BLIK_GATEWAY_ID = 509;
     const GPAY_GATEWAY_ID = 1512;
+    const APPLE_PAY_GATEWAY_ID = 1513;
     const AUTOPAY_GATEWAY_ID = 1503;
 
     /** @var GatewaysCollection */
@@ -49,6 +50,7 @@ class ConfigProvider implements ConfigProviderInterface
         1503, // Kartowa płatność automatyczna
         1500, // Płatność kartą
         1512, // Google Pay
+        1513, // Apple Pay
         1511, // Visa Checkout
         106, // Tylko na teście
         68, // Płać z ING
@@ -238,6 +240,7 @@ class ConfigProvider implements ConfigProviderInterface
         $isBlik = false;
         $isGPay = false;
         $isAutopay = false;
+        $isApplePay = false;
 
         switch ($gateway->getGatewayId()) {
             case self::IFRAME_GATEWAY_ID:
@@ -257,6 +260,9 @@ class ConfigProvider implements ConfigProviderInterface
             case self::GPAY_GATEWAY_ID:
                 $isGPay = true;
                 break;
+            case self::APPLE_PAY_GATEWAY_ID:
+                $isApplePay = true;
+                break;
         }
 
         return [
@@ -272,6 +278,7 @@ class ConfigProvider implements ConfigProviderInterface
             'is_blik'             => $isBlik,
             'is_gpay'             => $isGPay,
             'is_autopay'          => $isAutopay,
+            'is_apple_pay'        => $isApplePay
         ];
     }
 
