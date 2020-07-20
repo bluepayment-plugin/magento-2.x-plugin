@@ -335,7 +335,7 @@ class Payment extends AbstractMethod
         }
 
         /* Płatność iFrame */
-        if ($automatic === true && ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId) {
+        if ($automatic === true) {
             switch ($gatewayId) {
                 case ConfigProvider::IFRAME_GATEWAY_ID:
                     $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
