@@ -667,6 +667,9 @@ class Payment extends AbstractMethod
                     default:
                         break;
                 }
+
+                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->save();
             } else {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
@@ -680,11 +683,11 @@ class Payment extends AbstractMethod
                 )
                     ->save();
             }
+
             if (!$order->getEmailSent()) {
                 $this->sender->send($order);
             }
-            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-            $orderPayment->save();
+
             return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (Exception $e) {
             $this->_logger->critical($e);
