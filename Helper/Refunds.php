@@ -7,6 +7,7 @@ use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\RefundTransactionFactory;
 use Exception;
 use Magento\Framework\App\Config\Initial;
@@ -42,17 +43,18 @@ class Refunds extends Data
     /**
      * Gateways constructor.
      *
-     * @param Context                              $context
-     * @param LayoutFactory                        $layoutFactory
-     * @param Factory                              $paymentMethodFactory
-     * @param Emulation                            $appEmulation
-     * @param Config                               $paymentConfig
-     * @param Initial                              $initialConfig
-     * @param Client                               $apiClient
-     * @param OrderFactory                         $orderFactory
-     * @param RefundTransactionFactory             $refundTransactionFactory
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param Client $apiClient
+     * @param Logger $logger
+     * @param OrderFactory $orderFactory
+     * @param RefundTransactionFactory $refundTransactionFactory
      * @param RefundTransactionRepositoryInterface $refundTransactionRepository
-     * @param TransactionBuilder                   $transactionBuilder
+     * @param TransactionBuilder $transactionBuilder
      */
     public function __construct(
         Context $context,
@@ -62,11 +64,13 @@ class Refunds extends Data
         Config $paymentConfig,
         Initial $initialConfig,
         Client $apiClient,
+        Logger $logger,
         OrderFactory $orderFactory,
         RefundTransactionFactory $refundTransactionFactory,
         RefundTransactionRepositoryInterface $refundTransactionRepository,
         TransactionBuilder $transactionBuilder
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -74,7 +78,8 @@ class Refunds extends Data
             $appEmulation,
             $paymentConfig,
             $initialConfig,
-            $apiClient
+            $apiClient,
+            $logger
         );
         $this->refundTransactionFactory = $refundTransactionFactory;
         $this->refundTransactionRepository = $refundTransactionRepository;
@@ -263,7 +268,8 @@ class Refunds extends Data
         $amount,
         TransactionInterface $transaction,
         Order $order
-    ) {
+    )
+    {
         $this->saveRefundTransaction($loadResult, $amount, $transaction, $order);
         $this->saveTransaction($loadResult, $amount, $transaction, $order);
         $this->updateOrderOnRefund($loadResult, $amount, $transaction, $order);
@@ -282,7 +288,8 @@ class Refunds extends Data
         $amount,
         TransactionInterface $transaction,
         Order $order
-    ) {
+    )
+    {
         /** @var RefundTransactionInterface $refund */
         $refund = $this->refundTransactionFactory->create();
 
@@ -310,7 +317,8 @@ class Refunds extends Data
         $amount,
         TransactionInterface $transaction,
         Order $order
-    ) {
+    )
+    {
         $parent = $transaction;
 
         /** @var Order\Payment|null */
@@ -347,10 +355,10 @@ class Refunds extends Data
     }
 
     /**
-     * @param array                $loadResult
-     * @param float                $amount
+     * @param array $loadResult
+     * @param float $amount
      * @param TransactionInterface $transaction
-     * @param Order                $order
+     * @param Order $order
      *
      * @return void
      */

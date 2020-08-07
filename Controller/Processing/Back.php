@@ -16,7 +16,6 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
-use Psr\Log\LoggerInterface;
 
 /**
  * Controller for returning user

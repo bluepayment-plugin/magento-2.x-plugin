@@ -3,19 +3,18 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
+use BlueMedia\BluePayment\Logger\Logger;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Data extends \Magento\Payment\Helper\Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
-    const MESSAGE_ID_STRING_LENGTH      = 32;
+    const MESSAGE_ID_STRING_LENGTH = 32;
 
     /**
      * Logger
@@ -25,20 +24,21 @@ class Data extends \Magento\Payment\Helper\Data
     public $logger;
 
     /**
-     * @var \BlueMedia\BluePayment\Api\Client
+     * @var Client
      */
     public $apiClient;
 
     /**
      * Gateways constructor.
      *
-     * @param \Magento\Framework\App\Helper\Context   $context
-     * @param \Magento\Framework\View\LayoutFactory   $layoutFactory
-     * @param \Magento\Payment\Model\Method\Factory   $paymentMethodFactory
-     * @param \Magento\Store\Model\App\Emulation      $appEmulation
-     * @param \Magento\Payment\Model\Config           $paymentConfig
-     * @param \Magento\Framework\App\Config\Initial   $initialConfig
-     * @param \BlueMedia\BluePayment\Api\Client $apiClient
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param Client $apiClient
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
@@ -47,8 +47,10 @@ class Data extends \Magento\Payment\Helper\Data
         Emulation $appEmulation,
         Config $paymentConfig,
         Initial $initialConfig,
-        Client $apiClient
-    ) {
+        Client $apiClient,
+        Logger $logger
+    )
+    {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -58,11 +60,10 @@ class Data extends \Magento\Payment\Helper\Data
             $initialConfig
         );
 
-        $writer = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
         $this->apiClient = $apiClient;
+        $this->logger = $logger;
     }
+
 
     /**
      * @param array $data
@@ -71,13 +72,13 @@ class Data extends \Magento\Payment\Helper\Data
      */
     public function generateAndReturnHash($data)
     {
-        $algorithm           = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
-        $separator           = $this->scopeConfig->getValue("payment/bluepayment/hash_separator");
-        $values_array        = array_values($data);
+        $algorithm = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+        $separator = $this->scopeConfig->getValue("payment/bluepayment/hash_separator");
+        $values_array = array_values($data);
         $values_array_filter = array_filter(($values_array));
-        $comma_separated     = implode(",", $values_array_filter);
-        $replaced            = str_replace(",", $separator, $comma_separated);
-        $hash                = hash($algorithm, $replaced);
+        $comma_separated = implode(",", $values_array_filter);
+        $replaced = str_replace(",", $separator, $comma_separated);
+        $hash = hash($algorithm, $replaced);
 
         return $hash;
     }

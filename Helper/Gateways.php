@@ -4,6 +4,7 @@ namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Exception;
@@ -14,14 +15,12 @@ use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
 use SimpleXMLElement;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Gateways extends Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
-    const MESSAGE_ID_STRING_LENGTH      = 32;
-    const UPLOAD_PATH                   = '/BlueMedia/';
+    const MESSAGE_ID_STRING_LENGTH = 32;
+    const UPLOAD_PATH = '/BlueMedia/';
 
     /** @var array Available currencies */
     public static $currencies = [
@@ -47,15 +46,17 @@ class Gateways extends Data
     /**
      * Gateways constructor.
      *
-     * @param Context           $context
-     * @param LayoutFactory     $layoutFactory
-     * @param Factory           $paymentMethodFactory
-     * @param Emulation         $appEmulation
-     * @param Config            $paymentConfig
-     * @param Initial           $initialConfig
-     * @param GatewaysFactory   $gatewaysFactory
-     * @param Client            $apiClient
-     * @param EmailHelper       $emailHelper
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param GatewaysFactory $gatewaysFactory
+     * @param Client $apiClient
+     * @param Logger $logger
+     * @param EmailHelper $emailHelper
+     * @param Collection $collection
      */
     public function __construct(
         Context $context,
@@ -66,9 +67,11 @@ class Gateways extends Data
         Initial $initialConfig,
         GatewaysFactory $gatewaysFactory,
         Client $apiClient,
+        Logger $logger,
         EmailHelper $emailHelper,
         Collection $collection
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -76,15 +79,14 @@ class Gateways extends Data
             $appEmulation,
             $paymentConfig,
             $initialConfig,
-            $apiClient
+            $apiClient,
+            $logger
         );
 
-        $writer  = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
         $this->gatewaysFactory = $gatewaysFactory;
         $this->emailHelper = $emailHelper;
         $this->collection = $collection;
+        $this->logger = $logger;
     }
 
     /**
@@ -92,14 +94,14 @@ class Gateways extends Data
      */
     public function syncGateways()
     {
-        $result            = [];
-        $hashMethod        = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+        $result = [];
+        $hashMethod = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
         $gatewayListAPIUrl = $this->getGatewayListUrl();
 
         foreach (self::$currencies as $currency) {
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
+            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
             $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-            $hashKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+            $hashKey = $this->scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
 
             if ($serviceId) {
                 $tryCount = 0;
@@ -154,11 +156,11 @@ class Gateways extends Data
      */
     private function loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl)
     {
-        $hash   = hash($hashMethod, $serviceId . '|' . $messageId . '|' . $hashKey);
-        $data   = [
+        $hash = hash($hashMethod, $serviceId . '|' . $messageId . '|' . $hashKey);
+        $data = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
-            'Hash'      => $hash,
+            'Hash' => $hash,
         ];
 
         try {
@@ -173,12 +175,12 @@ class Gateways extends Data
     /**
      * @param array $gatewayList
      * @param string $currency
-     * 
+     *
      * @return bool
      */
     public function saveGateways($gatewayList, $currency = 'PLN')
     {
-        $existingGateways          = $this->getSimpleGatewaysList();
+        $existingGateways = $this->getSimpleGatewaysList();
         $currentlyActiveGatewayIDs = [];
 
         if (isset($gatewayList['gateway'])) {
@@ -234,7 +236,7 @@ class Gateways extends Data
                         $gatewayModel->save();
                         $disabledGateways[] = [
                             'gateway_name' => $existingGatewayData['gateway_name'],
-                            'gateway_id'   => $existingGatewayId,
+                            'gateway_id' => $existingGatewayId,
                         ];
                     } catch (Exception $e) {
                         $this->logger->info($e->getMessage());
@@ -265,18 +267,18 @@ class Gateways extends Data
 
         foreach ($bluegatewaysCollection as $blueGateways) {
             $existingGateways[$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
-                'entity_id'           => $blueGateways->getId(),
-                'gateway_currency'    => $blueGateways->getData('gateway_currency'),
-                'gateway_status'      => $blueGateways->getData('gateway_status'),
-                'bank_name'           => $blueGateways->getData('bank_name'),
-                'gateway_name'        => $blueGateways->getData('gateway_name'),
+                'entity_id' => $blueGateways->getId(),
+                'gateway_currency' => $blueGateways->getData('gateway_currency'),
+                'gateway_status' => $blueGateways->getData('gateway_status'),
+                'bank_name' => $blueGateways->getData('bank_name'),
+                'gateway_name' => $blueGateways->getData('gateway_name'),
                 'gateway_description' => $blueGateways->getData('gateway_description'),
-                'gateway_sort_order'  => $blueGateways->getData('gateway_sort_order'),
-                'gateway_type'        => $blueGateways->getData('gateway_type'),
-                'gateway_logo_url'    => $blueGateways->getData('gateway_logo_url'),
-                'use_own_logo'        => $blueGateways->getData('use_own_logo'),
-                'gateway_logo_path'   => $blueGateways->getData('gateway_logo_path'),
-                'status_date'         => $blueGateways->getData('status_date'),
+                'gateway_sort_order' => $blueGateways->getData('gateway_sort_order'),
+                'gateway_type' => $blueGateways->getData('gateway_type'),
+                'gateway_logo_url' => $blueGateways->getData('gateway_logo_url'),
+                'use_own_logo' => $blueGateways->getData('use_own_logo'),
+                'gateway_logo_path' => $blueGateways->getData('gateway_logo_path'),
+                'status_date' => $blueGateways->getData('status_date'),
             ];
         }
 
