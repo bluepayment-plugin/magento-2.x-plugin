@@ -4,6 +4,7 @@ namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
+use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use Exception;
 use Magento\Backend\App\Action\Context;
@@ -20,20 +21,23 @@ class Save extends Gateways
     /**
      * Save constructor.
      *
-     * @param Context         $context
-     * @param Registry        $coreRegistry
-     * @param PageFactory     $resultPageFactory
+     * @param Context $context
+     * @param Registry $coreRegistry
+     * @param PageFactory $resultPageFactory
      * @param GatewaysFactory $gatewaysFactory
-     * @param EmailHelper     $emailHelper
+     * @param Logger $logger
+     * @param EmailHelper $emailHelper
      */
     public function __construct(
         Context $context,
         Registry $coreRegistry,
         PageFactory $resultPageFactory,
         GatewaysFactory $gatewaysFactory,
+        Logger $logger,
         EmailHelper $emailHelper
-    ) {
-        parent::__construct($context, $coreRegistry, $resultPageFactory, $gatewaysFactory);
+    )
+    {
+        parent::__construct($context, $coreRegistry, $resultPageFactory, $gatewaysFactory, $logger);
         $this->emailHelper = $emailHelper;
     }
 
@@ -49,9 +53,9 @@ class Save extends Gateways
 
         if ($isPost) {
             $gatewaysModel = $this->gatewaysFactory->create();
-            $gatewaysId    = (int)$this->getRequest()->getParam('id', 0);
+            $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
 
-            $formData              = $this->getRequest()->getParam('gateways');
+            $formData = $this->getRequest()->getParam('gateways');
             $formData['entity_id'] = (int)$formData['id'];
 
             if ($gatewaysId) {
@@ -68,7 +72,7 @@ class Save extends Gateways
                 $disabledGateways = [
                     [
                         'gateway_name' => $gatewaysModel->getData('gateway_name'),
-                        'gateway_id'   => $gatewaysModel->getData('gateway_id'),
+                        'gateway_id' => $gatewaysModel->getData('gateway_id'),
                     ],
                 ];
                 $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);

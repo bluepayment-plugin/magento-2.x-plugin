@@ -7,8 +7,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
+use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Class Gateways
@@ -30,25 +29,25 @@ abstract class Gateways extends Action
     public $logger;
 
     /**
-     * @param Context         $context
-     * @param Registry        $coreRegistry
-     * @param PageFactory     $resultPageFactory
+     * @param Context $context
+     * @param Registry $coreRegistry
+     * @param PageFactory $resultPageFactory
      * @param GatewaysFactory $gatewaysFactory
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
         Registry $coreRegistry,
         PageFactory $resultPageFactory,
-        GatewaysFactory $gatewaysFactory
-    ) {
+        GatewaysFactory $gatewaysFactory,
+        Logger $logger
+    )
+    {
         parent::__construct($context);
-        $this->coreRegistry      = $coreRegistry;
+        $this->coreRegistry = $coreRegistry;
         $this->resultPageFactory = $resultPageFactory;
-        $this->gatewaysFactory   = $gatewaysFactory;
-
-        $writer = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
+        $this->gatewaysFactory = $gatewaysFactory;
+        $this->logger = $logger;
     }
 
     /**

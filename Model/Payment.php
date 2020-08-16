@@ -612,6 +612,8 @@ class Payment extends AbstractMethod
 
         $remoteId = $transaction->remoteID;
         $orderId = $transaction->orderID;
+        $gatewayId = $transaction->gatewayID;
+
         /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
 
@@ -667,6 +669,10 @@ class Payment extends AbstractMethod
                     default:
                         break;
                 }
+
+                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
+                $orderPayment->save();
             } else {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
@@ -680,11 +686,11 @@ class Payment extends AbstractMethod
                 )
                     ->save();
             }
+
             if (!$order->getEmailSent()) {
                 $this->sender->send($order);
             }
-            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-            $orderPayment->save();
+
             return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (Exception $e) {
             $this->_logger->critical($e);

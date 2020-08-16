@@ -3,8 +3,7 @@
 namespace BlueMedia\BluePayment\Cron;
 
 use BlueMedia\BluePayment\Helper\Gateways;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
+use BlueMedia\BluePayment\Logger\Logger;
 
 /**
  * Gateway synchronization CRON Job
@@ -24,13 +23,10 @@ class Synchronization
      *
      * @param Gateways $gatewayHelper
      */
-    public function __construct(Gateways $gatewayHelper)
+    public function __construct(Gateways $gatewayHelper, Logger $logger)
     {
-        $writer = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
-
         $this->gatewayHelper = $gatewayHelper;
+        $this->logger = $logger;
     }
 
     /**

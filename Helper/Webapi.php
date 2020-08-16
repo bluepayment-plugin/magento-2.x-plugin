@@ -3,8 +3,7 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
-use BlueMedia\BluePayment\Api\Data\TransactionInterface;
-use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
+use BlueMedia\BluePayment\Logger\Logger;
 use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
@@ -39,7 +38,9 @@ class Webapi extends Data
      * @param Config $paymentConfig
      * @param Initial $initialConfig
      * @param Client $apiClient
+     * @param Logger $logger
      * @param StoreManagerInterface $storeManager
+     * @param Http $zendUri
      * @parama Http $zendUri
      */
     public function __construct(
@@ -50,9 +51,11 @@ class Webapi extends Data
         Config $paymentConfig,
         Initial $initialConfig,
         Client $apiClient,
+        Logger $logger,
         StoreManagerInterface $storeManager,
         Http $zendUri
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -60,7 +63,8 @@ class Webapi extends Data
             $appEmulation,
             $paymentConfig,
             $initialConfig,
-            $apiClient
+            $apiClient,
+            $logger
         );
 
         $this->storeManager = $storeManager;
@@ -75,7 +79,7 @@ class Webapi extends Data
         /** @var Store $store */
         $store = $this->storeManager->getStore();
 
-        $hashMethod   = $this->getConfigValue('hash_algorithm');
+        $hashMethod = $this->getConfigValue('hash_algorithm');
         $GPayMerchantInfoURL = $this->getGPayMerchantInfoURL();
 
         $url = $store->getBaseUrl();
@@ -108,10 +112,10 @@ class Webapi extends Data
     public function getConfigValue($name, $currency = null)
     {
         if ($currency) {
-            return $this->scopeConfig->getValue('payment/bluepayment/'.strtolower($currency).'/'.$name);
+            return $this->scopeConfig->getValue('payment/bluepayment/' . strtolower($currency) . '/' . $name);
         }
 
-        return $this->scopeConfig->getValue('payment/bluepayment/'.$name);
+        return $this->scopeConfig->getValue('payment/bluepayment/' . $name);
     }
 
     /**
@@ -143,7 +147,7 @@ class Webapi extends Data
         ];
         $hashSeparator = $this->getConfigValue('hash_separator') ? $this->getConfigValue('hash_separator') :
             self::DEFAULT_HASH_SEPARATOR;
-        $data['Hash']  = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
+        $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
 
         try {
             return (array)$this->apiClient->callJson($apiUrl, $data);
