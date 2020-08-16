@@ -139,6 +139,10 @@ class Create extends Action
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
 
+            // Set Gateway ID to Order Payment
+            $orderPayment = $order->getPayment();
+            $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
+
             /** @var Json $resultJson */
             $resultJson = $this->resultJsonFactory->create();
 

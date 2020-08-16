@@ -612,6 +612,8 @@ class Payment extends AbstractMethod
 
         $remoteId = $transaction->remoteID;
         $orderId = $transaction->orderID;
+        $gatewayId = $transaction->gatewayID;
+
         /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
 
@@ -669,6 +671,7 @@ class Payment extends AbstractMethod
                 }
 
                 $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
                 $orderPayment->save();
             } else {
                 $orderComment =
