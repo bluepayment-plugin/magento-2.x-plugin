@@ -8,6 +8,7 @@ use Magento\Backend\Model\Auth\Session;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Translate\Inline\StateInterface;

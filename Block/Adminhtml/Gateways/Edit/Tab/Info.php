@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit\Tab;
 
 use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Gateways;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Form;
@@ -94,7 +95,14 @@ class Info extends Generic implements TabInterface
         $fieldset->addField('gateway_status', 'select', [
             'name'     => 'gateway_status',
             'label'    => __('Gateway Status'),
-            'required' => true,
+            'required' => false,
+            'disabled' => true,
+            'options'  => ['1' => __('Yes'), '0' => __('No')],
+        ]);
+        $fieldset->addField('force_disable', 'select', [
+            'name'     => 'force_disable',
+            'label'    => __('Force Disable'),
+            'required' => false,
             'options'  => ['1' => __('Yes'), '0' => __('No')],
         ]);
         $fieldset->addField('gateway_currency', 'text', [
@@ -136,12 +144,27 @@ class Info extends Generic implements TabInterface
             'required' => true,
             'disabled' => true,
         ]);
-        $fieldset->addField('is_separated_method', 'select', [
-            'name'     => 'is_separated_method',
-            'label'    => __('Is separated method'),
-            'required' => false,
-            'options'  => ['1' => __('Yes'), '0' => __('No')],
-        ]);
+
+        if (in_array($model->getGatewayId(), [
+            ConfigProvider::AUTOPAY_GATEWAY_ID,
+            ConfigProvider::GPAY_GATEWAY_ID,
+            ConfigProvider::APPLE_PAY_GATEWAY_ID
+        ])) {
+            $fieldset->addField('is_separated_method', 'select', [
+                'name' => 'is_separated_method',
+                'label' => __('Is separated method'),
+                'required' => false,
+                'disabled' => true,
+                'options' => ['1' => __('Yes'), '0' => __('No')],
+            ]);
+        } else {
+            $fieldset->addField('is_separated_method', 'select', [
+                'name' => 'is_separated_method',
+                'label' => __('Is separated method'),
+                'required' => false,
+                'options' => ['1' => __('Yes'), '0' => __('No')],
+            ]);
+        }
         $fieldset->addField('gateway_logo_url', 'text', [
             'name'     => 'gateway_logo_url',
             'label'    => __('Gateway Logo URL'),
@@ -166,12 +189,6 @@ class Info extends Generic implements TabInterface
             'label'       => __('Status Date'),
             'required'    => false,
             'disabled'    => true,
-        ]);
-        $fieldset->addField('force_disable', 'select', [
-            'name'     => 'force_disable',
-            'label'    => __('Force Disable Gateway'),
-            'required' => false,
-            'options'  => ['1' => __('Yes'), '0' => __('No')],
         ]);
 
         $data = $model->getData();

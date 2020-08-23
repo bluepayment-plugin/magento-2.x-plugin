@@ -131,6 +131,7 @@ class Back extends Action
                     ->setLastRealOrderId($order->getRealOrderId())
                     ->setLastOrderId($order->getId())
                     ->setLastQuoteId($order->getQuoteId())
+                    ->setLastSuccessQuoteId($order->getQuoteId())
                     ->setQuoteId($order->getQuoteId());
 
                 if ($hash == $hashLocal) {
