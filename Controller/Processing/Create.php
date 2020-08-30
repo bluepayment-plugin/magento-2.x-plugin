@@ -139,10 +139,6 @@ class Create extends Action
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
 
-            // Set Gateway ID to Order Payment
-            $orderPayment = $order->getPayment();
-            $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
-
             /** @var Json $resultJson */
             $resultJson = $this->resultJsonFactory->create();
 
@@ -173,8 +169,15 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
                 $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
 
-                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment)->save();
+                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment);
             }
+
+            // Set additional informations to order payment
+            $orderPayment = $order->getPayment();
+            $orderPayment->setAdditionalInformation('bluepayment_state', 'PENDING');
+            $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
+            $orderPayment->save();
+
 
             if ($order->getCanSendNewEmailFlag()) {
                 $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
@@ -306,7 +309,6 @@ class Create extends Action
 
                 if ($result['redirectUrl'] !== null) {
                     // 3DS
-
                     $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
 
                     /** @var Http $response */
