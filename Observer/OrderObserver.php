@@ -21,7 +21,7 @@ class OrderObserver implements ObserverInterface
     public function execute(Observer $observer)
     {
         /** @var DataObject $transport */
-        $transport = $observer->getEvent()->getTransport();
+        $transport = $observer->getEvent()->getData('transportObject');
         /** @var Order $order */
         $order = $transport->getData('order');
         /** @var Order\Payment $payment */
