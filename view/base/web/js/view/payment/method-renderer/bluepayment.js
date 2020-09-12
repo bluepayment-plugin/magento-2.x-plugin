@@ -34,7 +34,9 @@ define([
             bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
             bluePaymentCards: window.checkoutConfig.payment.bluePaymentCards,
             bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluePaymentAutopayAgreement,
-            bluePaymentCollapsible: window.checkoutConfig.payment.bluePaymentCollapsible === '1',
+            bluePaymentCollapsible:
+                window.checkoutConfig.payment.bluePaymentCollapsible === '1'
+                && window.checkoutConfig.payment.bluePaymentOptions.length > 8,
             selectedPaymentObject: {},
             selectedAutopayGatewayIndex: null,
             validationFailed: ko.observable(false),
