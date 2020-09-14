@@ -1,7 +1,0 @@
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- Sale order grid -->
-    <type name="Magento\Sales\Model\ResourceModel\Order\Grid\Collection">
-        <plugin name="bluepay_sales_order_grid" type="BlueMedia\BluePayment\Plugin\SalesOrderGrid" />
-    </type>
-</config>

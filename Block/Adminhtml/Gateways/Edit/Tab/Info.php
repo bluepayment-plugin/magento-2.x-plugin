@@ -105,6 +105,12 @@ class Info extends Generic implements TabInterface
             'required' => false,
             'options'  => ['1' => __('Yes'), '0' => __('No')],
         ]);
+        $fieldset->addField('gateway_service_id', 'text', [
+            'name'     => 'gateway_service_id',
+            'label'    => __('Gateway Service ID'),
+            'required' => true,
+            'disabled' => true,
+        ]);
         $fieldset->addField('gateway_currency', 'text', [
             'name'     => 'gateway_currency',
             'label'    => __('Gateway Currency'),

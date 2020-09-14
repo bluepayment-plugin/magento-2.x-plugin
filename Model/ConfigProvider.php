@@ -10,6 +10,9 @@ use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Api\Data\WebsiteInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
@@ -25,7 +28,7 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var array */
     private $activeGateways = [];
 
-    /** @var Form  */
+    /** @var Form */
     private $block;
 
     /** @var PriceCurrencyInterface */
@@ -34,7 +37,7 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var Logger */
     private $logger;
 
-    /** @var ScopeConfigInterface  */
+    /** @var ScopeConfigInterface */
     private $scopeConfig;
 
     /** @var Session */
@@ -42,6 +45,9 @@ class ConfigProvider implements ConfigProviderInterface
 
     /** @var CardCollectionFactory */
     private $cardCollectionFactory;
+
+    /** @var StoreManagerInterface */
+    private $storeManager;
 
     /** @var array */
     private $defaultSortOrder = [
@@ -106,8 +112,9 @@ class ConfigProvider implements ConfigProviderInterface
      * @param PriceCurrencyInterface $priceCurrency
      * @param Logger $logger
      * @param ScopeConfigInterface $scopeConfig
-     * @param Session $session,
+     * @param Session $session ,
      * @param CardCollectionFactory $cardCollectionFactory
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         GatewaysCollection $gatewaysCollection,
@@ -116,8 +123,10 @@ class ConfigProvider implements ConfigProviderInterface
         Logger $logger,
         ScopeConfigInterface $scopeConfig,
         Session $session,
-        CardCollectionFactory $cardCollectionFactory
-    ) {
+        CardCollectionFactory $cardCollectionFactory,
+        StoreManagerInterface $storeManager
+    )
+    {
         $this->gatewaysCollection = $gatewaysCollection;
         $this->block = $block;
         $this->priceCurrency = $priceCurrency;
@@ -125,6 +134,7 @@ class ConfigProvider implements ConfigProviderInterface
         $this->scopeConfig = $scopeConfig;
         $this->session = $session;
         $this->cardCollectionFactory = $cardCollectionFactory;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -145,10 +155,18 @@ class ConfigProvider implements ConfigProviderInterface
         $currency = $this->getCurrentCurrencyCode();
 
         if (!isset($this->activeGateways[$currency])) {
-            $resultSeparated         = [];
-            $result                  = [];
+            $resultSeparated = [];
+            $result = [];
+
+            $websiteCode = $this->storeManager->getWebsite()->getCode();
+            $serviceId = $this->scopeConfig->getValue(
+                'payment/bluepayment/' . strtolower($currency) . '/service_id',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
 
             $gatewaysCollection = $this->gatewaysCollection
+                ->addFilter('gateway_service_id', $serviceId)
                 ->addFilter('gateway_currency', $currency)
                 ->load();
 
@@ -158,9 +176,9 @@ class ConfigProvider implements ConfigProviderInterface
                     // AutoPay only for logger users
                     if ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->session->isLoggedIn()) {
                         if ($gateway->getIsSeparatedMethod()) {
-                            $resultSeparated[] = $this->prepareGatewayStructure($gateway);
+                            $resultSeparated[] = $this->prepareGatewayStructure($gateway, $websiteCode);
                         } else {
-                            $result[] = $this->prepareGatewayStructure($gateway);
+                            $result[] = $this->prepareGatewayStructure($gateway, $websiteCode);
                         }
                     }
                 }
@@ -173,16 +191,104 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentTestMode' => $this->scopeConfig->getValue("payment/bluepayment/test_mode"),
+                'bluePaymentTestMode' => $this->scopeConfig->getValue(
+                    'payment/bluepayment/test_mode',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                ),
                 'bluePaymentCards' => $this->prepareCards(),
-                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue("payment/bluepayment/autopay_agreement"),
-                'bluePaymentCollapsible' => $this->scopeConfig->getValue("payment/bluepayment/collapsible")
+                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue(
+                    'payment/bluepayment/autopay_agreement',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                ),
+                'bluePaymentCollapsible' => $this->scopeConfig->getValue(
+                    'payment/bluepayment/collapsible',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                )
             ];
 
             $this->activeGateways[$currency] = $activeGateways;
         }
 
         return $this->activeGateways[$currency];
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentCurrencyCode()
+    {
+        return $this->priceCurrency->getCurrency()->getCurrencyCode();
+    }
+
+    /**
+     * @param Gateways $gateway
+     *
+     * @param string $websiteCode
+     * @return array
+     */
+    private function prepareGatewayStructure($gateway, string $websiteCode)
+    {
+        $logoUrl = $gateway->getGatewayLogoUrl();
+        if ((int)$gateway->getUseOwnLogo()) {
+            $logoUrl = $gateway->getGatewayLogoPath();
+        }
+
+        $name = $gateway->getGatewayName();
+        $isIframe = false;
+        $isBlik = false;
+        $isGPay = false;
+        $isAutopay = false;
+        $isApplePay = false;
+
+        switch ($gateway->getGatewayId()) {
+            case self::IFRAME_GATEWAY_ID:
+                if ($this->scopeConfig->getValue(
+                    'payment/bluepayment/iframe_payment',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                )) {
+                    $isIframe = true;
+                }
+                break;
+            case self::AUTOPAY_GATEWAY_ID:
+                $isAutopay = true;
+                if ($this->scopeConfig->getValue(
+                    'payment/bluepayment/iframe_payment',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                )) {
+                    $isIframe = true;
+                }
+                break;
+            case self::BLIK_GATEWAY_ID:
+                $isBlik = true;
+                break;
+            case self::GPAY_GATEWAY_ID:
+                $isGPay = true;
+                break;
+            case self::APPLE_PAY_GATEWAY_ID:
+                $isApplePay = true;
+                break;
+        }
+
+        return [
+            'gateway_id' => $gateway->getGatewayId(),
+            'name' => $name,
+            'bank' => $gateway->getBankName(),
+            'description' => $gateway->getGatewayDescription(),
+            'sort_order' => $gateway->getGatewaySortOrder(),
+            'type' => $gateway->getGatewayType(),
+            'logo_url' => $logoUrl,
+            'is_separated_method' => $gateway->getIsSeparatedMethod(),
+            'is_iframe' => $isIframe,
+            'is_blik' => $isBlik,
+            'is_gpay' => $isGPay,
+            'is_autopay' => $isAutopay,
+            'is_apple_pay' => $isApplePay
+        ];
     }
 
     /**
@@ -224,73 +330,6 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param Gateways $gateway
-     *
-     * @return array
-     */
-    private function prepareGatewayStructure($gateway)
-    {
-        $logoUrl = $gateway->getGatewayLogoUrl();
-        if ((int)$gateway->getUseOwnLogo()) {
-            $logoUrl = $gateway->getGatewayLogoPath();
-        }
-
-        $name = $gateway->getGatewayName();
-        $isIframe = false;
-        $isBlik = false;
-        $isGPay = false;
-        $isAutopay = false;
-        $isApplePay = false;
-
-        switch ($gateway->getGatewayId()) {
-            case self::IFRAME_GATEWAY_ID:
-                if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')) {
-                    $isIframe = true;
-                }
-                break;
-            case self::AUTOPAY_GATEWAY_ID:
-                $isAutopay = true;
-                if ($this->scopeConfig->getValue('payment/bluepayment/iframe_payment')) {
-                    $isIframe = true;
-                }
-                break;
-            case self::BLIK_GATEWAY_ID:
-                $isBlik = true;
-                break;
-            case self::GPAY_GATEWAY_ID:
-                $isGPay = true;
-                break;
-            case self::APPLE_PAY_GATEWAY_ID:
-                $isApplePay = true;
-                break;
-        }
-
-        return [
-            'gateway_id'          => $gateway->getGatewayId(),
-            'name'                => $name,
-            'bank'                => $gateway->getBankName(),
-            'description'         => $gateway->getGatewayDescription(),
-            'sort_order'          => $gateway->getGatewaySortOrder(),
-            'type'                => $gateway->getGatewayType(),
-            'logo_url'            => $logoUrl,
-            'is_separated_method' => $gateway->getIsSeparatedMethod(),
-            'is_iframe'           => $isIframe,
-            'is_blik'             => $isBlik,
-            'is_gpay'             => $isGPay,
-            'is_autopay'          => $isAutopay,
-            'is_apple_pay'        => $isApplePay
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrentCurrencyCode()
-    {
-        return $this->priceCurrency->getCurrency()->getCurrencyCode();
-    }
-
-    /**
      * @return array
      */
     private function prepareCards()
@@ -299,7 +338,7 @@ class ConfigProvider implements ConfigProviderInterface
 
         /** @var Card[] $cards */
         $cards = $collection
-            ->addFieldToFilter('customer_id', (string) $this->session->getCustomerId())
+            ->addFieldToFilter('customer_id', (string)$this->session->getCustomerId())
             ->load();
 
         $return = [];
@@ -311,7 +350,7 @@ class ConfigProvider implements ConfigProviderInterface
                     'number' => $card->getNumber(),
                     'issuer' => $card->getIssuer(),
                     'logo' => $this->block->getViewFileUrl(
-                        'BlueMedia_BluePayment::images/'.strtolower($card->getIssuer()) .'.png'
+                        'BlueMedia_BluePayment::images/' . strtolower($card->getIssuer()) . '.png'
                     ),
                 ];
             }

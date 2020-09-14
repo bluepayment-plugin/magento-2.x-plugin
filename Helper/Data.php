@@ -10,6 +10,8 @@ use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends \Magento\Payment\Helper\Data
 {
@@ -23,10 +25,11 @@ class Data extends \Magento\Payment\Helper\Data
      */
     public $logger;
 
-    /**
-     * @var Client
-     */
+    /** @var Client */
     public $apiClient;
+
+    /** StoreManagerInterface $storeManager */
+    public $storeManager;
 
     /**
      * Gateways constructor.
@@ -39,6 +42,7 @@ class Data extends \Magento\Payment\Helper\Data
      * @param Initial $initialConfig
      * @param Client $apiClient
      * @param Logger $logger
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         Context $context,
@@ -48,9 +52,9 @@ class Data extends \Magento\Payment\Helper\Data
         Config $paymentConfig,
         Initial $initialConfig,
         Client $apiClient,
-        Logger $logger
-    )
-    {
+        Logger $logger,
+        StoreManagerInterface $storeManager
+    ) {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -62,6 +66,7 @@ class Data extends \Magento\Payment\Helper\Data
 
         $this->apiClient = $apiClient;
         $this->logger = $logger;
+        $this->storeManager = $storeManager;
     }
 
 
@@ -72,8 +77,18 @@ class Data extends \Magento\Payment\Helper\Data
      */
     public function generateAndReturnHash($data)
     {
-        $algorithm = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
-        $separator = $this->scopeConfig->getValue("payment/bluepayment/hash_separator");
+        $websiteCode = $this->storeManager->getWebsite()->getCode();
+
+        $algorithm = $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_algorithm',
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteCode
+        );
+        $separator = $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_separator',
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteCode
+        );
         $values_array = array_values($data);
         $values_array_filter = array_filter(($values_array));
         $comma_separated = implode(",", $values_array_filter);

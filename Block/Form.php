@@ -34,22 +34,6 @@ class Form extends \Magento\Payment\Block\Form
     }
 
     /**
-     * @return array|Collection
-     */
-    public function getGatewaysList()
-    {
-        if (!$this->gatewayList) {
-            $this->gatewayList = $this->collectionFactory->create();
-            $this->gatewayList
-                ->addFieldToFilter('gateway_status', (string)1)
-                ->addFieldToFilter('force_disable', (string)0)
-                ->load();
-        }
-
-        return $this->gatewayList;
-    }
-
-    /**
      * Zwraca adres do logo firmy
      *
      * @return string|bool

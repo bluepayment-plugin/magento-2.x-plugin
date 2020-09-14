@@ -182,26 +182,18 @@ class Email extends AbstractHelper
      *
      * @return mixed
      */
-    protected function getConfigValue($path, $storeId)
+    protected function getConfigValue($path)
     {
         return $this->scopeConfig->getValue(
             $path,
             ScopeInterface::SCOPE_STORE,
-            $storeId
+            $this->getWebsiteCode()
         );
     }
 
-    /**
-     * Get Store
-     *
-     * @return Store
-     */
-    public function getStore()
+    public function getWebsiteCode()
     {
-        /** @var Store $store */
-        $store = $this->storeManager->getStore();
-
-        return $store;
+        return $this->storeManager->getWebsite()->getCode();
     }
 
     /**
@@ -211,10 +203,7 @@ class Email extends AbstractHelper
      */
     public function getSenderName()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD);
     }
 
     /**
@@ -224,10 +213,7 @@ class Email extends AbstractHelper
      */
     public function getSenderEmail()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD);
     }
 
     /**
@@ -237,10 +223,7 @@ class Email extends AbstractHelper
      */
     public function getTemplateId()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD);
     }
 
     /**
@@ -248,10 +231,7 @@ class Email extends AbstractHelper
      */
     public function isSendingEnabled()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD);
     }
 
     /**

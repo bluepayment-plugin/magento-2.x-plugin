@@ -11,6 +11,7 @@ use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend\Uri\Http;
@@ -21,9 +22,6 @@ use Zend\Uri\Http;
 class Webapi extends Data
 {
     const DEFAULT_HASH_SEPARATOR = '|';
-
-    /** @var StoreManagerInterface */
-    public $storeManager;
 
     /** @var Http */
     public $zendUri;
@@ -64,10 +62,10 @@ class Webapi extends Data
             $paymentConfig,
             $initialConfig,
             $apiClient,
-            $logger
+            $logger,
+            $storeManager
         );
 
-        $this->storeManager = $storeManager;
         $this->zendUri = $zendUri;
     }
 
@@ -87,7 +85,7 @@ class Webapi extends Data
 
         $currency = $store->getCurrentCurrency()->getCode();
 
-        if ($currency == 'PLN') {
+        if (in_array($currency, ['PLN', 'EUR'])) {
             $serviceId = $this->getConfigValue('service_id', $currency);
             $sharedKey = $this->getConfigValue('shared_key', $currency);
 
@@ -111,11 +109,21 @@ class Webapi extends Data
      */
     public function getConfigValue($name, $currency = null)
     {
+        $website = $this->storeManager->getWebsite();
+
         if ($currency) {
-            return $this->scopeConfig->getValue('payment/bluepayment/' . strtolower($currency) . '/' . $name);
+            return $this->scopeConfig->getValue(
+                'payment/bluepayment/' . strtolower($currency) . '/' . $name,
+                ScopeInterface::SCOPE_WEBSITE,
+                $website->getCode()
+            );
         }
 
-        return $this->scopeConfig->getValue('payment/bluepayment/' . $name);
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . $name,
+            ScopeInterface::SCOPE_WEBSITE,
+            $website->getCode()
+        );
     }
 
     /**

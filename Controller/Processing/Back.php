@@ -16,6 +16,7 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Controller for returning user
@@ -107,13 +108,22 @@ class Back extends Action
             /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             $currency = strtolower($order->getOrderCurrencyCode());
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             /** @var Order\Payment $payment */
             $payment = $order->getPayment();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/" . $currency . "/service_id");
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/" . $currency . "/shared_key");
+                $serviceId = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . $currency . '/service_id',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
+                $sharedKey = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . $currency . '/shared_key',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
 
                 $hashData = [$serviceId, $orderId, $sharedKey];
 

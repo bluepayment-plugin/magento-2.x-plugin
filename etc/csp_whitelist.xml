@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 	xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="img-src">
+            <values>
+                <value id="img_bm" type="host">platnosci.bm.pl</value>
+            </values>
+        </policy>
+        <policy id="script-src">
+            <values>
+                <value id="script_bm_cards_accept" type="host">cards-accept.bm.pl</value>
+                <value id="script_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="script_gpay" type="host">pay.google.com</value>
+            </values>
+        </policy>
+        <policy id="frame-src">
+            <values>
+                <value id="frame_gpay" type="host">pay.google.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

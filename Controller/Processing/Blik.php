@@ -15,6 +15,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -92,10 +93,18 @@ class Blik extends Action
             /** @var Order $order */
             $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
             $hash       = $this->getRequest()->getParam('Hash');
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             $currency   = strtolower($order->getOrderCurrencyCode());
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/service_id");
-            $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/shared_key");
+            $serviceId = $this->scopeConfig->getValue(
+                'payment/bluepayment/' . $currency . '/service_id',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $sharedKey = $this->scopeConfig->getValue(
+                'payment/bluepayment/' . $currency . '/shared_key',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode);
 
             $hashData  = [$serviceId, $orderId, $sharedKey];
             $hashLocal = $this->helper->generateAndReturnHash($hashData);
@@ -137,8 +146,16 @@ class Blik extends Action
             $status = $payment->getAdditionalInformation('bluepayment_state');
 
             // Get ServiceID and SharedKey for order currency
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
-            $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
+            $serviceId = $this->scopeConfig->getValue(
+                'payment/bluepayment/' . strtolower($currency) . '/service_id',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $sharedKey = $this->scopeConfig->getValue(
+                'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
 
             // Generate hash
             $hashData = [$serviceId, $orderId, $sharedKey];

@@ -540,7 +540,7 @@ define([
                         self.GPayMerchantInfo = response.merchantInfo;
                         self.bluePaymentAcceptorId = response.acceptorId.toString();
 
-                        self.GPayClient = self.GPayClient = new google.payments.api.PaymentsClient({
+                        self.GPayClient = new google.payments.api.PaymentsClient({
                             environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
                         });
                         self.GPayClient.isReadyToPay({

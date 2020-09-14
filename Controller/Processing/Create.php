@@ -7,6 +7,7 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -17,10 +18,12 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\HTTP\Client\Curl;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Create payment (BM transaction) controller
@@ -60,6 +63,9 @@ class Create extends Action
     /** @var Curl */
     public $curl;
 
+    /** @var CollectionFactory */
+    public $gatewayFactory;
+
     /**
      * Create constructor.
      *
@@ -86,7 +92,8 @@ class Create extends Action
         Data $helper,
         JsonFactory $resultJsonFactory,
         Collection $collection,
-        Curl $curl
+        Curl $curl,
+        CollectionFactory $gatewayFactory
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -98,6 +105,7 @@ class Create extends Action
         $this->resultJsonFactory = $resultJsonFactory;
         $this->collection        = $collection;
         $this->curl              = $curl;
+        $this->gatewayFactory    = $gatewayFactory;
 
         parent::__construct($context);
     }
@@ -123,13 +131,26 @@ class Create extends Action
                 'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
             ]);
 
-            $autopayGateway = $this->scopeConfig->getValue('payment/bluepayment/autopay_gateway');
-
+            /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             $currency       = $order->getOrderCurrencyCode();
-            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+            $autopayGateway = $this->scopeConfig->getValue(
+                'payment/bluepayment/autopay_gateway',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $serviceId      = $this->scopeConfig->getValue(
+                'payment/bluepayment/'.strtolower($currency).'/service_id',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $sharedKey      = $this->scopeConfig->getValue(
+                'payment/bluepayment/'.strtolower($currency).'/shared_key',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
             $orderId        = $order->getRealOrderId();
 
             if (!$order->getId()) {
@@ -144,9 +165,17 @@ class Create extends Action
 
             $unchangeableStatuses = explode(
                 ',',
-                $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
+                $this->scopeConfig->getValue(
+                    'payment/bluepayment/unchangeable_statuses',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                )
             );
-            $statusWaitingPayment = $this->scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
+            $statusWaitingPayment = $this->scopeConfig->getValue(
+                'payment/bluepayment/status_waiting_payment',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
 
             if ($statusWaitingPayment != '') {
                 /**
@@ -175,9 +204,17 @@ class Create extends Action
             // Set additional informations to order payment
             $orderPayment = $order->getPayment();
             $orderPayment->setAdditionalInformation('bluepayment_state', 'PENDING');
-            $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
             $orderPayment->save();
 
+            // Set Payment Channel to Order
+            $gateway = $this->gatewayFactory->create()
+                ->addFieldToFilter('gateway_service_id', $serviceId)
+                ->addFieldToFilter('gateway_id', $gatewayId)
+                ->getFirstItem();
+
+            $order->setBlueGatewayId((int) $gatewayId);
+            $order->setPaymentChannel($gateway->getData('gateway_name'));
+            $order->save();
 
             if ($order->getCanSendNewEmailFlag()) {
                 $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
