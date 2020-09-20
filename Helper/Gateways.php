@@ -248,7 +248,6 @@ class Gateways extends Data
                         $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
                         $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
-                        $gatewayModel->setData('gateway_service_id', $serviceId);
                     }
 
                     if (in_array($gateway['gatewayID'], [
@@ -259,6 +258,7 @@ class Gateways extends Data
                         $gatewayModel->setData('is_separated_method', '1');
                     }
 
+                    $gatewayModel->setData('gateway_service_id', $serviceId);
                     $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
                     $gatewayModel->setData('gateway_status', 1);
@@ -266,6 +266,7 @@ class Gateways extends Data
                     $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
                     $gatewayModel->setData('gateway_logo_url', isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
                     $gatewayModel->setData('status_date', $gateway['statusDate']);
+
                     try {
                         $gatewayModel->save();
                     } catch (Exception $e) {
@@ -275,26 +276,28 @@ class Gateways extends Data
             }
 
             $disabledGateways = [];
-            foreach ($existingGateways[$serviceId][$currency] as $existingGatewayId => $existingGatewayData) {
-                if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
-                    && $existingGatewayData['gateway_status'] != 0
-                ) {
-                    $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
-                    $gatewayModel->setData('gateway_status', 0);
-                    try {
-                        $gatewayModel->save();
-                        $disabledGateways[] = [
-                            'gateway_name' => $existingGatewayData['gateway_name'],
-                            'gateway_id' => $existingGatewayId,
-                        ];
-                    } catch (Exception $e) {
-                        $this->logger->info($e->getMessage());
+            if (isset($existingGateways[$serviceId])) {
+                foreach ($existingGateways[$serviceId][$currency] as $existingGatewayId => $existingGatewayData) {
+                    if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
+                        && $existingGatewayData['gateway_status'] != 0
+                    ) {
+                        $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
+                        $gatewayModel->setData('gateway_status', 0);
+                        try {
+                            $gatewayModel->save();
+                            $disabledGateways[] = [
+                                'gateway_name' => $existingGatewayData['gateway_name'],
+                                'gateway_id' => $existingGatewayId,
+                            ];
+                        } catch (Exception $e) {
+                            $this->logger->info($e->getMessage());
+                        }
                     }
                 }
-            }
 
-            if (!empty($disabledGateways)) {
-                $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                if (!empty($disabledGateways)) {
+                    $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                }
             }
         }
 
@@ -310,16 +313,26 @@ class Gateways extends Data
         $bluegatewaysCollection->load();
 
         $existingGateways = [];
-
+        $globalServiceIds = [];
+        $config = $this->scopeConfig->getValue('payment/bluepayment');
         foreach (self::$currencies as $currency) {
-            $existingGateways[$currency] = [];
+            if (isset($config[strtolower($currency)]) && isset($config[strtolower($currency)]['service_id'])) {
+                $globalServiceIds[$currency] = $config[strtolower($currency)]['service_id'];
+            }
         }
 
         foreach ($bluegatewaysCollection as $blueGateways) {
-            $existingGateways[$blueGateways->getData('gateway_service_id')][$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
+            $serviceId = $blueGateways->getData('gateway_service_id');
+            $currency = $blueGateways->getData('gateway_currency');
+
+            if ($serviceId == 0 && isset($globalServiceIds[$currency])) {
+                $serviceId = $globalServiceIds[$currency];
+            }
+
+            $existingGateways[$serviceId][$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
                 'entity_id' => $blueGateways->getId(),
-                'gateway_service_id' => $blueGateways->getData('gateway_service_id'),
-                'gateway_currency' => $blueGateways->getData('gateway_currency'),
+                'gateway_service_id' => $serviceId,
+                'gateway_currency' => $currency,
                 'gateway_status' => $blueGateways->getData('gateway_status'),
                 'bank_name' => $blueGateways->getData('bank_name'),
                 'gateway_name' => $blueGateways->getData('gateway_name'),

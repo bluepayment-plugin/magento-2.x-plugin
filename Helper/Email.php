@@ -191,6 +191,25 @@ class Email extends AbstractHelper
         );
     }
 
+    /**
+     * Get Store
+     *
+     * @return Store
+     */
+    public function getStore()
+    {
+        /** @var Store $store */
+        $store = $this->storeManager->getStore();
+
+        return $store;
+    }
+
+    /**
+     * Get Website code
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function getWebsiteCode()
     {
         return $this->storeManager->getWebsite()->getCode();

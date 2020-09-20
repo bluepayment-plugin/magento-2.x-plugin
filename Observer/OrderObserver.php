@@ -42,7 +42,7 @@ class OrderObserver implements ObserverInterface
             $order->getStore()->getWebsite()->getCode()
         );
 
-        $gatewayId = $payment->getAdditionalInformation('bluepayment_gateway');
+        $gatewayId = $order->getBlueGatewayId();
 
         $gateway = $this->gatewayCollection
             ->addFieldToFilter('gateway_service_id', $serviceId)

@@ -90,7 +90,9 @@ class SetPaymentChannel implements DataPatchInterface
         }
 
         $orders = $this->orderCollectionFactory->create()
-            ->addFieldToSelect('*');
+            ->addFieldToSelect('entity_id')
+            ->addFieldToSelect('increment_id');
+
         $orders->getSelect()
             ->join(
                 ['payment' => 'sales_order_payment'],

@@ -125,6 +125,7 @@ class Blik extends Action
             // Check status on cart.
             $order = $this->session->getLastRealOrder();
             $orderId = $order->getIncrementId();
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
         }
 
         if (!$order) {
