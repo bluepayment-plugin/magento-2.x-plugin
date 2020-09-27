@@ -201,11 +201,6 @@ class Create extends Action
                 $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment);
             }
 
-            // Set additional informations to order payment
-            $orderPayment = $order->getPayment();
-            $orderPayment->setAdditionalInformation('bluepayment_state', 'PENDING');
-            $orderPayment->save();
-
             // Set Payment Channel to Order
             $gateway = $this->gatewayFactory->create()
                 ->addFieldToFilter('gateway_service_id', $serviceId)
