@@ -374,8 +374,28 @@ class Create extends Action
             $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
 
             if ($redirectUrl !== null) {
-                // 3DS
                 $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
+
+                $waitingPage = $this->scopeConfig->getValue(
+                    'payment/bluepayment/waiting_page',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
+
+                if ($waitingPage) {
+                    $waitingPageSeconds = $this->scopeConfig->getValue(
+                        'payment/bluepayment/waiting_page_seconds',
+                        ScopeInterface::SCOPE_WEBSITE,
+                        $websiteCode
+                    );
+
+                    // Redirect only if set in settings
+                    $session->setRedirectUrl($redirectUrl);
+                    $session->setWaitingPageSeconds($waitingPageSeconds);
+
+                    $response = $this->getResponse();
+                    return $response->setRedirect('/bluepayment/processing/redirect');
+                }
 
                 /** @var Http $response */
                 $response = $this->getResponse();

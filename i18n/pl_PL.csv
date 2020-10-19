@@ -117,7 +117,11 @@
 "Wrong card index.","Niepoprawny indeks karty."
 "Deletion failure. Please try again.","Błąd usuwania. Spróbuj ponownie."
 "You have no stored payment cards.","Nie masz żadnych zapisanych kart."
+"Autopay Agreement","Zgoda na płatności automatyczne"
 "Show all","Pokaż wszystkie"
 "Collapse","Zwiń"
 "Collapsible gateway list","Zwijalna lista kanałów",
 "Payment Channel","Kanał płatności"
+"Show waiting page before redirect","Pokaż stronę oczekiwania przed przekierowaniem"
+"Seconds to wait before redirect","Sekund oczekiwania przed przekierowaniem"
+"How many second wait on intermediate page, before redirect to BM payment.","Ile sekund czekać na pośredniej stronie, przed przekierowaniem do płatności BM."
