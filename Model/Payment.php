@@ -750,7 +750,10 @@ class Payment extends AbstractMethod
                 $order->setBlueGatewayId((int) $gatewayId);
                 $order->setPaymentChannel($gateway->getData('gateway_name'));
 
-                $this->orderRepository->save($order);
+                $orderPayment->setTransactionId((string)$remoteId);
+                $orderPayment->prependMessage('[' . $paymentStatus . ']');
+                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
 
                 switch ($paymentStatus) {
                     case self::PAYMENT_STATUS_PENDING:
@@ -765,12 +768,8 @@ class Payment extends AbstractMethod
                         break;
                 }
 
-                $orderPayment->setTransactionId((string)$remoteId);
-                $orderPayment->prependMessage('[' . $paymentStatus . ']');
-                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-                $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
-
                 $this->paymentRepository->save($orderPayment);
+                $this->orderRepository->save($order);
             } else {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
@@ -796,7 +795,7 @@ class Payment extends AbstractMethod
 
             return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (Exception $e) {
-            $this->_logger->critical($e);
+            $this->bmLooger->critical($e);
         }
 
         return $this->returnConfirmation($order, self::TRANSACTION_NOTCONFIRMED);
@@ -931,19 +930,19 @@ class Payment extends AbstractMethod
     {
         /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
-        $transaction->setOrderId($transactionResponse->orderID)
-            ->setRemoteId($transactionResponse->remoteID)
+        $transaction->setOrderId((string)$transactionResponse->orderID)
+            ->setRemoteId((string)$transactionResponse->remoteID)
             ->setAmount((float)$transactionResponse->amount)
-            ->setCurrency($transactionResponse->currency)
+            ->setCurrency((string)$transactionResponse->currency)
             ->setGatewayId((int)$transactionResponse->gatewayID)
-            ->setPaymentDate($transactionResponse->paymentDate)
-            ->setPaymentStatus($transactionResponse->paymentStatus)
-            ->setPaymentStatusDetails($transactionResponse->paymentStatusDetails);
+            ->setPaymentDate((string)$transactionResponse->paymentDate)
+            ->setPaymentStatus((string)$transactionResponse->paymentStatus)
+            ->setPaymentStatusDetails((string)$transactionResponse->paymentStatusDetails);
 
         try {
             $this->transactionRepository->save($transaction);
         } catch (CouldNotSaveException $e) {
-            $this->_logger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
+            $this->bmLooger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
         }
     }
 
