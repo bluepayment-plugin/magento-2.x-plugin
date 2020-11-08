@@ -983,7 +983,10 @@ class Payment extends AbstractMethod
         $order = $payment->getOrder();
         $ip = $order->getRemoteIp();
 
-        $this->bmLooger->info('PAYMENT:' . __LINE__, ['ip' => $ip]);
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'ip' => $ip,
+            'incrementId' => $order->getIncrementId()
+        ]);
 
         /** Orders from admin panel has empty remote ip */
         if ($order->getRemoteIp() === null) {
