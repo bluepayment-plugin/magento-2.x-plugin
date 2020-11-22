@@ -9,6 +9,7 @@ define([
         'BlueMedia_BluePayment/js/checkout-data',
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
+        'Magento_CheckoutAgreements/js/model/agreement-validator',
     ], function ($,
                  _,
                  ko,
@@ -18,7 +19,9 @@ define([
                  quote,
                  checkoutData,
                  modal,
-                 blikTpl) {
+                 blikTpl,
+                 agreementValidator
+    ) {
         'use strict';
         var widget;
         var redirectUrl;
@@ -31,7 +34,9 @@ define([
             bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
             bluePaymentCards: window.checkoutConfig.payment.bluePaymentCards,
             bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluePaymentAutopayAgreement,
-            bluePaymentCollapsible: window.checkoutConfig.payment.bluePaymentCollapsible === '1',
+            bluePaymentCollapsible:
+                window.checkoutConfig.payment.bluePaymentCollapsible === '1'
+                && window.checkoutConfig.payment.bluePaymentOptions.length > 8,
             selectedPaymentObject: {},
             selectedAutopayGatewayIndex: null,
             validationFailed: ko.observable(false),
@@ -213,6 +218,10 @@ define([
              * @return {Boolean}
              */
             validate: function () {
+                if (! agreementValidator.validate()) {
+                    return false;
+                }
+
                 if (this.isAutopaySelected()) {
                     var card_index = jQuery("input[name='payment_method_bluepayment_card_index']:checked").val();
 
@@ -451,11 +460,11 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             }, $('<div />').html()),
-            callGPayPayment: function() {
+            callGPayPayment: function () {
                 var self = this;
 
                 self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                    self.placeOrderAfterValidation(function() {
+                    self.placeOrderAfterValidation(function () {
                         var token = data.paymentMethodData.tokenizationData.token;
                         var urlResponse = url.build('bluepayment/processing/create')
                             + '?gateway_id='
@@ -487,7 +496,7 @@ define([
                         console.error(errorMessage);
                     });
             },
-            getGPayTransactionData: function() {
+            getGPayTransactionData: function () {
                 return {
                     apiVersion: 2,
                     apiVersionMinor: 0,
@@ -517,7 +526,7 @@ define([
                     },
                 };
             },
-            initGPay: function() {
+            initGPay: function () {
                 var urlResponse = url.build('bluepayment/processing/googlepay');
                 var self = this;
 
@@ -531,7 +540,7 @@ define([
                         self.GPayMerchantInfo = response.merchantInfo;
                         self.bluePaymentAcceptorId = response.acceptorId.toString();
 
-                        self.GPayClient = self.GPayClient = new google.payments.api.PaymentsClient({
+                        self.GPayClient = new google.payments.api.PaymentsClient({
                             environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
                         });
                         self.GPayClient.isReadyToPay({
@@ -568,7 +577,7 @@ define([
                     }
                 });
             },
-            handleGPayStatus: function(status, params) {
+            handleGPayStatus: function (status, params) {
                 var self = this;
 
                 if (status === 'SUCCESS') {
@@ -588,12 +597,12 @@ define([
                         this.GPayModal._removeKeyListener();
                     }
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         self.updateGPayStatus(status);
                     }, 2000);
                 }
             },
-            updateGPayStatus: function() {
+            updateGPayStatus: function () {
                 var urlResponse = url.build('bluepayment/processing/blik');
                 var self = this;
 

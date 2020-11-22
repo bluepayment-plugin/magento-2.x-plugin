@@ -76,9 +76,11 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
      */
     public function getIsSeparatedMethod()
     {
-        if ($this->getGatewayId() == ConfigProvider::AUTOPAY_GATEWAY_ID) {
-            return true;
-        } elseif ($this->getGatewayId() == ConfigProvider::GPAY_GATEWAY_ID) {
+        if (in_array($this->getGatewayId(), [
+            ConfigProvider::AUTOPAY_GATEWAY_ID,
+            ConfigProvider::GPAY_GATEWAY_ID,
+            ConfigProvider::APPLE_PAY_GATEWAY_ID
+        ])) {
             return true;
         }
 

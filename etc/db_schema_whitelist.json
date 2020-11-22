@@ -1,0 +1,75 @@
+{
+    "blue_gateways": {
+        "column": {
+            "entity_id": true,
+            "gateway_service_id": true,
+            "gateway_currency": true,
+            "gateway_status": true,
+            "gateway_id": true,
+            "bank_name": true,
+            "gateway_name": true,
+            "gateway_description": true,
+            "gateway_sort_order": true,
+            "gateway_type": true,
+            "gateway_logo_url": true,
+            "use_own_logo": true,
+            "gateway_logo_path": true,
+            "status_date": true,
+            "is_separated_method": true,
+            "force_disable": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "blue_transaction": {
+        "column": {
+            "transaction_id": true,
+            "order_id": true,
+            "remote_id": true,
+            "amount": true,
+            "currency": true,
+            "gateway_id": true,
+            "payment_date": true,
+            "payment_status": true,
+            "payment_status_details": true,
+            "creation_time": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "blue_refund": {
+        "column": {
+            "refund_id": true,
+            "order_id": true,
+            "remote_id": true,
+            "remote_out_id": true,
+            "amount": true,
+            "currency": true,
+            "is_partial": true,
+            "creation_time": true,
+            "update_time": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "blue_card": {
+        "column": {
+            "card_id": true,
+            "customer_id": true,
+            "card_index": true,
+            "validity_year": true,
+            "validity_month": true,
+            "issuer": true,
+            "mask": true,
+            "client_hash": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "BLUE_CARD_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "BLUE_CARD_CLIENT_HASH": true
+        }
+    }
+}

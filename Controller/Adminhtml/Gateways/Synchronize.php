@@ -3,13 +3,12 @@
 namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use BlueMedia\BluePayment\Helper\Gateways;
+use BlueMedia\BluePayment\Logger\Logger;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\View\Result\PageFactory;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Synchronize extends Action
 {
@@ -28,24 +27,23 @@ class Synchronize extends Action
     /**
      * Synchronize constructor.
      *
-     * @param \Magento\Backend\App\Action\Context        $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \BlueMedia\BluePayment\Helper\Gateways     $gatewaysHelper
+     * @param Context $context
+     * @param PageFactory $resultPageFactory
+     * @param Gateways $gatewaysHelper
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
         PageFactory $resultPageFactory,
-        Gateways $gatewaysHelper
-    ) {
+        Gateways $gatewaysHelper,
+        Logger $logger
+    )
+    {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
-
-        $writer = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
-
         $this->messageManager = $context->getMessageManager();
         $this->gatewaysHelper = $gatewaysHelper;
+        $this->logger = $logger;
     }
 
     /**

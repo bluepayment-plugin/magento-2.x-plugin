@@ -68,17 +68,23 @@
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <comment><![CDATA[Payment without redirecting to BM gateway.]]></comment>
                 </field>
-
                 <field id="collapsible" translate="label comment" type="select" sortOrder="560" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Collapsible gateway list</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
-
                 <field id="autopay_agreement" translate="label comment" type="editor" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Autopay Agreement</label>
                 </field>
-
-                <group id="pln" translate="label" type="text" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="waiting_page" translate="label comment" type="select" sortOrder="610" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Show waiting page before redirect</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="waiting_page_seconds" translate="label" type="text" sortOrder="620" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Seconds to wait before redirect</label>
+                    <validate>integer</validate>
+                    <comment>How many second wait on intermediate page, before redirect to BM payment.</comment>
+                </field>
+                <group id="pln" translate="label" type="text" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>PLN configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -87,7 +93,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="eur" translate="label" type="text" sortOrder="610" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="eur" translate="label" type="text" sortOrder="710" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>EUR configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -96,7 +102,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="gbp" translate="label" type="text" sortOrder="620" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="gbp" translate="label" type="text" sortOrder="720" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>GBP configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -105,7 +111,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="usd" translate="label" type="text" sortOrder="630" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="usd" translate="label" type="text" sortOrder="730" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>USD configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -114,7 +120,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="czk" translate="label" type="text" sortOrder="640" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="czk" translate="label" type="text" sortOrder="740" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>CZK configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -123,7 +129,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="ron" translate="label" type="text" sortOrder="650" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="ron" translate="label" type="text" sortOrder="750" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>RON configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -132,7 +138,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="huf" translate="label" type="text" sortOrder="660" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="huf" translate="label" type="text" sortOrder="760" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>HUF configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -141,7 +147,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="bgn" translate="label" type="text" sortOrder="670" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="bgn" translate="label" type="text" sortOrder="770" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>BGN configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>
@@ -150,7 +156,7 @@
                         <label>Shared key</label>
                     </field>
                 </group>
-                <group id="uah" translate="label" type="text" sortOrder="680" showInDefault="1" showInWebsite="1" showInStore="0">
+                <group id="uah" translate="label" type="text" sortOrder="780" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>UAH configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Service partner ID</label>

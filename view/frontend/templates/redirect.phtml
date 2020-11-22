@@ -1,0 +1,15 @@
+<div class="back"
+     data-mage-init='{
+            "BlueMedia_BluePayment/js/customer/redirect":{
+                "redirectURL": "<?= /* @noEscape */ $block->getRedirectUrl() ?>",
+                "seconds": "<?= /* @noEscape */ $block->getSeconds() ?>"
+            }
+        }'>
+
+    <img src="<?= /* @noEscape */ $block->getViewFileUrl('BlueMedia_BluePayment::images/pending.png') ?>"
+             style="float: left; margin-right: 20px; " />
+
+    <p>
+        Za chwilę zostaniesz przekierowany na stronę płatności.
+    </p>
+</div>

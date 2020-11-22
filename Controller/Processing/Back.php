@@ -16,7 +16,7 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
-use Psr\Log\LoggerInterface;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Controller for returning user
@@ -24,7 +24,7 @@ use Psr\Log\LoggerInterface;
 class Back extends Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var PageFactory
      */
     public $pageFactory;
 
@@ -34,12 +34,12 @@ class Back extends Action
     public $logger;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     public $scopeConfig;
 
     /**
-     * @var \BlueMedia\BluePayment\Helper\Data
+     * @var Data
      */
     public $helper;
 
@@ -56,12 +56,13 @@ class Back extends Action
     /**
      * Back constructor.
      *
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
+     * @param Context $context
+     * @param PageFactory $pageFactory
      * @param Logger $logger
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \BlueMedia\BluePayment\Helper\Data $helper
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Data $helper
+     * @param OrderFactory $orderFactory
+     * @param Onepage $onepage
      */
     public function __construct(
         Context $context,
@@ -71,11 +72,12 @@ class Back extends Action
         Data $helper,
         OrderFactory $orderFactory,
         Onepage $onepage
-    ) {
-        $this->helper       = $helper;
-        $this->pageFactory  = $pageFactory;
-        $this->scopeConfig  = $scopeConfig;
-        $this->logger       = $logger;
+    )
+    {
+        $this->helper = $helper;
+        $this->pageFactory = $pageFactory;
+        $this->scopeConfig = $scopeConfig;
+        $this->logger = $logger;
         $this->orderFactory = $orderFactory;
         $this->onepage = $onepage;
 
@@ -100,21 +102,30 @@ class Back extends Action
 
         $this->logger->info('BACK:' . __LINE__, ['params' => $params]);
         try {
-            $orderId    = $params['OrderID'];
-            $hash       = $params['Hash'];
+            $orderId = $params['OrderID'];
+            $hash = $params['Hash'];
 
             /** @var Order $order */
-            $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
-            $currency   = strtolower($order->getOrderCurrencyCode());
+            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+            $currency = strtolower($order->getOrderCurrencyCode());
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             /** @var Order\Payment $payment */
-            $payment    = $order->getPayment();
+            $payment = $order->getPayment();
 
             if (array_key_exists('Hash', $params)) {
-                $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/service_id");
-                $sharedKey = $this->scopeConfig->getValue("payment/bluepayment/".$currency."/shared_key");
+                $serviceId = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . $currency . '/service_id',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
+                $sharedKey = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . $currency . '/shared_key',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
 
-                $hashData  = [$serviceId, $orderId, $sharedKey];
+                $hashData = [$serviceId, $orderId, $sharedKey];
 
                 $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $this->logger->info('BACK:' . __LINE__, [
@@ -126,8 +137,12 @@ class Back extends Action
 
                 /** @var Session $session */
                 $session = $this->onepage->getCheckout();
-                $session->setQuoteId($orderId);
-                $session->setLastSuccessQuoteId($orderId);
+                $session
+                    ->setLastRealOrderId($order->getRealOrderId())
+                    ->setLastOrderId($order->getId())
+                    ->setLastQuoteId($order->getQuoteId())
+                    ->setLastSuccessQuoteId($order->getQuoteId())
+                    ->setQuoteId($order->getQuoteId());
 
                 if ($hash == $hashLocal) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');

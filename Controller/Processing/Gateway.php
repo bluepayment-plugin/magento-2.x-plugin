@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Controller\Processing;
 
+use BlueMedia\BluePayment\Logger\Logger;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -11,8 +12,6 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Gateway extends Action
 {
@@ -34,27 +33,27 @@ class Gateway extends Action
     /**
      * Gateway constructor.
      *
-     * @param Context               $context
-     * @param JsonFactory    $resultJsonFactory
+     * @param Context $context
+     * @param JsonFactory $resultJsonFactory
      * @param OrderSender $orderSender
-     * @param OrderFactory                   $orderFactory
-     * @param Session                     $session
+     * @param OrderFactory $orderFactory
+     * @param Session $session
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
         JsonFactory $resultJsonFactory,
         OrderSender $orderSender,
         OrderFactory $orderFactory,
-        Session $session
-    ) {
+        Session $session,
+        Logger $logger
+    )
+    {
         $this->resultJsonFactory = $resultJsonFactory;
-        $this->session           = $session;
-        $this->orderFactory      = $orderFactory;
-        $this->orderSender       = $orderSender;
-
-        $writer = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
+        $this->session = $session;
+        $this->orderFactory = $orderFactory;
+        $this->orderSender = $orderSender;
+        $this->logger = $logger;
 
         parent::__construct($context);
     }
@@ -66,7 +65,7 @@ class Gateway extends Action
      */
     public function execute()
     {
-        $result  = $this->resultJsonFactory->create();
+        $result = $this->resultJsonFactory->create();
         $session = $this->getCheckout();
 
         /** @var Http $request */

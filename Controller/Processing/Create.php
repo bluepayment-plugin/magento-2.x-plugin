@@ -7,6 +7,7 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -17,10 +18,12 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\HTTP\Client\Curl;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Create payment (BM transaction) controller
@@ -60,6 +63,9 @@ class Create extends Action
     /** @var Curl */
     public $curl;
 
+    /** @var CollectionFactory */
+    public $gatewayFactory;
+
     /**
      * Create constructor.
      *
@@ -86,7 +92,8 @@ class Create extends Action
         Data $helper,
         JsonFactory $resultJsonFactory,
         Collection $collection,
-        Curl $curl
+        Curl $curl,
+        CollectionFactory $gatewayFactory
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -98,6 +105,7 @@ class Create extends Action
         $this->resultJsonFactory = $resultJsonFactory;
         $this->collection        = $collection;
         $this->curl              = $curl;
+        $this->gatewayFactory    = $gatewayFactory;
 
         parent::__construct($context);
     }
@@ -123,16 +131,26 @@ class Create extends Action
                 'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
             ]);
 
-            $cardGateway = ConfigProvider::IFRAME_GATEWAY_ID;
-            $blikGateway = ConfigProvider::BLIK_GATEWAY_ID;
-            $gpayGateway = ConfigProvider::GPAY_GATEWAY_ID;
-            $autopayGateway = $this->scopeConfig->getValue('payment/bluepayment/autopay_gateway');
-
+            /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
+            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             $currency       = $order->getOrderCurrencyCode();
-            $serviceId      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-            $sharedKey      = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+            $autopayGateway = $this->scopeConfig->getValue(
+                'payment/bluepayment/autopay_gateway',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $serviceId      = $this->scopeConfig->getValue(
+                'payment/bluepayment/'.strtolower($currency).'/service_id',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
+            $sharedKey      = $this->scopeConfig->getValue(
+                'payment/bluepayment/'.strtolower($currency).'/shared_key',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
             $orderId        = $order->getRealOrderId();
 
             if (!$order->getId()) {
@@ -147,9 +165,17 @@ class Create extends Action
 
             $unchangeableStatuses = explode(
                 ',',
-                $this->scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
+                $this->scopeConfig->getValue(
+                    'payment/bluepayment/unchangeable_statuses',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                )
             );
-            $statusWaitingPayment = $this->scopeConfig->getValue("payment/bluepayment/status_waiting_payment");
+            $statusWaitingPayment = $this->scopeConfig->getValue(
+                'payment/bluepayment/status_waiting_payment',
+                ScopeInterface::SCOPE_WEBSITE,
+                $websiteCode
+            );
 
             if ($statusWaitingPayment != '') {
                 /**
@@ -172,8 +198,18 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
                 $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
 
-                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment)->save();
+                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment);
             }
+
+            // Set Payment Channel to Order
+            $gateway = $this->gatewayFactory->create()
+                ->addFieldToFilter('gateway_service_id', $serviceId)
+                ->addFieldToFilter('gateway_id', $gatewayId)
+                ->getFirstItem();
+
+            $order->setBlueGatewayId((int) $gatewayId);
+            $order->setPaymentChannel($gateway->getData('gateway_name'));
+            $order->save();
 
             if ($order->getCanSendNewEmailFlag()) {
                 $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
@@ -184,7 +220,7 @@ class Create extends Action
                 }
             }
 
-            if ($cardGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic);
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
@@ -196,7 +232,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if ($blikGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::BLIK_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $authorizationCode = $this->getRequest()->getParam('code', 0);
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
@@ -243,7 +279,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if ($gpayGateway == $gatewayId && $automatic === true) {
+            if (ConfigProvider::GPAY_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $token = $this->getRequest()->getParam('token', null);
 
                 $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);
@@ -305,7 +341,6 @@ class Create extends Action
 
                 if ($result['redirectUrl'] !== null) {
                     // 3DS
-
                     $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
 
                     /** @var Http $response */
@@ -333,17 +368,52 @@ class Create extends Action
                 ]);
             }
 
-            $url = $this->_url->getUrl(
-                $payment->getUrlGateway()
-                . '?'
-                . http_build_query($payment->getFormRedirectFields($order, $gatewayId))
-            );
+            $params = $payment->getFormRedirectFields($order, $gatewayId);
+            $xml = $this->sendRequest($params, $payment->getUrlGateway());
 
-            $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $url]);
+            $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
 
-            /** @var Http $response */
-            $response = $this->getResponse();
-            return $response->setRedirect($url);
+            if ($redirectUrl !== null) {
+                $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
+
+                $waitingPage = $this->scopeConfig->getValue(
+                    'payment/bluepayment/waiting_page',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
+
+                if ($waitingPage) {
+                    $waitingPageSeconds = $this->scopeConfig->getValue(
+                        'payment/bluepayment/waiting_page_seconds',
+                        ScopeInterface::SCOPE_WEBSITE,
+                        $websiteCode
+                    );
+
+                    // Redirect only if set in settings
+                    $session->setRedirectUrl($redirectUrl);
+                    $session->setWaitingPageSeconds($waitingPageSeconds);
+
+                    $response = $this->getResponse();
+                    return $response->setRedirect('/bluepayment/processing/redirect');
+                }
+
+                /** @var Http $response */
+                $response = $this->getResponse();
+                return $response->setRedirect($redirectUrl);
+            }
+
+            // Otherwise - redirect to "waiting" page
+            $hashData  = [$serviceId, $orderId, $sharedKey];
+            $redirectHash = $this->helper->generateAndReturnHash($hashData);
+
+            return $this->_redirect('bluepayment/processing/back', [
+                '_secure' => true,
+                '_query' => [
+                    'ServiceID' => $serviceId,
+                    'OrderID' => $orderId,
+                    'Hash' => $redirectHash
+                ]
+            ]);
         } catch (Exception $e) {
             $this->logger->critical($e);
         }

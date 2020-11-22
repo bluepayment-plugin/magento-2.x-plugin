@@ -45,7 +45,7 @@ class GooglePay extends Action
 
         $resultJson = $this->resultJsonFactory->create();
 
-        if (is_array($info)) {
+        if (is_array($info) && !empty($info)) {
             $resultJson->setData([
                 'acceptorId' => $info['acceptorId'],
                 'merchantInfo' => [
@@ -60,7 +60,7 @@ class GooglePay extends Action
         }
 
         $resultJson->setData([
-            'error' => 'Currency is not supported.',
+            'error' => 'Currency is not supported or unable to fetch data.',
         ]);
         return $resultJson;
     }

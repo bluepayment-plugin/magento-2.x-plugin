@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Helper;
 
+use BlueMedia\BluePayment\Logger\Logger;
 use Exception;
 use Magento\Backend\Model\Auth\Session;
 use Magento\Framework\App\Area;
@@ -11,13 +12,10 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Translate\Inline\StateInterface;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\User\Model\User;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Email extends AbstractHelper
 {
@@ -50,56 +48,28 @@ class Email extends AbstractHelper
     /**
      * Email constructor.
      *
-     * @param Context               $context
+     * @param Context $context
      * @param StoreManagerInterface $storeManager
-     * @param StateInterface        $inlineTranslation
-     * @param TransportBuilder      $transportBuilder
-     * @param Session               $authSession
+     * @param StateInterface $inlineTranslation
+     * @param TransportBuilder $transportBuilder
+     * @param Session $authSession
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         StateInterface $inlineTranslation,
         TransportBuilder $transportBuilder,
-        Session $authSession
-    ) {
+        Session $authSession,
+        Logger $logger
+    )
+    {
         parent::__construct($context);
-        $this->storeManager     = $storeManager;
+        $this->storeManager = $storeManager;
         $this->inlineTranslation = $inlineTranslation;
         $this->transportBuilder = $transportBuilder;
-        $this->authSession      = $authSession;
-
-        $writer = new Stream(BP . '/var/log/bluemedia_notificator.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
-    }
-
-    /**
-     * @param string $path
-     * @param int    $storeId
-     *
-     * @return mixed
-     */
-    protected function getConfigValue($path, $storeId)
-    {
-        return $this->scopeConfig->getValue(
-            $path,
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-    }
-
-    /**
-     * Get Store
-     *
-     * @return Store
-     */
-    public function getStore()
-    {
-        /** @var Store $store */
-        $store = $this->storeManager->getStore();
-
-        return $store;
+        $this->authSession = $authSession;
+        $this->logger = $logger;
     }
 
     /**
@@ -112,11 +82,11 @@ class Email extends AbstractHelper
     public function sendGatewayDeactivationEmail(array $disabledGateways = [])
     {
         $receiverInfo = $this->geEmailReceivers();
-        $senderInfo   = [
-            'name'  => $this->getSenderName(),
+        $senderInfo = [
+            'name' => $this->getSenderName(),
             'email' => $this->getSenderEmail(),
         ];
-        $templateId   = $this->getTemplateId();
+        $templateId = $this->getTemplateId();
         if (empty($senderInfo)
             || empty($receiverInfo)
             || empty($disabledGateways)
@@ -148,7 +118,7 @@ class Email extends AbstractHelper
                 $templateId,
                 [
                     'gateways' => $disabledGatewaysMsg,
-                    'source'   => $source,
+                    'source' => $source,
                 ],
                 $senderInfo,
                 $receiverInfo
@@ -167,24 +137,13 @@ class Email extends AbstractHelper
     }
 
     /**
-     * @return bool
-     */
-    public function isSendingEnabled()
-    {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD,
-            $this->getStore()->getStoreId()
-        );
-    }
-
-    /**
      * Returns email receiver array
      *
      * @return array
      */
     public function geEmailReceivers()
     {
-        $result       = [];
+        $result = [];
         $unserialized = $this->unserialize(
             $this->getConfigValue(
                 self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_RECEIVERS_FIELD,
@@ -194,7 +153,7 @@ class Email extends AbstractHelper
         if ($unserialized) {
             foreach ($unserialized as $row) {
                 $result[] = [
-                    'name'  => $row['name'],
+                    'name' => $row['name'],
                     'email' => $row['email'],
                 ];
             }
@@ -218,16 +177,52 @@ class Email extends AbstractHelper
     }
 
     /**
+     * @param string $path
+     * @param int $storeId
+     *
+     * @return mixed
+     */
+    protected function getConfigValue($path)
+    {
+        return $this->scopeConfig->getValue(
+            $path,
+            ScopeInterface::SCOPE_STORE,
+            $this->getWebsiteCode()
+        );
+    }
+
+    /**
+     * Get Store
+     *
+     * @return Store
+     */
+    public function getStore()
+    {
+        /** @var Store $store */
+        $store = $this->storeManager->getStore();
+
+        return $store;
+    }
+
+    /**
+     * Get Website code
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getWebsiteCode()
+    {
+        return $this->storeManager->getWebsite()->getCode();
+    }
+
+    /**
      * Get configured sender name
      *
      * @return string
      */
     public function getSenderName()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_NAME_FIELD);
     }
 
     /**
@@ -237,10 +232,7 @@ class Email extends AbstractHelper
      */
     public function getSenderEmail()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_SENDER_EMAIL_FIELD);
     }
 
     /**
@@ -250,15 +242,28 @@ class Email extends AbstractHelper
      */
     public function getTemplateId()
     {
-        return $this->getConfigValue(
-            self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD,
-            $this->getStore()->getStoreId()
-        );
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_TEMPLATE_FIELD);
     }
 
     /**
-     * @param int          $templateId
-     * @param array        $emailTemplateVariables
+     * @return bool
+     */
+    public function isSendingEnabled()
+    {
+        return $this->getConfigValue(self::XML_PATH_DISABLED_GATEWAYS_NOTIFICATION_ACTIVE_FIELD);
+    }
+
+    /**
+     * @return User|null
+     */
+    public function getCurrentUser()
+    {
+        return $this->authSession->getUser();
+    }
+
+    /**
+     * @param int $templateId
+     * @param array $emailTemplateVariables
      * @param array|string $senderInfo
      * @param array $receiverInfo
      *
@@ -266,10 +271,10 @@ class Email extends AbstractHelper
      */
     public function generateTemplate($templateId, $emailTemplateVariables, $senderInfo, $receiverInfo)
     {
-        $this->transportBuilder->setTemplateIdentifier((string) $templateId)
+        $this->transportBuilder->setTemplateIdentifier((string)$templateId)
             ->setTemplateOptions(
                 [
-                    'area'  => Area::AREA_FRONTEND,
+                    'area' => Area::AREA_FRONTEND,
                     'store' => $this->storeManager->getStore()->getId(),
                 ]
             )
@@ -281,13 +286,5 @@ class Email extends AbstractHelper
                 $this->transportBuilder->addTo($receiver['email'], $receiver['name']);
             }
         }
-    }
-
-    /**
-     * @return User|null
-     */
-    public function getCurrentUser()
-    {
-        return $this->authSession->getUser();
     }
 }

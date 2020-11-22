@@ -4,6 +4,8 @@ namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
+use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\GatewaysFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
 use Exception;
@@ -12,16 +14,17 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 class Gateways extends Data
 {
     const FAILED_CONNECTION_RETRY_COUNT = 5;
-    const MESSAGE_ID_STRING_LENGTH      = 32;
-    const UPLOAD_PATH                   = '/BlueMedia/';
+    const MESSAGE_ID_STRING_LENGTH = 32;
+    const UPLOAD_PATH = '/BlueMedia/';
 
     /** @var array Available currencies */
     public static $currencies = [
@@ -31,11 +34,7 @@ class Gateways extends Data
     /** @var GatewaysFactory */
     public $gatewaysFactory;
 
-    /**
-     * Logger
-     *
-     * @var \Zend\Log\Logger
-     */
+    /** @var \Zend\Log\Logger */
     public $logger;
 
     /** @var Email */
@@ -47,15 +46,18 @@ class Gateways extends Data
     /**
      * Gateways constructor.
      *
-     * @param Context           $context
-     * @param LayoutFactory     $layoutFactory
-     * @param Factory           $paymentMethodFactory
-     * @param Emulation         $appEmulation
-     * @param Config            $paymentConfig
-     * @param Initial           $initialConfig
-     * @param GatewaysFactory   $gatewaysFactory
-     * @param Client            $apiClient
-     * @param EmailHelper       $emailHelper
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param GatewaysFactory $gatewaysFactory
+     * @param Client $apiClient
+     * @param Logger $logger
+     * @param EmailHelper $emailHelper
+     * @param Collection $collection
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         Context $context,
@@ -66,9 +68,12 @@ class Gateways extends Data
         Initial $initialConfig,
         GatewaysFactory $gatewaysFactory,
         Client $apiClient,
+        Logger $logger,
         EmailHelper $emailHelper,
-        Collection $collection
-    ) {
+        Collection $collection,
+        StoreManagerInterface $storeManager
+    )
+    {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -76,15 +81,15 @@ class Gateways extends Data
             $appEmulation,
             $paymentConfig,
             $initialConfig,
-            $apiClient
+            $apiClient,
+            $logger,
+            $storeManager
         );
 
-        $writer  = new Stream(BP . '/var/log/bluemedia.log');
-        $this->logger = new Logger();
-        $this->logger->addWriter($writer);
         $this->gatewaysFactory = $gatewaysFactory;
         $this->emailHelper = $emailHelper;
         $this->collection = $collection;
+        $this->logger = $logger;
     }
 
     /**
@@ -92,37 +97,59 @@ class Gateways extends Data
      */
     public function syncGateways()
     {
-        $result            = [];
-        $hashMethod        = $this->scopeConfig->getValue("payment/bluepayment/hash_algorithm");
-        $gatewayListAPIUrl = $this->getGatewayListUrl();
+        $result = [];
+        $existingGateways = $this->getSimpleGatewaysList();
 
-        foreach (self::$currencies as $currency) {
-            $serviceId = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-            $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-            $hashKey = $this->scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
+        foreach ($this->storeManager->getWebsites() as $website) {
+            $hashMethod = $this->scopeConfig->getValue(
+                'payment/bluepayment/hash_algorithm',
+                ScopeInterface::SCOPE_WEBSITE,
+                $website->getCode()
+            );
+            $gatewayListAPIUrl = $this->getGatewayListUrl($website);
 
-            if ($serviceId) {
-                $tryCount = 0;
-                $loadResult = false;
-                while (!$loadResult) {
-                    $loadResult = $this->loadGatewaysFromAPI(
-                        $hashMethod,
-                        $serviceId,
-                        $messageId,
-                        $hashKey,
-                        $gatewayListAPIUrl
-                    );
+            foreach (self::$currencies as $currency) {
+                $serviceId = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . strtolower($currency) . '/service_id',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $website->getCode()
+                );
+                $hashKey = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $website->getCode()
+                );
 
-                    if ($loadResult) {
-                        $result['success'] = $this->saveGateways((array)$loadResult, $currency);
-                        break;
-                    } else {
-                        if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
-                            $result['error'] = 'Exceeded the limit of attempts to sync gateways list!';
+                $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
+
+                if ($serviceId) {
+                    $tryCount = 0;
+                    $loadResult = false;
+                    while (!$loadResult) {
+                        $loadResult = $this->loadGatewaysFromAPI(
+                            $hashMethod,
+                            $serviceId,
+                            $messageId,
+                            $hashKey,
+                            $gatewayListAPIUrl
+                        );
+
+                        if ($loadResult) {
+                            $result['success'] = $this->saveGateways(
+                                $serviceId,
+                                (array)$loadResult,
+                                $existingGateways,
+                                $currency
+                            );
                             break;
+                        } else {
+                            if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
+                                $result['error'] = 'Exceeded the limit of attempts to sync gateways list for ' . $serviceId . '!';
+                                break;
+                            }
                         }
+                        $tryCount++;
                     }
-                    $tryCount++;
                 }
             }
         }
@@ -131,16 +158,30 @@ class Gateways extends Data
     }
 
     /**
+     * @param WebsiteInterface $website
      * @return string
      */
-    private function getGatewayListUrl()
+    private function getGatewayListUrl(WebsiteInterface $website)
     {
-        $mode = $this->scopeConfig->getValue("payment/bluepayment/test_mode");
-        if ($mode) {
-            return $this->scopeConfig->getValue("payment/bluepayment/test_address_gateways_url");
+        $testMode = $this->scopeConfig->getValue(
+            'payment/bluepayment/test_mode',
+            ScopeInterface::SCOPE_WEBSITE,
+            $website->getCode()
+        );
+
+        if ($testMode) {
+            return $this->scopeConfig->getValue(
+                'payment/bluepayment/test_address_gateways_url',
+                ScopeInterface::SCOPE_WEBSITE,
+                $website->getCode()
+            );
         }
 
-        return $this->scopeConfig->getValue("payment/bluepayment/prod_address_gateways_url");
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/prod_address_gateways_url',
+            ScopeInterface::SCOPE_WEBSITE,
+            $website->getCode()
+        );
     }
 
     /**
@@ -154,11 +195,11 @@ class Gateways extends Data
      */
     private function loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl)
     {
-        $hash   = hash($hashMethod, $serviceId . '|' . $messageId . '|' . $hashKey);
-        $data   = [
+        $hash = hash($hashMethod, $serviceId . '|' . $messageId . '|' . $hashKey);
+        $data = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
-            'Hash'      => $hash,
+            'Hash' => $hash,
         ];
 
         try {
@@ -171,14 +212,15 @@ class Gateways extends Data
     }
 
     /**
+     * @param integer $serviceId
      * @param array $gatewayList
+     * @param array $existingGateways
      * @param string $currency
-     * 
+     *
      * @return bool
      */
-    public function saveGateways($gatewayList, $currency = 'PLN')
+    public function saveGateways($serviceId, $gatewayList, $existingGateways, $currency = 'PLN')
     {
-        $existingGateways          = $this->getSimpleGatewaysList();
         $currentlyActiveGatewayIDs = [];
 
         if (isset($gatewayList['gateway'])) {
@@ -199,22 +241,32 @@ class Gateways extends Data
                 ) {
                     $currentlyActiveGatewayIDs[] = $gateway['gatewayID'];
 
-                    if (isset($existingGateways[$currency][$gateway['gatewayID']])) {
+                    if (isset($existingGateways[$serviceId][$currency][$gateway['gatewayID']])) {
                         $gatewayModel = $this->gatewaysFactory->create();
-                        $gatewayModel->load($existingGateways[$currency][$gateway['gatewayID']]['entity_id']);
+                        $gatewayModel->load($existingGateways[$serviceId][$currency][$gateway['gatewayID']]['entity_id']);
                     } else {
                         $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
+                        $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     }
 
+                    if (in_array($gateway['gatewayID'], [
+                        ConfigProvider::AUTOPAY_GATEWAY_ID,
+                        ConfigProvider::GPAY_GATEWAY_ID,
+                        ConfigProvider::APPLE_PAY_GATEWAY_ID
+                    ])) {
+                        $gatewayModel->setData('is_separated_method', '1');
+                    }
+
+                    $gatewayModel->setData('gateway_service_id', $serviceId);
                     $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
                     $gatewayModel->setData('gateway_status', 1);
                     $gatewayModel->setData('bank_name', $gateway['bankName']);
-                    $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
                     $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
                     $gatewayModel->setData('gateway_logo_url', isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
                     $gatewayModel->setData('status_date', $gateway['statusDate']);
+
                     try {
                         $gatewayModel->save();
                     } catch (Exception $e) {
@@ -224,25 +276,28 @@ class Gateways extends Data
             }
 
             $disabledGateways = [];
-            foreach ($existingGateways[$currency] as $existingGatewayId => $existingGatewayData) {
-                if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
-                    && $existingGatewayData['gateway_status'] != 0
-                ) {
-                    $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
-                    $gatewayModel->setData('gateway_status', 0);
-                    try {
-                        $gatewayModel->save();
-                        $disabledGateways[] = [
-                            'gateway_name' => $existingGatewayData['gateway_name'],
-                            'gateway_id'   => $existingGatewayId,
-                        ];
-                    } catch (Exception $e) {
-                        $this->logger->info($e->getMessage());
+            if (isset($existingGateways[$serviceId])) {
+                foreach ($existingGateways[$serviceId][$currency] as $existingGatewayId => $existingGatewayData) {
+                    if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
+                        && $existingGatewayData['gateway_status'] != 0
+                    ) {
+                        $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
+                        $gatewayModel->setData('gateway_status', 0);
+                        try {
+                            $gatewayModel->save();
+                            $disabledGateways[] = [
+                                'gateway_name' => $existingGatewayData['gateway_name'],
+                                'gateway_id' => $existingGatewayId,
+                            ];
+                        } catch (Exception $e) {
+                            $this->logger->info($e->getMessage());
+                        }
                     }
                 }
-            }
-            if (!empty($disabledGateways)) {
-                $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+
+                if (!empty($disabledGateways)) {
+                    $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                }
             }
         }
 
@@ -258,36 +313,39 @@ class Gateways extends Data
         $bluegatewaysCollection->load();
 
         $existingGateways = [];
-
+        $globalServiceIds = [];
+        $config = $this->scopeConfig->getValue('payment/bluepayment');
         foreach (self::$currencies as $currency) {
-            $existingGateways[$currency] = [];
+            if (isset($config[strtolower($currency)]) && isset($config[strtolower($currency)]['service_id'])) {
+                $globalServiceIds[$currency] = $config[strtolower($currency)]['service_id'];
+            }
         }
 
         foreach ($bluegatewaysCollection as $blueGateways) {
-            $existingGateways[$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
-                'entity_id'           => $blueGateways->getId(),
-                'gateway_currency'    => $blueGateways->getData('gateway_currency'),
-                'gateway_status'      => $blueGateways->getData('gateway_status'),
-                'bank_name'           => $blueGateways->getData('bank_name'),
-                'gateway_name'        => $blueGateways->getData('gateway_name'),
+            $serviceId = $blueGateways->getData('gateway_service_id');
+            $currency = $blueGateways->getData('gateway_currency');
+
+            if ($serviceId == 0 && isset($globalServiceIds[$currency])) {
+                $serviceId = $globalServiceIds[$currency];
+            }
+
+            $existingGateways[$serviceId][$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
+                'entity_id' => $blueGateways->getId(),
+                'gateway_service_id' => $serviceId,
+                'gateway_currency' => $currency,
+                'gateway_status' => $blueGateways->getData('gateway_status'),
+                'bank_name' => $blueGateways->getData('bank_name'),
+                'gateway_name' => $blueGateways->getData('gateway_name'),
                 'gateway_description' => $blueGateways->getData('gateway_description'),
-                'gateway_sort_order'  => $blueGateways->getData('gateway_sort_order'),
-                'gateway_type'        => $blueGateways->getData('gateway_type'),
-                'gateway_logo_url'    => $blueGateways->getData('gateway_logo_url'),
-                'use_own_logo'        => $blueGateways->getData('use_own_logo'),
-                'gateway_logo_path'   => $blueGateways->getData('gateway_logo_path'),
-                'status_date'         => $blueGateways->getData('status_date'),
+                'gateway_sort_order' => $blueGateways->getData('gateway_sort_order'),
+                'gateway_type' => $blueGateways->getData('gateway_type'),
+                'gateway_logo_url' => $blueGateways->getData('gateway_logo_url'),
+                'use_own_logo' => $blueGateways->getData('use_own_logo'),
+                'gateway_logo_path' => $blueGateways->getData('gateway_logo_path'),
+                'status_date' => $blueGateways->getData('status_date'),
             ];
         }
 
         return $existingGateways;
-    }
-
-    /**
-     * @return bool
-     */
-    public function showGatewayLogo()
-    {
-        return $this->scopeConfig->getValue("payment/bluepayment/show_gateway_logo") == 1;
     }
 }

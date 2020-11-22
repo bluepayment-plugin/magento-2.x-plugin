@@ -5,8 +5,10 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory as GatewayFactory;
 use DOMDocument;
 use Exception;
 use Magento\Framework\Api\AttributeValueFactory;
@@ -14,20 +16,29 @@ use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentData;
+use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Sales\Api\OrderPaymentRepositoryInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Config;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Status;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
+use Magento\Framework\HTTP\Client\Curl;
 
 /**
  * BluePayment class
@@ -48,8 +59,8 @@ class Payment extends AbstractMethod
     /**
      * Stałe potwierdzenia autentyczności transakcji
      */
-    const TRANSACTION_CONFIRMED = "CONFIRMED";
-    const TRANSACTION_NOTCONFIRMED = "NOTCONFIRMED";
+    const TRANSACTION_CONFIRMED = 'CONFIRMED';
+    const TRANSACTION_NOTCONFIRMED = 'NOTCONFIRMED';
 
     /** @var string[] */
     private $orderParams = [
@@ -116,14 +127,18 @@ class Payment extends AbstractMethod
      *
      * @var boolean
      */
-    protected $_canUseInternal = false;
+    protected $_canUseInternal = true;
 
     /**
      * Czy wymagana jest inicjalizacja ?
      *
      * @var boolean
      */
-    protected $_isInitializeNeeded = true;
+    protected $_isInitializeNeeded = false;
+
+    protected $_canAuthorize = true;
+
+    protected $_canCapture = false;
 
     /** @var OrderFactory */
     private $orderFactory;
@@ -140,59 +155,81 @@ class Payment extends AbstractMethod
     /** @var EncryptorInterface */
     private $encryptor;
 
-    /**
-     * @var \BlueMedia\BluePayment\Helper\Data
-     */
+    /** @var Curl */
+    private $curl;
+
+    /** @var BMLogger */
+    private $bmLooger;
+
+    /** @var Collection */
+    private $collection;
+
+    /** @var Data */
     private $helper;
 
-    /**
-     * @var \Magento\Framework\UrlInterface
-     */
+    /** @var UrlInterface */
     private $url;
 
-    /**
-     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
-     */
+    /** @var OrderSender */
     private $sender;
 
-    /**
-     * @var \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory
-     */
+    /** @var CollectionFactory */
     private $statusCollectionFactory;
 
-    /**
-     * @var \BlueMedia\BluePayment\Model\TransactionFactory
-     */
+    /** @var TransactionFactory */
     private $transactionFactory;
 
-    /**
-     * @var \BlueMedia\BluePayment\Api\TransactionRepositoryInterface
-     */
+    /** @var TransactionRepositoryInterface */
     private $transactionRepository;
+
+    /** @var string */
+    private $websiteCode;
+
+    /** @var OrderRepositoryInterface */
+    private $orderRepository;
+
+    /** @var OrderPaymentRepositoryInterface */
+    private $paymentRepository;
+
+    /** @var Config */
+    private $orderConfig;
+
+    /** @var GatewayFactory */
+    private $gatewayFactory;
 
     /**
      * Payment constructor.
      *
-     * @param CollectionFactory                 $statusCollectionFactory
-     * @param OrderSender                       $orderSender
-     * @param Data                              $helper
-     * @param UrlInterface                      $url
-     * @param OrderFactory                      $orderFactory
-     * @param Context                           $context
-     * @param Registry                          $registry
-     * @param ExtensionAttributesFactory        $extensionFactory
-     * @param AttributeValueFactory             $customAttributeFactory
-     * @param PaymentData                       $paymentData
-     * @param ScopeConfigInterface              $scopeConfig
-     * @param Logger                            $logger
-     * @param TransactionFactory                $transactionFactory
-     * @param TransactionRepositoryInterface    $transactionRepository
-     * @param CardFactory                                                       $cardFactory
-     * @param CardCollectionFactory                                             $cardCollectionFactory
-     * @param CardResource
-     * @param AbstractResource|null             $resource
-     * @param AbstractDb|null                   $resourceCollection
-     * @param array                             $data
+     * @param CollectionFactory $statusCollectionFactory
+     * @param OrderSender $orderSender
+     * @param Data $helper
+     * @param UrlInterface $url
+     * @param OrderFactory $orderFactory
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param PaymentData $paymentData
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Logger $logger
+     * @param TransactionFactory $transactionFactory
+     * @param TransactionRepositoryInterface $transactionRepository
+     * @param CardFactory $cardFactory
+     * @param CardCollectionFactory $cardCollectionFactory
+     * @param CardResource $cardResource
+     * @param EncryptorInterface $encryptor
+     * @param Curl $curl
+     * @param BMLogger $bmLogger
+     * @param Collection $collection
+     * @param StoreManagerInterface $storeManager
+     * @param OrderRepositoryInterface $orderRepository
+     * @param OrderPaymentRepositoryInterface $paymentRepository
+     * @param Config $orderConfig
+     * @param GatewayFactory $gatewayFactory
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param array $data
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
         CollectionFactory $statusCollectionFactory,
@@ -213,6 +250,14 @@ class Payment extends AbstractMethod
         CardCollectionFactory $cardCollectionFactory,
         CardResource $cardResource,
         EncryptorInterface $encryptor,
+        Curl $curl,
+        BMLogger $bmLogger,
+        Collection $collection,
+        StoreManagerInterface $storeManager,
+        OrderRepositoryInterface $orderRepository,
+        OrderPaymentRepositoryInterface $paymentRepository,
+        Config $orderConfig,
+        GatewayFactory $gatewayFactory,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -226,6 +271,10 @@ class Payment extends AbstractMethod
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->cardResource = $cardResource;
         $this->encryptor = $encryptor;
+        $this->curl = $curl;
+        $this->bmLooger = $bmLogger;
+        $this->collection = $collection;
+        $this->websiteCode = $storeManager->getWebsite()->getCode();
 
         parent::__construct(
             $context,
@@ -242,6 +291,10 @@ class Payment extends AbstractMethod
 
         $this->transactionFactory = $transactionFactory;
         $this->transactionRepository = $transactionRepository;
+        $this->orderRepository = $orderRepository;
+        $this->paymentRepository = $paymentRepository;
+        $this->orderConfig = $orderConfig;
+        $this->gatewayFactory = $gatewayFactory;
     }
 
     /**
@@ -261,11 +314,25 @@ class Payment extends AbstractMethod
      */
     public function getUrlGateway()
     {
-        if ($this->getConfigData('test_mode')) {
-            return $this->getConfigData("test_address_url");
+        $testMode = $this->_scopeConfig->getValue(
+            'payment/bluepayment/test_mode',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+
+        if ($testMode) {
+            return $this->_scopeConfig->getValue(
+                'payment/bluepayment/test_address_url',
+                ScopeInterface::SCOPE_WEBSITE,
+                $this->websiteCode
+            );
         }
 
-        return $this->getConfigData("prod_address_url");
+        return $this->_scopeConfig->getValue(
+            'payment/bluepayment/prod_address_url',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
     }
 
     /**
@@ -293,12 +360,16 @@ class Payment extends AbstractMethod
         $currency      = $order->getOrderCurrencyCode();
 
         // Config
-        $serviceId     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-        $sharedKey     = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $cardGateway   = ConfigProvider::IFRAME_GATEWAY_ID;
-        $blikGateway   = ConfigProvider::BLIK_GATEWAY_ID;
-        $gpayGateway   = ConfigProvider::GPAY_GATEWAY_ID;
-        $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
+        $serviceId     = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $sharedKey     = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
 
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
@@ -323,26 +394,24 @@ class Payment extends AbstractMethod
         }
 
         /* Płatność iFrame */
-        if ($automatic === true && $cardGateway == $gatewayId) {
-            $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+        if ($automatic === true) {
+            switch ($gatewayId) {
+                case ConfigProvider::IFRAME_GATEWAY_ID:
+                    $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+                    break;
+                case ConfigProvider::BLIK_GATEWAY_ID == $gatewayId:
+                    $params['AuthorizationCode'] = $authorizationCode;
+                    break;
+                case ConfigProvider::GPAY_GATEWAY_ID == $gatewayId:
+                    $params['Description'] = '';
+                    $params['PaymentToken'] = base64_encode($paymentToken);
+                    break;
+            }
         }
 
         /* Automatic payment */
-        if ($autopayGateway == $gatewayId) {
+        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
             $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
-        }
-
-        /* BLIK */
-        if ($automatic === true && $blikGateway == $gatewayId) {
-            $params['AuthorizationCode'] = $authorizationCode;
-        }
-
-        /* Google Pay */
-        if ($automatic === true && $gpayGateway == $gatewayId) {
-            $desc = '';
-
-            $params['Description'] = $desc;
-            $params['PaymentToken'] = base64_encode($paymentToken);
         }
 
         $hashArray = array_values($this->sortParams($params));
@@ -405,7 +474,7 @@ class Payment extends AbstractMethod
     {
         if ($this->_validAllTransaction($response)) {
             $transaction_xml = $response->transactions->transaction;
-            return $this->updateStatusTransactionAndOrder($transaction_xml);
+            return $this->updateStatusTransactionAndOrder($transaction_xml, $response->serviceID);
         }
 
         return null;
@@ -433,7 +502,7 @@ class Payment extends AbstractMethod
                         break;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
 
@@ -444,7 +513,7 @@ class Payment extends AbstractMethod
      * @param SimpleXMLElement $data
      *
      * @return string
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws AlreadyExistsException
      */
     private function saveCardData($data)
     {
@@ -524,8 +593,11 @@ class Payment extends AbstractMethod
                 $currencies = \BlueMedia\BluePayment\Helper\Gateways::$currencies;
 
                 foreach ($currencies as $c) {
-                    if ($this->_scopeConfig->getValue("payment/bluepayment/".strtolower($c)."/service_id")
-                        == $response->serviceID) {
+                    if ($this->_scopeConfig->getValue(
+                        'payment/bluepayment/' . strtolower($c) . '/service_id',
+                            ScopeInterface::SCOPE_WEBSITE,
+                            $this->websiteCode
+                    ) == $response->serviceID) {
                         $currency = $c;
                         break;
                     }
@@ -533,10 +605,26 @@ class Payment extends AbstractMethod
             }
         }
 
-        $serviceId      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/service_id");
-        $sharedKey      = $this->_scopeConfig->getValue("payment/bluepayment/".strtolower($currency)."/shared_key");
-        $hashSeparator  = $this->_scopeConfig->getValue("payment/bluepayment/hash_separator");
-        $hashAlgorithm  = $this->_scopeConfig->getValue("payment/bluepayment/hash_algorithm");
+        $serviceId      = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $sharedKey      = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $hashSeparator  = $this->_scopeConfig->getValue(
+            'payment/bluepayment/hash_separator',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $hashAlgorithm  = $this->_scopeConfig->getValue(
+            'payment/bluepayment/hash_algorithm',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
 
         if ($serviceId != $response->serviceID) {
             return false;
@@ -553,61 +641,82 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * Sprawdza czy można zmienić status zamówienia oraz czy nie zostało już opłacone.
-     *
-     * @param Order $order
-     *
-     * @return boolean
-     */
-    public function isOrderChangable($order)
-    {
-        $status = $order->getStatus();
-        $unchangeableStatuses = explode(
-            ',',
-            $this->_scopeConfig->getValue("payment/bluepayment/unchangeable_statuses")
-        );
-
-        if (in_array($status, $unchangeableStatuses)) {
-            return false;
-        }
-
-        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
-        if ($statusAcceptPayment == '') {
-            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
-        }
-
-        $alreadyPaidBefore = false;
-        $orderStatusHistory = $order->getAllStatusHistory();
-        foreach ($orderStatusHistory as $historyStatus) {
-            if ($historyStatus->getStatus() == $statusAcceptPayment) {
-                if ($order->getTotalDue() == 0) {
-                    $alreadyPaidBefore = true;
-                }
-            }
-        }
-
-        return $alreadyPaidBefore == false;
-    }
-
-    /**
      * Aktualizacja statusu zamówienia, transakcji oraz wysyłka maila do klienta
      *
-     * @param SimpleXMLElement $transaction
+     * @param SimpleXMLElement $payment
      *
+     * @param int $serviceId
      * @return string
      */
-    protected function updateStatusTransactionAndOrder(SimpleXMLElement $transaction)
+    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, $serviceId = 0)
     {
-        $paymentStatus = (string)$transaction->paymentStatus;
+        $paymentStatus = (string)$payment->paymentStatus;
 
-        $remoteId = $transaction->remoteID;
-        $orderId = $transaction->orderID;
+        $remoteId = $payment->remoteID;
+        $orderId = $payment->orderID;
+        $gatewayId = $payment->gatewayID;
+
+        $gateway = $this->gatewayFactory->create()
+            ->addFieldToFilter('gateway_service_id', $serviceId)
+            ->addFieldToFilter('gateway_id', $gatewayId)
+            ->getFirstItem();
+
+        $this->saveTransactionResponse($payment);
+
+        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue(
+            'payment/bluepayment/unchangeable_statuses',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        ));
+
+        $statusAcceptPayment = $this->_scopeConfig->getValue(
+            'payment/bluepayment/status_accept_payment',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        if ($statusAcceptPayment == '') {
+            $statusAcceptPayment = $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+        }
+
+        switch ($paymentStatus) {
+            case self::PAYMENT_STATUS_SUCCESS:
+                $state = Order::STATE_PROCESSING;
+                $statusKey = 'status_accept_payment';
+                break;
+            case self::PAYMENT_STATUS_FAILURE:
+                $state = Order::STATE_CANCELED;
+                $statusKey = 'status_error_payment';
+                break;
+            case self::PAYMENT_STATUS_PENDING:
+            default:
+                $state = Order::STATE_PENDING_PAYMENT;
+                $statusKey = 'status_waiting_payment';
+                break;
+        }
+
+        $status = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . $statusKey,
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+
+        if ($status != '') {
+            foreach ($this->statusCollectionFactory->create()->joinStates() as $s) {
+                /** @var Status $s */
+                if ($s->getStatus() == $status) {
+                    $state = $s->getState();
+                }
+            }
+        } else {
+            $status = $this->orderConfig->getStateDefaultStatus($state);
+        }
+
+        $time1 = microtime(true);
+
         /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
 
-        $this->saveTransactionResponse($transaction);
-
-        /** @var \Magento\Sales\Model\Order\Payment|mixed|null $orderPayment */
+        /** @var Order\Payment|mixed|null $orderPayment */
         $orderPayment = $order->getPayment();
 
         if ($orderPayment === null) {
@@ -617,67 +726,76 @@ class Payment extends AbstractMethod
         /** @var string $orderPaymentState */
         $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
         $amount = $order->getGrandTotal();
-        $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
+        $formattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+        $changable = true;
+        if (in_array($order->getStatus(), $unchangeableStatuses)) {
+            $changable = false;
+        }
+        foreach ($order->getAllStatusHistory() as $historyStatus) {
+            if ($historyStatus->getStatus() == $statusAcceptPayment && $order->getTotalDue() == 0) {
+                $changable = false;
+            }
+        }
 
         try {
-            if ($this->isOrderChangable($order) && $orderPaymentState != $paymentStatus) {
+            if ($changable && $orderPaymentState != $paymentStatus) {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
-                    . ' | Amount: ' . $formaattedAmount
+                    . ' | Amount: ' . $formattedAmount
                     . ' | Status: ' . $paymentStatus;
+
+                $order->setState($state);
+                $order->addStatusToHistory($status, $orderComment, false);
+                $order->setBlueGatewayId((int) $gatewayId);
+                $order->setPaymentChannel($gateway->getData('gateway_name'));
+
+                $orderPayment->setTransactionId((string)$remoteId);
+                $orderPayment->prependMessage('[' . $paymentStatus . ']');
+                $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+                $orderPayment->setAdditionalInformation('bluepayment_gateway', (int)$gatewayId);
 
                 switch ($paymentStatus) {
                     case self::PAYMENT_STATUS_PENDING:
-                        $this->processPending(
-                            $order,
-                            $paymentStatus,
-                            $orderPaymentState,
-                            $orderPayment,
-                            $remoteId,
-                            $orderComment
-                        );
+                        $orderPayment->setIsTransactionPending(true);
                         break;
                     case self::PAYMENT_STATUS_SUCCESS:
-                        $this->processSuccess(
-                            $order,
-                            $orderPayment,
-                            $remoteId,
-                            $amount,
-                            $orderComment
-                        );
-                        break;
-                    case self::PAYMENT_STATUS_FAILURE:
-                        $this->processFailure(
-                            $order,
-                            $orderPaymentState,
-                            $paymentStatus,
-                            $orderComment
-                        );
+                        $orderPayment->registerCaptureNotification($amount);
+                        $orderPayment->setIsTransactionApproved(true);
+                        $orderPayment->setIsTransactionClosed(true);
                         break;
                     default:
                         break;
                 }
+
+                $this->paymentRepository->save($orderPayment);
+                $this->orderRepository->save($order);
             } else {
                 $orderComment =
                     '[BM] Transaction ID: ' . (string)$remoteId
                     . ' | Amount: ' . $amount
                     . ' | Status: ' . $paymentStatus . ' [IGNORED]';
 
-                $order->addStatusToHistory(
-                    $order->getStatus(),
-                    $orderComment,
-                    false
-                )
-                    ->save();
+                $order->addStatusToHistory($order->getStatus(), $orderComment, false);
+                $this->orderRepository->save($order);
             }
+
+            $time2 = microtime(true);
+
+            $this->bmLooger->info('PAYMENT:' . __LINE__, [
+                'orderID' => (string) $orderId,
+                'paymentStatus' => $paymentStatus,
+                'orderPaymentState' => $orderPaymentState,
+                'time' => round(($time2 - $time1)*1000, 2) . ' ms'
+            ]);
+
             if (!$order->getEmailSent()) {
                 $this->sender->send($order);
             }
-            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-            $orderPayment->save();
+
             return $this->returnConfirmation($order, self::TRANSACTION_CONFIRMED);
         } catch (Exception $e) {
-            $this->_logger->critical($e);
+            $this->bmLooger->critical($e);
         }
 
         return $this->returnConfirmation($order, self::TRANSACTION_NOTCONFIRMED);
@@ -711,8 +829,16 @@ class Payment extends AbstractMethod
     {
         $currency = $order->getOrderCurrencyCode();
 
-        $serviceId = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/service_id");
-        $sharedKey = $this->_scopeConfig->getValue("payment/bluepayment/" . strtolower($currency) . "/shared_key");
+        $serviceId = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $sharedKey = $this->_scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
         $hashData = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
@@ -753,8 +879,16 @@ class Payment extends AbstractMethod
      */
     private function recurringResponse($clientHash, $status)
     {
-        $serviceId        = $this->_scopeConfig->getValue("payment/bluepayment/pln/service_id");
-        $sharedKey        = $this->_scopeConfig->getValue("payment/bluepayment/pln/shared_key");
+        $serviceId        = $this->_scopeConfig->getValue(
+            'payment/bluepayment/pln/service_id',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
+        $sharedKey        = $this->_scopeConfig->getValue(
+            'payment/bluepayment/pln/shared_key',
+            ScopeInterface::SCOPE_WEBSITE,
+            $this->websiteCode
+        );
         $hashData = [$serviceId, $clientHash, $status, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
 
@@ -796,19 +930,19 @@ class Payment extends AbstractMethod
     {
         /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
-        $transaction->setOrderId($transactionResponse->orderID)
-            ->setRemoteId($transactionResponse->remoteID)
+        $transaction->setOrderId((string)$transactionResponse->orderID)
+            ->setRemoteId((string)$transactionResponse->remoteID)
             ->setAmount((float)$transactionResponse->amount)
-            ->setCurrency($transactionResponse->currency)
+            ->setCurrency((string)$transactionResponse->currency)
             ->setGatewayId((int)$transactionResponse->gatewayID)
-            ->setPaymentDate($transactionResponse->paymentDate)
-            ->setPaymentStatus($transactionResponse->paymentStatus)
-            ->setPaymentStatusDetails($transactionResponse->paymentStatusDetails);
+            ->setPaymentDate((string)$transactionResponse->paymentDate)
+            ->setPaymentStatus((string)$transactionResponse->paymentStatus)
+            ->setPaymentStatusDetails((string)$transactionResponse->paymentStatusDetails);
 
         try {
             $this->transactionRepository->save($transaction);
         } catch (CouldNotSaveException $e) {
-            $this->_logger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
+            $this->bmLooger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
         }
     }
 
@@ -843,139 +977,101 @@ class Payment extends AbstractMethod
         return $params;
     }
 
-    /**
-     * @param Order $order
-     * @param string $orderPaymentState
-     * @param string $paymentStatus
-     * @param string $orderComment
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function processFailure(
-        Order $order,
-        $orderPaymentState,
-        $paymentStatus,
-        $orderComment
-    ) {
-        $orderStatusErrorState = Order::STATE_PENDING_PAYMENT;
-        $statusErrorPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_error_payment');
-        if ($statusErrorPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var Status $status */
-                if ($status->getStatus() == $statusErrorPayment) {
-                    $orderStatusErrorState = $status->getState();
+    public function authorize(InfoInterface $payment, $amount)
+    {
+        /** @var Order $order */
+        $order = $payment->getOrder();
+        $ip = $order->getRemoteIp();
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'ip' => $ip,
+            'incrementId' => $order->getIncrementId()
+        ]);
+
+        /** Orders from admin panel has empty remote ip */
+        if ($order->getRemoteIp() === null) {
+            $params = $this->getFormRedirectFields($order);
+            $url = $this->getUrlGateway();
+
+            $response = $this->sendRequest($params, $url);
+            $remoteId = $response->traansactionId;
+            $redirecturl = $response->redirecturl;
+            $orderStatus = $response->status;
+
+            $unchangeableStatuses = explode(
+                ',',
+                $this->_scopeConfig->getValue(
+                    'payment/bluepayment/unchangeable_statuses',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $this->websiteCode
+                )
+            );
+            $statusWaitingPayment = $this->_scopeConfig->getValue(
+                'payment/bluepayment/status_waiting_payment',
+                ScopeInterface::SCOPE_WEBSITE,
+                $this->websiteCode
+            );
+
+            if ($statusWaitingPayment != '') {
+                $statusCollection = $this->collection;
+                $orderStatusWaitingState = Order::STATE_NEW;
+                foreach ($statusCollection->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusWaitingPayment) {
+                        $orderStatusWaitingState = $status->getState();
+                    }
                 }
+            } else {
+                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
             }
-        } else {
-            $statusErrorPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PAYMENT_REVIEW);
+
+            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+                $amount = $order->getGrandTotal();
+                $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+                $orderComment =
+                    '[BM] Transaction ID: ' . (string)$remoteId
+                    . ' | Amount: ' . $formaattedAmount
+                    . ' | Status: ' . $orderStatus
+                    . ' | URL: ' . $redirecturl;
+
+                $order->setState($orderStatusWaitingState)
+                    ->setStatus($statusWaitingPayment)
+                    ->addStatusToHistory(
+                        $statusWaitingPayment,
+                        $orderComment,
+                        false
+                    )
+                    ->save();
+            }
         }
 
-        if ($orderPaymentState != $paymentStatus) {
-            $order
-                ->setState($orderStatusErrorState)
-                ->setStatus($statusErrorPayment)
-                ->addStatusToHistory(
-                    $orderStatusErrorState,
-                    $orderComment,
-                    false
-                )
-                ->save();
-        }
+        return $this;
     }
 
     /**
-     * @param Order $order
-     * @param Order\Payment $orderPayment
-     * @param string $remoteId
-     * @param float $transactionAmount
-     * @param string $orderComment
+     * @param string $urlGateway
+     * @param array $params
      *
-     * @return void
-     * @throws Exception
+     * @return SimpleXMLElement|false
      */
-    protected function processSuccess(
-        Order $order,
-        Order\Payment $orderPayment,
-        $remoteId,
-        $transactionAmount,
-        $orderComment
-    ) {
-        $orderStatusAcceptState = Order::STATE_PROCESSING;
-        $statusAcceptPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_accept_payment');
-        if ($statusAcceptPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var Status $status */
-                if ($status->getStatus() == $statusAcceptPayment) {
-                    $orderStatusAcceptState = $status->getState();
-                }
-            }
+    private function sendRequest($params, $urlGateway)
+    {
+        if (array_key_exists('ClientHash', $params)) {
+            $this->curl->addHeader('BmHeader', 'pay-bm');
         } else {
-            $statusAcceptPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING);
+            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
         }
 
-        $transaction = $orderPayment->setTransactionId((string)$remoteId);
-        $transaction->prependMessage('[' . self::PAYMENT_STATUS_SUCCESS . ']');
-        $transaction->registerCaptureNotification($transactionAmount)
-            ->setIsTransactionApproved(true)
-            ->setIsTransactionClosed(true)
-            ->save();
-        $order->setState($orderStatusAcceptState)
-            ->setStatus($statusAcceptPayment)
-            ->addStatusToHistory(
-                $statusAcceptPayment,
-                $orderComment,
-                false
-            )
-            ->save();
-    }
+        $this->bmLooger->info('PAYMENT:' . __LINE__, ['params' => $params]);
 
-    /**
-     * @param Order $order
-     * @param string $paymentStatus
-     * @param string $orderPaymentState
-     * @param Order\Payment $orderPayment
-     * @param string $remoteId
-     * @param string $orderComment
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function processPending(
-        Order $order,
-        $paymentStatus,
-        $orderPaymentState,
-        Order\Payment $orderPayment,
-        $remoteId,
-        $orderComment
-    ) {
-        $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-        $statusWaitingPayment = $this->_scopeConfig->getValue('payment/bluepayment/status_waiting_payment');
-        if ($statusWaitingPayment != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $status) {
-                /** @var Status $status */
-                if ($status->getStatus() == $statusWaitingPayment) {
-                    $orderStatusWaitingState = $status->getState();
-                }
-            }
-        } else {
-            $statusWaitingPayment = $order->getConfig()->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
-        }
+        $this->curl->post($urlGateway, $params);
+        $response = $this->curl->getBody();
 
-        if ($paymentStatus != $orderPaymentState) {
-            $transaction = $orderPayment->setTransactionId((string)$remoteId);
-            $transaction->prependMessage('[' . self::PAYMENT_STATUS_PENDING . ']');
-            $transaction->setIsTransactionPending(true);
-            $transaction->save();
+        $this->bmLooger->info('PAYMENT:' . __LINE__, ['response' => $response]);
+        $xml = simplexml_load_string($response);
 
-            $order->setState($orderStatusWaitingState)
-                ->setStatus($statusWaitingPayment)
-                ->addStatusToHistory(
-                    $statusWaitingPayment,
-                    $orderComment,
-                    false
-                )
-                ->save();
-        }
+        return $xml;
     }
 }

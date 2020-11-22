@@ -45,6 +45,13 @@
             </argument>
         </arguments>
     </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="payment_channel" xsi:type="string">sales_order.payment_channel</item>
+            </argument>
+        </arguments>
+    </virtualType>
 
     <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface"
                 type="BlueMedia\BluePayment\Model\TransactionRepository"/>

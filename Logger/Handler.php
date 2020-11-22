@@ -8,7 +8,7 @@ use Magento\Framework\Logger\Handler\Base;
 class Handler extends Base
 {
     const LOG_FILE_NAME_PREFIX = 'BlueMedia';
-    const LOG_MAIN_DIR         = '/var/log';
+    const LOG_MAIN_DIR         = '/var/log/BlueMedia/';
     const LOG_FILE_DATE_FORMAT = 'Y-m-d';
 
     /**
