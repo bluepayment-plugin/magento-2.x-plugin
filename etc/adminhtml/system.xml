@@ -25,14 +25,6 @@
                     <label>Status error payment</label>
                     <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
-                <field id="status_full_refund" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Status full refund</label>
-                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
-                </field>
-                <field id="status_partial_refund" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Status partial refund</label>
-                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
-                </field>
                 <field id="unchangeable_statuses" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Unchangeable statuses</label>
                     <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
@@ -83,6 +75,18 @@
                     <label>Seconds to wait before redirect</label>
                     <validate>integer</validate>
                     <comment>How many second wait on intermediate page, before redirect to BM payment.</comment>
+                </field>
+                <field id="show_manual_refund" translate="label comment" type="select" sortOrder="630" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Show manual BM refund in order details</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="status_full_refund" translate="label" type="select" sortOrder="631" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Status full refund</label>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
+                </field>
+                <field id="status_partial_refund" translate="label" type="select" sortOrder="632" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Status partial refund</label>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
                 <group id="pln" translate="label" type="text" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>PLN configuration</label>

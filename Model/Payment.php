@@ -4,7 +4,9 @@ namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Block\Form;
+use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Helper\Refunds;
 use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
@@ -15,9 +17,12 @@ use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\DataObject;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
@@ -104,35 +109,49 @@ class Payment extends AbstractMethod
      * Czy ta opcja płatności może być pokazywana na stronie
      * płatności w zakupach typu 'checkout' ?
      *
-     * @var boolean
+     * @var bool
      */
     protected $_canUseCheckout = true;
 
     /**
      * Czy stosować tą metodę płatności dla opcji multi-dostaw ?
      *
-     * @var boolean
+     * @var bool
      */
     protected $_canUseForMultishipping = false;
 
     /**
      * Czy ta metoda płatności jest bramką (online auth/charge) ?
      *
-     * @var boolean
+     * @var bool
      */
     protected $_isGateway = false;
 
     /**
      * Możliwość użycia formy płatności z panelu administracyjnego
      *
-     * @var boolean
+     * @var bool
      */
     protected $_canUseInternal = true;
 
     /**
+     * Możliwość zwrotu on-line
+     *
+     * @var bool
+     */
+    protected $_canRefund = true;
+
+    /**
+     * Możliwość częściowego zwrotu
+     *
+     * @var bool
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * Czy wymagana jest inicjalizacja ?
      *
-     * @var boolean
+     * @var bool
      */
     protected $_isInitializeNeeded = false;
 
@@ -197,6 +216,9 @@ class Payment extends AbstractMethod
     /** @var GatewayFactory */
     private $gatewayFactory;
 
+    /** @var Refunds */
+    private $refunds;
+
     /**
      * Payment constructor.
      *
@@ -226,6 +248,7 @@ class Payment extends AbstractMethod
      * @param OrderPaymentRepositoryInterface $paymentRepository
      * @param Config $orderConfig
      * @param GatewayFactory $gatewayFactory
+     * @param Refunds $refunds
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
@@ -258,6 +281,7 @@ class Payment extends AbstractMethod
         OrderPaymentRepositoryInterface $paymentRepository,
         Config $orderConfig,
         GatewayFactory $gatewayFactory,
+        Refunds $refunds,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -295,6 +319,7 @@ class Payment extends AbstractMethod
         $this->paymentRepository = $paymentRepository;
         $this->orderConfig = $orderConfig;
         $this->gatewayFactory = $gatewayFactory;
+        $this->refunds = $refunds;
     }
 
     /**
@@ -1045,6 +1070,50 @@ class Payment extends AbstractMethod
                     )
                     ->save();
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param InfoInterface $payment
+     * @param float $amount
+     *
+     * @return Payment
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function refund(InfoInterface $payment, $amount)
+    {
+        try {
+            $order = $payment->getOrder();
+            $transaction = $this->transactionRepository->getSuccessTransactionFromOrder($order);
+            $result = $this->refunds->makeRefund($transaction, $amount, false);
+
+            if (isset($result['error']) && $result['error'] === true) {
+                $payment->setIsTransactionDenied(true);
+
+                throw new \Magento\Framework\Exception\LocalizedException($result['message']);
+            } else {
+                $payment->setIsTransactionApproved(true);
+            }
+        } catch (InputException $e) {
+            $payment->setIsTransactionDenied(true);
+
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('Order ID is mandatory.')
+            );
+        } catch (EmptyRemoteIdException $e) {
+            $payment->setIsTransactionDenied(true);
+
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('There is no succeeded payment transaction.')
+            );
+        } catch (NoSuchEntityException $e) {
+            $payment->setIsTransactionDenied(true);
+
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('There is no such order.')
+            );
         }
 
         return $this;
