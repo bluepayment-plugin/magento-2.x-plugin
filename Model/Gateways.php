@@ -79,7 +79,8 @@ class Gateways extends AbstractModel implements IdentityInterface, GatewaysInter
         if (in_array($this->getGatewayId(), [
             ConfigProvider::AUTOPAY_GATEWAY_ID,
             ConfigProvider::GPAY_GATEWAY_ID,
-            ConfigProvider::APPLE_PAY_GATEWAY_ID
+            ConfigProvider::APPLE_PAY_GATEWAY_ID,
+            ConfigProvider::CREDIT_GATEWAY_ID
         ])) {
             return true;
         }

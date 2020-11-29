@@ -154,7 +154,8 @@ class Info extends Generic implements TabInterface
         if (in_array($model->getGatewayId(), [
             ConfigProvider::AUTOPAY_GATEWAY_ID,
             ConfigProvider::GPAY_GATEWAY_ID,
-            ConfigProvider::APPLE_PAY_GATEWAY_ID
+            ConfigProvider::APPLE_PAY_GATEWAY_ID,
+            ConfigProvider::CREDIT_GATEWAY_ID
         ])) {
             $fieldset->addField('is_separated_method', 'select', [
                 'name' => 'is_separated_method',
