@@ -8,6 +8,7 @@ use BlueMedia\BluePayment\Model\Payment;
 use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Widget\Button;
 use Magento\Backend\Block\Widget\Context;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Sales\Block\Adminhtml\Order\View;
@@ -15,6 +16,7 @@ use Magento\Sales\Helper\Reorder;
 use Magento\Sales\Model\Config;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Order details buttons block
@@ -37,6 +39,11 @@ class Buttons extends View
     private $refundTransactionRepository;
 
     /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
      * Buttons constructor.
      *
      * @param Context $context
@@ -46,6 +53,7 @@ class Buttons extends View
      * @param OrderFactory $orderFactory
      * @param TransactionRepositoryInterface $transactionRepository
      * @param RefundTransactionRepositoryInterface $refundTransactionRepository
+     * @param ScopeConfigInterface $scopeConfig
      * @param array $data
      */
     public function __construct(
@@ -56,12 +64,14 @@ class Buttons extends View
         OrderFactory $orderFactory,
         TransactionRepositoryInterface $transactionRepository,
         RefundTransactionRepositoryInterface $refundTransactionRepository,
+        ScopeConfigInterface $scopeConfig,
         array $data = []
     ) {
         parent::__construct($context, $registry, $salesConfig, $reorderHelper, $data);
         $this->orderFactory = $orderFactory;
         $this->transactionRepository = $transactionRepository;
         $this->refundTransactionRepository = $refundTransactionRepository;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -108,8 +118,16 @@ class Buttons extends View
     {
         /** @var Order $order */
         $order = $this->orderFactory->create()->load((int)$orderId);
+        $websiteCode = $order->getStore()->getWebsite()->getCode();
 
-        return null !== $order->getPayment()->getLastTransId()
+        $showManualRefund = $this->scopeConfig->getValue(
+            'payment/bluepayment/show_manual_refund',
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteCode
+        );
+
+        return $showManualRefund
+            && null !== $order->getPayment()->getLastTransId()
             && $this->transactionRepository->orderHasSuccessTransaction($order)
             && !$this->hasOrderFullRefund($order)
             && $order->getPayment()->getMethod() === Payment::METHOD_CODE;

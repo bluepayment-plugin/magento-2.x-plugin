@@ -7,7 +7,8 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
 use Magento\Checkout\Model\ConfigProviderInterface;
-use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -21,6 +22,7 @@ class ConfigProvider implements ConfigProviderInterface
     const GPAY_GATEWAY_ID = 1512;
     const APPLE_PAY_GATEWAY_ID = 1513;
     const AUTOPAY_GATEWAY_ID = 1503;
+    const CREDIT_GATEWAY_ID = 700;
 
     /** @var GatewaysCollection */
     private $gatewaysCollection;
@@ -40,8 +42,11 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var ScopeConfigInterface */
     private $scopeConfig;
 
-    /** @var Session */
-    private $session;
+    /** @var CustomerSession */
+    private $customerSession;
+
+    /** @var CheckoutSession */
+    private $checkoutSession;
 
     /** @var CardCollectionFactory */
     private $cardCollectionFactory;
@@ -58,6 +63,7 @@ class ConfigProvider implements ConfigProviderInterface
         1512, // Google Pay
         1513, // Apple Pay
         1511, // Visa Checkout
+        700, // Smartney
         106, // Tylko na teście
         68, // Płać z ING
         1808, // Płatność z ING
@@ -112,7 +118,8 @@ class ConfigProvider implements ConfigProviderInterface
      * @param PriceCurrencyInterface $priceCurrency
      * @param Logger $logger
      * @param ScopeConfigInterface $scopeConfig
-     * @param Session $session ,
+     * @param CustomerSession $customerSession
+     * @param CheckoutSession $checkoutSession
      * @param CardCollectionFactory $cardCollectionFactory
      * @param StoreManagerInterface $storeManager
      */
@@ -122,7 +129,8 @@ class ConfigProvider implements ConfigProviderInterface
         PriceCurrencyInterface $priceCurrency,
         Logger $logger,
         ScopeConfigInterface $scopeConfig,
-        Session $session,
+        CustomerSession $customerSession,
+        CheckoutSession $checkoutSession,
         CardCollectionFactory $cardCollectionFactory,
         StoreManagerInterface $storeManager
     )
@@ -132,7 +140,8 @@ class ConfigProvider implements ConfigProviderInterface
         $this->priceCurrency = $priceCurrency;
         $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
-        $this->session = $session;
+        $this->customerSession = $customerSession;
+        $this->checkoutSession = $checkoutSession;
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->storeManager = $storeManager;
     }
@@ -173,8 +182,12 @@ class ConfigProvider implements ConfigProviderInterface
             /** @var Gateways $gateway */
             foreach ($gatewaysCollection as $gateway) {
                 if ($gateway->isActive()) {
-                    // AutoPay only for logger users
-                    if ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->session->isLoggedIn()) {
+                    $amount = $this->checkoutSession->getQuote()->getGrandTotal();
+
+                    if (
+                        ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
+                        && ($gateway->getGatewayId() != self::CREDIT_GATEWAY_ID || ($amount >= 200 && $amount <= 1500)) // Credit for 200-1500zł
+                    ) {
                         if ($gateway->getIsSeparatedMethod()) {
                             $resultSeparated[] = $this->prepareGatewayStructure($gateway, $websiteCode);
                         } else {
@@ -338,7 +351,7 @@ class ConfigProvider implements ConfigProviderInterface
 
         /** @var Card[] $cards */
         $cards = $collection
-            ->addFieldToFilter('customer_id', (string)$this->session->getCustomerId())
+            ->addFieldToFilter('customer_id', (string)$this->customerSession->getCustomerId())
             ->load();
 
         $return = [];

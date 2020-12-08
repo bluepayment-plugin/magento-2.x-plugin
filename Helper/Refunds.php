@@ -98,7 +98,7 @@ class Refunds extends Data
      * @return array
      * @throws EmptyRemoteIdException
      */
-    public function makeRefund($transaction, $amount = null)
+    public function makeRefund($transaction, $amount = null, $addTransaction = true)
     {
         if (null === $transaction || empty($transaction->getRemoteId())) {
             throw new EmptyRemoteIdException();
@@ -164,7 +164,10 @@ class Refunds extends Data
                     'message' => __('Invalid response hash!'),
                 ];
             } else {
-                $this->processResponse($loadResult, $amount, $transaction, $order);
+                if ($addTransaction) {
+                    $this->processResponse($loadResult, $amount, $transaction, $order);
+                }
+
                 $result = [
                     'success' => true,
                 ];

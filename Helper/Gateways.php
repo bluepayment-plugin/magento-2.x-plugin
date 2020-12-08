@@ -253,7 +253,8 @@ class Gateways extends Data
                     if (in_array($gateway['gatewayID'], [
                         ConfigProvider::AUTOPAY_GATEWAY_ID,
                         ConfigProvider::GPAY_GATEWAY_ID,
-                        ConfigProvider::APPLE_PAY_GATEWAY_ID
+                        ConfigProvider::APPLE_PAY_GATEWAY_ID,
+                        ConfigProvider::CREDIT_GATEWAY_ID
                     ])) {
                         $gatewayModel->setData('is_separated_method', '1');
                     }
