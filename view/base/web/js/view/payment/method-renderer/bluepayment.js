@@ -9,7 +9,7 @@ define([
         'BlueMedia_BluePayment/js/checkout-data',
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
-        'Magento_CheckoutAgreements/js/model/agreement-validator',
+        'Magento_Checkout/js/model/payment/additional-validators'
     ], function ($,
                  _,
                  ko,
@@ -20,7 +20,7 @@ define([
                  checkoutData,
                  modal,
                  blikTpl,
-                 agreementValidator
+                 additionalValidators
     ) {
         'use strict';
         var widget;
@@ -218,7 +218,7 @@ define([
              * @return {Boolean}
              */
             validate: function () {
-                if (! agreementValidator.validate()) {
+                if (! additionalValidators.validate()) {
                     return false;
                 }
 
