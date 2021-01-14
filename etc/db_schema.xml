@@ -20,6 +20,10 @@
     <constraint xsi:type="primary" referenceId="PRIMARY">
       <column name="entity_id"/>
     </constraint>
+<!--    <constraint xsi:type="unique" referenceId="BLUE_GATEWAYS_UNIQUE_SERVICE_ID_GATEWAY_IDPlugin/SalesOrderGrid.php">-->
+<!--      <column name="gateway_service_id"/>-->
+<!--      <column name="gateway_id"/>-->
+<!--    </constraint>-->
   </table>
   <table name="blue_transaction" resource="default" engine="innodb" comment="blue_transaction">
     <column xsi:type="int" name="transaction_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>

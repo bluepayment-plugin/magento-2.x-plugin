@@ -71,5 +71,16 @@
             "BLUE_CARD_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
             "BLUE_CARD_CLIENT_HASH": true
         }
+    },
+    "sales_order": {
+        "column": {
+            "blue_gateway_id": true,
+            "payment_channel": true
+        }
+    },
+    "sales_order_grid": {
+        "column": {
+            "payment_channel": true
+        }
     }
 }
