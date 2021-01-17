@@ -167,20 +167,23 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $websiteCode = $this->storeManager->getWebsite()->getCode();
+            $website = $this->storeManager->getWebsite();
+            $websiteId = $website->getId();
+            $websiteCode = $website->getCode();
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/service_id',
                 ScopeInterface::SCOPE_WEBSITE,
                 $websiteCode
             );
 
-            $gatewaysCollection = $this->gatewaysCollection
+            $gateways = $this->gatewaysCollection
+                ->addFilter('website_id', $websiteId)
                 ->addFilter('gateway_service_id', $serviceId)
                 ->addFilter('gateway_currency', $currency)
                 ->load();
 
             /** @var Gateways $gateway */
-            foreach ($gatewaysCollection as $gateway) {
+            foreach ($gateways as $gateway) {
                 if ($gateway->isActive()) {
                     $amount = $this->checkoutSession->getQuote()->getGrandTotal();
 
@@ -200,7 +203,7 @@ class ConfigProvider implements ConfigProviderInterface
             $this->sortGateways($result);
             $this->sortGateways($resultSeparated);
 
-            $activeGateways = [
+            $this->activeGateways[$currency] = [
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
@@ -221,8 +224,6 @@ class ConfigProvider implements ConfigProviderInterface
                     $websiteCode
                 )
             ];
-
-            $this->activeGateways[$currency] = $activeGateways;
         }
 
         return $this->activeGateways[$currency];
@@ -310,15 +311,15 @@ class ConfigProvider implements ConfigProviderInterface
      */
     private function sortGateways(&$array)
     {
-        $defaultSortOrder = $this->defaultSortOrder;
+        $sortOrder = $this->defaultSortOrder;
 
-        usort($array, function ($a, $b) use ($defaultSortOrder) {
+        usort($array, function ($a, $b) use ($sortOrder) {
             $aPos = (int)$a['sort_order'];
             $bPos = (int)$b['sort_order'];
 
             if ($aPos == $bPos) {
-                $aPos = array_search($a["gateway_id"], $defaultSortOrder);
-                $bPos = array_search($b["gateway_id"], $defaultSortOrder);
+                $aPos = array_search($a["gateway_id"], $sortOrder);
+                $bPos = array_search($b["gateway_id"], $sortOrder);
 
                 if ($aPos === false) {
                     // New gateway
