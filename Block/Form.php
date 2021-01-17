@@ -11,9 +11,6 @@ class Form extends \Magento\Payment\Block\Form
     /** @var string */
     protected $_template = 'BlueMedia_BluePayment::bluepayment/form.phtml';
 
-    /** @var array|Collection */
-    private $gatewayList = [];
-
     /** @var CollectionFactory */
     private $collectionFactory;
 

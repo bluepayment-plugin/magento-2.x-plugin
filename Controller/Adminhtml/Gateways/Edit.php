@@ -15,7 +15,7 @@ class Edit extends Gateways
      */
     public function execute()
     {
-        $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
+        $gatewaysId = (int)$this->getRequest()->getParam('entity_id', 0);
         /** @var \BlueMedia\BluePayment\Model\Gateways $model */
         $model = $this->gatewaysFactory->create();
 

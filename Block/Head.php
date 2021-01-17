@@ -20,6 +20,7 @@ class Head extends Template
     /**
      * @param Context $context
      * @param CollectionFactory $gatewayFactory
+     * @param PriceCurrencyInterface $priceCurrency
      * @param array $data
      */
     public function __construct(
