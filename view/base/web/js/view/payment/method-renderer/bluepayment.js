@@ -51,6 +51,7 @@ define([
             blikModal: modal({
                 title: 'Potwierdź transakcję BLIK',
                 autoOpen: false,
+                clickableOverlay: false,
                 buttons: [],
                 type: 'popup',
                 popupTpl: blikTpl,
@@ -456,6 +457,7 @@ define([
             GPayModal: modal({
                 title: 'Oczekiwanie na potwierdzenie transakcji.',
                 autoOpen: false,
+                clickableOverlay: false,
                 buttons: [],
                 type: 'popup',
                 popupTpl: blikTpl,
