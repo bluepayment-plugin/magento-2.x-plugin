@@ -4,10 +4,11 @@ namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Backend\Model\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 
-class Index extends Action
+class Index extends Action implements HttpGetActionInterface
 {
     /** @var PageFactory */
     public $resultPageFactory;
@@ -25,8 +26,9 @@ class Index extends Action
         Context $context,
         PageFactory $resultPageFactory
     ) {
-        parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
+
+        parent::__construct($context);
     }
 
     /**
@@ -44,40 +46,10 @@ class Index extends Action
      */
     public function execute()
     {
-        $this->_setPageData();
+        $page = $this->resultPageFactory->create();
+        $page->setActiveMenu('BlueMedia_BluePayment::gateways');
+        $page->getConfig()->getTitle()->prepend((__('Gateways')));
 
-        return $this->getResultPage();
-    }
-
-    /**
-     * @return $this
-     */
-    public function _setPageData()
-    {
-        $resultPage = $this->getResultPage();
-        $resultPage->setActiveMenu('BlueMedia_BluePayment::gateways');
-        $resultPage->getConfig()->getTitle()->prepend((__('Gateways')));
-
-        $resultPage->addBreadcrumb(__('BlueMedia'), __('BlueMedia'));
-        $resultPage->addBreadcrumb(__('Gateways'), __('Manage Gateways'));
-
-        return $this;
-    }
-
-    /**
-     * Returns created page
-     *
-     * @return Page
-     */
-    public function getResultPage()
-    {
-        if ($this->resultPage === null) {
-            /** @var Page $resultPage */
-            $resultPage = $this->resultPageFactory->create();
-
-            $this->resultPage = $resultPage;
-        }
-
-        return $this->resultPage;
+        return $page;
     }
 }

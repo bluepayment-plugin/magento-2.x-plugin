@@ -39,11 +39,7 @@ $img = $block->getLogoSrc();
 
         var $bluepaymentInput = jQuery('#p_method_bluepayment');
         if ($bluepaymentInput.length) {
-            setDefauleDisplayGateways($bluepaymentInput);
-
-//            jQuery('.input [name="payment[method]"]').each.change(function () {
-//                showHideGateways();
-//            });
+            setDefaultDisplayGateways($bluepaymentInput);
 
             jQuery('input:radio[name="payment[method]"]').change(function () {
                 if (jQuery(this).val() === 'bluepayment') {
@@ -55,7 +51,7 @@ $img = $block->getLogoSrc();
         }
     });
 
-    function setDefauleDisplayGateways(input) {
+    function setDefaultDisplayGateways(input) {
         if ($gateways.length) {
             $gateways.find('input:radio').each(function () {
                 jQuery(this).prop('disabled', false);

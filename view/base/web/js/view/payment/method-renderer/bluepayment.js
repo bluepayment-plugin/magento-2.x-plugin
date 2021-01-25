@@ -9,7 +9,7 @@ define([
         'BlueMedia_BluePayment/js/checkout-data',
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
-        'Magento_CheckoutAgreements/js/model/agreement-validator',
+        'Magento_Checkout/js/model/payment/additional-validators'
     ], function ($,
                  _,
                  ko,
@@ -20,7 +20,7 @@ define([
                  checkoutData,
                  modal,
                  blikTpl,
-                 agreementValidator
+                 additionalValidators
     ) {
         'use strict';
         var widget;
@@ -51,6 +51,7 @@ define([
             blikModal: modal({
                 title: 'Potwierdź transakcję BLIK',
                 autoOpen: false,
+                clickableOverlay: false,
                 buttons: [],
                 type: 'popup',
                 popupTpl: blikTpl,
@@ -115,7 +116,9 @@ define([
                     // window.location.href = redirectUrl;
                 };
 
-                this.initGPay();
+                if (typeof google.payments !== 'undefined') {
+                    this.initGPay();
+                }
             },
             defaults: {
                 template: 'BlueMedia_BluePayment/payment/bluepayment',
@@ -218,7 +221,7 @@ define([
              * @return {Boolean}
              */
             validate: function () {
-                if (! agreementValidator.validate()) {
+                if (! additionalValidators.validate()) {
                     return false;
                 }
 
@@ -454,6 +457,7 @@ define([
             GPayModal: modal({
                 title: 'Oczekiwanie na potwierdzenie transakcji.',
                 autoOpen: false,
+                clickableOverlay: false,
                 buttons: [],
                 type: 'popup',
                 popupTpl: blikTpl,

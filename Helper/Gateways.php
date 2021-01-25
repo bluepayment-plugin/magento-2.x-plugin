@@ -34,7 +34,7 @@ class Gateways extends Data
     /** @var GatewaysFactory */
     public $gatewaysFactory;
 
-    /** @var \Zend\Log\Logger */
+    /** @var Logger */
     public $logger;
 
     /** @var Email */
@@ -98,9 +98,10 @@ class Gateways extends Data
     public function syncGateways()
     {
         $result = [];
-        $existingGateways = $this->getSimpleGatewaysList();
 
         foreach ($this->storeManager->getWebsites() as $website) {
+            $existingGateways = $this->getSimpleGatewaysList();
+
             $hashMethod = $this->scopeConfig->getValue(
                 'payment/bluepayment/hash_algorithm',
                 ScopeInterface::SCOPE_WEBSITE,
@@ -137,6 +138,7 @@ class Gateways extends Data
                         if ($loadResult) {
                             $result['success'] = $this->saveGateways(
                                 $serviceId,
+                                $website->getId(),
                                 (array)$loadResult,
                                 $existingGateways,
                                 $currency
@@ -213,13 +215,14 @@ class Gateways extends Data
 
     /**
      * @param integer $serviceId
+     * @param integer $websiteId
      * @param array $gatewayList
      * @param array $existingGateways
      * @param string $currency
      *
      * @return bool
      */
-    public function saveGateways($serviceId, $gatewayList, $existingGateways, $currency = 'PLN')
+    public function saveGateways($serviceId, $websiteId, $gatewayList, $existingGateways, $currency = 'PLN')
     {
         $currentlyActiveGatewayIDs = [];
 
@@ -239,11 +242,12 @@ class Gateways extends Data
                     && isset($gateway['bankName'])
                     && isset($gateway['statusDate'])
                 ) {
-                    $currentlyActiveGatewayIDs[] = $gateway['gatewayID'];
+                    $gatewayId = $gateway['gatewayID'];
+                    $currentlyActiveGatewayIDs[] = $gatewayId;
 
-                    if (isset($existingGateways[$serviceId][$currency][$gateway['gatewayID']])) {
+                    if (isset($existingGateways[$websiteId][$currency][$gatewayId])) {
                         $gatewayModel = $this->gatewaysFactory->create();
-                        $gatewayModel->load($existingGateways[$serviceId][$currency][$gateway['gatewayID']]['entity_id']);
+                        $gatewayModel->load($existingGateways[$websiteId][$currency][$gatewayId]['entity_id']);
                     } else {
                         $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
@@ -259,6 +263,7 @@ class Gateways extends Data
                         $gatewayModel->setData('is_separated_method', '1');
                     }
 
+                    $gatewayModel->setData('website_id', $websiteId);
                     $gatewayModel->setData('gateway_service_id', $serviceId);
                     $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
@@ -277,8 +282,8 @@ class Gateways extends Data
             }
 
             $disabledGateways = [];
-            if (isset($existingGateways[$serviceId])) {
-                foreach ($existingGateways[$serviceId][$currency] as $existingGatewayId => $existingGatewayData) {
+            if (isset($existingGateways[$websiteId])) {
+                foreach ($existingGateways[$websiteId][$currency] as $existingGatewayId => $existingGatewayData) {
                     if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
                         && $existingGatewayData['gateway_status'] != 0
                     ) {
@@ -322,28 +327,42 @@ class Gateways extends Data
             }
         }
 
-        foreach ($bluegatewaysCollection as $blueGateways) {
-            $serviceId = $blueGateways->getData('gateway_service_id');
-            $currency = $blueGateways->getData('gateway_currency');
+        $defaultWebsite = $this->storeManager->getDefaultStoreView()->getWebsiteId();
+
+        foreach ($bluegatewaysCollection as $gateway) {
+            /** @var \BlueMedia\BluePayment\Model\Gateways $gateway */
+
+            $websiteId = $gateway->getData('website_id') ?? $defaultWebsite;
+            $serviceId = $gateway->getData('gateway_service_id');
+            $currency = $gateway->getData('gateway_currency');
+            $gatewayId = $gateway->getData('gateway_id');
+
+            if (isset($existingGateways[$websiteId][$currency][$gatewayId])) {
+                // Remove duplicates
+                $gateway->delete();
+                continue;
+            }
 
             if ($serviceId == 0 && isset($globalServiceIds[$currency])) {
                 $serviceId = $globalServiceIds[$currency];
             }
 
-            $existingGateways[$serviceId][$blueGateways->getData('gateway_currency')][$blueGateways->getData('gateway_id')] = [
-                'entity_id' => $blueGateways->getId(),
+            $existingGateways[$websiteId][$currency][$gatewayId] = [
+                'entity_id' => $gateway->getId(),
+                'website_id' => $websiteId,
+                'gateway_id' => $gatewayId,
                 'gateway_service_id' => $serviceId,
                 'gateway_currency' => $currency,
-                'gateway_status' => $blueGateways->getData('gateway_status'),
-                'bank_name' => $blueGateways->getData('bank_name'),
-                'gateway_name' => $blueGateways->getData('gateway_name'),
-                'gateway_description' => $blueGateways->getData('gateway_description'),
-                'gateway_sort_order' => $blueGateways->getData('gateway_sort_order'),
-                'gateway_type' => $blueGateways->getData('gateway_type'),
-                'gateway_logo_url' => $blueGateways->getData('gateway_logo_url'),
-                'use_own_logo' => $blueGateways->getData('use_own_logo'),
-                'gateway_logo_path' => $blueGateways->getData('gateway_logo_path'),
-                'status_date' => $blueGateways->getData('status_date'),
+                'gateway_status' => $gateway->getData('gateway_status'),
+                'bank_name' => $gateway->getData('bank_name'),
+                'gateway_name' => $gateway->getData('gateway_name'),
+                'gateway_description' => $gateway->getData('gateway_description'),
+                'gateway_sort_order' => $gateway->getData('gateway_sort_order'),
+                'gateway_type' => $gateway->getData('gateway_type'),
+                'gateway_logo_url' => $gateway->getData('gateway_logo_url'),
+                'use_own_logo' => $gateway->getData('use_own_logo'),
+                'gateway_logo_path' => $gateway->getData('gateway_logo_path'),
+                'status_date' => $gateway->getData('status_date'),
             ];
         }
 

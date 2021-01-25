@@ -92,6 +92,12 @@ class Info extends Generic implements TabInterface
         if ($model->getId()) {
             $fieldset->addField('entity_id', 'hidden', ['name' => 'id']);
         }
+        $fieldset->addField('website_id', 'text', [
+            'name'     => 'website_id',
+            'label'    => __('Website ID'),
+            'required' => true,
+            'disabled' => true,
+        ]);
         $fieldset->addField('gateway_status', 'select', [
             'name'     => 'gateway_status',
             'label'    => __('Gateway Status'),
