@@ -11,7 +11,7 @@
     "ext-curl": "*"
   },
   "type": "magento2-module",
-  "version": "2.13.4",
+  "version": "2.13.5",
   "autoload": {
     "files": [
       "registration.php"
