@@ -4,6 +4,7 @@
         <policy id="img-src">
             <values>
                 <value id="img_bm" type="host">platnosci.bm.pl</value>
+                <value id="img_gpay" type="host">www.gstatic.com</value>
             </values>
         </policy>
         <policy id="script-src">
@@ -13,9 +14,22 @@
                 <value id="script_gpay" type="host">pay.google.com</value>
             </values>
         </policy>
+        <policy id="style-src">
+            <values>
+                <value id="style_bm_pay_accept" type="host">pay-accept.bm.pl</value>
+                <value id="style_bm_pay_prod" type="host">pay.bm.pl</value>
+                <value id="style_bm_cards_accept" type="host">cards-accept.bm.pl</value>
+                <value id="style_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="style_google_apis" type="host">*.googleapis.com</value>
+            </values>
+        </policy>
         <policy id="frame-src">
             <values>
                 <value id="frame_gpay" type="host">pay.google.com</value>
+                <value id="frame_bm_pay_accept" type="host">pay-accept.bm.pl</value>
+                <value id="frame_bm_pay_prod" type="host">pay.bm.pl</value>
+                <value id="frame_bm_cards_accept" type="host">cards-accept.bm.pl</value>
+                <value id="frame_bm_cards_prod" type="host">cards.bm.pl</value>
             </values>
         </policy>
     </policies>
