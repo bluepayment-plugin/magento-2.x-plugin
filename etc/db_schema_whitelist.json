@@ -2,6 +2,7 @@
     "blue_gateways": {
         "column": {
             "entity_id": true,
+            "website_id": true,
             "gateway_service_id": true,
             "gateway_currency": true,
             "gateway_status": true,
@@ -19,7 +20,9 @@
             "force_disable": true
         },
         "constraint": {
-            "PRIMARY": true
+            "PRIMARY": true,
+            "BLUE_GATEWAYS_WEBSITE_ID_WEBSITE_WEBSITE_ID": true,
+            "BLUE_GATEWAYS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true
         }
     },
     "blue_transaction": {
