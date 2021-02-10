@@ -27,6 +27,11 @@ define([
         var redirectUrl;
 
         return Component.extend({
+            defaults: {
+                template: 'BlueMedia_BluePayment/payment/bluepayment',
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+            },
+
             ordered: false,
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
@@ -76,6 +81,8 @@ define([
                 widget = this;
                 this._super();
 
+                console.log(quote.getQuoteId());
+
                 var blueMediaPayment = checkoutData.getBlueMediaPaymentMethod();
                 if (blueMediaPayment && quote.paymentMethod()) {
                     if (quote.paymentMethod().method === 'bluepayment') {
@@ -119,10 +126,6 @@ define([
                 if (typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
-            },
-            defaults: {
-                template: 'BlueMedia_BluePayment/payment/bluepayment',
-                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);

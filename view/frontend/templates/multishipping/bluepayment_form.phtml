@@ -1,0 +1,44 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<script>
+    require([
+        'uiLayout',
+        'jquery'
+    ], function (layout, $) {
+        $(function () {
+            var paymentMethodData = {
+                method: 'bluepayment'
+            };
+            layout([
+                {
+                    component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment',
+                    name: 'payment_method_bluepayment',
+                    method: paymentMethodData.method,
+                    item: paymentMethodData
+                }
+            ]);
+
+            $('body').trigger('contentUpdated');
+        })
+    })
+</script>
+
+<ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+    <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}">
+        <input required
+               data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+               name="payment_method_bluepayment_gateway"
+               class="radio"
+               data-validate="{'validate-one-required-by-name':true}"
+               type="radio"/>
+        <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
+            <img data-bind="attr:{src: logo_url,alt: name}"
+                 class="payment-logo"/>
+        </label>
+    </li>
+</ul>
+<!-- ko template: getTemplate() --><!-- /ko -->

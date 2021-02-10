@@ -114,13 +114,6 @@ class Payment extends AbstractMethod
     protected $_canUseCheckout = true;
 
     /**
-     * Czy stosować tą metodę płatności dla opcji multi-dostaw ?
-     *
-     * @var bool
-     */
-    protected $_canUseForMultishipping = false;
-
-    /**
      * Czy ta metoda płatności jest bramką (online auth/charge) ?
      *
      * @var bool
