@@ -9,7 +9,7 @@
                 <title>Online payment BM</title>
                 <title_automatic>Title Automatic Gateway</title_automatic>
                 <title_blik>BLIK</title_blik>
-                <payment_action>authorize</payment_action>
+                <payment_action>order</payment_action>
                 <allowspecific>0</allowspecific>
                 <test_address_url>https://pay-accept.bm.pl/payment</test_address_url>
                 <prod_address_url>https://pay.bm.pl/payment</prod_address_url>

@@ -1,6 +1,6 @@
 {
-  "name": "bm/bluepayment",
-  "description": "BM payment gateway.",
+  "name": "bluemedia/module-bluepayment",
+  "description": "BM payment gateway for Magento 2.",
   "require": {
     "magento/framework": "^102||^103",
     "magento/module-config": "101.0.*||101.1.*||^101.2.0",
@@ -11,7 +11,7 @@
     "ext-curl": "*"
   },
   "type": "magento2-module",
-  "version": "2.13.4",
+  "version": "2.13.6",
   "autoload": {
     "files": [
       "registration.php"

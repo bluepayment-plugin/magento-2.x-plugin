@@ -155,8 +155,8 @@ class Payment extends AbstractMethod
      */
     protected $_isInitializeNeeded = false;
 
-    protected $_canAuthorize = true;
-
+    protected $_canOrder = true;
+    protected $_canAuthorize = false;
     protected $_canCapture = false;
 
     /** @var OrderFactory */
@@ -1002,7 +1002,7 @@ class Payment extends AbstractMethod
         return $params;
     }
 
-    public function authorize(InfoInterface $payment, $amount)
+    public function order(InfoInterface $payment, $amount)
     {
         /** @var Order $order */
         $order = $payment->getOrder();
