@@ -14,7 +14,7 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
   - Na stronie sklepu – zintegrowany, Klient przenoszony jest od razu do banku lub na stronę płatności kartą.
 
 ### Wymagania
-- Wersja Magento: 2.4.0 – 2.4.1.
+- Wersja Magento: 2.3.0 – 2.4.1.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ## Opis zmian
