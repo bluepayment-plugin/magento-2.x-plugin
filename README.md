@@ -19,6 +19,18 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.13.6
+- Odblokowanie Google Pay dla wszystkich walut.
+
+### Wersja 2.13.5
+- Poprawiono składanie zamówienia – metoda order zamiast authorize.
+- Poprawiono db_schema.
+- Zaktualizowano Content Security Policy.
+- Zaktualizowano composer.json.
+
+### Wersja 2.13.4
+- Poprawiono składanie zamówienia – metoda order zamiast authorize.
+
 ### Wersja 2.13.3
 - Poprawiono moduł konfiguracji kanałów płatności.
 - Poprawiono synchronizację kanałów dla wielu witryn.
