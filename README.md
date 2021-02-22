@@ -117,7 +117,7 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 ### Poprzez composera
 1. Wykonać komendę:
 ```
-composer require bluemedia/module-bluepayment
+composer require bluepayment-plugin/module-bluepayment
 ```
 2. Przejść do aktywacji modułu
 
@@ -310,7 +310,7 @@ Szablon, który jest wykorzystywany: `view/frontend/templates/redirect.phtml`
 ### Przez composera
 1. Wykonać komendę
 ```bash
-composer update bluemedia/module-bluepayment
+composer update bluepayment-plugin/module-bluepayment
 bin/magento setup:upgrade
 bin/magento setup:di:compile
 bin/magento cache:flush

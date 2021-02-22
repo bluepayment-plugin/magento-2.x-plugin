@@ -1,5 +1,5 @@
 {
-  "name": "bluemedia/module-bluepayment",
+  "name": "bluepayment-plugin/module-bluepayment",
   "description": "BM payment gateway for Magento 2.",
   "require": {
     "magento/framework": "^102||^103",
