@@ -82,23 +82,18 @@ class Webapi extends Data
 
         $url = $store->getBaseUrl();
         $merchantDomain = $this->zendUri->parse($url)->getHost();
-
         $currency = $store->getCurrentCurrency()->getCode();
 
-        if (in_array($currency, ['PLN', 'EUR'])) {
-            $serviceId = $this->getConfigValue('service_id', $currency);
-            $sharedKey = $this->getConfigValue('shared_key', $currency);
+        $serviceId = $this->getConfigValue('service_id', $currency);
+        $sharedKey = $this->getConfigValue('shared_key', $currency);
 
-            return $this->callAPI(
-                $hashMethod,
-                $serviceId,
-                $merchantDomain,
-                $sharedKey,
-                $GPayMerchantInfoURL
-            );
-        } else {
-            return false;
-        }
+        return $this->callAPI(
+            $hashMethod,
+            $serviceId,
+            $merchantDomain,
+            $sharedKey,
+            $GPayMerchantInfoURL
+        );
     }
 
     /**
