@@ -410,6 +410,7 @@ class Payment extends AbstractMethod
 
         /* Ustawiona ważność linku */
         if ($validityTime) {
+            $params['LinkValidityTime'] = $validityTime;
             $params['ValidityTime'] = $validityTime;
         }
 
@@ -472,8 +473,9 @@ class Payment extends AbstractMethod
      */
     private function getTransactionLifeHours()
     {
-        $hours = $this->getConfigData('transaction_life_hours');
-        if ($hours && is_int($hours) && $hours >= 1 && $hours <= 720) {
+        $hours = (int) $this->getConfigData('transaction_life_hours');
+
+        if ($hours && $hours >= 1 && $hours <= 720) {
             date_default_timezone_set('Europe/Warsaw');
             $time = strtotime("+" . $hours . " hour");
 

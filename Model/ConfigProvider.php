@@ -161,15 +161,30 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getActiveGateways()
     {
+        $website = $this->storeManager->getWebsite();
+        $websiteId = $website->getId();
+        $websiteCode = $website->getCode();
+
+        $gatewaySelection = (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/gateway_selection',
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteCode
+        );
+
+        if (! $gatewaySelection) {
+            return [
+                'bluePaymentOptions' => false,
+                'bluePaymentSeparated' => false,
+                'bluePaymentLogo' => $this->block->getLogoSrc(),
+            ];
+        }
+
         $currency = $this->getCurrentCurrencyCode();
 
         if (!isset($this->activeGateways[$currency])) {
             $resultSeparated = [];
             $result = [];
 
-            $website = $this->storeManager->getWebsite();
-            $websiteId = $website->getId();
-            $websiteCode = $website->getCode();
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/service_id',
                 ScopeInterface::SCOPE_WEBSITE,

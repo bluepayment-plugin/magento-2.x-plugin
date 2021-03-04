@@ -102,55 +102,64 @@ class Gateways extends Data
         foreach ($this->storeManager->getWebsites() as $website) {
             $existingGateways = $this->getSimpleGatewaysList();
 
-            $hashMethod = $this->scopeConfig->getValue(
-                'payment/bluepayment/hash_algorithm',
+
+            $gatewaySelection = $this->scopeConfig->getValue(
+                'payment/bluepayment/gateway_selection',
                 ScopeInterface::SCOPE_WEBSITE,
                 $website->getCode()
             );
-            $gatewayListAPIUrl = $this->getGatewayListUrl($website);
 
-            foreach (self::$currencies as $currency) {
-                $serviceId = $this->scopeConfig->getValue(
-                    'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            if ($gatewaySelection) {
+                $hashMethod = $this->scopeConfig->getValue(
+                    'payment/bluepayment/hash_algorithm',
                     ScopeInterface::SCOPE_WEBSITE,
                     $website->getCode()
                 );
-                $hashKey = $this->scopeConfig->getValue(
-                    'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $website->getCode()
-                );
+                $gatewayListAPIUrl = $this->getGatewayListUrl($website);
 
-                $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
+                foreach (self::$currencies as $currency) {
+                    $serviceId = $this->scopeConfig->getValue(
+                        'payment/bluepayment/' . strtolower($currency) . '/service_id',
+                        ScopeInterface::SCOPE_WEBSITE,
+                        $website->getCode()
+                    );
+                    $hashKey = $this->scopeConfig->getValue(
+                        'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+                        ScopeInterface::SCOPE_WEBSITE,
+                        $website->getCode()
+                    );
 
-                if ($serviceId) {
-                    $tryCount = 0;
-                    $loadResult = false;
-                    while (!$loadResult) {
-                        $loadResult = $this->loadGatewaysFromAPI(
-                            $hashMethod,
-                            $serviceId,
-                            $messageId,
-                            $hashKey,
-                            $gatewayListAPIUrl
-                        );
+                    $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
 
-                        if ($loadResult) {
-                            $result['success'] = $this->saveGateways(
+                    if ($serviceId) {
+                        $tryCount = 0;
+                        $loadResult = false;
+                        while (!$loadResult) {
+                            $loadResult = $this->loadGatewaysFromAPI(
+                                $hashMethod,
                                 $serviceId,
-                                $website->getId(),
-                                (array)$loadResult,
-                                $existingGateways,
-                                $currency
+                                $messageId,
+                                $hashKey,
+                                $gatewayListAPIUrl
                             );
-                            break;
-                        } else {
-                            if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
-                                $result['error'] = 'Exceeded the limit of attempts to sync gateways list for ' . $serviceId . '!';
+
+                            if ($loadResult) {
+                                $result['success'] = $this->saveGateways(
+                                    $serviceId,
+                                    $website->getId(),
+                                    (array)$loadResult,
+                                    $existingGateways,
+                                    $currency
+                                );
                                 break;
+                            } else {
+                                if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
+                                    $result['error'] = 'Exceeded the limit of attempts to sync gateways list for ' . $serviceId . '!';
+                                    break;
+                                }
                             }
+                            $tryCount++;
                         }
-                        $tryCount++;
                     }
                 }
             }
