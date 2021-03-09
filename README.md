@@ -19,6 +19,9 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.13.7
+- Poprawienie zachowania modułu przy wyłączonym Google Pay.
+
 ### Wersja 2.13.6
 - Odblokowanie Google Pay dla wszystkich walut.
 
