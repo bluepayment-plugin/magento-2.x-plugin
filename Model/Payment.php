@@ -1015,15 +1015,20 @@ class Payment extends AbstractMethod
             'incrementId' => $order->getIncrementId()
         ]);
 
+        $createOrder = $payment->getAdditionalInformation('create_order') === true || $order->getRemoteIp() === null;
+
         /** Orders from admin panel has empty remote ip */
-        if ($order->getRemoteIp() === null) {
+        if ($createOrder) {
             $params = $this->getFormRedirectFields($order);
             $url = $this->getUrlGateway();
 
             $response = $this->sendRequest($params, $url);
             $remoteId = $response->traansactionId;
-            $redirecturl = $response->redirecturl;
+            $redirectUrl = $response->redirecturl;
             $orderStatus = $response->status;
+
+            $order->getPayment()
+                ->setAdditionalInformation('bluepayment_redirecturl', (string) $redirectUrl);
 
             $unchangeableStatuses = explode(
                 ',',
@@ -1061,7 +1066,7 @@ class Payment extends AbstractMethod
                     '[BM] Transaction ID: ' . (string)$remoteId
                     . ' | Amount: ' . $formaattedAmount
                     . ' | Status: ' . $orderStatus
-                    . ' | URL: ' . $redirecturl;
+                    . ' | URL: ' . $redirectUrl;
 
                 $order->setState($orderStatusWaitingState)
                     ->setStatus($statusWaitingPayment)
