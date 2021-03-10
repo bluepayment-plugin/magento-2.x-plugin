@@ -78,6 +78,8 @@ class Payment extends AbstractMethod
         'CustomerIP',
         'Title',
         'ValidityTime',
+        'LinkValidityTime',
+        'ReturnURL',
         'RecurringAcceptanceState',
         'RecurringAction',
         'ClientHash',
@@ -369,7 +371,7 @@ class Payment extends AbstractMethod
      * @param string $authorizationCode
      * @param string $paymentToken
      * @param int $cardIndex
-     *
+     * @param bool $backUrl
      * @return string[]
      */
     public function getFormRedirectFields(
@@ -378,7 +380,8 @@ class Payment extends AbstractMethod
         $automatic = false,
         $authorizationCode = '',
         $paymentToken = '',
-        $cardIndex = -1
+        $cardIndex = -1,
+        $backUrl = false
     ) {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
@@ -417,6 +420,10 @@ class Payment extends AbstractMethod
         /* Wybrana bramka płatnicza */
         if ($gatewayId !== 0) {
             $params['GatewayID'] = $gatewayId;
+        }
+
+        if ($backUrl !== false) {
+            $params['ReturnURL'] = $backUrl;
         }
 
         /* Płatność iFrame */
@@ -1015,11 +1022,21 @@ class Payment extends AbstractMethod
             'incrementId' => $order->getIncrementId()
         ]);
 
-        $createOrder = $payment->getAdditionalInformation('create_order') === true || $order->getRemoteIp() === null;
+        $createOrder = $payment->getAdditionalInformation('create_payment') === true || $order->getRemoteIp() === null;
 
         /** Orders from admin panel has empty remote ip */
         if ($createOrder) {
-            $params = $this->getFormRedirectFields($order);
+            $backUrl = $payment->getAdditionalInformation('back_url');
+
+            $params = $this->getFormRedirectFields(
+                $order,
+                0,
+                false,
+                '',
+                '',
+                -1,
+                $backUrl
+            );
             $url = $this->getUrlGateway();
 
             $response = $this->sendRequest($params, $url);
@@ -1028,7 +1045,7 @@ class Payment extends AbstractMethod
             $orderStatus = $response->status;
 
             $order->getPayment()
-                ->setAdditionalInformation('bluepayment_redirecturl', (string) $redirectUrl);
+                ->setAdditionalInformation('bluepayment_redirect_url', (string) $redirectUrl);
 
             $unchangeableStatuses = explode(
                 ',',
