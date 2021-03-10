@@ -5,6 +5,7 @@
             <bluepayment>
                 <active>0</active>
                 <model>BlueMedia\BluePayment\Model\Payment</model>
+                <gateway_selection>1</gateway_selection>
                 <encoding>UTF</encoding>
                 <title>Online payment BM</title>
                 <title_automatic>Title Automatic Gateway</title_automatic>

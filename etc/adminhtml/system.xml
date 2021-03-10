@@ -9,6 +9,10 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="gateway_selection" translate="label" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Show payment gateways in store</label>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Source\ShowGateways</source_model>
+                </field>
                 <field id="test_mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Test Mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -42,30 +46,51 @@
                 <field id="disabled_gateways_notification_active" translate="label comment" type="select" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enabled disabled gateways notification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="disabled_gateways_notification_sender_name" translate="label comment" type="text" sortOrder="510" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Disabled gateways notification Sender Name</label>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="disabled_gateways_notification_receivers" translate="label comment" sortOrder="520" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Disabled gateways notification Receivers</label>
                     <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\Receivers</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="disabled_gateways_notification_template" translate="label comment" type="select" sortOrder="530" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Disabled gateways notification Template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="iframe_payment" translate="label comment" type="select" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Iframe Payment</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <comment><![CDATA[Payment without redirecting to BM gateway.]]></comment>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="collapsible" translate="label comment" type="select" sortOrder="560" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Collapsible gateway list</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="autopay_agreement" translate="label comment" type="editor" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Autopay Agreement</label>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
                 </field>
                 <field id="waiting_page" translate="label comment" type="select" sortOrder="610" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Show waiting page before redirect</label>
