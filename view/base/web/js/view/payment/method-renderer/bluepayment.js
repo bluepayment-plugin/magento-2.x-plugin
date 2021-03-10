@@ -123,7 +123,7 @@ define([
                     // window.location.href = redirectUrl;
                 };
 
-                if (typeof google.payments !== 'undefined') {
+                if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
             },
