@@ -9,7 +9,7 @@ use Magento\Framework\View\Element\Template\Context;
 class Form extends \Magento\Payment\Block\Form
 {
     /** @var string */
-    protected $_template = 'BlueMedia_BluePayment::bluepayment/form.phtml';
+    protected $_template = 'BlueMedia_BluePayment::form.phtml';
 
     /** @var CollectionFactory */
     private $collectionFactory;

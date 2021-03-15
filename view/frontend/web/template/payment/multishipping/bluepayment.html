@@ -1,0 +1,52 @@
+<div class="payment-method blue-payment multishipping" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+
+        <!-- ko if: renderSubOptions != false && renderSubOptions.length > 0 -->
+        <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
+            <div class="payment-method-note">
+                <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
+                    <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 6)">
+                            <input required
+                                   data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+                                   name="payment_method_bluepayment_gateway"
+                                   class="radio"
+                                   data-validate="{'validate-one-required-by-name':true}"
+                                   type="radio"/>
+                            <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
+                                <img data-bind="attr:{src: logo_url,alt: name}"
+                                     class="payment-logo"/>
+                            </label>
+                        </li>
+                    </ul>
+
+                    <!-- ko if: bluePaymentCollapsible -->
+                    <div class="gateway-collapsible">
+                        <a href="#" class="expand" data-bind="{visible: collapsed(), click: function() {this.collapsed(false)}}">
+                            <!-- ko i18n: 'Show all' --><!-- /ko -->
+                        </a>
+
+                        <a href="#" class="collapse" data-bind="{visible: !collapsed(), click: function() {this.collapsed(true)}}">
+                            <!-- ko i18n: 'Collapse' --><!-- /ko -->
+                        </a>
+                    </div>
+                    <!--/ko-->
+                </div>
+            </div>
+        </fieldset>
+        <!--/ko-->
+
+        <!-- ko if: (renderSubOptions != false && renderSubOptions.length == 0)-->
+        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+        <!--/ko-->
+
+        <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
+        <div class="payment-method-empty-gateway" data-bind="{visible: validationFailed}">
+            <p><!-- ko i18n: 'No gateway was selected.' --><!-- /ko --></p>
+        </div>
+        <!--/ko-->
+    </div>
+</div>

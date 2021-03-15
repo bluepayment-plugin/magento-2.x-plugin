@@ -23,8 +23,8 @@ define([
                  additionalValidators
     ) {
         'use strict';
-        var widget;
-        var redirectUrl;
+        let widget;
+        let redirectUrl;
 
         return Component.extend({
             defaults: {
@@ -71,17 +71,12 @@ define([
              */
             getData: function () {
                 return {
-                    "method": this.item.method,
-                    "po_number": null,
-                    "additional_data": null
+                    "method": this.item.method
                 };
             },
             initialize: function (config) {
-                var self = this;
                 widget = this;
                 this._super();
-
-                console.log(quote.getQuoteId());
 
                 var blueMediaPayment = checkoutData.getBlueMediaPaymentMethod();
                 if (blueMediaPayment && quote.paymentMethod()) {

@@ -62,4 +62,29 @@ class Back extends Template
     {
         return $this->getData('Hash');
     }
+
+    /**
+     * @return array
+     */
+    public function getOrders()
+    {
+        return $this->getData('orders');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultishipping()
+    {
+        return $this->getOrders() !== null;
+    }
+
+    /**
+     * @param int $orderId
+     * @return string
+     */
+    public function getViewOrderUrl($orderId)
+    {
+        return $this->getUrl('sales/order/view/', ['order_id' => $orderId, '_secure' => true]);
+    }
 }

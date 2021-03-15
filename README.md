@@ -300,7 +300,7 @@ moduł rozszerza listę dostępnych zmiennych o payment_channel. Przykładowe u�
 
 ## Strona oczekiwania na przekierowanie
 Moduł umożliwia dodanie strony pośredniej, wyświetlanej przed samym przekierowaniem użytkownika do płatności. Może to być wykorzystane np. do śledzenia e-commerce w Google Analytics.
-Szablon, który jest wykorzystywany: `view/frontend/templates/redirect.phtml`
+Szablon, który jest wykorzystywany: `view/frontend/template/redirect.phtml`
 
 ### Aktywacja
 1. Przejść do konfiguracji modułu.
