@@ -225,6 +225,7 @@ define([
                     return false;
                 }
 
+                // Autopay agreement
                 if (this.isAutopaySelected()) {
                     var card_index = jQuery("input[name='payment_method_bluepayment_card_index']:checked").val();
 
@@ -241,19 +242,8 @@ define([
                     }
                 }
 
-                if (this.isGPaySelected()) {
-                    this.callGPayPayment();
-                    return false;
-                }
-
+                // BLIK Validation
                 $('.blik-error').hide();
-
-                if (_.isEmpty(this.selectedPaymentObject)) {
-                    this.validationFailed(true);
-                    return false;
-                }
-
-                // Add code validation if BLIK is selected./
                 if (this.isBlikSelected()) {
                     var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
                     if (code.length !== 6) {
@@ -261,6 +251,18 @@ define([
                         $(".blue-payment__blik input[name='payment_method_bluepayment_code']").focus();
                         return false;
                     }
+                }
+
+                // Call GooglePay
+                if (this.isGPaySelected()) {
+                    this.callGPayPayment();
+                    return false;
+                }
+
+                // Selected payment method validation
+                if (this.renderSubOptions !== false && _.isEmpty(this.selectedPaymentObject)) {
+                    this.validationFailed(true);
+                    return false;
                 }
 
                 return true;
