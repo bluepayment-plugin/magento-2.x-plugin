@@ -19,6 +19,10 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.14.0
+- Dodano opcję „Pokaż kanały płatności w sklepie” – domyślnie włączona.
+- Poprawiono opcję „Czas ważności płatności”
+
 ### Wersja 2.13.7
 - Poprawienie zachowania modułu przy wyłączonym Google Pay.
 
