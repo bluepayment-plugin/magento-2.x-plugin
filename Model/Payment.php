@@ -32,6 +32,7 @@ use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
@@ -103,7 +104,7 @@ class Payment extends AbstractMethod
      *
      * @var string [a-z0-9_]
      */
-    protected $_code = 'bluepayment';
+    protected $_code = self::METHOD_CODE;
 
     /**
      * Blok z formularza płatności
@@ -224,6 +225,9 @@ class Payment extends AbstractMethod
 
     /** @var OrderCollectionFactory */
     private $orderCollectionFactory;
+
+    /** @var string */
+    private $title;
 
     /**
      * Payment constructor.
@@ -778,9 +782,7 @@ class Payment extends AbstractMethod
         $confirmed = true;
 
         foreach ($orders as $order) {
-
-
-            /** @var Order\Payment|\Magento\Sales\Api\Data\OrderPaymentInterface|null $orderPayment */
+            /** @var Order\Payment|OrderPaymentInterface|null $orderPayment */
             $orderPayment = $order->getPayment();
 
             if ($orderPayment === null || $orderPayment->getMethod() != self::METHOD_CODE) {
@@ -811,7 +813,7 @@ class Payment extends AbstractMethod
 
                     $order->setState($state);
                     $order->addStatusToHistory($status, $orderComment, false);
-                    $order->setBlueGatewayId((int)$gatewayId);
+                    $order->setBlueGatewayId((int) $gatewayId);
                     $order->setPaymentChannel($gateway->getData('gateway_name'));
 
                     $orderPayment->setTransactionId((string)$remoteId);
@@ -1145,12 +1147,12 @@ class Payment extends AbstractMethod
         try {
             $order = $payment->getOrder();
             $transaction = $this->transactionRepository->getSuccessTransactionFromOrder($order);
-            $result = $this->refunds->makeRefund($transaction, $amount, false);
+            $result = $this->refunds->makeRefund($order, $transaction, $amount, false);
 
             if (isset($result['error']) && $result['error'] === true) {
                 $payment->setIsTransactionDenied(true);
 
-                throw new \Magento\Framework\Exception\LocalizedException($result['message']);
+                throw new \Magento\Framework\Exception\LocalizedException(__($result['message']));
             } else {
                 $payment->setIsTransactionApproved(true);
             }
@@ -1200,5 +1202,69 @@ class Payment extends AbstractMethod
         $xml = simplexml_load_string($response);
 
         return $xml;
+    }
+
+    public function setCode($code)
+    {
+        $this->_code = $code;
+        return $this;
+    }
+
+    /**
+     * Retrieve information from payment configuration
+     *
+     * @param string $field
+     * @param int|string|null|\Magento\Store\Model\Store $storeId
+     *
+     * @return mixed
+     * @deprecated 100.2.0
+     */
+    public function getConfigData($field, $storeId = null)
+    {
+        $code = $this->getCode();
+
+        if (false === strpos($code, 'bluepayment_')) {
+            return parent::getConfigData($field, $storeId);
+        }
+
+        if ($field === 'order_place_redirect_url') {
+            return $this->getOrderPlaceRedirectUrl();
+        }
+
+        if ($field === 'sort_order') {
+            return parent::getConfigData('sort_order');
+        }
+
+        if ($storeId === null) {
+            $storeId = $this->getStore();
+        }
+        $path = 'payment/bluepayment/' . $field;
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
+     * Is active
+     *
+     * @param int|null $storeId
+     * @return bool
+     * @deprecated 100.2.0
+     */
+    public function isActive($storeId = null)
+    {
+        return (bool)(int)$this->getConfigData('active', $storeId);
+    }
+
+    public function getTitle()
+    {
+        if (false !== strpos($this->getCode(), 'bluepayment_')) {
+            return $this->title;
+        }
+
+        return parent::getTitle();
+    }
+
+    public function setTitle($title)
+    {
+        $this->title = $title;
     }
 }

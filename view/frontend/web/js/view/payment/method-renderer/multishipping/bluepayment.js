@@ -27,11 +27,30 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/multishipping/bluepayment',
-            gatewayId: null
+            gatewayId: null,
+            submitButtonSelector: '[id="parent-payment-continue"]',
+            reviewButtonHtml: ''
+        },
+        imports: {
+            onActiveChange: 'active'
         },
 
-        initialize: function (config) {
-            this._super();
+        initObservable: function () {
+            this.reviewButtonHtml = $(this.submitButtonSelector).html();
+            return this._super();
+        },
+
+        /**
+         * Trigger order placing
+         */
+        placeOrderClick: function () {
+            // Selected payment method validation
+            if (this.renderSubOptions !== false && _.isNull(this.gatewayId)) {
+                this.validationFailed(true);
+                return false;
+            }
+
+            return true;
         },
 
         /**

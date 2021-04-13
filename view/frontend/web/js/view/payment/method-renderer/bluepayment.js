@@ -29,7 +29,7 @@ define([
         return Component.extend({
             defaults: {
                 template: 'BlueMedia_BluePayment/payment/bluepayment',
-                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png'
             },
 
             ordered: false,
@@ -74,6 +74,7 @@ define([
                     "method": this.item.method
                 };
             },
+
             initialize: function (config) {
                 widget = this;
                 this._super();

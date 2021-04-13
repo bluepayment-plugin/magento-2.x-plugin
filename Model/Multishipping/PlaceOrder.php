@@ -3,10 +3,11 @@
 namespace BlueMedia\BluePayment\Model\Multishipping;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\Card;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Config\Scope;
 use Magento\Framework\Convert\ConvertArray;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Session\Generic;
@@ -14,7 +15,7 @@ use Magento\Multishipping\Model\Checkout\Type\Multishipping\PlaceOrderInterface;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
-use function DeepCopy\deep_copy;
+use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 
 class PlaceOrder implements PlaceOrderInterface
 {
@@ -43,6 +44,9 @@ class PlaceOrder implements PlaceOrderInterface
      */
     public $session;
 
+    /** @var CardCollectionFactory */
+    public $cardCollectionFactory;
+
     /**
      * @param OrderManagementInterface $orderManagement
      */
@@ -53,7 +57,8 @@ class PlaceOrder implements PlaceOrderInterface
         ConvertArray $convertArray,
         Data $helper,
         Curl $curl,
-        Generic $session
+        Generic $session,
+        CardCollectionFactory $cardCollectionFactory
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -62,6 +67,7 @@ class PlaceOrder implements PlaceOrderInterface
         $this->helper = $helper;
         $this->curl = $curl;
         $this->session = $session;
+        $this->cardCollectionFactory = $cardCollectionFactory;
     }
 
     /**
@@ -103,21 +109,19 @@ class PlaceOrder implements PlaceOrderInterface
             if ($payment->getMethod() == Payment::METHOD_CODE) {
                 $orderToPayment[] = $order;
 
-                if (!isset($gatewayId)) {
-                    $gatewayId = $payment->getAdditionalInformation('gateway_id');
-                    $websiteCode = $order->getStore()->getWebsite()->getCode();
-                    $currency = $order->getOrderCurrencyCode();
-                    $serviceId = $this->scopeConfig->getValue(
-                        'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                        ScopeInterface::SCOPE_WEBSITE,
-                        $websiteCode
-                    );
-                    // Set Payment Channel to Order
-                    $gateway = $this->gatewayFactory->create()
-                        ->addFieldToFilter('gateway_service_id', $serviceId)
-                        ->addFieldToFilter('gateway_id', $gatewayId)
-                        ->getFirstItem();
-                }
+                $gatewayId = $payment->getAdditionalInformation('gateway_id');
+                $websiteCode = $order->getStore()->getWebsite()->getCode();
+                $currency = $order->getOrderCurrencyCode();
+                $serviceId = $this->scopeConfig->getValue(
+                    'payment/bluepayment/' . strtolower($currency) . '/service_id',
+                    ScopeInterface::SCOPE_WEBSITE,
+                    $websiteCode
+                );
+                // Set Payment Channel to Order
+                $gateway = $this->gatewayFactory->create()
+                    ->addFieldToFilter('gateway_service_id', $serviceId)
+                    ->addFieldToFilter('gateway_id', $gatewayId)
+                    ->getFirstItem();
 
                 $order->setBlueGatewayId((int) $gatewayId);
                 $order->setPaymentChannel($gateway->getData('gateway_name'));
@@ -181,13 +185,33 @@ class PlaceOrder implements PlaceOrderInterface
 
         $params = [
             'ServiceID' => $serviceId,
-            'OrderID' => 'QUOTE_'.$order->getQuoteId(),
+            'OrderID' => Payment::QUOTE_PREFIX . $order->getQuoteId(),
             'Amount' => $amount,
             'Currency' => $currency,
             'CustomerEmail' => $customerEmail,
             'Products' => base64_encode($xml->asXML()),
             'GatewayID' => $gatewayId
         ];
+
+        /* Płatność automatyczna kartowa */
+        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+            $cardIndex = $payment->getAdditionalInformation('gateway_index');
+
+            /** @var Card $card */
+            $card = $this->cardCollectionFactory
+                ->create()
+                ->addFieldToFilter('card_index', (string) $cardIndex)
+                ->addFieldToFilter('customer_id', (string) $customerId)
+                ->getFirstItem();
+
+            if ($cardIndex == -1 || $card == null) {
+                $params['RecurringAcceptanceState'] = 'ACCEPTED';
+                $params['RecurringAction'] = 'INIT_WITH_PAYMENT';
+            } else {
+                $params['RecurringAction'] = 'MANUAL';
+                $params['ClientHash'] = $card->getClientHash();
+            }
+        }
 
         $hashArray = array_values(Payment::sortParams($params));
         $hashArray[] = $sharedKey;

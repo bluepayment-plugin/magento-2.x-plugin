@@ -1,0 +1,31 @@
+<?php
+/** @var \BlueMedia\BluePayment\Block\Form $block */
+$gatewayId = $block->getGatewayId();
+$isAutopay = $gatewayId === \BlueMedia\BluePayment\Model\ConfigProvider::AUTOPAY_GATEWAY_ID;
+?>
+
+<script>
+    require([
+        'uiLayout',
+        'jquery'
+    ], function (layout, $) {
+        $(function () {
+            var paymentMethodData = {
+                method: 'bluepayment',
+                gateway_id: <?= $gatewayId; ?>,
+            };
+
+            layout([
+                {
+                    component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment_autopay',
+                    name: 'payment_method_bluepayment_<?= $gatewayId; ?>',
+                    method: paymentMethodData.method,
+                    item: paymentMethodData
+                }
+            ]);
+
+            $('body').trigger('contentUpdated');
+        })
+    })
+</script>
+<!-- ko template: getTemplate() --><!-- /ko -->

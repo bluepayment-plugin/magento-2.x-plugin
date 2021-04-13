@@ -12,6 +12,7 @@ use BlueMedia\BluePayment\Model\RefundTransactionFactory;
 use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
@@ -92,20 +93,20 @@ class Refunds extends Data
     }
 
     /**
+     * @param Order $order
      * @param TransactionInterface|null $transaction
      * @param null $amount
-     *
+     * @param bool $addTransaction
      * @return array
      * @throws EmptyRemoteIdException
+     * @throws NoSuchEntityException
      */
-    public function makeRefund($transaction, $amount = null, $addTransaction = true)
+    public function makeRefund(Order $order, $transaction, $amount = null, $addTransaction = true)
     {
         if (null === $transaction || empty($transaction->getRemoteId())) {
             throw new EmptyRemoteIdException();
         }
 
-        /** @var Order $order */
-        $order = $this->orderFactory->create()->loadByIncrementId($transaction->getOrderId());
         $websiteCode = $order->getStore()->getWebsite()->getCode();
 
         $result = [

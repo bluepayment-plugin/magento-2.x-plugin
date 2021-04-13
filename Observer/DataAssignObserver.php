@@ -11,6 +11,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     const CREATE_PAYMENT = 'create_payment';
     const BACK_URL = 'back_url';
     const GATEWAY_ID = 'gateway_id';
+    const GATEWAY_INDEX = 'gateway_index';
 
     /**
      * @var array
@@ -18,7 +19,8 @@ class DataAssignObserver extends AbstractDataAssignObserver
     protected $additionalInformationList = [
         self::CREATE_PAYMENT,
         self::BACK_URL,
-        self::GATEWAY_ID
+        self::GATEWAY_ID,
+        self::GATEWAY_INDEX
     ];
 
     /**
