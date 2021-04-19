@@ -108,7 +108,6 @@ class Back extends Action
             /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             $currency = strtolower($order->getOrderCurrencyCode());
-            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             /** @var Order\Payment $payment */
             $payment = $order->getPayment();
@@ -116,13 +115,11 @@ class Back extends Action
             if (array_key_exists('Hash', $params)) {
                 $serviceId = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . $currency . '/service_id',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $websiteCode
+                    ScopeInterface::SCOPE_STORE
                 );
                 $sharedKey = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . $currency . '/shared_key',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $websiteCode
+                    ScopeInterface::SCOPE_STORE
                 );
 
                 $hashData = [$serviceId, $orderId, $sharedKey];

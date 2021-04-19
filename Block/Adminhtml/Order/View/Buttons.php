@@ -117,13 +117,11 @@ class Buttons extends View
     public function canShowButton($orderId)
     {
         /** @var Order $order */
-        $order = $this->orderFactory->create()->load((int)$orderId);
-        $websiteCode = $order->getStore()->getWebsite()->getCode();
+        $order = $this->orderFactory->create()->load((int)$orderId);        
 
         $showManualRefund = $this->scopeConfig->getValue(
             'payment/bluepayment/show_manual_refund',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         return $showManualRefund

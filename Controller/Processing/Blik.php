@@ -93,18 +93,16 @@ class Blik extends Action
             /** @var Order $order */
             $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
             $hash       = $this->getRequest()->getParam('Hash');
-            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             $currency   = strtolower($order->getOrderCurrencyCode());
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . $currency . '/service_id',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE                
             );
             $sharedKey = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . $currency . '/shared_key',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode);
+                ScopeInterface::SCOPE_STORE
+            );
 
             $hashData  = [$serviceId, $orderId, $sharedKey];
             $hashLocal = $this->helper->generateAndReturnHash($hashData);
@@ -125,7 +123,6 @@ class Blik extends Action
             // Check status on cart.
             $order = $this->session->getLastRealOrder();
             $orderId = $order->getIncrementId();
-            $websiteCode = $order->getStore()->getWebsite()->getCode();
         }
 
         if (!$order) {
@@ -149,13 +146,11 @@ class Blik extends Action
             // Get ServiceID and SharedKey for order currency
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
             $sharedKey = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
 
             // Generate hash

@@ -86,12 +86,12 @@
                 <indexField>entity_id</indexField>
             </settings>
         </selectionsColumn>
-        <column name="website_id" component="Magento_Ui/js/grid/columns/select" sortOrder="20">
+        <column name="store_id" component="Magento_Ui/js/grid/columns/select" sortOrder="20">
             <settings>
                 <filter>select</filter>
                 <dataType>select</dataType>
-                <label translate="true">Website</label>
-                <options class="BlueMedia\BluePayment\Ui\Component\Listing\Column\WebsiteColumn"/>
+                <label translate="true">Store</label>
+                <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
             </settings>
         </column>
         <column name="gateway_currency" sortOrder="30">

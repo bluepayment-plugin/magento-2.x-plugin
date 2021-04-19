@@ -133,23 +133,19 @@ class Create extends Action
 
             /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
-            $websiteCode = $order->getStore()->getWebsite()->getCode();
 
             $currency       = $order->getOrderCurrencyCode();
             $autopayGateway = $this->scopeConfig->getValue(
                 'payment/bluepayment/autopay_gateway',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
             $sharedKey      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/shared_key',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
             $orderId        = $order->getRealOrderId();
 
@@ -167,14 +163,12 @@ class Create extends Action
                 ',',
                 $this->scopeConfig->getValue(
                     'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $websiteCode
+                    ScopeInterface::SCOPE_STORE
                 )
             );
             $statusWaitingPayment = $this->scopeConfig->getValue(
                 'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteCode
+                ScopeInterface::SCOPE_STORE
             );
 
             if ($statusWaitingPayment != '') {
@@ -378,15 +372,13 @@ class Create extends Action
 
                 $waitingPage = $this->scopeConfig->getValue(
                     'payment/bluepayment/waiting_page',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $websiteCode
+                    ScopeInterface::SCOPE_STORE
                 );
 
                 if ($waitingPage) {
                     $waitingPageSeconds = $this->scopeConfig->getValue(
                         'payment/bluepayment/waiting_page_seconds',
-                        ScopeInterface::SCOPE_WEBSITE,
-                        $websiteCode
+                        ScopeInterface::SCOPE_STORE
                     );
 
                     // Redirect only if set in settings

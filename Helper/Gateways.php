@@ -14,7 +14,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
-use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -99,34 +99,34 @@ class Gateways extends Data
     {
         $result = [];
 
-        foreach ($this->storeManager->getWebsites() as $website) {
+        foreach ($this->storeManager->getStores() as $store) {
             $existingGateways = $this->getSimpleGatewaysList();
 
 
             $gatewaySelection = $this->scopeConfig->getValue(
                 'payment/bluepayment/gateway_selection',
-                ScopeInterface::SCOPE_WEBSITE,
-                $website->getCode()
+                ScopeInterface::SCOPE_STORE,
+                $store->getCode()
             );
 
             if ($gatewaySelection) {
                 $hashMethod = $this->scopeConfig->getValue(
                     'payment/bluepayment/hash_algorithm',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $website->getCode()
+                    ScopeInterface::SCOPE_STORE,
+                    $store->getCode()
                 );
-                $gatewayListAPIUrl = $this->getGatewayListUrl($website);
+                $gatewayListAPIUrl = $this->getGatewayListUrl($store);
 
                 foreach (self::$currencies as $currency) {
                     $serviceId = $this->scopeConfig->getValue(
                         'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                        ScopeInterface::SCOPE_WEBSITE,
-                        $website->getCode()
+                        ScopeInterface::SCOPE_STORE,
+                        $store->getCode()
                     );
                     $hashKey = $this->scopeConfig->getValue(
                         'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-                        ScopeInterface::SCOPE_WEBSITE,
-                        $website->getCode()
+                        ScopeInterface::SCOPE_STORE,
+                        $store->getCode()
                     );
 
                     $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
@@ -146,7 +146,7 @@ class Gateways extends Data
                             if ($loadResult) {
                                 $result['success'] = $this->saveGateways(
                                     $serviceId,
-                                    $website->getId(),
+                                    $store->getId(),
                                     (array)$loadResult,
                                     $existingGateways,
                                     $currency
@@ -169,29 +169,29 @@ class Gateways extends Data
     }
 
     /**
-     * @param WebsiteInterface $website
+     * @param StoreInterface $store
      * @return string
      */
-    private function getGatewayListUrl(WebsiteInterface $website)
+    private function getGatewayListUrl(StoreInterface $store)
     {
         $testMode = $this->scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_WEBSITE,
-            $website->getCode()
+            ScopeInterface::SCOPE_STORE,
+            $store->getCode()
         );
 
         if ($testMode) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/test_address_gateways_url',
-                ScopeInterface::SCOPE_WEBSITE,
-                $website->getCode()
+                ScopeInterface::SCOPE_STORE,
+                $store->getCode()
             );
         }
 
         return $this->scopeConfig->getValue(
             'payment/bluepayment/prod_address_gateways_url',
-            ScopeInterface::SCOPE_WEBSITE,
-            $website->getCode()
+            ScopeInterface::SCOPE_STORE,
+            $store->getCode()
         );
     }
 
@@ -224,14 +224,14 @@ class Gateways extends Data
 
     /**
      * @param integer $serviceId
-     * @param integer $websiteId
+     * @param integer $storeId
      * @param array $gatewayList
      * @param array $existingGateways
      * @param string $currency
      *
      * @return bool
      */
-    public function saveGateways($serviceId, $websiteId, $gatewayList, $existingGateways, $currency = 'PLN')
+    public function saveGateways($serviceId, $storeId, $gatewayList, $existingGateways, $currency = 'PLN')
     {
         $currentlyActiveGatewayIDs = [];
 
@@ -254,9 +254,9 @@ class Gateways extends Data
                     $gatewayId = $gateway['gatewayID'];
                     $currentlyActiveGatewayIDs[] = $gatewayId;
 
-                    if (isset($existingGateways[$websiteId][$currency][$gatewayId])) {
+                    if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
                         $gatewayModel = $this->gatewaysFactory->create();
-                        $gatewayModel->load($existingGateways[$websiteId][$currency][$gatewayId]['entity_id']);
+                        $gatewayModel->load($existingGateways[$storeId][$currency][$gatewayId]['entity_id']);
                     } else {
                         $gatewayModel = $this->gatewaysFactory->create();
                         $gatewayModel->setData('force_disable', 0);
@@ -272,7 +272,7 @@ class Gateways extends Data
                         $gatewayModel->setData('is_separated_method', '1');
                     }
 
-                    $gatewayModel->setData('website_id', $websiteId);
+                    $gatewayModel->setData('store_id', $storeId);
                     $gatewayModel->setData('gateway_service_id', $serviceId);
                     $gatewayModel->setData('gateway_currency', $currency);
                     $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
@@ -291,8 +291,8 @@ class Gateways extends Data
             }
 
             $disabledGateways = [];
-            if (isset($existingGateways[$websiteId])) {
-                foreach ($existingGateways[$websiteId][$currency] as $existingGatewayId => $existingGatewayData) {
+            if (isset($existingGateways[$storeId])) {
+                foreach ($existingGateways[$storeId][$currency] as $existingGatewayId => $existingGatewayData) {
                     if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
                         && $existingGatewayData['gateway_status'] != 0
                     ) {
@@ -336,17 +336,17 @@ class Gateways extends Data
             }
         }
 
-        $defaultWebsite = $this->storeManager->getDefaultStoreView()->getWebsiteId();
+        $defaultStoreId = $this->storeManager->getDefaultStoreView()->getId();
 
         foreach ($bluegatewaysCollection as $gateway) {
             /** @var \BlueMedia\BluePayment\Model\Gateways $gateway */
 
-            $websiteId = $gateway->getData('website_id') ?? $defaultWebsite;
+            $storeId = $gateway->getData('store_id') ?? $defaultStoreId;
             $serviceId = $gateway->getData('gateway_service_id');
             $currency = $gateway->getData('gateway_currency');
             $gatewayId = $gateway->getData('gateway_id');
 
-            if (isset($existingGateways[$websiteId][$currency][$gatewayId])) {
+            if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
                 // Remove duplicates
                 $gateway->delete();
                 continue;
@@ -356,9 +356,9 @@ class Gateways extends Data
                 $serviceId = $globalServiceIds[$currency];
             }
 
-            $existingGateways[$websiteId][$currency][$gatewayId] = [
+            $existingGateways[$storeId][$currency][$gatewayId] = [
                 'entity_id' => $gateway->getId(),
-                'website_id' => $websiteId,
+                'store_id' => $storeId,
                 'gateway_id' => $gatewayId,
                 'gateway_service_id' => $serviceId,
                 'gateway_currency' => $currency,

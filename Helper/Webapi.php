@@ -104,20 +104,16 @@ class Webapi extends Data
      */
     public function getConfigValue($name, $currency = null)
     {
-        $website = $this->storeManager->getWebsite();
-
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
-                ScopeInterface::SCOPE_WEBSITE,
-                $website->getCode()
+                ScopeInterface::SCOPE_STORE
             );
         }
 
         return $this->scopeConfig->getValue(
             'payment/bluepayment/' . $name,
-            ScopeInterface::SCOPE_WEBSITE,
-            $website->getCode()
+            ScopeInterface::SCOPE_STORE
         );
     }
 
