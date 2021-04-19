@@ -38,8 +38,7 @@ class OrderObserver implements ObserverInterface
         $currency = $order->getOrderCurrencyCode();
         $serviceId = $this->scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $order->getStore()->getWebsite()->getCode()
+            ScopeInterface::SCOPE_STORE
         );
 
         $gatewayId = $order->getBlueGatewayId();

@@ -2,7 +2,7 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
   <table name="blue_gateways" resource="default" engine="innodb" comment="BlueMedia BluePayment Gateways Table">
     <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
-    <column xsi:type="smallint" name="website_id" unsigned="true" nullable="true" identity="false" comment="Webssite ID"/>
+    <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false" comment="Store ID"/>
     <column xsi:type="int" name="gateway_service_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Gateway Service ID"/>
     <column xsi:type="varchar" name="gateway_currency" nullable="false" length="5" default="PLN" comment="Gateway Currency"/>
     <column xsi:type="int" name="gateway_status" padding="11" unsigned="false" nullable="false" identity="false" comment="Gateway Status"/>
@@ -21,7 +21,7 @@
     <constraint xsi:type="primary" referenceId="PRIMARY">
       <column name="entity_id"/>
     </constraint>
-    <constraint xsi:type="foreign" referenceId="BLUE_GATEWAYS_WEBSITE_ID_WEBSITE_WEBSITE_ID" table="blue_gateways" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="BLUE_GATEWAYS_STORE_ID_STORE_STORE_ID" table="blue_gateways" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
   </table>
   <table name="blue_transaction" resource="default" engine="innodb" comment="blue_transaction">
     <column xsi:type="int" name="transaction_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>

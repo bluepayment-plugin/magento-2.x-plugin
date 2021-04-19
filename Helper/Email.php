@@ -186,8 +186,7 @@ class Email extends AbstractHelper
     {
         return $this->scopeConfig->getValue(
             $path,
-            ScopeInterface::SCOPE_STORE,
-            $this->getWebsiteCode()
+            ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -202,17 +201,6 @@ class Email extends AbstractHelper
         $store = $this->storeManager->getStore();
 
         return $store;
-    }
-
-    /**
-     * Get Website code
-     *
-     * @return string
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function getWebsiteCode()
-    {
-        return $this->storeManager->getWebsite()->getCode();
     }
 
     /**

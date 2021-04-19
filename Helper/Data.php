@@ -77,17 +77,13 @@ class Data extends \Magento\Payment\Helper\Data
      */
     public function generateAndReturnHash($data)
     {
-        $websiteCode = $this->storeManager->getWebsite()->getCode();
-
         $algorithm = $this->scopeConfig->getValue(
             'payment/bluepayment/hash_algorithm',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $separator = $this->scopeConfig->getValue(
             'payment/bluepayment/hash_separator',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $values_array = array_values($data);
         $values_array_filter = array_filter(($values_array));

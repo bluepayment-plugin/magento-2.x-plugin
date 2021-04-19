@@ -42,8 +42,7 @@ class Head extends Template
     {
         return (bool)$this->_scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->_storeManager->getWebsite()->getCode()
+            ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -56,8 +55,7 @@ class Head extends Template
 
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->_storeManager->getWebsite()->getCode()
+            ScopeInterface::SCOPE_STORE
         );
 
         $gateway = $this->gatewayFactory->create()

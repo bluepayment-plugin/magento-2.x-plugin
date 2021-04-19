@@ -205,9 +205,6 @@ class Payment extends AbstractMethod
     /** @var TransactionRepositoryInterface */
     private $transactionRepository;
 
-    /** @var string */
-    private $websiteCode;
-
     /** @var OrderRepositoryInterface */
     private $orderRepository;
 
@@ -309,7 +306,6 @@ class Payment extends AbstractMethod
         $this->curl = $curl;
         $this->bmLooger = $bmLogger;
         $this->collection = $collection;
-        $this->websiteCode = $storeManager->getWebsite()->getCode();
         $this->orderCollectionFactory = $orderCollectionFactory;
 
         parent::__construct(
@@ -353,22 +349,19 @@ class Payment extends AbstractMethod
     {
         $testMode = $this->_scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         if ($testMode) {
             return $this->_scopeConfig->getValue(
                 'payment/bluepayment/test_address_url',
-                ScopeInterface::SCOPE_WEBSITE,
-                $this->websiteCode
+                ScopeInterface::SCOPE_STORE
             );
         }
 
         return $this->_scopeConfig->getValue(
             'payment/bluepayment/prod_address_url',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -400,13 +393,11 @@ class Payment extends AbstractMethod
         // Config
         $serviceId     = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $sharedKey     = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         $customerId = $order->getCustomerId();
@@ -638,8 +629,7 @@ class Payment extends AbstractMethod
                 foreach ($currencies as $c) {
                     if ($this->_scopeConfig->getValue(
                         'payment/bluepayment/' . strtolower($c) . '/service_id',
-                            ScopeInterface::SCOPE_WEBSITE,
-                            $this->websiteCode
+                            ScopeInterface::SCOPE_STORE
                     ) == $response->serviceID) {
                         $currency = $c;
                         break;
@@ -650,23 +640,19 @@ class Payment extends AbstractMethod
 
         $serviceId      = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $sharedKey      = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $hashSeparator  = $this->_scopeConfig->getValue(
             'payment/bluepayment/hash_separator',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $hashAlgorithm  = $this->_scopeConfig->getValue(
             'payment/bluepayment/hash_algorithm',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         if ($serviceId != $response->serviceID) {
@@ -708,14 +694,12 @@ class Payment extends AbstractMethod
 
         $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue(
             'payment/bluepayment/unchangeable_statuses',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         ));
 
         $statusAcceptPayment = $this->_scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         if ($statusAcceptPayment == '') {
             $statusAcceptPayment = $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
@@ -739,8 +723,7 @@ class Payment extends AbstractMethod
 
         $status = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . $statusKey,
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         if ($status != '') {
@@ -901,13 +884,11 @@ class Payment extends AbstractMethod
 
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $sharedKey = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $hashData = [$serviceId, $order->getId(), $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -951,13 +932,11 @@ class Payment extends AbstractMethod
     {
         $serviceId        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $sharedKey        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/shared_key',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $hashData = [$serviceId, $clientHash, $status, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -1087,14 +1066,12 @@ class Payment extends AbstractMethod
                 ',',
                 $this->_scopeConfig->getValue(
                     'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $this->websiteCode
+                    ScopeInterface::SCOPE_STORE
                 )
             );
             $statusWaitingPayment = $this->_scopeConfig->getValue(
                 'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_WEBSITE,
-                $this->websiteCode
+                ScopeInterface::SCOPE_STORE
             );
 
             if ($statusWaitingPayment != '') {
@@ -1152,7 +1129,9 @@ class Payment extends AbstractMethod
             if (isset($result['error']) && $result['error'] === true) {
                 $payment->setIsTransactionDenied(true);
 
-                throw new \Magento\Framework\Exception\LocalizedException(__($result['message']));
+                throw new \Magento\Framework\Exception\LocalizedException(
+                    __($result['message'])
+                );
             } else {
                 $payment->setIsTransactionApproved(true);
             }
