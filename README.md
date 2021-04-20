@@ -19,8 +19,9 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
-### Wersja 2.14.1
-- Zmiana scope z Website na Store.
+### Wersja 2.15.0
+- Dodano obsługę „Dostawa na wiele adresów (multishipping)”.
+- Zmieniono scope konfiguracji z SCOPE_WEBSITE na SCOPE_STORE.
 
 ### Wersja 2.14.0
 - Dodano opcję „Pokaż kanały płatności w sklepie” – domyślnie włączona.
@@ -308,6 +309,27 @@ moduł rozszerza listę dostępnych zmiennych o payment_channel. Przykładowe u�
 ## Strona oczekiwania na przekierowanie
 Moduł umożliwia dodanie strony pośredniej, wyświetlanej przed samym przekierowaniem użytkownika do płatności. Może to być wykorzystane np. do śledzenia e-commerce w Google Analytics.
 Szablon, który jest wykorzystywany: `view/frontend/template/redirect.phtml`
+
+## Dostawa na wiele adresów (multishipping)
+Moduł umożliwia opłacenie zamówień złożonych z wykorzystaniem funkcjonalności multishipping.
+Konfiguracja dostawy zgodnie z instrukcją w dokumentacji: https://docs.magento.com/user-guide/configuration/sales/multishipping-settings.html
+
+Sam moduł płatności nie wymaga żadnych dodatkowych czynności. Płatności BM będą dostępne od razu.
+
+**UWAGA!**
+Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności iFrame, Google Pay i BLIK 0.
+Dla zamówień multishipping, OrderID w wiadomościach do klienta oraz w panelu oplacasie.bm.pl będzie numerem koszyka z przedrostkiem QUOTE_, nie numerem zamówienia.
+
+
+## Informacje o płatności
+Informacja o wybranym przez klienta kanale płatności jest widoczna z poziomu listy zamówień (Order grid).
+W tym celu należy dodać do widoku kolumnę **Kanał płatności (Payment Channel)**.
+Informacja tekstowa o kanale płatności będzie widoczna w tabeli.
+
+Informacje o wybranym kanale płatności zapisane są w bazie danych:
+- w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
+- w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
+
 
 ### Aktywacja
 1. Przejść do konfiguracji modułu.

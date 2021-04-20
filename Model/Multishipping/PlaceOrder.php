@@ -16,6 +16,7 @@ use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
+use BlueMedia\BluePayment\Logger\Logger;
 
 class PlaceOrder implements PlaceOrderInterface
 {
@@ -39,13 +40,14 @@ class PlaceOrder implements PlaceOrderInterface
     /** @var Curl */
     public $curl;
 
-    /**
-     * @var Generic
-     */
+    /** @var Generic */
     public $session;
 
     /** @var CardCollectionFactory */
     public $cardCollectionFactory;
+
+    /** @var Logger */
+    public $logger;
 
     /**
      * @param OrderManagementInterface $orderManagement
@@ -58,7 +60,8 @@ class PlaceOrder implements PlaceOrderInterface
         Data $helper,
         Curl $curl,
         Generic $session,
-        CardCollectionFactory $cardCollectionFactory
+        CardCollectionFactory $cardCollectionFactory,
+        Logger $logger
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -68,6 +71,7 @@ class PlaceOrder implements PlaceOrderInterface
         $this->curl = $curl;
         $this->session = $session;
         $this->cardCollectionFactory = $cardCollectionFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -106,16 +110,16 @@ class PlaceOrder implements PlaceOrderInterface
         foreach ($orderList as $order) {
             $payment = $order->getPayment();
 
+            $this->logger->info('PlaceOrder:' . __LINE__, ['orderID' => $order->getIncrementId()]);
+
             if ($payment->getMethod() == Payment::METHOD_CODE) {
                 $orderToPayment[] = $order;
 
                 $gatewayId = $payment->getAdditionalInformation('gateway_id');
-                $websiteCode = $order->getStore()->getWebsite()->getCode();
                 $currency = $order->getOrderCurrencyCode();
                 $serviceId = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                    ScopeInterface::SCOPE_WEBSITE,
-                    $websiteCode
+                    ScopeInterface::SCOPE_STORE
                 );
                 // Set Payment Channel to Order
                 $gateway = $this->gatewayFactory->create()
@@ -125,6 +129,8 @@ class PlaceOrder implements PlaceOrderInterface
 
                 $order->setBlueGatewayId((int) $gatewayId);
                 $order->setPaymentChannel($gateway->getData('gateway_name'));
+
+                $this->logger->info('PlaceOrder:' . __LINE__, ['gatewayID' => $gatewayId, 'w']);
 
                 foreach ($order->getAllItems() as $item) {
                     $productsList[] = [
@@ -155,13 +161,11 @@ class PlaceOrder implements PlaceOrderInterface
         // Config
         $serviceId = $this->scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
         $sharedKey = $this->scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         $customerId = $order->getCustomerId();
@@ -220,15 +224,15 @@ class PlaceOrder implements PlaceOrderInterface
 
         $testMode = $this->scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         $urlGateway = $this->scopeConfig->getValue(
             'payment/bluepayment/' . ($testMode ? 'test' : 'prod') . '_address_url',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteCode
+            ScopeInterface::SCOPE_STORE,
         );
+
+        $this->logger->info('PlaceOrder:' . __LINE__, ['params' => $params]);
 
         $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
         $this->curl->post($urlGateway, $params);
@@ -238,6 +242,8 @@ class PlaceOrder implements PlaceOrderInterface
 
         $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
         $this->session->setAuthorizationRedirect($redirectUrl);
+
+        $this->logger->info('PlaceOrder:' . __LINE__, ['redirectUrl' => $redirectUrl]);
 
         return [];
     }

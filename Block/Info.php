@@ -15,9 +15,6 @@ class Info extends \Magento\Payment\Block\Info
     /** @var Session */
     private $checkoutSession;
 
-    /** @var string */
-    private $websiteCode;
-
     public function __construct(
         GatewayFactory $gatewayFactory,
         Session $checkoutSession,
@@ -28,7 +25,6 @@ class Info extends \Magento\Payment\Block\Info
         parent::__construct($context, $data);
         $this->gatewayFactory = $gatewayFactory;
         $this->checkoutSession = $checkoutSession;
-        $this->websiteCode = $this->_storeManager->getWebsite()->getCode();
     }
 
     public function getGatewayName()
@@ -42,8 +38,7 @@ class Info extends \Magento\Payment\Block\Info
         $currency = $this->getQuote()->getQuoteCurrencyCode();
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $this->websiteCode
+            ScopeInterface::SCOPE_STORE
         );
 
         $gateway = $this->gatewayFactory->create()

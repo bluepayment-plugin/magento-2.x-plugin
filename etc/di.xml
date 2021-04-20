@@ -55,31 +55,4 @@
                 type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
     <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface"
                 type="BlueMedia\BluePayment\Model\RefundTransaction"/>
-
-    <!-- Extend PlaceOrder for Multishipping -->
-    <type name="Magento\Multishipping\Model\Checkout\Type\Multishipping\PlaceOrderPool">
-        <arguments>
-            <argument name="services" xsi:type="array">
-                <item name="bluepayment" xsi:type="string">BlueMedia\BluePayment\Model\Multishipping\PlaceOrder</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <preference for="Magento\Multishipping\Controller\Checkout\OverviewPost"
-                type="BlueMedia\BluePayment\Controller\Multishipping\OverviewPost" />
-    <!-- Extend PlaceOrder for Multishipping -->
-
-    <!-- Extend payments methods for multishipping -->
-    <type name="Magento\Payment\Helper\Data">
-        <plugin sortOrder="10" name="bluepayment_payment_data" type="BlueMedia\BluePayment\Plugin\ExtendPaymentMethod"/>
-    </type>
-
-    <type name="Magento\Multishipping\Model\Payment\Method\Specification\Enabled">
-        <plugin sortOrder="10" name="bluepayment_enabled" type="BlueMedia\BluePayment\Plugin\SetEnabled"/>
-    </type>
-
-    <type name="Magento\Multishipping\Model\Checkout\Type\Multishipping">
-        <plugin sortOrder="10" name="bluepayment_set_payment_method" type="BlueMedia\BluePayment\Plugin\SetPaymentMethod"/>
-    </type>
-    <!-- Extend payments methods for multishipping -->
 </config>
