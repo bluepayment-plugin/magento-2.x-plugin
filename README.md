@@ -19,6 +19,9 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.14.1
+- Zmieniono kwoty dla "Smartney – Kup teraz, zapłać później" - z przedziału ~~200 zł - 1500 zł~~ na **100 zł - 2000 zł**.
+
 ### Wersja 2.14.0
 - Dodano opcję „Pokaż kanały płatności w sklepie” – domyślnie włączona.
 - Poprawiono opcję „Czas ważności płatności”
