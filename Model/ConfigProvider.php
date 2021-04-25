@@ -204,7 +204,7 @@ class ConfigProvider implements ConfigProviderInterface
 
                     if (
                         ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
-                        && ($gateway->getGatewayId() != self::CREDIT_GATEWAY_ID || ($amount >= 100 && $amount <= 2000)) // Credit for 100-2000zł
+                        && ($gateway->getGatewayId() != self::CREDIT_GATEWAY_ID || ($amount >= 100 && $amount <= 2500)) // Credit for 100-2500zł
                     ) {
                         if ($gateway->getIsSeparatedMethod()) {
                             $resultSeparated[] = $this->prepareGatewayStructure($gateway, $websiteCode);
