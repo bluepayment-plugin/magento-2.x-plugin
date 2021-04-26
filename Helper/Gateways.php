@@ -102,7 +102,6 @@ class Gateways extends Data
         foreach ($this->storeManager->getWebsites() as $website) {
             $existingGateways = $this->getSimpleGatewaysList();
 
-
             $gatewaySelection = $this->scopeConfig->getValue(
                 'payment/bluepayment/gateway_selection',
                 ScopeInterface::SCOPE_WEBSITE,
