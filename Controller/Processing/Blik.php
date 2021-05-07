@@ -97,11 +97,13 @@ class Blik extends Action
             $currency   = strtolower($order->getOrderCurrencyCode());
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . $currency . '/service_id',
-                ScopeInterface::SCOPE_STORE                
+                ScopeInterface::SCOPE_STORE,
+                $order->getStoreId()
             );
             $sharedKey = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . $currency . '/shared_key',
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $order->getStoreId()
             );
 
             $hashData  = [$serviceId, $orderId, $sharedKey];
@@ -146,11 +148,13 @@ class Blik extends Action
             // Get ServiceID and SharedKey for order currency
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $order->getStoreId()
             );
             $sharedKey = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $order->getStoreId()
             );
 
             // Generate hash

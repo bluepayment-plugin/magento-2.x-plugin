@@ -115,11 +115,13 @@ class Back extends Action
             if (array_key_exists('Hash', $params)) {
                 $serviceId = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . $currency . '/service_id',
-                    ScopeInterface::SCOPE_STORE
+                    ScopeInterface::SCOPE_STORE,
+                    $order->getStoreId()
                 );
                 $sharedKey = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . $currency . '/shared_key',
-                    ScopeInterface::SCOPE_STORE
+                    ScopeInterface::SCOPE_STORE,
+                    $order->getStoreId()
                 );
 
                 $hashData = [$serviceId, $orderId, $sharedKey];

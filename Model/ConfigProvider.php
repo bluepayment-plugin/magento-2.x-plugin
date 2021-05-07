@@ -151,17 +151,15 @@ class ConfigProvider implements ConfigProviderInterface
     public function getConfig()
     {
         return [
-            'payment' => $this->getActiveGateways(),
+            'payment' => $this->getPaymentConfig(),
         ];
     }
 
     /**
      * @return array
      */
-    public function getActiveGateways()
+    public function getPaymentConfig()
     {
-        $storeId = $this->storeManager->getStore()->getId();
-
         $gatewaySelection = (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/gateway_selection',
             ScopeInterface::SCOPE_STORE
@@ -181,31 +179,19 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $serviceId = $this->scopeConfig->getValue(
-                'payment/bluepayment/' . strtolower($currency) . '/service_id',
-                ScopeInterface::SCOPE_STORE
-            );
+            $amount = $this->checkoutSession->getQuote()->getGrandTotal();
 
-            $gateways = $this->gatewaysCollection
-                ->addFilter('store_id', $storeId)
-                ->addFilter('gateway_service_id', $serviceId)
-                ->addFilter('gateway_currency', $currency)
-                ->load();
+            $gateways = $this->getActiveGateways($amount, $currency);
 
             /** @var Gateways $gateway */
             foreach ($gateways as $gateway) {
-                if ($gateway->isActive()) {
-                    $amount = $this->checkoutSession->getQuote()->getGrandTotal();
-
-                    if (
-                        ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
-                        && ($gateway->getGatewayId() != self::CREDIT_GATEWAY_ID || ($amount >= 200 && $amount <= 1500)) // Credit for 200-1500zł
-                    ) {
-                        if ($gateway->getIsSeparatedMethod()) {
-                            $resultSeparated[] = $this->prepareGatewayStructure($gateway);
-                        } else {
-                            $result[] = $this->prepareGatewayStructure($gateway);
-                        }
+                if (
+                    ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
+                ) {
+                    if ($gateway->getIsSeparatedMethod()) {
+                        $resultSeparated[] = $this->prepareGatewayStructure($gateway);
+                    } else {
+                        $result[] = $this->prepareGatewayStructure($gateway);
                     }
                 }
             }
@@ -313,7 +299,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param array $array
      * @return array
      */
-    private function sortGateways(&$array)
+    public function sortGateways(&$array)
     {
         $sortOrder = $this->defaultSortOrder;
 
@@ -382,5 +368,35 @@ class ConfigProvider implements ConfigProviderInterface
         ];
 
         return $return;
+    }
+
+    /**
+     * @param string $currency
+     * @return GatewaysCollection
+     */
+    public function getActiveGateways($amount, $currency)
+    {
+        $storeId = $this->storeManager->getStore()->getId();
+
+        $serviceId = $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        $gateways = $this->gatewaysCollection
+            ->addFieldToFilter('store_id', ['eq' => $storeId])
+            ->addFieldToFilter('gateway_service_id', ['eq' => $serviceId])
+            ->addFieldToFilter('gateway_currency', ['eq' => $currency])
+            ->addFieldToFilter('gateway_status', ['eq' => 1])
+            ->addFieldToFilter('force_disable', ['eq' => 0]);
+
+        if ($amount < 100 || $amount > 2500) {
+            // Credit for 100-2500zł
+            $gateways->addFieldToFilter('gateway_id', ['neq' => self::CREDIT_GATEWAY_ID]);
+        }
+
+        var_dump($gateways->getSelect()->__toString());die;
+
+        return $gateways->load();
     }
 }

@@ -106,17 +106,18 @@ class Refunds extends Data
 
         /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($transaction->getOrderId());
+        $storeId = $order->getStoreId();
 
         $result = [
             'error' => true,
             'message' => __('Something went wrong. Please try again later.'),
         ];
 
-        $refundAPIUrl = $this->getRefundUrl();
+        $refundAPIUrl = $this->getRefundUrl($storeId);
 
-        $hashMethod = $this->getConfigValue('hash_algorithm');
-        $serviceId = $this->getConfigValue('service_id', $order->getOrderCurrencyCode());
-        $sharedKey = $this->getConfigValue('shared_key', $order->getOrderCurrencyCode());
+        $hashMethod = $this->getConfigValue('hash_algorithm', $storeId);
+        $serviceId = $this->getConfigValue('service_id', $storeId, $order->getOrderCurrencyCode());
+        $sharedKey = $this->getConfigValue('shared_key', $storeId, $order->getOrderCurrencyCode());
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
 
         if ($amount === null) {
@@ -138,6 +139,7 @@ class Refunds extends Data
 
         $loadResult = $this->callRefundAPI(
             $hashMethod,
+            $storeId,
             $serviceId,
             $messageId,
             $transaction->getRemoteId(),
@@ -153,8 +155,8 @@ class Refunds extends Data
                 $loadResult['remoteOutID'],
                 $sharedKey,
             ];
-            $hashSeparator = $this->getConfigValue('hash_separator')
-                ? $this->getConfigValue('hash_separator') : self::DEFAULT_HASH_SEPARATOR;
+            $hashSeparator = $this->getConfigValue('hash_separator', $storeId)
+                ? $this->getConfigValue('hash_separator', $storeId) : self::DEFAULT_HASH_SEPARATOR;
 
             if ($loadResult['hash'] != hash($hashMethod, implode($hashSeparator, $valuesForHash))) {
                 $result = [
@@ -189,35 +191,40 @@ class Refunds extends Data
 
     /**
      * @param string $name
+     * @param int $storeId
      * @param string $currency
      *
      * @return mixed
      */
-    public function getConfigValue($name, $currency = null)
+    public function getConfigValue($name, $storeId, $currency = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $storeId
             );
         }
 
         return $this->scopeConfig->getValue(
             'payment/bluepayment/' . $name,
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $storeId
         );
     }
 
     /**
+     * @param int $storeId
+     * 
      * @return mixed
      */
-    public function getRefundUrl()
+    public function getRefundUrl($storeId)
     {
-        if ($this->getConfigValue('test_mode')) {
-            return $this->getConfigValue('test_address_refunds_url');
+        if ($this->getConfigValue('test_mode', $storeId)) {
+            return $this->getConfigValue('test_address_refunds_url', $storeId);
         }
 
-        return $this->getConfigValue('prod_address_refunds_url');
+        return $this->getConfigValue('prod_address_refunds_url', $storeId);
     }
 
     /**
@@ -232,6 +239,7 @@ class Refunds extends Data
 
     /**
      * @param string $hashMethod
+     * @param int $storeId
      * @param string $serviceId
      * @param string $messageId
      * @param string $remoteId
@@ -241,7 +249,7 @@ class Refunds extends Data
      *
      * @return bool|array
      */
-    public function callRefundAPI($hashMethod, $serviceId, $messageId, $remoteId, $amount, $hashKey, $refundAPIUrl)
+    public function callRefundAPI($hashMethod, $storeId, $serviceId, $messageId, $remoteId, $amount, $hashKey, $refundAPIUrl)
     {
         $data = [
             'ServiceID' => $serviceId,
@@ -251,8 +259,8 @@ class Refunds extends Data
         if (!empty($amount)) {
             $data['Amount'] = number_format((float)$amount, 2, '.', '');
         }
-        $hashSeparator = $this->getConfigValue('hash_separator')
-            ? $this->getConfigValue('hash_separator') : self::DEFAULT_HASH_SEPARATOR;
+        $hashSeparator = $this->getConfigValue('hash_separator', $storeId)
+            ? $this->getConfigValue('hash_separator', $storeId) : self::DEFAULT_HASH_SEPARATOR;
         $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
 
         $this->logger->info('REFUNDS:' . __LINE__, ['data' => $data]);
@@ -380,9 +388,9 @@ class Refunds extends Data
     public function updateOrderOnRefund($loadResult, $amount, $transaction, $order)
     {
         if ($amount < $transaction->getAmount()) {
-            $status = $this->getConfigValue('status_partial_refund');
+            $status = $this->getConfigValue('status_partial_refund', $order->getStoreId());
         } else {
-            $status = $this->getConfigValue('status_full_refund');
+            $status = $this->getConfigValue('status_full_refund', $order->getStoreId());
         }
 
         $historyStatusComment = __(
