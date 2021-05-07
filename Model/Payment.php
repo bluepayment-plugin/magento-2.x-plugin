@@ -75,6 +75,7 @@ class Payment extends AbstractMethod
         'GatewayID',
         'Currency',
         'CustomerEmail',
+        'Language',
         'CustomerIP',
         'Title',
         'ValidityTime',
@@ -393,6 +394,7 @@ class Payment extends AbstractMethod
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifeHours();
+        $language = $this->getLanguage($order);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -400,6 +402,7 @@ class Payment extends AbstractMethod
             'Amount' => $amount,
             'Currency' => $currency,
             'CustomerEmail' => $customerEmail,
+            'Language' => $language
         ];
 
         /* Ustawiona ważność linku */
@@ -1145,5 +1148,37 @@ class Payment extends AbstractMethod
         $xml = simplexml_load_string($response);
 
         return $xml;
+    }
+
+    private function getLanguage(Order $order)
+    {
+        $code = $this->_scopeConfig
+            ->getValue(
+                'general/locale/code',
+                ScopeInterface::SCOPE_STORE,
+                $order->getStoreId()
+            );
+
+        $locales = [
+            'pl_' => 'PL', // polski
+            'en_' => 'EN', // angielski
+            'de_' => 'DE', // niemiecki
+            'cs_' => 'CS', // czeski
+            'fr_' => 'FR', // francuski
+            'it_' => 'IT', // włoski
+            'es_' => 'ES', // hiszpański
+            'sk_' => 'SK', // słowacki
+            'ro_' => 'RO', // rumuński
+            'uk_' => 'UK', // ukraiński
+            'hu_' => 'HU', // węgierski
+        ];
+
+        $prefix = substr($code, 0, 3);
+
+        if (isset($locales[$prefix])) {
+            return $locales[$prefix];
+        }
+
+        return 'PL';
     }
 }
