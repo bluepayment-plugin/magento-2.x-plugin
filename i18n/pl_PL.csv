@@ -17,7 +17,7 @@
 "Gateway Description","Opis"
 "Gateway Sort Order","Kolejność"
 "Gateway Type","Typ"
-"Is separated method","useCheckoutPage"
+"Is separated method","Traktuj jako oddzielną metodę płatności"
 "Gateway Logo URL","URL do logo"
 "Use Own Logo","Użyj własnego logo"
 "Gateway Logo Path","Ścieżka do logo"

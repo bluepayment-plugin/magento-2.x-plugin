@@ -395,8 +395,6 @@ class ConfigProvider implements ConfigProviderInterface
             $gateways->addFieldToFilter('gateway_id', ['neq' => self::CREDIT_GATEWAY_ID]);
         }
 
-        var_dump($gateways->getSelect()->__toString());die;
-
         return $gateways->load();
     }
 }
