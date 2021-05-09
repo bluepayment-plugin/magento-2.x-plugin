@@ -159,7 +159,6 @@ class Create extends Action
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
 
-            /** @var Json $resultJson */
             $resultJson = $this->resultJsonFactory->create();
 
             $unchangeableStatuses = explode(
@@ -176,10 +175,7 @@ class Create extends Action
                 $order->getStoreId()
             );
 
-            if ($statusWaitingPayment != '') {
-                /**
-                 * @var Collection $statusCollection
-                 */
+            if (!empty($statusWaitingPayment)) {
                 $statusCollection  = $this->collection;
                 $orderStatusWaitingState = Order::STATE_NEW;
                 foreach ($statusCollection->joinStates() as $status) {

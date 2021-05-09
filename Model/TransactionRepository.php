@@ -107,7 +107,13 @@ class TransactionRepository implements TransactionRepositoryInterface
         /** @var ResourceModel\Transaction\Collection $collection */
         $collection = $this->transactionCollectionFactory->create();
 
-        $collection->addFieldToFilter(TransactionInterface::ORDER_ID, $order->getIncrementId());
+        $collection->addFieldToFilter([
+            TransactionInterface::ORDER_ID,
+            TransactionInterface::ORDER_ID
+        ], [
+            ['eq' => $order->getIncrementId()],
+            ['eq' => Payment::QUOTE_PREFIX . $order->getQuoteId()]
+        ]);
 
         return $collection;
     }

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="head.additional">
+            <block  template="head.phtml"
+                    class="BlueMedia\BluePayment\Block\Head"
+                    name="bluemedia_bluepayment_block_head" />
+        </referenceBlock>
+        <referenceBlock name="checkout_billing">
+            <arguments>
+                <argument name="form_templates" xsi:type="array">
+                    <item name="bluepayment" xsi:type="string">BlueMedia_BluePayment::multishipping/bluepayment_form.phtml</item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

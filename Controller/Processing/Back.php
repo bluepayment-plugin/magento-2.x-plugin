@@ -16,6 +16,7 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 
 /**
@@ -44,7 +45,7 @@ class Back extends Action
     public $helper;
 
     /**
-     * @var\Magento\Sales\Model\OrderFactory
+     * @var OrderFactory
      */
     public $orderFactory;
 
@@ -52,6 +53,9 @@ class Back extends Action
      * @var Onepage
      */
     public $onepage;
+
+    /** @var CollectionFactory */
+    public $orderCollectionFactory;
 
     /**
      * Back constructor.
@@ -71,7 +75,8 @@ class Back extends Action
         ScopeConfigInterface $scopeConfig,
         Data $helper,
         OrderFactory $orderFactory,
-        Onepage $onepage
+        Onepage $onepage,
+        CollectionFactory $orderCollectionFactory
     )
     {
         $this->helper = $helper;
@@ -80,6 +85,7 @@ class Back extends Action
         $this->logger = $logger;
         $this->orderFactory = $orderFactory;
         $this->onepage = $onepage;
+        $this->orderCollectionFactory = $orderCollectionFactory;
 
         parent::__construct($context);
     }
@@ -104,9 +110,23 @@ class Back extends Action
         try {
             $orderId = $params['OrderID'];
             $hash = $params['Hash'];
+            $isMultishipping = false;
+
+            // Multishipping
+            if (substr($orderId, 0, strlen(Payment::QUOTE_PREFIX)) === Payment::QUOTE_PREFIX) {
+                $quoteId = substr($orderId, strlen(Payment::QUOTE_PREFIX));
+                $isMultishipping = true;
+
+                $orders = $this->orderCollectionFactory->create()
+                    ->addFieldToFilter('quote_id', $quoteId)
+                    ->load();
+
+                $order = $orders->getFirstItem();
+            } else {
+                $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+            }
 
             /** @var Order $order */
-            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             $currency = strtolower($order->getOrderCurrencyCode());
 
             /** @var Order\Payment $payment */
@@ -133,34 +153,42 @@ class Back extends Action
                     'sharedKey' => $sharedKey,
                     'hashLocal' => $hashLocal
                 ]);
-
-                /** @var Session $session */
-                $session = $this->onepage->getCheckout();
-                $session
-                    ->setLastRealOrderId($order->getRealOrderId())
-                    ->setLastOrderId($order->getId())
-                    ->setLastQuoteId($order->getQuoteId())
-                    ->setLastSuccessQuoteId($order->getQuoteId())
-                    ->setQuoteId($order->getQuoteId());
-
                 if ($hash == $hashLocal) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
                     $status = $this->getBluePaymentState($payment);
-
-                    if ($status == Payment::PAYMENT_STATUS_SUCCESS) {
-                        return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
-                    } elseif ($status == Payment::PAYMENT_STATUS_FAILURE) {
-                        return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
-                    }
 
                     $block->addData([
                         'ServiceID' => $serviceId,
                         'OrderID' => $orderId,
                         'Hash' => $hash,
-
                         'order' => $order,
-                        'status' => $this->getBluePaymentState($payment)
+                        'status' => $status
                     ]);
+
+                    if ($isMultishipping) {
+                        $block->setData('orders', $orders);
+
+                        if ($status == Payment::PAYMENT_STATUS_SUCCESS) {
+                            return $this->_redirect('multishipping/checkout/success', ['_secure' => true]);
+                        } elseif ($status == Payment::PAYMENT_STATUS_FAILURE) {
+                            return $this->_redirect('multishipping/checkout/results', ['_secure' => true]);
+                        }
+                    } else {
+                        /** @var Session $session */
+                        $session = $this->onepage->getCheckout();
+                        $session
+                            ->setLastRealOrderId($order->getRealOrderId())
+                            ->setLastOrderId($order->getId())
+                            ->setLastQuoteId($order->getQuoteId())
+                            ->setLastSuccessQuoteId($order->getQuoteId())
+                            ->setQuoteId($order->getQuoteId());
+
+                        if ($status == Payment::PAYMENT_STATUS_SUCCESS) {
+                            return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                        } elseif ($status == Payment::PAYMENT_STATUS_FAILURE) {
+                            return $this->_redirect('checkout/onepage/failure', ['_secure' => true]);
+                        }
+                    }
                 } else {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji jest nieprawidłowy');
 

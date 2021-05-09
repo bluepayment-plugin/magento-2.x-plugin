@@ -4,6 +4,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\Payment;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -15,6 +16,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
@@ -44,6 +46,9 @@ class Blik extends Action
     /** @var OrderFactory */
     public $orderFactory;
 
+    /** @var CollectionFactory */
+    public $orderCollectionFactory;
+
     /**
      * Create constructor.
      *
@@ -64,7 +69,8 @@ class Blik extends Action
         ScopeConfigInterface $scopeConfig,
         Data $helper,
         JsonFactory $resultJsonFactory,
-        OrderFactory $orderFactory
+        OrderFactory $orderFactory,
+        CollectionFactory $orderCollectionFactory
     ) {
         $this->orderSender = $orderSender;
         $this->session = $session;
@@ -73,6 +79,7 @@ class Blik extends Action
         $this->helper = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->orderFactory = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
 
         parent::__construct($context);
     }
@@ -88,10 +95,18 @@ class Blik extends Action
         $orderId = $this->getRequest()->getParam('OrderID', false);
 
         if ($orderId) {
-            // Check status after back.
+            if (substr($orderId, 0, strlen(Payment::QUOTE_PREFIX)) === Payment::QUOTE_PREFIX) {
+                $quoteId = substr($orderId, strlen(Payment::QUOTE_PREFIX));
 
-            /** @var Order $order */
-            $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
+                $order = $this->orderCollectionFactory->create()
+                    ->addFieldToFilter('quote_id', $quoteId)
+                    ->getFirstItem();
+            } else {
+                // Check status after back.
+                /** @var Order $order */
+                $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
+            }
+
             $hash       = $this->getRequest()->getParam('Hash');
 
             $currency   = strtolower($order->getOrderCurrencyCode());

@@ -362,7 +362,7 @@ class ConfigProvider implements ConfigProviderInterface
 
         $return[] = [
             'index' => -1,
-            'number' => 'Dodaj nową kartę',
+            'number' => __('Add new card'),
             'issuer' => 'None',
             'logo' => 'https://platnosci.bm.pl/storage/app/media/grafika/1503.png',
         ];

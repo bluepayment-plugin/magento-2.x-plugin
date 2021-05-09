@@ -1,0 +1,23 @@
+<script>
+    require([
+        'uiLayout',
+        'jquery'
+    ], function (layout, $) {
+        $(function () {
+            var paymentMethodData = {
+                method: 'bluepayment'
+            };
+            layout([
+                {
+                    component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment',
+                    name: 'payment_method_bluepayment',
+                    method: paymentMethodData.method,
+                    item: paymentMethodData
+                }
+            ]);
+
+            $('body').trigger('contentUpdated');
+        })
+    })
+</script>
+<!-- ko template: getTemplate() --><!-- /ko -->

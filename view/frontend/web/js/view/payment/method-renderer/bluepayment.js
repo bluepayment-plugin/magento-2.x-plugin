@@ -23,10 +23,15 @@ define([
                  additionalValidators
     ) {
         'use strict';
-        var widget;
-        var redirectUrl;
+        let widget;
+        let redirectUrl;
 
         return Component.extend({
+            defaults: {
+                template: 'BlueMedia_BluePayment/payment/bluepayment',
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png'
+            },
+
             ordered: false,
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
@@ -66,13 +71,11 @@ define([
              */
             getData: function () {
                 return {
-                    "method": this.item.method,
-                    "po_number": null,
-                    "additional_data": null
+                    "method": this.item.method
                 };
             },
+
             initialize: function (config) {
-                var self = this;
                 widget = this;
                 this._super();
 
@@ -119,10 +122,6 @@ define([
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
-            },
-            defaults: {
-                template: 'BlueMedia_BluePayment/payment/bluepayment',
-                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
