@@ -80,6 +80,7 @@ class Payment extends AbstractMethod
         'GatewayID',
         'Currency',
         'CustomerEmail',
+        'Language',
         'CustomerIP',
         'Title',
         'Products',
@@ -403,6 +404,7 @@ class Payment extends AbstractMethod
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifeHours();
+        $language = $this->getLanguage($order);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -410,6 +412,7 @@ class Payment extends AbstractMethod
             'Amount' => $amount,
             'Currency' => $currency,
             'CustomerEmail' => $customerEmail,
+            'Language' => $language,
         ];
 
         /* Ustawiona ważność linku */
@@ -1203,7 +1206,7 @@ class Payment extends AbstractMethod
         $code = $this->getCode();
 
         if (false === strpos($code, 'bluepayment_')) {
-            return parent::getConfigData($field, $storeId);
+            return parent::getConfigData($field);
         }
 
         if ($field === 'order_place_redirect_url') {
@@ -1214,11 +1217,8 @@ class Payment extends AbstractMethod
             return parent::getConfigData('sort_order');
         }
 
-        if ($storeId === null) {
-            $storeId = $this->getStore();
-        }
         $path = 'payment/bluepayment/' . $field;
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+        return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
     }
 
     /**

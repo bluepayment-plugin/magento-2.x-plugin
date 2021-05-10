@@ -107,17 +107,13 @@ define([
                     }
                 };
 
-                PayBmCheckout.transactionSuccess = function (status) {
-                    window.location.href = redirectUrl;
-                };
-
-                PayBmCheckout.transactionDeclined = function (status) {
-                    // window.location.href = redirectUrl;
-                };
-
-                PayBmCheckout.transactionError = function (status) {
-                    // window.location.href = redirectUrl;
-                };
+                if (typeof PayBmCheckout !== 'undefined') {
+                    PayBmCheckout.transactionSuccess = function (status) {
+                        window.location.href = redirectUrl;
+                    };
+                    PayBmCheckout.transactionDeclined = function (status) {};
+                    PayBmCheckout.transactionError = function (status) {};
+                }
 
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();

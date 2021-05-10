@@ -7,6 +7,7 @@ use BlueMedia\BluePayment\Model\Payment;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Helper\Data;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Payment\Model\MethodInterface;
 
 class ExtendPaymentMethod
 {
@@ -44,7 +45,7 @@ class ExtendPaymentMethod
      */
     public function afterGetPaymentMethods(Data $subject, $result)
     {
-        foreach ($this->configProvider->getActiveGateways()['bluePaymentSeparated'] as $separated) {
+        foreach ($this->configProvider->getPaymentConfig()['bluePaymentSeparated'] as $separated) {
             $code = 'bluepayment_'.$separated['gateway_id'];
             $result[$code] = $result['bluepayment'];
             $result[$code]['title'] = $separated['name'];
@@ -76,7 +77,7 @@ class ExtendPaymentMethod
         $payment->setCode($code);
 
         if (! $this->names) {
-            foreach ($this->configProvider->getActiveGateways()['bluePaymentSeparated'] as $separated) {
+            foreach ($this->configProvider->getPaymentConfig()['bluePaymentSeparated'] as $separated) {
                 $this->names['bluepayment_'.$separated['gateway_id']] = $separated['name'];
             }
         }
