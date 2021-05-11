@@ -166,14 +166,6 @@ define([
                 quote.setBlueMediaPaymentMethod(value);
                 checkoutData.setBlueMediaPaymentMethod(value);
             },
-            isChecked: ko.computed(function () {
-                var paymentMethod = quote.paymentMethod();
-
-                if (paymentMethod) {
-                    return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
-                }
-                return null;
-            }),
             isSeparatedChecked: function (context) {
                 return ko.pureComputed(function () {
                     var paymentMethod = quote.paymentMethod();

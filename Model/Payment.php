@@ -338,7 +338,7 @@ class Payment extends AbstractMethod
      */
     public function getOrderPlaceRedirectUrl()
     {
-        return $this->url->getUrl('bluepayment/processing/create', ['_secure' => true]);
+        return $this->url->getUrl('/bluepayment/processing/create', ['_secure' => true]);
     }
 
     /**
@@ -1037,7 +1037,8 @@ class Payment extends AbstractMethod
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'ip' => $ip,
-            'incrementId' => $order->getIncrementId()
+            'incrementId' => $order->getIncrementId(),
+            'additionalInformation' => $payment->getAdditionalInformation()
         ]);
 
         $createOrder = $payment->getAdditionalInformation('create_payment') === true || $order->getRemoteIp() === null;
@@ -1045,10 +1046,11 @@ class Payment extends AbstractMethod
         /** Orders from admin panel has empty remote ip */
         if ($createOrder) {
             $backUrl = $payment->getAdditionalInformation('back_url');
+            $gatewayId = $payment->hasAdditionalInformation('gateway_id') ? $payment->getAdditionalInformation('gateway_id') : 0;
 
             $params = $this->getFormRedirectFields(
                 $order,
-                0,
+                $gatewayId,
                 false,
                 '',
                 '',
@@ -1061,54 +1063,60 @@ class Payment extends AbstractMethod
             $remoteId = $response->traansactionId;
             $redirectUrl = $response->redirecturl;
             $orderStatus = $response->status;
+            $confirmation = $response->confirmation;
 
-            $order->getPayment()
-                ->setAdditionalInformation('bluepayment_redirect_url', (string) $redirectUrl);
-
-            $unchangeableStatuses = explode(
-                ',',
-                $this->_scopeConfig->getValue(
-                    'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_STORE
-                )
-            );
-            $statusWaitingPayment = $this->_scopeConfig->getValue(
-                'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_STORE
-            );
-
-            if ($statusWaitingPayment != '') {
-                $statusCollection = $this->collection;
-                $orderStatusWaitingState = Order::STATE_NEW;
-                foreach ($statusCollection->joinStates() as $status) {
-                    /** @var \Magento\Sales\Model\Order\Status $status */
-                    if ($status->getStatus() == $statusWaitingPayment) {
-                        $orderStatusWaitingState = $status->getState();
-                    }
-                }
+            if ($confirmation == 'NOTCONFIRMED') {
+                $orderComment = 'Unable to create transaction. Reason: '.$response->reason;
+                $order->addCommentToStatusHistory($orderComment);
             } else {
-                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
-            }
+                $order->getPayment()
+                    ->setAdditionalInformation('bluepayment_redirect_url', (string)$redirectUrl);
 
-            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
-                $amount = $order->getGrandTotal();
-                $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
-
-                $orderComment =
-                    '[BM] Transaction ID: ' . (string)$remoteId
-                    . ' | Amount: ' . $formaattedAmount
-                    . ' | Status: ' . $orderStatus
-                    . ' | URL: ' . $redirectUrl;
-
-                $order->setState($orderStatusWaitingState)
-                    ->setStatus($statusWaitingPayment)
-                    ->addStatusToHistory(
-                        $statusWaitingPayment,
-                        $orderComment,
-                        false
+                $unchangeableStatuses = explode(
+                    ',',
+                    $this->_scopeConfig->getValue(
+                        'payment/bluepayment/unchangeable_statuses',
+                        ScopeInterface::SCOPE_STORE
                     )
-                    ->save();
+                );
+                $statusWaitingPayment = $this->_scopeConfig->getValue(
+                    'payment/bluepayment/status_waiting_payment',
+                    ScopeInterface::SCOPE_STORE
+                );
+
+                if ($statusWaitingPayment != '') {
+                    $statusCollection = $this->collection;
+                    $orderStatusWaitingState = Order::STATE_NEW;
+                    foreach ($statusCollection->joinStates() as $status) {
+                        /** @var \Magento\Sales\Model\Order\Status $status */
+                        if ($status->getStatus() == $statusWaitingPayment) {
+                            $orderStatusWaitingState = $status->getState();
+                        }
+                    }
+                } else {
+                    $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+                    $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
+                }
+
+                if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+                    $amount = $order->getGrandTotal();
+                    $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+                    $orderComment =
+                        '[BM] Transaction ID: ' . (string)$remoteId
+                        . ' | Amount: ' . $formaattedAmount
+                        . ' | Status: ' . $orderStatus
+                        . ' | URL: ' . $redirectUrl;
+
+                    $order->setState($orderStatusWaitingState)
+                        ->setStatus($statusWaitingPayment)
+                        ->addStatusToHistory(
+                            $statusWaitingPayment,
+                            $orderComment,
+                            false
+                        )
+                        ->save();
+                }
             }
         }
 

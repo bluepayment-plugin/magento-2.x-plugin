@@ -11,16 +11,14 @@ define([
     'Magento_Checkout/js/model/full-screen-loader',
     'Magento_Checkout/js/action/set-payment-information',
     'Magento_Checkout/js/model/payment/additional-validators',
-    'Magento_Checkout/js/action/select-payment-method',
-    'BlueMedia_BluePayment/js/checkout-data'
+    'Magento_Checkout/js/action/select-payment-method'
 ], function (
     $,
     Component,
     fullScreenLoader,
     setPaymentInformationAction,
     additionalValidators,
-    selectPaymentMethodAction,
-    checkoutData
+    selectPaymentMethodAction
 ) {
     'use strict';
 
