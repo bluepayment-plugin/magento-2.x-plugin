@@ -2,15 +2,16 @@
   "name": "bluepayment-plugin/module-bluepayment",
   "description": "BM payment gateway for Magento 2.",
   "type": "magento2-module",
-  "version": "2.14.2",
+  "version": "2.14.3",
   "require": {
     "magento/framework": "^102||^103",
-    "magento/module-config": "^101.0",
-    "magento/module-sales": "^101.0",
-    "magento/module-payment": "^100.2",
-    "magento/module-checkout": "^100.2",
+    "magento/module-config": "^101.1",
+    "magento/module-sales": "^102.0|^102.0",
+    "magento/module-payment": "^100.3",
+    "magento/module-checkout": "^100.3",
     "magento/module-quote": "^101",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-xml": "*"
   },
   "autoload": {
     "files": [

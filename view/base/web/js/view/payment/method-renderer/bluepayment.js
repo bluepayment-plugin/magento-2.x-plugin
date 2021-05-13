@@ -27,6 +27,12 @@ define([
         var redirectUrl;
 
         return Component.extend({
+            defaults: {
+                template: 'BlueMedia_BluePayment/payment/bluepayment',
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+                grandTotalAmount: 0
+            },
+
             ordered: false,
             redirectAfterPlaceOrder: false,
             renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
@@ -60,6 +66,23 @@ define([
             }, $('<div />').html('Potwierdź płatność w aplikacji swojego banku.')),
             blikTimeout: null,
             collapsed: ko.observable(true),
+
+            /**
+             * Subscribe to grand totals
+             */
+            initObservable: function () {
+                this._super();
+                this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
+                this.currencyCode = quote.totals()['base_currency_code'];
+
+                quote.totals.subscribe(function () {
+                    if (this.grandTotalAmount !== quote.totals()['base_grand_total']) {
+                        this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
+                    }
+                }.bind(this));
+
+                return this;
+            },
 
             /**
              * Get payment method data
@@ -119,10 +142,6 @@ define([
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
-            },
-            defaults: {
-                template: 'BlueMedia_BluePayment/payment/bluepayment',
-                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
@@ -527,8 +546,8 @@ define([
                     shippingAddressRequired: false,
                     transactionInfo: {
                         totalPriceStatus: 'FINAL',
-                        totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
-                        currencyCode: window.checkoutConfig.quoteData.quote_currency_code
+                        totalPrice: this.grandTotalAmount,
+                        currencyCode: this.currencyCode
                     },
                 };
             },
