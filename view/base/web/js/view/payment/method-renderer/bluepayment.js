@@ -281,6 +281,7 @@ define([
                 // Selected payment method validation
                 if (this.renderSubOptions !== false && _.isEmpty(this.selectedPaymentObject)) {
                     this.validationFailed(true);
+                    $('.payment-method-empty-gateway')[0].scrollIntoView({block: "center"});
                     return false;
                 }
 
