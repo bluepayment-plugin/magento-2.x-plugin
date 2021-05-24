@@ -26,7 +26,7 @@
                     <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
                         <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
                             <input required
-                                   data-bind="click: $parent.selectPaymentOption, checked:  $parent.activeMethod(), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+                                   data-bind="click: $parent.selectPaymentOption, checked: ($parent.activeMethod()), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
                                    name="payment_method_bluepayment_gateway"
                                    class="radio"
                                    data-validate="{'validate-one-required-by-name':true}"
@@ -59,7 +59,7 @@
         <!--/ko-->
 
         <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
-            <div class="payment-method-empty-gateway" data-bind="{visible: validationFailed}">
+            <div class="payment-method-empty-gateway mage-error" generated="yes" data-bind="{visible: validationFailed}">
                 <p><!-- ko i18n: 'No gateway was selected.' --><!-- /ko --></p>
             </div>
         <!--/ko-->
