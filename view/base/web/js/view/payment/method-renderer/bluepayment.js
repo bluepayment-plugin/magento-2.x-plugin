@@ -154,6 +154,7 @@ define([
                 checkoutData.setSelectedPaymentMethod(this.item.method);
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
+                jQuery('[name=payment_method_bluepayment_gateway]').trigger('change');
 
                 return true;
             },
@@ -279,7 +280,7 @@ define([
                 }
 
                 // Selected payment method validation
-                if (this.renderSubOptions !== false && _.isEmpty(this.selectedPaymentObject)) {
+                if (this.renderSubOptions !== false && !this.activeMethod()) {
                     this.validationFailed(true);
                     $('.payment-method-empty-gateway')[0].scrollIntoView({block: "center"});
                     return false;

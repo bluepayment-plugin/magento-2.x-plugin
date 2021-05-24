@@ -19,6 +19,12 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.14.5
+- Poprawiono walidację wybranego kanału płatności.
+
+### Wersja 2.14.4
+- Dodano scroll do komunikatu błędu, gdy użytkownik nie wybierze kanału płatności.
+
 ### Wersja 2.14.3
 - Poprawiono inicjalizację płatności Google Pay (kwota netto/brutto).
 - Poprawiono zależności composer.json
