@@ -106,27 +106,6 @@ define([
                     }
                 }
 
-                ko.bindingHandlers.doSomething = {
-                    update: function (element) {
-                        var el = $(element).find('input.radio');
-                        el.change(function () {
-                            el.parent().removeClass('_active');
-                            $(this).parent().addClass('_active');
-                        });
-                    }
-                };
-                ko.bindingHandlers.addActiveClass = {
-                    init: function (element) {
-                        var el = $(element);
-                        var checkboxes = el.find('input');
-                        checkboxes.each(function () {
-                            if ($(this).is(':checked')) {
-                                $(this).parent().addClass('_active');
-                            }
-                        });
-                    }
-                };
-
                 PayBmCheckout.transactionSuccess = function (status) {
                     window.location.href = redirectUrl;
                 };
@@ -142,6 +121,10 @@ define([
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
+
+                // Refresh selected gateway
+                checkoutData.setIndividualGatewayFlag('');
+                this.setBlueMediaGatewayMethod({});
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
@@ -154,7 +137,6 @@ define([
                 checkoutData.setSelectedPaymentMethod(this.item.method);
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
-                jQuery('[name=payment_method_bluepayment_gateway]').trigger('change');
 
                 return true;
             },
