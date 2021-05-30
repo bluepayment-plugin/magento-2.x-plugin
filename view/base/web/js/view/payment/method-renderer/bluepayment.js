@@ -4,6 +4,7 @@ define([
         'ko',
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/action/select-payment-method',
+        'Magento_Checkout/js/model/payment-service',
         'mage/url',
         'BlueMedia_BluePayment/js/model/quote',
         'BlueMedia_BluePayment/js/checkout-data',
@@ -15,6 +16,7 @@ define([
                  ko,
                  Component,
                  selectPaymentMethodAction,
+                 paymentService,
                  url,
                  quote,
                  checkoutData,
@@ -180,6 +182,14 @@ define([
                     return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
                 }
                 return null;
+            }),
+            isRadioButtonVisible: ko.computed(function () {
+                // If has separated methods - always show radio
+                if (window.checkoutConfig.payment.bluePaymentSeparated.length > 0) {
+                    return true;
+                }
+
+                return paymentService.getAvailablePaymentMethods().length !== 1;
             }),
             isSeparatedChecked: function (context) {
                 return ko.pureComputed(function () {
