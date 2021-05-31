@@ -23,14 +23,8 @@
         <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
             <div class="payment-method-note">
                 <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
-                    <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
-                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
-                            <input required
-                                   data-bind="click: $parent.selectPaymentOption, checked: ($parent.activeMethod()), attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
-                                   name="payment_method_bluepayment_gateway"
-                                   class="radio"
-                                   data-validate="{'validate-one-required-by-name':true}"
-                                   type="radio"/>
+                    <ul data-bind="foreach: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <li data-bind="click: $parent.selectPaymentOption, attr:{class: 'payment-option opt_'+ gateway_id + ($parent.activeMethod() == gateway_id ? ' _active' : '')}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
                             <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                 <img data-bind="attr:{src: logo_url,alt: name}"
                                      class="payment-logo"/>
@@ -60,7 +54,7 @@
 
         <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
             <div class="payment-method-empty-gateway mage-error" generated="yes" data-bind="{visible: validationFailed}">
-                <p><!-- ko i18n: 'No gateway was selected.' --><!-- /ko --></p>
+                <p><!-- ko i18n: 'Choose the way you want to pay.' --><!-- /ko --></p>
             </div>
         <!--/ko-->
 

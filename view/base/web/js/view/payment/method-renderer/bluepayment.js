@@ -4,6 +4,7 @@ define([
         'ko',
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/action/select-payment-method',
+        'Magento_Checkout/js/model/payment-service',
         'mage/url',
         'BlueMedia_BluePayment/js/model/quote',
         'BlueMedia_BluePayment/js/checkout-data',
@@ -15,6 +16,7 @@ define([
                  ko,
                  Component,
                  selectPaymentMethodAction,
+                 paymentService,
                  url,
                  quote,
                  checkoutData,
@@ -106,27 +108,6 @@ define([
                     }
                 }
 
-                ko.bindingHandlers.doSomething = {
-                    update: function (element) {
-                        var el = $(element).find('input.radio');
-                        el.change(function () {
-                            el.parent().removeClass('_active');
-                            $(this).parent().addClass('_active');
-                        });
-                    }
-                };
-                ko.bindingHandlers.addActiveClass = {
-                    init: function (element) {
-                        var el = $(element);
-                        var checkboxes = el.find('input');
-                        checkboxes.each(function () {
-                            if ($(this).is(':checked')) {
-                                $(this).parent().addClass('_active');
-                            }
-                        });
-                    }
-                };
-
                 PayBmCheckout.transactionSuccess = function (status) {
                     window.location.href = redirectUrl;
                 };
@@ -142,6 +123,10 @@ define([
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
+
+                // Refresh selected gateway
+                checkoutData.setIndividualGatewayFlag('');
+                this.setBlueMediaGatewayMethod({});
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
@@ -154,7 +139,6 @@ define([
                 checkoutData.setSelectedPaymentMethod(this.item.method);
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
-                jQuery('[name=payment_method_bluepayment_gateway]').trigger('change');
 
                 return true;
             },
@@ -198,6 +182,14 @@ define([
                     return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
                 }
                 return null;
+            }),
+            isRadioButtonVisible: ko.computed(function () {
+                // If has separated methods - always show radio
+                if (window.checkoutConfig.payment.bluePaymentSeparated.length > 0) {
+                    return true;
+                }
+
+                return paymentService.getAvailablePaymentMethods().length !== 1;
             }),
             isSeparatedChecked: function (context) {
                 return ko.pureComputed(function () {

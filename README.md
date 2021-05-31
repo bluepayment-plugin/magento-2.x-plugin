@@ -19,6 +19,9 @@ Moduł płatności umożliwiający realizację transakcji bezgotówkowych w skle
 
 ## Opis zmian
 
+### Wersja 2.14.6
+- Poprawiono wybór kanału płatności.
+
 ### Wersja 2.14.5
 - Poprawiono walidację wybranego kanału płatności.
 
