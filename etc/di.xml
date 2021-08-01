@@ -19,19 +19,18 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
-                <item name="gateways_listing_data_source" xsi:type="string">
-                    BlueMedia\BluePayment\Model\ResourceModel\Gateways\Grid\Collection
+                <item name="gateway_listing_data_source" xsi:type="string">
+                    BlueMedia\BluePayment\Model\ResourceModel\Gateway\Grid\Collection
                 </item>
             </argument>
         </arguments>
     </type>
-    <type name="BlueMedia\BluePayment\Model\ResourceModel\Gateways\Grid\Collection">
+    <type name="BlueMedia\BluePayment\Model\ResourceModel\Gateway\Grid\Collection">
         <arguments>
             <argument name="mainTable" xsi:type="string">blue_gateways</argument>
-            <argument name="eventPrefix" xsi:type="string">gateways_grid_collection</argument>
-            <argument name="eventObject" xsi:type="string">gateways_grid_collection</argument>
-            <argument name="resourceModel" xsi:type="string">BlueMedia\BluePayment\Model\ResourceModel\Gateways
-            </argument>
+            <argument name="eventPrefix" xsi:type="string">gateway_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">gateway_grid_collection</argument>
+            <argument name="resourceModel" xsi:type="string">BlueMedia\BluePayment\Model\ResourceModel\Gateway</argument>
         </arguments>
     </type>
     <!-- /Payment gateways grid -->
@@ -46,13 +45,10 @@
     </virtualType>
     <!-- /Extend Order grid with payment_channel -->
 
-    <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface"
-                type="BlueMedia\BluePayment\Model\TransactionRepository"/>
-    <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface"
-                type="BlueMedia\BluePayment\Model\Transaction"/>
-
-    <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface"
-                type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
-    <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface"
-                type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+    <preference for="BlueMedia\BluePayment\Api\GatewayRepositoryInterface" type="BlueMedia\BluePayment\Model\GatewayRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\GatewayInterface" type="BlueMedia\BluePayment\Model\Gateway"/>
+    <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\TransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface" type="BlueMedia\BluePayment\Model\Transaction"/>
+    <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface" type="BlueMedia\BluePayment\Model\RefundTransaction"/>
 </config>

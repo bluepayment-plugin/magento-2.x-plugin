@@ -5,7 +5,7 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection as GatewayCollection;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -23,8 +23,8 @@ class ConfigProvider implements ConfigProviderInterface
     const AUTOPAY_GATEWAY_ID = 1503;
     const CREDIT_GATEWAY_ID = 700;
 
-    /** @var GatewaysCollection */
-    private $gatewaysCollection;
+    /** @var GatewayCollection */
+    private $gatewayCollection;
 
     /** @var array */
     private $activeGateways = [];
@@ -112,7 +112,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * ConfigProvider constructor.
      *
-     * @param GatewaysCollection $gatewaysCollection
+     * @param GatewayCollection $gatewayCollection
      * @param Form $block
      * @param PriceCurrencyInterface $priceCurrency
      * @param Logger $logger
@@ -123,7 +123,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        GatewaysCollection $gatewaysCollection,
+        GatewayCollection $gatewayCollection,
         Form $block,
         PriceCurrencyInterface $priceCurrency,
         Logger $logger,
@@ -132,9 +132,8 @@ class ConfigProvider implements ConfigProviderInterface
         CheckoutSession $checkoutSession,
         CardCollectionFactory $cardCollectionFactory,
         StoreManagerInterface $storeManager
-    )
-    {
-        $this->gatewaysCollection = $gatewaysCollection;
+    ) {
+        $this->gatewayCollection = $gatewayCollection;
         $this->block = $block;
         $this->priceCurrency = $priceCurrency;
         $this->logger = $logger;
@@ -183,12 +182,12 @@ class ConfigProvider implements ConfigProviderInterface
 
             $gateways = $this->getActiveGateways($amount, $currency);
 
-            /** @var Gateways $gateway */
+            /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
                 if (
                     ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
                 ) {
-                    if ($gateway->getIsSeparatedMethod()) {
+                    if ($gateway->isSeparatedMethod()) {
                         $resultSeparated[] = $this->prepareGatewayStructure($gateway);
                     } else {
                         $result[] = $this->prepareGatewayStructure($gateway);
@@ -231,18 +230,18 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param Gateways $gateway
+     * @param Gateway $gateway
      *
      * @return array
      */
     private function prepareGatewayStructure($gateway)
     {
-        $logoUrl = $gateway->getGatewayLogoUrl();
-        if ((int)$gateway->getUseOwnLogo()) {
-            $logoUrl = $gateway->getGatewayLogoPath();
+        $logoUrl = $gateway->getLogoUrl();
+        if ($gateway->getUseOwnLogo()) {
+            $logoUrl = $gateway->getLogoPath();
         }
 
-        $name = $gateway->getGatewayName();
+        $name = $gateway->getName();
         $isIframe = false;
         $isBlik = false;
         $isGPay = false;
@@ -282,11 +281,11 @@ class ConfigProvider implements ConfigProviderInterface
             'gateway_id' => $gateway->getGatewayId(),
             'name' => $name,
             'bank' => $gateway->getBankName(),
-            'description' => $gateway->getGatewayDescription(),
-            'sort_order' => $gateway->getGatewaySortOrder(),
-            'type' => $gateway->getGatewayType(),
+            'description' => $gateway->getDescription(),
+            'sort_order' => $gateway->getSortOrder(),
+            'type' => $gateway->getType(),
             'logo_url' => $logoUrl,
-            'is_separated_method' => $gateway->getIsSeparatedMethod(),
+            'is_separated_method' => $gateway->isSeparatedMethod(),
             'is_iframe' => $isIframe,
             'is_blik' => $isBlik,
             'is_gpay' => $isGPay,
@@ -372,7 +371,7 @@ class ConfigProvider implements ConfigProviderInterface
 
     /**
      * @param string $currency
-     * @return GatewaysCollection
+     * @return GatewayCollection
      */
     public function getActiveGateways($amount, $currency)
     {
@@ -383,7 +382,7 @@ class ConfigProvider implements ConfigProviderInterface
             ScopeInterface::SCOPE_STORE
         );
 
-        $gateways = $this->gatewaysCollection
+        $gateways = $this->gatewayCollection
             ->addFieldToFilter('store_id', ['eq' => $storeId])
             ->addFieldToFilter('gateway_service_id', ['eq' => $serviceId])
             ->addFieldToFilter('gateway_currency', ['eq' => $currency])

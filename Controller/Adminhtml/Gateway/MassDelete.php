@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateway;
 
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Exception;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
@@ -19,7 +19,7 @@ class MassDelete extends Action implements HttpPostActionInterface
      *
      * @see _isAllowed()
      */
-    const ADMIN_RESOURCE = 'BlueMedia_BluePayment::gateways';
+    const ADMIN_RESOURCE = 'BlueMedia_BluePayment::gateway';
 
     /**
      * @var Filter

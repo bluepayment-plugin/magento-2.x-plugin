@@ -6,7 +6,7 @@ use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Convert\ConvertArray;
 use Magento\Framework\HTTP\Client\Curl;
@@ -101,9 +101,8 @@ class PlaceOrder implements PlaceOrderInterface
      *
      * @return array Error list
      */
-    protected function createPayment(array $orderList = [])
+    protected function createPayment(array $orderList = []): array
     {
-        $orderToPayment = [];
         $productsList = [];
         $totalToPay = 0;
 
@@ -113,8 +112,6 @@ class PlaceOrder implements PlaceOrderInterface
             $this->logger->info('PlaceOrder:' . __LINE__, ['orderID' => $order->getIncrementId()]);
 
             if ($payment->getMethod() == Payment::METHOD_CODE) {
-                $orderToPayment[] = $order;
-
                 $gatewayId = $payment->getAdditionalInformation('gateway_id');
                 $currency = $order->getOrderCurrencyCode();
                 $serviceId = $this->scopeConfig->getValue(
@@ -141,11 +138,13 @@ class PlaceOrder implements PlaceOrderInterface
                     ];
                 }
 
-                if (!$order->getIsVirtual() && ((double)$order->getShippingAmount() || $order->getShippingDescription())) {
+                if (!$order->getIsVirtual()
+                    && ((double)$order->getShippingAmount() || $order->getShippingDescription())
+                ) {
                     $productsList[] = [
                         'subAmount' => (double)$order->getShippingAmount(),
                         'params' => [
-                            'productName' => 'Dostawa',# __('Shipping & Handling')->render(),
+                            'productName' => __('Shipping & Handling')->render(),
                         ],
                     ];
                 }
@@ -214,6 +213,18 @@ class PlaceOrder implements PlaceOrderInterface
             } else {
                 $params['RecurringAction'] = 'MANUAL';
                 $params['ClientHash'] = $card->getClientHash();
+            }
+        } else {
+            $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
+                ? array_unique(explode(',', $payment->getAdditionalInformation('agreements_ids')))
+                : [];
+
+            $agreementId = reset($agreementsIds);
+
+            if ($agreementId) {
+                $params['DefaultRegulationAcceptanceState'] = 'ACCEPTED';
+                $params['DefaultRegulationAcceptanceID'] = $agreementId;
+                $params['DefaultRegulationAcceptanceTime'] = date('Y-m-d H:i:s');
             }
         }
 

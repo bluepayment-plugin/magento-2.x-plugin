@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateway;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
@@ -8,8 +8,8 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\App\Action\HttpPostActionInterface;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways as GatewaysResource;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory as GatewaysCollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway as GatewayResource;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayCollectionFactory;
 
 /**
  * InlineEdit Controller
@@ -22,14 +22,14 @@ class InlineEdit extends Action implements HttpPostActionInterface
     const ADMIN_RESOURCE = 'BlueMedia_BluePayment::gateways';
 
     /**
-     * @var GatewaysResource
+     * @var GatewayResource
      */
-    private $gatewaysResource;
+    private $gatewayResource;
 
     /**
-     * @var GatewaysCollectionFactory
+     * @var GatewayCollectionFactory
      */
-    private $gatewaysCollectionFactory;
+    private $gatewayCollectionFactory;
 
     /**
      * @var JsonFactory
@@ -38,18 +38,18 @@ class InlineEdit extends Action implements HttpPostActionInterface
 
     /**
      * @param Context $context
-     * @param GatewaysCollectionFactory $gatewaysCollectionFactory
+     * @param GatewayCollectionFactory $gatewayCollectionFactory
      * @param JsonFactory $jsonFactory
      */
     public function __construct(
-        Context $context,
-        GatewaysResource $gatewaysResource,
-        GatewaysCollectionFactory $gatewaysCollectionFactory,
-        JsonFactory $jsonFactory
+        Context                  $context,
+        GatewayResource          $gatewayResource,
+        GatewayCollectionFactory $gatewayCollectionFactory,
+        JsonFactory              $jsonFactory
     ) {
         parent::__construct($context);
-        $this->gatewaysResource = $gatewaysResource;
-        $this->gatewaysCollectionFactory = $gatewaysCollectionFactory;
+        $this->gatewayResource = $gatewayResource;
+        $this->gatewayCollectionFactory = $gatewayCollectionFactory;
         $this->jsonFactory = $jsonFactory;
     }
 
@@ -78,14 +78,14 @@ class InlineEdit extends Action implements HttpPostActionInterface
         }
 
         foreach (array_keys($items) as $gatewayId) {
-            $cardCollection = $this->gatewaysCollectionFactory->create();
+            $cardCollection = $this->gatewayCollectionFactory->create();
             $gatewayData = $items[$gatewayId];
 
             try {
-                /** @var \BlueMedia\BluePayment\Model\Gateways $gateway */
+                /** @var \BlueMedia\BluePayment\Model\Gateway $gateway */
                 $gateway = $cardCollection->getItemById($gatewayId);
                 $gateway->setData(array_merge($gateway->getData(), $gatewayData));
-                $this->gatewaysResource->save($gateway);
+                $this->gatewayResource->save($gateway);
             } catch (\Exception $e) {
                 $messages[] = $e->getMessage();
                 $error = true;

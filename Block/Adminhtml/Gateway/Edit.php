@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways;
+namespace BlueMedia\BluePayment\Block\Adminhtml\Gateway;
 
-use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
+use BlueMedia\BluePayment\Controller\Adminhtml\Gateway\Edit as GatewayController;
 use Magento\Backend\Block\Widget\Context;
 use Magento\Backend\Block\Widget\Form\Container;
 use Magento\Framework\Registry;
@@ -42,7 +42,7 @@ class Edit extends Container
     protected function _construct()
     {
         $this->_objectId   = 'id';
-        $this->_controller = 'adminhtml_gateways';
+        $this->_controller = 'adminhtml_gateway';
         $this->_blockGroup = 'BlueMedia_BluePayment';
 
         parent::_construct();
@@ -70,9 +70,9 @@ class Edit extends Container
      */
     public function getHeaderText()
     {
-        $gatewaysRegistry = $this->coreRegistry->registry(GatewaysController::GATEWAYS_REGISTER_CODE);
-        if ($gatewaysRegistry->getId()) {
-            $gatewaysTitle = $this->escapeHtml($gatewaysRegistry->getTitle());
+        $gatewayRegistry = $this->coreRegistry->registry(GatewayController::GATEWAY_REGISTER_CODE);
+        if ($gatewayRegistry->getId()) {
+            $gatewaysTitle = $this->escapeHtml($gatewayRegistry->getTitle());
 
             return __("Edit Gateway '%1'", $gatewaysTitle);
         } else {

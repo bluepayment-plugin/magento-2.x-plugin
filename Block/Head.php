@@ -6,7 +6,7 @@ use BlueMedia\BluePayment\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 
 class Head extends Template
@@ -63,7 +63,7 @@ class Head extends Template
             ->addFieldToFilter('gateway_id', ConfigProvider::GPAY_GATEWAY_ID)
             ->getFirstItem();
 
-        return $gateway && $gateway->isActive() && $gateway->getIsSeparatedMethod();
+        return $gateway && $gateway->isActive() && $gateway->isSeparatedMethod();
     }
 
     /**

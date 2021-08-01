@@ -18,11 +18,7 @@ class Data extends \Magento\Payment\Helper\Data
     const FAILED_CONNECTION_RETRY_COUNT = 5;
     const MESSAGE_ID_STRING_LENGTH = 32;
 
-    /**
-     * Logger
-     *
-     * @var Logger
-     */
+    /** @var Logger */
     public $logger;
 
     /** @var Client */
@@ -89,9 +85,8 @@ class Data extends \Magento\Payment\Helper\Data
         $values_array_filter = array_filter(($values_array));
         $comma_separated = implode(",", $values_array_filter);
         $replaced = str_replace(",", $separator, $comma_separated);
-        $hash = hash($algorithm, $replaced);
 
-        return $hash;
+        return hash($algorithm, $replaced);
     }
 
     /**
@@ -108,5 +103,30 @@ class Data extends \Magento\Payment\Helper\Data
         }
 
         return $randomString;
+    }
+
+    public function getLanguageFromLocale($locale)
+    {
+        $locales = [
+            'pl_' => 'PL', // polski
+            'en_' => 'EN', // angielski
+            'de_' => 'DE', // niemiecki
+            'cs_' => 'CS', // czeski
+            'fr_' => 'FR', // francuski
+            'it_' => 'IT', // włoski
+            'es_' => 'ES', // hiszpański
+            'sk_' => 'SK', // słowacki
+            'ro_' => 'RO', // rumuński
+            'uk_' => 'UK', // ukraiński
+            'hu_' => 'HU', // węgierski
+        ];
+
+        $prefix = substr($locale, 0, 3);
+
+        if (isset($locales[$prefix])) {
+            return $locales[$prefix];
+        }
+
+        return 'PL';
     }
 }

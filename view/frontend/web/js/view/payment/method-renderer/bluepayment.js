@@ -5,26 +5,30 @@ define([
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/action/select-payment-method',
         'mage/url',
+        'mage/translate',
         'BlueMedia_BluePayment/js/model/quote',
         'BlueMedia_BluePayment/js/checkout-data',
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
         'Magento_Checkout/js/model/payment/additional-validators'
-    ], function ($,
-                 _,
-                 ko,
-                 Component,
-                 selectPaymentMethodAction,
-                 url,
-                 quote,
-                 checkoutData,
-                 modal,
-                 blikTpl,
-                 additionalValidators
+    ], function (
+        $,
+        _,
+        ko,
+        Component,
+        selectPaymentMethodAction,
+        url,
+        $t,
+        quote,
+        checkoutData,
+        modal,
+        blikTpl,
+        additionalValidators
     ) {
         'use strict';
-        let widget;
+
         let redirectUrl;
+        let widget;
 
         return Component.extend({
             defaults: {
@@ -53,29 +57,33 @@ define([
                 }
                 return -1;
             }),
-            blikModal: modal({
-                title: 'Potwierdź transakcję BLIK',
-                autoOpen: false,
-                clickableOverlay: false,
-                buttons: [],
-                type: 'popup',
-                popupTpl: blikTpl,
-                keyEventHandlers: {},
-                modalClass: 'blik-modal',
-            }, $('<div />').html('Potwierdź płatność w aplikacji swojego banku.')),
-            blikTimeout: null,
-            collapsed: ko.observable(true),
+        blikModal: modal({
+            title: $t('Confirm BLIK transaction'),
+            autoOpen: false,
+            clickableOverlay: false,
+            buttons: [],
+            type: 'popup',
+            popupTpl: blikTpl,
+            keyEventHandlers: {},
+            modalClass: 'blik-modal',
+            }, $('<div />').html($t('Confirm the payment in your bank\'s app.'))),
+        blikTimeout: null,
+        collapsed: ko.observable(true),
+        agreements: ko.observable([]),
 
             /**
              * Get payment method data
              */
-            getData: function () {
-                return {
-                    "method": this.item.method
-                };
-            },
+        getData: function () {
+            return {
+                'method': this.item.method,
+                'additional_data': {
+                    'agreements_ids': this.getCheckedAgreementsIds()
+                }
+            };
+        },
 
-            initialize: function (config) {
+            initialize: function () {
                 widget = this;
                 this._super();
 
@@ -121,6 +129,7 @@ define([
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
+                widget.getAgreements();
                 return true;
             },
             selectPaymentMethod: function () {
@@ -130,7 +139,6 @@ define([
                 checkoutData.setSelectedPaymentMethod(this.item.method);
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
-
                 return true;
             },
             selectCardPaymentMethod: function () {
@@ -156,7 +164,6 @@ define([
                     $('.autopay-agreement').hide();
                 }
 
-                $('.autopay-card-error').hide();
                 return true;
             },
             setBlueMediaGatewayMethod: function (value) {
@@ -165,6 +172,8 @@ define([
 
                 quote.setBlueMediaPaymentMethod(value);
                 checkoutData.setBlueMediaPaymentMethod(value);
+
+                this.getAgreements();
             },
             isChecked: ko.computed(function () {
                 var paymentMethod = quote.paymentMethod();
@@ -174,24 +183,24 @@ define([
                 }
                 return null;
             }),
-            isSeparatedChecked: function (context) {
-                return ko.pureComputed(function () {
-                    var paymentMethod = quote.paymentMethod();
-                    var individualFlag = checkoutData.getIndividualGatewayFlag();
-                    if (paymentMethod) {
-                        if (individualFlag && paymentMethod.method == 'bluepayment') {
-                            if (individualFlag == context.gateway_id) {
-                                return individualFlag;
-                            }
-
-                            return false;
-                        } else {
-                            return false;
+        isSeparatedChecked: function (context) {
+            return ko.pureComputed(function () {
+                var paymentMethod = quote.paymentMethod();
+                var individualFlag = checkoutData.getIndividualGatewayFlag();
+                if (paymentMethod) {
+                    if (individualFlag && paymentMethod.method == 'bluepayment') {
+                        if (individualFlag == context.gateway_id) {
+                            return individualFlag;
                         }
+
+                        return false;
+                    } else {
+                        return false;
                     }
-                    return null;
-                });
-            },
+                }
+                return null;
+            });
+        },
             isIframeSelected: function () {
                 if (this.isAutopaySelected()) {
                     var cardIndex = checkoutData.getCardIndex();
@@ -228,21 +237,22 @@ define([
                         checkoutData.setCardIndex(card_index);
 
                         if (card_index == -1 && !jQuery('#autopay-agreement').is(':checked')) {
-                            $('.autopay-agreement-error').show();
+                            this.messageContainer.addErrorMessage({message: $t('You have to agree with terms.')});
+
                             return false;
                         }
                     } else {
-                        $('.autopay-card-error').show();
+                        this.messageContainer.addErrorMessage({message: $t('You have to select card.')});
+
                         return false;
                     }
                 }
 
                 // BLIK Validation
-                $('.blik-error').hide();
                 if (this.isBlikSelected()) {
                     var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
                     if (code.length !== 6) {
-                        $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                        this.messageContainer.addErrorMessage({message: $t('Invalid BLIK code.')});
                         $(".blue-payment__blik input[name='payment_method_bluepayment_code']").focus();
                         return false;
                     }
@@ -293,17 +303,17 @@ define([
                                 self.isPlaceOrderActionAllowed(true);
                             }
                         ).done(function () {
-                        self.ordered = true;
-                        self.afterPlaceOrder();
+                            self.ordered = true;
+                            self.afterPlaceOrder();
 
-                        if (typeof callback == 'function') {
-                            callback.call(this);
-                        }
+                            if (typeof callback == 'function') {
+                                callback.call(this);
+                            }
 
-                        if (self.redirectAfterPlaceOrder) {
-                            redirectOnSuccessAction.execute();
-                        }
-                    });
+                            if (self.redirectAfterPlaceOrder) {
+                                redirectOnSuccessAction.execute();
+                            }
+                        });
 
                     return true;
                 } else {
@@ -373,7 +383,6 @@ define([
                     + this.selectedPaymentObject.gateway_id
                     + '&automatic=true';
                 var code = $(".blue-payment__blik input[name='payment_method_bluepayment_code']").val();
-                $('.blik-error').hide();
 
                 if (code.length === 6) {
                     $.ajax({
@@ -385,7 +394,7 @@ define([
                     }).done(function (response) {
                         if (response.params) {
                             if (response.params.confirmation && response.params.confirmation == 'NOTCONFIRMED') {
-                                $('.blik-error').text('Niepoprawny kod BLIK.').show();
+                                this.messageContainer.addErrorMessage({message: $t('Invalid BLIK code.')});
                             } else {
                                 self.handleBlikStatus(response.params.paymentStatus, response.params);
                             }
@@ -410,9 +419,10 @@ define([
                     window.location.href = redirectUrl;
                 } else if (status === 'FAILURE') {
                     clearTimeout(self.blikTimeout);
-
                     this.blikModal.closeModal();
-                    $('.blik-error').text('Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności.').show();
+                    this.messageContainer.addErrorMessage({
+                        message: $t('Request timed out. Please try again or use a different payment method.')
+                    });
                 } else {
                     if (this.blikModal.options.isOpen !== true) {
                         this.blikModal.openModal();
@@ -420,7 +430,9 @@ define([
 
                         this.blikTimeout = setTimeout(function () {
                             self.blikModal.closeModal();
-                            $('.blik-error').text('Kod BLIK wygasł. Spróbuj ponownie.').show();
+                            self.messageContainer.addErrorMessage({
+                                message: $t('The BLIK code has expired. Try again.')
+                            });
                         }, 120000); /* 2 minutes */
                     }
 
@@ -452,7 +464,7 @@ define([
             GPayMerchantInfo: null,
             bluePaymentAcceptorId: null,
             GPayModal: modal({
-                title: 'Oczekiwanie na potwierdzenie transakcji.',
+                title: $t('Waiting for the confirmation of the transaction.'),
                 autoOpen: false,
                 clickableOverlay: false,
                 buttons: [],
@@ -461,23 +473,23 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             }, $('<div />').html()),
-            callGPayPayment: function () {
-                var self = this;
+        callGPayPayment: function () {
+            var self = this;
 
-                self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                    self.placeOrderAfterValidation(function () {
-                        var token = data.paymentMethodData.tokenizationData.token;
-                        var urlResponse = url.build('bluepayment/processing/create')
-                            + '?gateway_id='
-                            + self.selectedPaymentObject.gateway_id
-                            + '&automatic=true';
+            self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
+                self.placeOrderAfterValidation(function () {
+                    var token = data.paymentMethodData.tokenizationData.token;
+                    var urlResponse = url.build('bluepayment/processing/create')
+                        + '?gateway_id='
+                        + self.selectedPaymentObject.gateway_id
+                        + '&automatic=true';
 
-                        $.ajax({
-                            showLoader: true,
-                            url: urlResponse,
-                            data: {'token': token},
-                            type: "POST",
-                            dataType: "json",
+                    $.ajax({
+                        showLoader: true,
+                        url: urlResponse,
+                        data: {'token': token},
+                        type: "POST",
+                        dataType: "json",
                         }).done(function (response) {
                             if (response.params) {
                                 if (response.params.redirectUrl) {
@@ -491,12 +503,12 @@ define([
                                 }
                             }
                         });
-                    });
-                })
-                    .catch(function (errorMessage) {
-                        console.error(errorMessage);
-                    });
-            },
+                });
+            })
+                .catch(function (errorMessage) {
+                    console.error(errorMessage);
+                });
+        },
             getGPayTransactionData: function () {
                 return {
                     apiVersion: 2,
@@ -517,7 +529,7 @@ define([
                                     'gatewayMerchantId': this.bluePaymentAcceptorId
                                 }
                             }
-                        }
+                    }
                     ],
                     shippingAddressRequired: false,
                     transactionInfo: {
@@ -526,6 +538,35 @@ define([
                         currencyCode: window.checkoutConfig.quoteData.quote_currency_code
                     },
                 };
+            },
+            getAgreements: function () {
+                var urlResponse = url.build('bluepayment/processing/agreements');
+                var self = this;
+
+                $.ajax({
+                    showLoader: true,
+                    url: urlResponse,
+                    type: 'GET',
+                    data: {
+                        'gateway_id': this.selectedPaymentObject.gateway_id
+                    },
+                    dataType: "json"
+                }).done(function (response) {
+                    if (!response.hasOwnProperty('error')) {
+                        self.agreements(response);
+                    }
+                });
+            },
+            getCheckedAgreementsIds: function () {
+                var agreementData = $('.payment-method._active .bluepayment-agreements-block input')
+                    .serializeArray();
+                var agreementsIds = [];
+
+                agreementData.forEach(function (item) {
+                    agreementsIds.push(item.value);
+                });
+
+                return agreementsIds.join(',');
             },
             initGPay: function () {
                 var urlResponse = url.build('bluepayment/processing/googlepay');
@@ -555,7 +596,7 @@ define([
                                         allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
                                         allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
                                     }
-                                }
+                            }
                             ]
                         })
                             .then(function (response) {
@@ -617,5 +658,4 @@ define([
                 });
             }
         });
-    }
-);
+    });

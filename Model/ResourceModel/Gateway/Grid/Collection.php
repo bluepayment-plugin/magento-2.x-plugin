@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\BluePayment\Model\ResourceModel\Gateways\Grid;
+namespace BlueMedia\BluePayment\Model\ResourceModel\Gateway\Grid;
 
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection as GatewayCollection;
 use Magento\Framework\Api\Search\AggregationInterface;
 use Magento\Framework\Api\Search\SearchResultInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
@@ -14,7 +14,7 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\View\Element\UiComponent\DataProvider\Document;
 use Psr\Log\LoggerInterface;
 
-class Collection extends GatewaysCollection implements SearchResultInterface
+class Collection extends GatewayCollection implements SearchResultInterface
 {
     /**
      * @var AggregationInterface

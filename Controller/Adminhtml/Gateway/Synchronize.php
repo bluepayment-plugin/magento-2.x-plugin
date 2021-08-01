@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateway;
 
 use BlueMedia\BluePayment\Helper\Gateways;
 use BlueMedia\BluePayment\Logger\Logger;
@@ -12,9 +12,6 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Synchronize extends Action
 {
-    /** @var PageFactory */
-    public $resultPageFactory;
-
     /** @var ManagerInterface */
     public $messageManager;
 
@@ -28,21 +25,17 @@ class Synchronize extends Action
      * Synchronize constructor.
      *
      * @param Context $context
-     * @param PageFactory $resultPageFactory
-     * @param Gateways $gatewaysHelper
+     * @param Gateways $gatewayHelper
      * @param Logger $logger
      */
     public function __construct(
-        Context $context,
-        PageFactory $resultPageFactory,
-        Gateways $gatewaysHelper,
-        Logger $logger
-    )
-    {
+        Context     $context,
+        Gateways    $gatewayHelper,
+        Logger      $logger
+    ) {
         parent::__construct($context);
-        $this->resultPageFactory = $resultPageFactory;
         $this->messageManager = $context->getMessageManager();
-        $this->gatewaysHelper = $gatewaysHelper;
+        $this->gatewaysHelper = $gatewayHelper;
         $this->logger = $logger;
     }
 
@@ -63,9 +56,7 @@ class Synchronize extends Action
             $successMessage = __('Gateway list has been synchronized!');
             $this->messageManager->addSuccessMessage($successMessage);
         }
-        $resultRedirect = $this->resultRedirectFactory->create();
-        $resultRedirect->setPath('adminbluepayment/gateways/index');
 
-        return $resultRedirect;
+        return $this->_redirect('*/*/index');
     }
 }

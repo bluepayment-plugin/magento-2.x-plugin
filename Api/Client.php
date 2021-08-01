@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Api;
 
 use BlueMedia\BluePayment\Exception\ResponseException;
+use Magento\Framework\HTTP\Client\Curl;
 use SimpleXMLElement;
 
 /**
@@ -13,11 +14,14 @@ class Client implements ClientInterface
     const RESPONSE_TIMEZONE = 'Europe/Warsaw';
 
     /**
-     * @var \Magento\Framework\HTTP\Client\Curl
+     * @var Curl
      */
     private $curl;
 
-    public function __construct(\Magento\Framework\HTTP\Client\Curl $curl)
+    /**
+     * @param Curl $curl
+     */
+    public function __construct(Curl $curl)
     {
         $this->curl = $curl;
     }
@@ -42,16 +46,17 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param string $endPoint
-     * @param array $data
+     * @param string $uri
+     * @param array $params
      *
      * @return mixed
      * @throws ResponseException
      */
-    public function callJson($endPoint, $data)
+    public function callJson($uri, $params)
     {
         $this->curl->addHeader('BmHeader', 'pay-bm');
-        $this->curl->post($endPoint, $data);
+        $this->curl->addHeader('Content-Type', 'application/json');
+        $this->curl->post($uri, json_encode($params));
         $response = $this->curl->getBody();
 
         if ($response == 'ERROR') {
@@ -59,15 +64,5 @@ class Client implements ClientInterface
         }
 
         return json_decode($response);
-    }
-
-    /**
-     * @param string|array $data
-     *
-     * @return string
-     */
-    private function buildFields($data)
-    {
-        return (is_array($data)) ? http_build_query($data) : (string)$data;
     }
 }

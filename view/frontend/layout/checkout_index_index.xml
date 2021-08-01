@@ -34,6 +34,13 @@
                                                                 </item>
                                                             </item>
                                                         </item>
+                                                        <item name="additional-payment-validators" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="bluepayment-agreements-validator" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">BlueMedia_BluePayment/js/view/payment/agreements-validator</item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
                                                     </item>
                                                 </item>
                                             </item>

@@ -7,11 +7,12 @@ use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Block\Info;
 use BlueMedia\BluePayment\Exception\EmptyRemoteIdException;
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Helper\Gateways;
 use BlueMedia\BluePayment\Helper\Refunds;
 use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory as GatewayFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
 use DOMDocument;
 use Exception;
 use Magento\Framework\Api\AttributeValueFactory;
@@ -23,7 +24,9 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
@@ -44,9 +47,9 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
-use Magento\Framework\HTTP\Client\Curl;
 
 /**
  * BluePayment class
@@ -89,6 +92,9 @@ class Payment extends AbstractMethod
         'ReturnURL',
         'RecurringAcceptanceState',
         'RecurringAction',
+        'DefaultRegulationAcceptanceState',
+        'DefaultRegulationAcceptanceID',
+        'DefaultRegulationAcceptanceTime',
         'ClientHash',
         'AuthorizationCode',
         'ScreenType',
@@ -260,7 +266,7 @@ class Payment extends AbstractMethod
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function __construct(
         CollectionFactory $statusCollectionFactory,
@@ -369,24 +375,27 @@ class Payment extends AbstractMethod
     /**
      * Tablica z parametrami do wysłania metodą GET do bramki
      *
-     * @param Order $order
-     * @param int $gatewayId
-     * @param bool $automatic
-     * @param string $authorizationCode
-     * @param string $paymentToken
-     * @param int $cardIndex
-     * @param bool $backUrl
+     * @param  Order  $order
+     * @param  int  $gatewayId
+     * @param  array  $agreementsIds
+     * @param  bool  $automatic
+     * @param  string  $authorizationCode
+     * @param  string  $paymentToken
+     * @param  int  $cardIndex
+     * @param  bool  $backUrl
+     *
      * @return string[]
      */
     public function getFormRedirectFields(
-        $order,
-        $gatewayId = 0,
-        $automatic = false,
-        $authorizationCode = '',
-        $paymentToken = '',
-        $cardIndex = -1,
-        $backUrl = false
-    ) {
+        Order $order,
+        int $gatewayId = 0,
+        array $agreementsIds = [],
+        bool $automatic = false,
+        string $authorizationCode = '',
+        string $paymentToken = '',
+        int $cardIndex = -1,
+        bool $backUrl = false
+    ): array {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
         $currency      = $order->getOrderCurrencyCode();
@@ -404,7 +413,13 @@ class Payment extends AbstractMethod
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifeHours();
-        $language = $this->getLanguage($order);
+
+        $locale = $this->_scopeConfig
+            ->getValue(
+                'general/locale/code',
+                ScopeInterface::SCOPE_STORE
+            );
+        $language = $this->helper->getLanguageFromLocale($locale);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -448,6 +463,14 @@ class Payment extends AbstractMethod
         /* Płatność automatyczna kartowa */
         if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
             $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
+        } else {
+            $agreementId = reset($agreementsIds);
+
+            if ($agreementId) {
+                $params['DefaultRegulationAcceptanceState'] = 'ACCEPTED';
+                $params['DefaultRegulationAcceptanceID'] = $agreementId;
+                $params['DefaultRegulationAcceptanceTime'] = date('Y-m-d H:i:s');
+            }
         }
 
         $hashArray = array_values(self::sortParams($params));
@@ -463,7 +486,7 @@ class Payment extends AbstractMethod
      *
      * @return array
      */
-    public static function sortParams(array $params)
+    public static function sortParams(array $params): array
     {
         $ordered = [];
         foreach (self::$orderParams as $value) {
@@ -594,7 +617,7 @@ class Payment extends AbstractMethod
      * @return string
      * @throws Exception
      */
-    private function deleteCardData($data)
+    private function deleteCardData($data): string
     {
         $clientHash = (string)$data->recurringData->clientHash;
 
@@ -615,11 +638,11 @@ class Payment extends AbstractMethod
      * Waliduje zgodność otrzymanego XML'a
      *
      * @param SimpleXMLElement $response
-     * @param string $currency
+     * @param  string|null  $currency
      *
      * @return bool
      */
-    public function _validAllTransaction(SimpleXMLElement $response, $currency = null)
+    public function _validAllTransaction(SimpleXMLElement $response, string $currency = null): bool
     {
         if ($currency === null) {
             if (property_exists($response, 'transactions')) {
@@ -627,12 +650,12 @@ class Payment extends AbstractMethod
                 $currency = $response->transactions->transaction->currency;
             } else {
                 // Otherwise - find correct currency
-                $currencies = \BlueMedia\BluePayment\Helper\Gateways::$currencies;
+                $currencies = Gateways::$currencies;
 
                 foreach ($currencies as $c) {
                     if ($this->_scopeConfig->getValue(
                         'payment/bluepayment/' . strtolower($c) . '/service_id',
-                            ScopeInterface::SCOPE_STORE
+                        ScopeInterface::SCOPE_STORE
                     ) == $response->serviceID) {
                         $currency = $c;
                         break;
@@ -666,7 +689,7 @@ class Payment extends AbstractMethod
         $hash = (string)$response->hash;
         $response->hash = '';
 
-        $this->_checkInList($response);
+        $this->checkInList($response);
         $this->checkHashArray[] = $sharedKey;
 
         return hash($hashAlgorithm, implode($hashSeparator, $this->checkHashArray)) == $hash;
@@ -677,10 +700,11 @@ class Payment extends AbstractMethod
      *
      * @param SimpleXMLElement $payment
      *
-     * @param int $serviceId
+     * @param  int  $serviceId
+     *
      * @return string
      */
-    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, $serviceId = 0)
+    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, int $serviceId = 0): string
     {
         $paymentStatus = (string)$payment->paymentStatus;
 
@@ -741,8 +765,8 @@ class Payment extends AbstractMethod
         }
 
         // Multishipping
-        if (substr($orderId, 0, strlen(Payment::QUOTE_PREFIX)) === Payment::QUOTE_PREFIX) {
-            $quoteId = substr($orderId, strlen(Payment::QUOTE_PREFIX));
+        if (strpos($orderId, self::QUOTE_PREFIX) === 0) {
+            $quoteId = substr($orderId, strlen(self::QUOTE_PREFIX));
 
             /** @var DataObject|Order[] $orders */
             $orders = $this->orderCollectionFactory->create()
@@ -854,19 +878,22 @@ class Payment extends AbstractMethod
             $confirmed = false;
         }
 
-        return $this->returnConfirmation($order, ($confirmed) ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED);
+        return $this->returnConfirmation(
+            $order,
+            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED
+        );
     }
 
     /**
-     * @param object|array $list
+     * @param  array  $list
      *
      * @return void
      */
-    private function _checkInList($list)
+    private function checkInList(array $list): void
     {
-        foreach ((array)$list as $row) {
+        foreach ($list as $row) {
             if (is_object($row)) {
-                $this->_checkInList($row);
+                $this->checkInList($row);
             } else {
                 $this->checkHashArray[] = $row;
             }
@@ -876,12 +903,12 @@ class Payment extends AbstractMethod
     /**
      * Potwierdzenie w postaci xml o prawidłowej/nieprawidłowej transakcji
      *
-     * @param Order $order
-     * @param string $confirmation
+     * @param  Order  $order
+     * @param  string  $confirmation
      *
      * @return string
      */
-    public function returnConfirmation($order, $confirmation)
+    public function returnConfirmation(Order $order, string $confirmation): string
     {
         $currency = $order->getOrderCurrencyCode();
 
@@ -922,16 +949,16 @@ class Payment extends AbstractMethod
 
         $xml = $dom->saveXML();
 
-        return $xml ? $xml : '';
+        return $xml ?: '';
     }
 
     /**
-     * @param string $clientHash
-     * @param string $status
+     * @param  string  $clientHash
+     * @param  string  $status
      *
      * @return string
      */
-    private function recurringResponse($clientHash, $status)
+    private function recurringResponse(string $clientHash, string $status): string
     {
         $serviceId        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/service_id',
@@ -970,7 +997,7 @@ class Payment extends AbstractMethod
 
         $xml = $dom->saveXML();
 
-        return $xml ? $xml : '';
+        return $xml ?: '';
     }
 
     /**
@@ -978,7 +1005,7 @@ class Payment extends AbstractMethod
      *
      * @return void
      */
-    private function saveTransactionResponse(SimpleXMLElement $transactionResponse)
+    private function saveTransactionResponse(SimpleXMLElement $transactionResponse): void
     {
         /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
@@ -1000,13 +1027,13 @@ class Payment extends AbstractMethod
 
     /**
      * @param array $params
-     * @param bool $automatic
-     * @param int $customerId
-     * @param int $cardIndex
+     * @param  bool  $automatic
+     * @param  int  $customerId
+     * @param  int  $cardIndex
      *
      * @return array
      */
-    private function autopayGateway(array $params, $automatic, $customerId, $cardIndex)
+    private function autopayGateway(array $params, bool $automatic, int $customerId, int $cardIndex): array
     {
         /** @var Card $card */
         $card = $this->cardCollectionFactory
@@ -1043,14 +1070,20 @@ class Payment extends AbstractMethod
 
         $createOrder = $payment->getAdditionalInformation('create_payment') === true || $order->getRemoteIp() === null;
 
-        /** Orders from admin panel has empty remote ip */
+        /** Manually create order (multishipping / GraphQL) */
         if ($createOrder) {
             $backUrl = $payment->getAdditionalInformation('back_url');
-            $gatewayId = $payment->hasAdditionalInformation('gateway_id') ? $payment->getAdditionalInformation('gateway_id') : 0;
+            $gatewayId = $payment->hasAdditionalInformation('gateway_id')
+                ? $payment->getAdditionalInformation('gateway_id')
+                : 0;
+            $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
+                ? explode(',', $payment->getAdditionalInformation('agreements_ids'))
+                : [];
 
             $params = $this->getFormRedirectFields(
                 $order,
                 $gatewayId,
+                $agreementsIds,
                 false,
                 '',
                 '',
@@ -1069,8 +1102,7 @@ class Payment extends AbstractMethod
                 $orderComment = 'Unable to create transaction. Reason: '.$response->reason;
                 $order->addCommentToStatusHistory($orderComment);
             } else {
-                $order->getPayment()
-                    ->setAdditionalInformation('bluepayment_redirect_url', (string)$redirectUrl);
+                $payment->setAdditionalInformation('bluepayment_redirect_url', (string)$redirectUrl);
 
                 $unchangeableStatuses = explode(
                     ',',
@@ -1128,7 +1160,7 @@ class Payment extends AbstractMethod
      * @param float $amount
      *
      * @return Payment
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function refund(InfoInterface $payment, $amount)
     {
@@ -1140,7 +1172,7 @@ class Payment extends AbstractMethod
             if (isset($result['error']) && $result['error'] === true) {
                 $payment->setIsTransactionDenied(true);
 
-                throw new \Magento\Framework\Exception\LocalizedException(
+                throw new LocalizedException(
                     __($result['message'])
                 );
             } else {
@@ -1149,19 +1181,19 @@ class Payment extends AbstractMethod
         } catch (InputException $e) {
             $payment->setIsTransactionDenied(true);
 
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __('Order ID is mandatory.')
             );
         } catch (EmptyRemoteIdException $e) {
             $payment->setIsTransactionDenied(true);
 
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __('There is no succeeded payment transaction.')
             );
         } catch (NoSuchEntityException $e) {
             $payment->setIsTransactionDenied(true);
 
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __('There is no such order.')
             );
         }
@@ -1189,9 +1221,7 @@ class Payment extends AbstractMethod
         $response = $this->curl->getBody();
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, ['response' => $response]);
-        $xml = simplexml_load_string($response);
-
-        return $xml;
+        return simplexml_load_string($response);
     }
 
     public function setCode($code)
@@ -1203,10 +1233,11 @@ class Payment extends AbstractMethod
     /**
      * Retrieve information from payment configuration
      *
-     * @param string $field
-     * @param int|string|null|\Magento\Store\Model\Store $storeId
+     * @param  string  $field
+     * @param  int|string|null|Store  $storeId
      *
      * @return mixed
+     * @throws LocalizedException
      * @deprecated 100.2.0
      */
     public function getConfigData($field, $storeId = null)
@@ -1253,37 +1284,5 @@ class Payment extends AbstractMethod
     public function setTitle($title)
     {
         $this->title = $title;
-    }
-
-    private function getLanguage(Order $order)
-    {
-        $code = $this->_scopeConfig
-            ->getValue(
-                'general/locale/code',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
-            );
-
-        $locales = [
-            'pl_' => 'PL', // polski
-            'en_' => 'EN', // angielski
-            'de_' => 'DE', // niemiecki
-            'cs_' => 'CS', // czeski
-            'fr_' => 'FR', // francuski
-            'it_' => 'IT', // włoski
-            'es_' => 'ES', // hiszpański
-            'sk_' => 'SK', // słowacki
-            'ro_' => 'RO', // rumuński
-            'uk_' => 'UK', // ukraiński
-            'hu_' => 'HU', // węgierski
-        ];
-
-        $prefix = substr($code, 0, 3);
-
-        if (isset($locales[$prefix])) {
-            return $locales[$prefix];
-        }
-
-        return 'PL';
     }
 }

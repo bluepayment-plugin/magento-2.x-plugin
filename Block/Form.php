@@ -3,8 +3,8 @@
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Model\ConfigProvider;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Framework\View\Element\Template\Context;
 
 class Form extends \Magento\Payment\Block\Form

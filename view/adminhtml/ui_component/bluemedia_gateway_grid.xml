@@ -2,7 +2,7 @@
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">bluemedia_gateways_grid.gateways_listing_data_source</item>
+            <item name="provider" xsi:type="string">bluemedia_gateway_grid.gateway_listing_data_source</item>
         </item>
     </argument>
     <settings>
@@ -15,10 +15,10 @@
         </buttons>
         <spinner>gateways_columns</spinner>
         <deps>
-            <dep>bluemedia_gateways_grid.gateways_listing_data_source</dep>
+            <dep>bluemedia_gateway_grid.gateway_listing_data_source</dep>
         </deps>
     </settings>
-    <dataSource name="gateways_listing_data_source" component="Magento_Ui/js/grid/provider">
+    <dataSource name="gateway_listing_data_source" component="Magento_Ui/js/grid/provider">
         <settings>
             <storageConfig>
                 <param name="cacheRequests" xsi:type="boolean">false</param>
@@ -26,8 +26,8 @@
             </storageConfig>
             <updateUrl path="mui/index/render"/>
         </settings>
-        <aclResource>BlueMedia_BluePayment::gateways</aclResource>
-        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="gateways_listing_data_source">
+        <aclResource>BlueMedia_BluePayment::gateway</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="gateway_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
                 <primaryFieldName>entity_id</primaryFieldName>
@@ -49,7 +49,7 @@
                         <message translate="true">Are you sure you want to delete selected items?</message>
                         <title translate="true">Delete items</title>
                     </confirm>
-                    <url path="adminbluepayment/gateways/massDelete"/>
+                    <url path="adminbluepayment/gateway/massDelete"/>
                     <type>delete</type>
                     <label translate="true">Delete</label>
                 </settings>
@@ -63,16 +63,16 @@
         <settings>
             <editorConfig>
                 <param name="clientConfig" xsi:type="array">
-                    <item name="saveUrl" xsi:type="url" path="adminbluepayment/gateways/inlineEdit"/>
+                    <item name="saveUrl" xsi:type="url" path="adminbluepayment/gateway/inlineEdit"/>
                     <item name="validateBeforeSave" xsi:type="boolean">false</item>
                 </param>
                 <param name="indexField" xsi:type="string">entity_id</param>
                 <param name="enabled" xsi:type="boolean">true</param>
-                <param name="selectProvider" xsi:type="string">bluemedia_gateways_grid.bluemedia_gateways_grid.gateways_columns.ids</param>
+                <param name="selectProvider" xsi:type="string">bluemedia_gateway_grid.bluemedia_gateway_grid.gateway_columns.ids</param>
             </editorConfig>
             <childDefaults>
                 <param name="fieldAction" xsi:type="array">
-                    <item name="provider" xsi:type="string">bluemedia_gateways_grid.bluemedia_gateways_grid.gateways_columns_editor</item>
+                    <item name="provider" xsi:type="string">bluemedia_gateway_grid.bluemedia_gateway_grid.gateway_columns_editor</item>
                     <item name="target" xsi:type="string">startEdit</item>
                     <item name="params" xsi:type="array">
                         <item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
@@ -201,7 +201,7 @@
         <actionsColumn name="actions" class="Magento\Backend\Ui\Component\Listing\Column\EditAction" sortOrder="160">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="editUrlPath" xsi:type="string">adminbluepayment/gateways/edit</item>
+                    <item name="editUrlPath" xsi:type="string">adminbluepayment/gateway/edit</item>
                 </item>
             </argument>
             <settings>

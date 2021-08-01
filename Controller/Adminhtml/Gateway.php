@@ -2,7 +2,8 @@
 
 namespace BlueMedia\BluePayment\Controller\Adminhtml;
 
-use BlueMedia\BluePayment\Model\GatewaysFactory;
+use BlueMedia\BluePayment\Api\Data\GatewayInterfaceFactory;
+use BlueMedia\BluePayment\Api\GatewayRepositoryInterface;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Registry;
@@ -14,7 +15,7 @@ use BlueMedia\BluePayment\Logger\Logger;
  *
  * @package BlueMedia\BluePayment\Controller\Adminhtml
  */
-abstract class Gateways extends Action
+abstract class Gateway extends Action
 {
     /** @var Registry */
     public $coreRegistry;
@@ -22,8 +23,11 @@ abstract class Gateways extends Action
     /** @var PageFactory */
     public $resultPageFactory;
 
-    /** @var GatewaysFactory */
-    public $gatewaysFactory;
+    /** @var GatewayInterfaceFactory */
+    public $gatewayFactory;
+
+    /** @var GatewayRepositoryInterface */
+    public $gatewayRepository;
 
     /** @var Logger */
     public $logger;
@@ -32,21 +36,23 @@ abstract class Gateways extends Action
      * @param Context $context
      * @param Registry $coreRegistry
      * @param PageFactory $resultPageFactory
-     * @param GatewaysFactory $gatewaysFactory
+     * @param GatewayInterfaceFactory $gatewayFactory
      * @param Logger $logger
      */
     public function __construct(
         Context $context,
         Registry $coreRegistry,
         PageFactory $resultPageFactory,
-        GatewaysFactory $gatewaysFactory,
+        GatewayInterfaceFactory $gatewayFactory,
+        GatewayRepositoryInterface $gatewayRepository,
         Logger $logger
     )
     {
         parent::__construct($context);
         $this->coreRegistry = $coreRegistry;
         $this->resultPageFactory = $resultPageFactory;
-        $this->gatewaysFactory = $gatewaysFactory;
+        $this->gatewayFactory = $gatewayFactory;
+        $this->gatewayRepository = $gatewayRepository;
         $this->logger = $logger;
     }
 

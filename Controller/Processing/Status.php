@@ -66,8 +66,6 @@ class Status extends Action
     public function execute()
     {
         $result = $this->rawFactory->create();
-
-        /** @var Payment $payment */
         $payment = $this->paymentFactory->create();
 
         try {
@@ -80,26 +78,20 @@ class Status extends Action
                 $simpleXml          = simplexml_load_string($base64transactions);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlTransactions' => json_encode($simpleXml)]);
 
-                if ($simpleXml) {
-                    $xml = $payment->processStatusPayment($simpleXml);
-                } else {
-                    $xml = '';
-                }
+                $xml = ($simpleXml) ? $payment->processStatusPayment($simpleXml) : '';
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);
                 return $result;
-            } elseif (array_key_exists('recurring', $params)) {
+            }
+
+            if (array_key_exists('recurring', $params)) {
                 $paramRecurring = str_replace(' ', '+', $params['recurring']);
                 $base64recurring = base64_decode($paramRecurring);
                 $simpleXml = simplexml_load_string($base64recurring);
                 $this->logger->info('STATUS:' . __LINE__, ['simpleXmlRecurring' => json_encode($simpleXml)]);
 
-                if ($simpleXml) {
-                    $xml = $payment->processRecurring($simpleXml);
-                } else {
-                    $xml = '';
-                }
+                $xml = $simpleXml ? $payment->processRecurring($simpleXml) : '';
 
                 $result->setHeader('Content-Type', 'text/xml');
                 $result->setContents($xml);

@@ -1,9 +1,9 @@
 <?php
 
-namespace BlueMedia\BluePayment\Model\ResourceModel\Gateways;
+namespace BlueMedia\BluePayment\Model\ResourceModel\Gateway;
 
-use BlueMedia\BluePayment\Model\Gateways;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways as GatewaysResource;
+use BlueMedia\BluePayment\Model\Gateway;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway as GatewayResource;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Zend_Db_Select;
@@ -11,8 +11,8 @@ use Zend_Db_Select;
 class Collection extends AbstractCollection
 {
     protected $_idFieldName = 'entity_id';
-    protected $_eventPrefix = 'bluemedia_bluepayment_gateways_collection';
-    protected $_eventObject = 'gateways_collection';
+    protected $_eventPrefix = 'bluemedia_bluepayment_gateway_collection';
+    protected $_eventObject = 'gateway_collection';
 
     /**
      * Define resource model
@@ -21,7 +21,7 @@ class Collection extends AbstractCollection
      */
     protected function _construct()
     {
-        $this->_init(Gateways::class, GatewaysResource::class);
+        $this->_init(Gateway::class, GatewayResource::class);
     }
 
     /**

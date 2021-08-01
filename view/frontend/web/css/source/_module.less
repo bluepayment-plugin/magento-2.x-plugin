@@ -230,6 +230,36 @@ and open the template in the editor.
             }
         }
     }
+
+    .bluepayment-agreements-block {
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        .bluepayment-agreement {
+            display: flex;
+            margin-top: 5px;
+
+            &.required {
+                label {
+                    content: none;
+
+                    span {
+                        &:after {
+                            content: '*';
+                            .lib-typography(
+                                @_font-size: @form-field-label-asterisk__font-size,
+                                @_color: @form-field-label-asterisk__color,
+                                @_font-family: @form-field-label-asterisk__font-family,
+                                @_font-weight: @form-field-label-asterisk__font-weight,
+                                @_line-height: @form-field-label-asterisk__line-height,
+                                @_font-style: @form-field-label-asterisk__font-style
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__l) {

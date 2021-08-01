@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit;
+namespace BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit;
 
 use Magento\Backend\Block\Widget\Form\Generic;
 

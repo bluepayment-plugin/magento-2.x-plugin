@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateways;
+namespace BlueMedia\BluePayment\Controller\Adminhtml\Gateway;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
@@ -12,9 +12,6 @@ class Index extends Action implements HttpGetActionInterface
 {
     /** @var PageFactory */
     public $resultPageFactory;
-
-    /** @var Page */
-    public $resultPage;
 
     /**
      * Index constructor.
@@ -36,18 +33,18 @@ class Index extends Action implements HttpGetActionInterface
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('BlueMedia_BluePayment::gateways');
+        return $this->_authorization->isAllowed('BlueMedia_BluePayment::gateway');
     }
 
     /**
      * Call page factory to render layout and page content
      *
-     * @return Page
+     * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
     {
         $page = $this->resultPageFactory->create();
-        $page->setActiveMenu('BlueMedia_BluePayment::gateways');
+        $page->setActiveMenu('BlueMedia_BluePayment::gateway');
         $page->getConfig()->getTitle()->prepend((__('Gateways')));
 
         return $page;

@@ -1,10 +1,10 @@
 <?php
 
-namespace BlueMedia\BluePayment\Block\Adminhtml\Gateways\Edit\Tab;
+namespace BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit\Tab;
 
-use BlueMedia\BluePayment\Controller\Adminhtml\Gateways\Edit as GatewaysController;
+use BlueMedia\BluePayment\Controller\Adminhtml\Gateway\Edit as GatewayController;
 use BlueMedia\BluePayment\Model\ConfigProvider;
-use BlueMedia\BluePayment\Model\Gateways;
+use BlueMedia\BluePayment\Model\Gateway;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Form;
 use Magento\Backend\Block\Widget\Form\Generic;
@@ -79,8 +79,8 @@ class Info extends Generic implements TabInterface
      */
     protected function _prepareForm()
     {
-        /** @var Gateways $model */
-        $model = $this->_coreRegistry->registry(GatewaysController::GATEWAYS_REGISTER_CODE);
+        /** @var Gateway $model */
+        $model = $this->_coreRegistry->registry(GatewayController::GATEWAY_REGISTER_CODE);
 
         /** @var \Magento\Framework\Data\Form $form */
         $form = $this->_formFactory->create();

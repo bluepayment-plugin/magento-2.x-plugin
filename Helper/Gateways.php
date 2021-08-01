@@ -3,18 +3,18 @@
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
+use BlueMedia\BluePayment\Api\GatewayRepositoryInterface;
 use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
-use BlueMedia\BluePayment\Model\GatewaysFactory;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection;
+use BlueMedia\BluePayment\Api\Data\GatewayInterfaceFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
 use Exception;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -31,8 +31,11 @@ class Gateways extends Data
         'PLN', 'EUR', 'GBP', 'USD', 'CZK', 'RON', 'HUF', 'BGN', 'UAH'
     ];
 
-    /** @var GatewaysFactory */
-    public $gatewaysFactory;
+    /** @var GatewayInterfaceFactory */
+    public $gatewayFactory;
+
+    /** @var GatewayRepositoryInterface */
+    public $gatewayRepository;
 
     /** @var Logger */
     public $logger;
@@ -43,6 +46,9 @@ class Gateways extends Data
     /** @var Collection */
     public $collection;
 
+    /** @var Webapi */
+    public $webapi;
+
     /**
      * Gateways constructor.
      *
@@ -52,7 +58,7 @@ class Gateways extends Data
      * @param Emulation $appEmulation
      * @param Config $paymentConfig
      * @param Initial $initialConfig
-     * @param GatewaysFactory $gatewaysFactory
+     * @param GatewaysFactory $gatewayFactory
      * @param Client $apiClient
      * @param Logger $logger
      * @param EmailHelper $emailHelper
@@ -66,14 +72,15 @@ class Gateways extends Data
         Emulation $appEmulation,
         Config $paymentConfig,
         Initial $initialConfig,
-        GatewaysFactory $gatewaysFactory,
+        GatewayInterfaceFactory $gatewayFactory,
+        GatewayRepositoryInterface $gatewayRepository,
         Client $apiClient,
         Logger $logger,
         EmailHelper $emailHelper,
         Collection $collection,
-        StoreManagerInterface $storeManager
-    )
-    {
+        StoreManagerInterface $storeManager,
+        Webapi $webapi
+    ) {
         parent::__construct(
             $context,
             $layoutFactory,
@@ -86,10 +93,12 @@ class Gateways extends Data
             $storeManager
         );
 
-        $this->gatewaysFactory = $gatewaysFactory;
+        $this->gatewayFactory = $gatewayFactory;
+        $this->gatewayRepository = $gatewayRepository;
         $this->emailHelper = $emailHelper;
         $this->collection = $collection;
         $this->logger = $logger;
+        $this->webapi = $webapi;
     }
 
     /**
@@ -109,13 +118,6 @@ class Gateways extends Data
             );
 
             if ($gatewaySelection) {
-                $hashMethod = $this->scopeConfig->getValue(
-                    'payment/bluepayment/hash_algorithm',
-                    ScopeInterface::SCOPE_STORE,
-                    $store->getCode()
-                );
-                $gatewayListAPIUrl = $this->getGatewayListUrl($store);
-
                 foreach (self::$currencies as $currency) {
                     $serviceId = $this->scopeConfig->getValue(
                         'payment/bluepayment/' . strtolower($currency) . '/service_id',
@@ -128,25 +130,21 @@ class Gateways extends Data
                         $store->getCode()
                     );
 
-                    $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
-
                     if ($serviceId) {
                         $tryCount = 0;
                         $loadResult = false;
                         while (!$loadResult) {
-                            $loadResult = $this->loadGatewaysFromAPI(
-                                $hashMethod,
+                            $loadResult = $this->webapi->gatewayList(
                                 $serviceId,
-                                $messageId,
                                 $hashKey,
-                                $gatewayListAPIUrl
+                                $currency
                             );
 
-                            if ($loadResult) {
+                            if (isset($loadResult['result']) && $loadResult['result'] == 'OK') {
                                 $result['success'] = $this->saveGateways(
                                     $serviceId,
                                     $store->getId(),
-                                    (array)$loadResult,
+                                    $loadResult['gatewayList'],
                                     $existingGateways,
                                     $currency
                                 );
@@ -168,60 +166,6 @@ class Gateways extends Data
     }
 
     /**
-     * @param StoreInterface $store
-     * @return string
-     */
-    private function getGatewayListUrl(StoreInterface $store)
-    {
-        $testMode = $this->scopeConfig->getValue(
-            'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_STORE,
-            $store->getCode()
-        );
-
-        if ($testMode) {
-            return $this->scopeConfig->getValue(
-                'payment/bluepayment/test_address_gateways_url',
-                ScopeInterface::SCOPE_STORE,
-                $store->getCode()
-            );
-        }
-
-        return $this->scopeConfig->getValue(
-            'payment/bluepayment/prod_address_gateways_url',
-            ScopeInterface::SCOPE_STORE,
-            $store->getCode()
-        );
-    }
-
-    /**
-     * @param string $hashMethod
-     * @param string $serviceId
-     * @param string $messageId
-     * @param string $hashKey
-     * @param string $gatewayListAPIUrl
-     *
-     * @return bool|SimpleXMLElement
-     */
-    private function loadGatewaysFromAPI($hashMethod, $serviceId, $messageId, $hashKey, $gatewayListAPIUrl)
-    {
-        $hash = hash($hashMethod, $serviceId . '|' . $messageId . '|' . $hashKey);
-        $data = [
-            'ServiceID' => $serviceId,
-            'MessageID' => $messageId,
-            'Hash' => $hash,
-        ];
-
-        try {
-            return $this->apiClient->call($gatewayListAPIUrl, $data);
-        } catch (Exception $e) {
-            $this->logger->info($e->getMessage());
-
-            return false;
-        }
-    }
-
-    /**
      * @param integer $serviceId
      * @param integer $storeId
      * @param array $gatewayList
@@ -234,84 +178,79 @@ class Gateways extends Data
     {
         $currentlyActiveGatewayIDs = [];
 
-        if (isset($gatewayList['gateway'])) {
-            if (is_array($gatewayList['gateway'])) {
-                $gatewayXMLObjects = $gatewayList['gateway'];
-            } else {
-                $gatewayXMLObjects = [$gatewayList['gateway']];
+        foreach ($gatewayList as $gateway) {
+            $gateway = (array)$gateway;
+
+            if (isset($gateway['gatewayID'])
+                && isset($gateway['gatewayName'])
+                && isset($gateway['gatewayType'])
+                && isset($gateway['bankName'])
+                && isset($gateway['stateDate'])
+            ) {
+                $gatewayId = $gateway['gatewayID'];
+                $currentlyActiveGatewayIDs[] = $gatewayId;
+
+                if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
+                    $gatewayModel = $this->gatewayRepository->getById(
+                        $existingGateways[$storeId][$currency][$gatewayId]['entity_id']
+                    );
+                } else {
+                    $gatewayModel = $this->gatewayFactory->create();
+                    $gatewayModel->setForceDisable(false);
+                    $gatewayModel->setName($gateway['gatewayName']);
+                }
+
+                if (in_array($gateway['gatewayID'], [
+                    ConfigProvider::AUTOPAY_GATEWAY_ID,
+                    ConfigProvider::GPAY_GATEWAY_ID,
+                    ConfigProvider::APPLE_PAY_GATEWAY_ID,
+                    ConfigProvider::CREDIT_GATEWAY_ID
+                ])) {
+                    $gatewayModel->setIsSeparatedMethod(true);
+                }
+
+                $gatewayModel->setStoreId($storeId);
+                $gatewayModel->setServiceId($serviceId);
+                $gatewayModel->setCurrency($currency);
+                $gatewayModel->setGatewayId($gateway['gatewayID']);
+                $gatewayModel->setStatus($gateway['state'] == 'OK');
+                $gatewayModel->setBankName($gateway['bankName']);
+                $gatewayModel->setType($gateway['gatewayType']);
+                $gatewayModel->setLogoUrl(isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
+                $gatewayModel->setData('status_date', $gateway['stateDate']);
+
+                try {
+                    $this->gatewayRepository->save($gatewayModel);
+                } catch (Exception $e) {
+                    $this->logger->info($e->getMessage());
+                }
             }
+        }
 
-            foreach ($gatewayXMLObjects as $gatewayXMLObject) {
-                $gateway = (array)$gatewayXMLObject;
-
-                if (isset($gateway['gatewayID'])
-                    && isset($gateway['gatewayName'])
-                    && isset($gateway['gatewayType'])
-                    && isset($gateway['bankName'])
-                    && isset($gateway['statusDate'])
+        $disabledGateways = [];
+        if (isset($existingGateways[$storeId])) {
+            foreach ($existingGateways[$storeId][$currency] as $existingGatewayId => $existingGatewayData) {
+                if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
+                    && $existingGatewayData['gateway_status'] != 0
                 ) {
-                    $gatewayId = $gateway['gatewayID'];
-                    $currentlyActiveGatewayIDs[] = $gatewayId;
-
-                    if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
-                        $gatewayModel = $this->gatewaysFactory->create();
-                        $gatewayModel->load($existingGateways[$storeId][$currency][$gatewayId]['entity_id']);
-                    } else {
-                        $gatewayModel = $this->gatewaysFactory->create();
-                        $gatewayModel->setData('force_disable', 0);
-                        $gatewayModel->setData('gateway_name', $gateway['gatewayName']);
-                    }
-
-                    if (in_array($gateway['gatewayID'], [
-                        ConfigProvider::AUTOPAY_GATEWAY_ID,
-                        ConfigProvider::GPAY_GATEWAY_ID,
-                        ConfigProvider::APPLE_PAY_GATEWAY_ID,
-                        ConfigProvider::CREDIT_GATEWAY_ID
-                    ])) {
-                        $gatewayModel->setData('is_separated_method', '1');
-                    }
-
-                    $gatewayModel->setData('store_id', $storeId);
-                    $gatewayModel->setData('gateway_service_id', $serviceId);
-                    $gatewayModel->setData('gateway_currency', $currency);
-                    $gatewayModel->setData('gateway_id', $gateway['gatewayID']);
-                    $gatewayModel->setData('gateway_status', 1);
-                    $gatewayModel->setData('bank_name', $gateway['bankName']);
-                    $gatewayModel->setData('gateway_type', $gateway['gatewayType']);
-                    $gatewayModel->setData('gateway_logo_url', isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
-                    $gatewayModel->setData('status_date', $gateway['statusDate']);
+                    $gatewayModel = $this->gatewayRepository->getById($existingGatewayData['entity_id']);
+                    $gatewayModel->setStatus(false);
 
                     try {
-                        $gatewayModel->save();
+                        $this->gatewayRepository->save($gatewayModel);
+
+                        $disabledGateways[] = [
+                            'gateway_name' => $existingGatewayData['gateway_name'],
+                            'gateway_id' => $existingGatewayId,
+                        ];
                     } catch (Exception $e) {
                         $this->logger->info($e->getMessage());
                     }
                 }
             }
 
-            $disabledGateways = [];
-            if (isset($existingGateways[$storeId])) {
-                foreach ($existingGateways[$storeId][$currency] as $existingGatewayId => $existingGatewayData) {
-                    if (!in_array($existingGatewayId, $currentlyActiveGatewayIDs)
-                        && $existingGatewayData['gateway_status'] != 0
-                    ) {
-                        $gatewayModel = $this->gatewaysFactory->create()->load($existingGatewayData['entity_id']);
-                        $gatewayModel->setData('gateway_status', 0);
-                        try {
-                            $gatewayModel->save();
-                            $disabledGateways[] = [
-                                'gateway_name' => $existingGatewayData['gateway_name'],
-                                'gateway_id' => $existingGatewayId,
-                            ];
-                        } catch (Exception $e) {
-                            $this->logger->info($e->getMessage());
-                        }
-                    }
-                }
-
-                if (!empty($disabledGateways)) {
-                    $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
-                }
+            if (!empty($disabledGateways)) {
+                $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
             }
         }
 
@@ -338,7 +277,7 @@ class Gateways extends Data
         $defaultStoreId = $this->storeManager->getDefaultStoreView()->getId();
 
         foreach ($bluegatewaysCollection as $gateway) {
-            /** @var \BlueMedia\BluePayment\Model\Gateways $gateway */
+            /** @var \BlueMedia\BluePayment\Model\Gateway $gateway */
 
             $storeId = $gateway->getData('store_id') ?? $defaultStoreId;
             $serviceId = $gateway->getData('gateway_service_id');
@@ -347,7 +286,8 @@ class Gateways extends Data
 
             if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
                 // Remove duplicates
-                $gateway->delete();
+                $this->gatewayRepository->delete($gateway);
+
                 continue;
             }
 

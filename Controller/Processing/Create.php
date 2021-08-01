@@ -7,18 +7,17 @@ use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Response\Http;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
@@ -135,11 +134,7 @@ class Create extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
-            $autopayGateway = $this->scopeConfig->getValue(
-                'payment/bluepayment/autopay_gateway',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
-            );
+            $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
                 ScopeInterface::SCOPE_STORE,
@@ -151,6 +146,9 @@ class Create extends Action
                 $order->getStoreId()
             );
             $orderId        = $order->getRealOrderId();
+            $agreementsIds  = $order->getPayment()->hasAdditionalInformation('agreements_ids')
+                ? array_unique(explode(',', $order->getPayment()->getAdditionalInformation('agreements_ids')))
+                : [];
 
             if (!$order->getId()) {
                 $this->logger->info('CREATE:' . __LINE__, ['Zamówienie bez identyfikatora']);
@@ -202,7 +200,7 @@ class Create extends Action
                 ->addFieldToFilter('gateway_id', $gatewayId)
                 ->getFirstItem();
 
-            $order->setBlueGatewayId((int) $gatewayId);
+            $order->setBlueGatewayId($gatewayId);
             $order->setPaymentChannel($gateway->getData('gateway_name'));
             $order->save();
 
@@ -216,7 +214,12 @@ class Create extends Action
             }
 
             if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
-                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic);
+                $params = $payment->getFormRedirectFields(
+                    $order,
+                    $gatewayId,
+                    $agreementsIds,
+                    true
+                );
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $redirectHash = $this->helper->generateAndReturnHash($hashData);
@@ -232,7 +235,13 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
                 if ($this->validateBlikCode($authorizationCode)) {
-                    $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, $authorizationCode);
+                    $params = $payment->getFormRedirectFields(
+                        $order,
+                        $gatewayId,
+                        $agreementsIds,
+                        true,
+                        $authorizationCode
+                    );
                     $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
                     $responseParams = $this->sendRequestBlik($payment->getUrlGateway(), $params);
@@ -275,11 +284,18 @@ class Create extends Action
             }
 
             if (ConfigProvider::GPAY_GATEWAY_ID == $gatewayId && $automatic === true) {
-                $token = $this->getRequest()->getParam('token', null);
+                $token = $this->getRequest()->getParam('token');
 
                 $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);
 
-                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, '', $token);
+                $params = $payment->getFormRedirectFields(
+                    $order,
+                    $gatewayId,
+                    $agreementsIds,
+                    true,
+                    '',
+                    $token
+                );
                 $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
                 $responseParams = $this->sendRequestGPay($payment->getUrlGateway(), $params);
@@ -313,7 +329,15 @@ class Create extends Action
             }
 
             if ($autopayGateway == $gatewayId) {
-                $params = $payment->getFormRedirectFields($order, $gatewayId, $automatic, '', '', $cardIndex);
+                $params = $payment->getFormRedirectFields(
+                    $order,
+                    $gatewayId,
+                    $agreementsIds,
+                    $automatic,
+                    '',
+                    '',
+                    $cardIndex
+                );
 
                 if ($automatic === true) {
                     $hashData  = [$serviceId, $orderId, $sharedKey];
@@ -363,7 +387,11 @@ class Create extends Action
                 ]);
             }
 
-            $params = $payment->getFormRedirectFields($order, $gatewayId);
+            $params = $payment->getFormRedirectFields(
+                $order,
+                $gatewayId,
+                $agreementsIds
+            );
             $xml = $this->sendRequest($params, $payment->getUrlGateway());
 
             $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
