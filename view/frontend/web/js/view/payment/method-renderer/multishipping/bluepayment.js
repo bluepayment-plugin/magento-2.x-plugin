@@ -7,20 +7,26 @@
 
 define([
     'jquery',
+    'ko',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',
     'Magento_Checkout/js/model/full-screen-loader',
     'Magento_Checkout/js/action/set-payment-information',
     'Magento_Checkout/js/model/payment/additional-validators',
-    'Magento_Checkout/js/action/select-payment-method'
+    'Magento_Checkout/js/action/select-payment-method',
+    'mage/url',
 ], function (
     $,
+    ko,
     Component,
     fullScreenLoader,
     setPaymentInformationAction,
     additionalValidators,
-    selectPaymentMethodAction
+    selectPaymentMethodAction,
+    url
 ) {
     'use strict';
+
+    let widget;
 
     return Component.extend({
         defaults: {
@@ -31,6 +37,12 @@ define([
         },
         imports: {
             onActiveChange: 'active'
+        },
+        agreements: ko.observable([]),
+
+        initialize: function () {
+            widget = this;
+            return this._super();
         },
 
         initObservable: function () {
@@ -58,9 +70,46 @@ define([
             return {
                 'method': this.item.method,
                 'additional_data': {
-                    'gateway_id': this.gatewayId
+                    'gateway_id': this.gatewayId,
+                    'agreements_ids': this.getCheckedAgreementsIds(),
                 }
             };
+        },
+
+        getAgreements: function () {
+            var urlResponse = url.build('bluepayment/processing/agreements');
+            var self = this;
+
+            $.ajax({
+                showLoader: true,
+                url: urlResponse,
+                type: 'GET',
+                data: {
+                    'gateway_id': this.gatewayId
+                },
+                dataType: "json"
+            }).done(function (response) {
+                if (!response.hasOwnProperty('error')) {
+                    self.agreements(response);
+                    setPaymentInformationAction(self.messageContainer, self.getData());
+                }
+            });
+        },
+
+        agreementChanged: function () {
+            setPaymentInformationAction(this.messageContainer, this.getData());
+        },
+
+        getCheckedAgreementsIds: function () {
+            var agreementData = $('.payment-method._active[data-name=' + this.name + '] .bluepayment-agreements-block input')
+                .serializeArray();
+            var agreementsIds = [];
+
+            agreementData.forEach(function (item) {
+                agreementsIds.push(item.value);
+            });
+
+            return agreementsIds.join(',');
         },
 
         /**
@@ -95,9 +144,19 @@ define([
         /**
          * @override
          */
+        selectPaymentOption: function (value) {
+            widget.setBlueMediaGatewayMethod(value);
+            return true;
+        },
+
+        /**
+         * @override
+         */
         setBlueMediaGatewayMethod: function (value) {
             this.gatewayId = value.gateway_id;
             setPaymentInformationAction(this.messageContainer, this.getData());
+
+            this.getAgreements();
 
             return true;
         },
