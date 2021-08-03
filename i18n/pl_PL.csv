@@ -61,7 +61,7 @@
 "Update","Update"
 "Cancel","Cancel"
 "No online payment is available at this time. Feel free to contact us about that.","Brak dostępnych kanałów płatności. Skontaktuj się z nami."
-"No gateway was selected.","Nie wybrano bramki."
+"Choose the way you want to pay.","Wybierz sposób, w jaki chcesz zapłacić."
 "Place Order","Złóż zamówienie"
 %gateways,%gateways
 %source,%source

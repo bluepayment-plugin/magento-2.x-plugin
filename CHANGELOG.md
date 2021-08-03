@@ -10,6 +10,9 @@
 - Dodano obsługę „Dostawa na wiele adresów (multishipping)”.
 - Zmieniono scope konfiguracji z SCOPE_WEBSITE na SCOPE_STORE.
 
+### Wersja 2.14.6
+- Poprawiono wybór kanału płatności.
+
 ## Wersja 2.14.2
 - Zmieniono kwoty dla "Smartney – Kup teraz, zapłać później" - z przedziału ~~100 zł - 2000 zł~~ na **100 zł - 2500 zł**.
 - Dodanie parametru "Language" do rozpoczęcia transakcji - zgodnego z językiem sklepu danego zamówienia.

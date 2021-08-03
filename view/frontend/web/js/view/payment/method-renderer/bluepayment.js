@@ -4,6 +4,7 @@ define([
         'ko',
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/action/select-payment-method',
+        'Magento_Checkout/js/model/payment-service',
         'mage/url',
         'mage/translate',
         'BlueMedia_BluePayment/js/model/quote',
@@ -11,19 +12,18 @@ define([
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
         'Magento_Checkout/js/model/payment/additional-validators'
-    ], function (
-        $,
-        _,
-        ko,
-        Component,
-        selectPaymentMethodAction,
-        url,
-        $t,
-        quote,
-        checkoutData,
-        modal,
-        blikTpl,
-        additionalValidators
+    ], function ($,
+                 _,
+                 ko,
+                 Component,
+                 selectPaymentMethodAction,
+                 paymentService,
+                 url,
+                 quote,
+                 checkoutData,
+                 modal,
+                 blikTpl,
+                 additionalValidators
     ) {
         'use strict';
 
@@ -33,7 +33,8 @@ define([
         return Component.extend({
             defaults: {
                 template: 'BlueMedia_BluePayment/payment/bluepayment',
-                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png'
+                logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+                grandTotalAmount: 0
             },
 
             ordered: false,
@@ -57,31 +58,48 @@ define([
                 }
                 return -1;
             }),
-        blikModal: modal({
-            title: $t('Confirm BLIK transaction'),
-            autoOpen: false,
-            clickableOverlay: false,
-            buttons: [],
-            type: 'popup',
-            popupTpl: blikTpl,
-            keyEventHandlers: {},
-            modalClass: 'blik-modal',
-            }, $('<div />').html($t('Confirm the payment in your bank\'s app.'))),
-        blikTimeout: null,
-        collapsed: ko.observable(true),
-        agreements: ko.observable([]),
+            blikModal: modal({
+                title: $t('Confirm BLIK transaction'),
+                autoOpen: false,
+                clickableOverlay: false,
+                buttons: [],
+                type: 'popup',
+                popupTpl: blikTpl,
+                keyEventHandlers: {},
+                modalClass: 'blik-modal',
+                }, $('<div />').html($t('Confirm the payment in your bank\'s app.'))),
+            blikTimeout: null,
+            collapsed: ko.observable(true),
+            agreements: ko.observable([]),
+
+            /**
+             * Subscribe to grand totals
+             */
+            initObservable: function () {
+                this._super();
+                this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
+                this.currencyCode = quote.totals()['base_currency_code'];
+
+                quote.totals.subscribe(function () {
+                    if (this.grandTotalAmount !== quote.totals()['base_grand_total']) {
+                        this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
+                    }
+                }.bind(this));
+
+                return this;
+            },
 
             /**
              * Get payment method data
              */
-        getData: function () {
-            return {
-                'method': this.item.method,
-                'additional_data': {
-                    'agreements_ids': this.getCheckedAgreementsIds()
-                }
-            };
-        },
+            getData: function () {
+                return {
+                    'method': this.item.method,
+                    'additional_data': {
+                        'agreements_ids': this.getCheckedAgreementsIds()
+                    }
+                };
+            },
 
             initialize: function () {
                 widget = this;
@@ -94,38 +112,25 @@ define([
                     }
                 }
 
-                ko.bindingHandlers.doSomething = {
-                    update: function (element) {
-                        var el = $(element).find('input.radio');
-                        el.change(function () {
-                            el.parent().removeClass('_active');
-                            $(this).parent().addClass('_active');
-                        });
-                    }
-                };
-                ko.bindingHandlers.addActiveClass = {
-                    init: function (element) {
-                        var el = $(element);
-                        var checkboxes = el.find('input');
-                        checkboxes.each(function () {
-                            if ($(this).is(':checked')) {
-                                $(this).parent().addClass('_active');
-                            }
-                        });
-                    }
+                PayBmCheckout.transactionSuccess = function (status) {
+                    window.location.href = redirectUrl;
                 };
 
-                if (typeof PayBmCheckout !== 'undefined') {
-                    PayBmCheckout.transactionSuccess = function (status) {
-                        window.location.href = redirectUrl;
-                    };
-                    PayBmCheckout.transactionDeclined = function (status) {};
-                    PayBmCheckout.transactionError = function (status) {};
-                }
+                PayBmCheckout.transactionDeclined = function (status) {
+                    // window.location.href = redirectUrl;
+                };
+
+                PayBmCheckout.transactionError = function (status) {
+                    // window.location.href = redirectUrl;
+                };
 
                 if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                     this.initGPay();
                 }
+
+                // Refresh selected gateway
+                checkoutData.setIndividualGatewayFlag('');
+                this.setBlueMediaGatewayMethod({});
             },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
@@ -183,24 +188,32 @@ define([
                 }
                 return null;
             }),
-        isSeparatedChecked: function (context) {
-            return ko.pureComputed(function () {
-                var paymentMethod = quote.paymentMethod();
-                var individualFlag = checkoutData.getIndividualGatewayFlag();
-                if (paymentMethod) {
-                    if (individualFlag && paymentMethod.method == 'bluepayment') {
-                        if (individualFlag == context.gateway_id) {
-                            return individualFlag;
-                        }
-
-                        return false;
-                    } else {
-                        return false;
-                    }
+            isRadioButtonVisible: ko.computed(function () {
+                // If has separated methods - always show radio
+                if (window.checkoutConfig.payment.bluePaymentSeparated.length > 0) {
+                    return true;
                 }
-                return null;
-            });
-        },
+
+                return paymentService.getAvailablePaymentMethods().length !== 1;
+            }),
+            isSeparatedChecked: function (context) {
+                return ko.pureComputed(function () {
+                    var paymentMethod = quote.paymentMethod();
+                    var individualFlag = checkoutData.getIndividualGatewayFlag();
+                    if (paymentMethod) {
+                        if (individualFlag && paymentMethod.method == 'bluepayment') {
+                            if (individualFlag == context.gateway_id) {
+                                return individualFlag;
+                            }
+                            return false;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    return null;
+                });
+            },
             isIframeSelected: function () {
                 if (this.isAutopaySelected()) {
                     var cardIndex = checkoutData.getCardIndex();
@@ -265,8 +278,9 @@ define([
                 }
 
                 // Selected payment method validation
-                if (this.renderSubOptions !== false && _.isEmpty(this.selectedPaymentObject)) {
+                if (this.renderSubOptions !== false && !this.activeMethod()) {
                     this.validationFailed(true);
+                    $('.payment-method-empty-gateway')[0].scrollIntoView({block: "center"});
                     return false;
                 }
 
@@ -534,8 +548,8 @@ define([
                     shippingAddressRequired: false,
                     transactionInfo: {
                         totalPriceStatus: 'FINAL',
-                        totalPrice: quote.getCalculatedTotal().toFixed(2).toString(),
-                        currencyCode: window.checkoutConfig.quoteData.quote_currency_code
+                        totalPrice: this.grandTotalAmount,
+                        currencyCode: this.currencyCode
                     },
                 };
             },
