@@ -382,7 +382,7 @@ class Payment extends AbstractMethod
      * @param  string  $authorizationCode
      * @param  string  $paymentToken
      * @param  int  $cardIndex
-     * @param  bool  $backUrl
+     * @param  string  $backUrl
      *
      * @return string[]
      */
@@ -394,7 +394,7 @@ class Payment extends AbstractMethod
         string $authorizationCode = '',
         string $paymentToken = '',
         int $cardIndex = -1,
-        bool $backUrl = false
+        string $backUrl = null
     ): array {
         $orderId       = $order->getRealOrderId();
         $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
@@ -441,7 +441,7 @@ class Payment extends AbstractMethod
             $params['GatewayID'] = $gatewayId;
         }
 
-        if ($backUrl !== false) {
+        if ($backUrl !== null) {
             $params['ReturnURL'] = $backUrl;
         }
 
@@ -532,9 +532,9 @@ class Payment extends AbstractMethod
      */
     public function processStatusPayment(SimpleXMLElement $response)
     {
-        if ($this->_validAllTransaction($response)) {
+        if ($this->validAllTransaction($response)) {
             $transaction_xml = $response->transactions->transaction;
-            return $this->updateStatusTransactionAndOrder($transaction_xml, $response->serviceID);
+            return $this->updateStatusTransactionAndOrder($transaction_xml, (string) $response->serviceID);
         }
 
         return null;
@@ -552,7 +552,7 @@ class Payment extends AbstractMethod
         $currency = $response->transaction->currency;
 
         try {
-            if ($this->_validAllTransaction($response, $currency)) {
+            if ($this->validAllTransaction($response, $currency)) {
                 switch ($response->getName()) {
                     case 'recurringActivation':
                         return $this->saveCardData($response);
@@ -642,7 +642,7 @@ class Payment extends AbstractMethod
      *
      * @return bool
      */
-    public function _validAllTransaction(SimpleXMLElement $response, string $currency = null): bool
+    public function validAllTransaction(SimpleXMLElement $response, $currency = null)
     {
         if ($currency === null) {
             if (property_exists($response, 'transactions')) {
@@ -700,17 +700,23 @@ class Payment extends AbstractMethod
      *
      * @param SimpleXMLElement $payment
      *
-     * @param  int  $serviceId
+     * @param  string  $serviceId
      *
      * @return string
      */
-    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, int $serviceId = 0): string
+    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, string $serviceId = '0'): string
     {
         $paymentStatus = (string)$payment->paymentStatus;
 
         $remoteId = $payment->remoteID;
         $orderId = $payment->orderID;
         $gatewayId = $payment->gatewayID;
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'remoteId' => $remoteId,
+            'orderId' => $orderId,
+            'gatewayId' => $gatewayId,
+        ]);
 
         $gateway = $this->gatewayFactory->create()
             ->addFieldToFilter('gateway_service_id', $serviceId)
@@ -844,7 +850,7 @@ class Payment extends AbstractMethod
                             break;
                     }
 
-                    $this->paymentRepository->save($orderPayment);
+                    // $this->paymentRepository->save($orderPayment);
                     $this->orderRepository->save($order);
                 } else {
                     $orderComment =
@@ -874,10 +880,6 @@ class Payment extends AbstractMethod
             'time' => round(($time2 - $time1) * 1000, 2) . ' ms'
         ]);
 
-        if ($orderPaymentState === null) {
-            $confirmed = false;
-        }
-
         return $this->returnConfirmation(
             $order,
             $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED
@@ -885,13 +887,13 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * @param  array  $list
+     * @param  array|object  $list
      *
      * @return void
      */
-    private function checkInList(array $list): void
+    private function checkInList($list)
     {
-        foreach ($list as $row) {
+        foreach ((array)$list as $row) {
             if (is_object($row)) {
                 $this->checkInList($row);
             } else {
@@ -1079,6 +1081,12 @@ class Payment extends AbstractMethod
             $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
                 ? explode(',', $payment->getAdditionalInformation('agreements_ids'))
                 : [];
+
+            $this->bmLooger->info('PAYMENT:' . __LINE__, [
+                'backUrl' => $backUrl,
+                'gatewayId' => $gatewayId,
+                'agreementsIds' => $agreementsIds
+            ]);
 
             $params = $this->getFormRedirectFields(
                 $order,
