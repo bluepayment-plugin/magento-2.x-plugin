@@ -4,6 +4,7 @@
 - Dodano obsługę zgód formalnych.
 - Zmiana endpointu pobierania kanałów płatności na `gatewayList` (REST API).
 - Poprawienie podwójnego zapisu transakcji przy ITNie.
+- Dodanie opcji "Nie zmieniaj statusu" przy ustawieniach statusów dla zwrotów.
 
 ## Wersja 2.15.0
 - Dodano obsługę „Dostawa na wiele adresów (multishipping)”.

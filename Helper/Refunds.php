@@ -99,7 +99,6 @@ class Refunds extends Data
      * @param bool $addTransaction
      * @return array
      * @throws EmptyRemoteIdException
-     * @throws NoSuchEntityException
      */
     public function makeRefund(Order $order, $transaction, $amount = null, $addTransaction = true)
     {
@@ -146,7 +145,7 @@ class Refunds extends Data
             $serviceId,
             $messageId,
             $transaction->getRemoteId(),
-            $amount,
+            (float) $amount,
             $sharedKey,
             $refundAPIUrl
         );
@@ -180,7 +179,7 @@ class Refunds extends Data
             $errorText = $loadResult['description'];
 
             if (strpos($errorText, " - ") !== false) {
-                list($errorCode, $errorText) = explode(" - ", $loadResult['description']);
+                [$errorCode, $errorText] = explode(" - ", $loadResult['description']);
             }
 
             $result = [
@@ -217,11 +216,11 @@ class Refunds extends Data
     }
 
     /**
-     * @param int $storeId
+     * @param  int  $storeId
      *
      * @return mixed
      */
-    public function getRefundUrl($storeId)
+    public function getRefundUrl(int $storeId)
     {
         if ($this->getConfigValue('test_mode', $storeId)) {
             return $this->getConfigValue('test_address_refunds_url', $storeId);
@@ -231,36 +230,44 @@ class Refunds extends Data
     }
 
     /**
-     * @param float $amount
+     * @param  float  $amount
      *
      * @return string
      */
-    public function formatAmount($amount)
+    public function formatAmount(float $amount): string
     {
         return sprintf('%.2f', $amount);
     }
 
     /**
-     * @param string $hashMethod
-     * @param int $storeId
-     * @param string $serviceId
-     * @param string $messageId
-     * @param string $remoteId
-     * @param float $amount
-     * @param string $hashKey
-     * @param string $refundAPIUrl
+     * @param  string  $hashMethod
+     * @param  int  $storeId
+     * @param  string  $serviceId
+     * @param  string  $messageId
+     * @param  string  $remoteId
+     * @param  float  $amount
+     * @param  string  $hashKey
+     * @param  string  $refundAPIUrl
      *
      * @return bool|array
      */
-    public function callRefundAPI($hashMethod, $storeId, $serviceId, $messageId, $remoteId, $amount, $hashKey, $refundAPIUrl)
-    {
+    public function callRefundAPI(
+        string $hashMethod,
+        int $storeId,
+        string $serviceId,
+        string $messageId,
+        string $remoteId,
+        float $amount,
+        string $hashKey,
+        string $refundAPIUrl
+    ) {
         $data = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
             'RemoteID' => $remoteId,
         ];
         if (!empty($amount)) {
-            $data['Amount'] = number_format((float)$amount, 2, '.', '');
+            $data['Amount'] = number_format($amount, 2, '.', '');
         }
         $hashSeparator = $this->getConfigValue('hash_separator', $storeId)
             ? $this->getConfigValue('hash_separator', $storeId) : self::DEFAULT_HASH_SEPARATOR;
@@ -282,40 +289,39 @@ class Refunds extends Data
     }
 
     /**
-     * @param array $loadResult
-     * @param float $amount
-     * @param TransactionInterface $transaction
-     * @param Order $order
+     * @param  array  $loadResult
+     * @param  float  $amount
+     * @param  TransactionInterface  $transaction
+     * @param  Order  $order
      *
      * @return void
+     * @throws Exception
      */
     public function processResponse(
-        $loadResult,
-        $amount,
+        array $loadResult,
+        float $amount,
         TransactionInterface $transaction,
         Order $order
-    )
-    {
+    ): void {
         $this->saveRefundTransaction($loadResult, $amount, $transaction, $order);
         $this->saveTransaction($loadResult, $amount, $transaction, $order);
         $this->updateOrderOnRefund($loadResult, $amount, $transaction, $order);
     }
 
     /**
-     * @param array $loadResult
-     * @param float $amount
+     * @param  array  $loadResult
+     * @param  float  $amount
      * @param TransactionInterface $transaction
      * @param Order $order
      *
      * @return void
      */
     public function saveRefundTransaction(
-        $loadResult,
-        $amount,
+        array $loadResult,
+        float $amount,
         TransactionInterface $transaction,
         Order $order
-    )
-    {
+    ): void {
         /** @var RefundTransactionInterface $refund */
         $refund = $this->refundTransactionFactory->create();
 
@@ -331,20 +337,20 @@ class Refunds extends Data
     }
 
     /**
-     * @param array $loadResult
-     * @param float $amount
-     * @param TransactionInterface $transaction
-     * @param Order $order
+     * @param  array  $loadResult
+     * @param  float  $amount
+     * @param  TransactionInterface  $transaction
+     * @param  Order  $order
      *
      * @return int|false
+     * @throws Exception
      */
     public function saveTransaction(
-        $loadResult,
-        $amount,
+        array $loadResult,
+        float $amount,
         TransactionInterface $transaction,
         Order $order
-    )
-    {
+    ) {
         $parent = $transaction;
 
         /** @var Order\Payment|null */
@@ -381,19 +387,24 @@ class Refunds extends Data
     }
 
     /**
-     * @param array $loadResult
-     * @param float $amount
-     * @param TransactionInterface $transaction
-     * @param Order $order
+     * @param  array  $loadResult
+     * @param  float  $amount
+     * @param  TransactionInterface  $transaction
+     * @param  Order  $order
      *
      * @return void
+     * @throws Exception
      */
-    public function updateOrderOnRefund($loadResult, $amount, $transaction, $order)
+    public function updateOrderOnRefund(array $loadResult, float $amount, TransactionInterface $transaction, Order $order): void
     {
         if ($amount < $transaction->getAmount()) {
             $status = $this->getConfigValue('status_partial_refund', $order->getStoreId());
         } else {
             $status = $this->getConfigValue('status_full_refund', $order->getStoreId());
+        }
+
+        if ($status) {
+            $order->setStatus($status);
         }
 
         $historyStatusComment = __(
@@ -403,7 +414,6 @@ class Refunds extends Data
         );
 
         $order
-            ->setStatus($status)
             ->addStatusToHistory($status, $historyStatusComment, true)
             ->save();
     }

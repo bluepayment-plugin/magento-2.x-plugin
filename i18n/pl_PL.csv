@@ -132,9 +132,10 @@
 You have to select payment card.,"Musisz wybrać kartę płatniczą."
 "You have to agree.","Musisz wyrazić zgodę."
 "Add new card","Dodaj nową kartę"
-Request timed out. Please try again or use a different payment method.,Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności.
-The BLIK code has expired. Try again.,Kod BLIK wygasł. Spróbuj ponownie.
-Invalid BLIK code.,Niepoprawny kod BLIK.
-Waiting for the confirmation of the transaction.,Oczekiwanie na potwierdzenie transakcji.
-Confirm BLIK transaction,Potwierdź transakcję BLIK
-Potwierdź płatność w aplikacji swojego banku.,Confirm the payment in your bank's app.
+"Request timed out. Please try again or use a different payment method.","Upłynął czas żądania. Spróbuj ponownie lub użyj innej metody płatności."
+"The BLIK code has expired. Try again.","Kod BLIK wygasł. Spróbuj ponownie."
+"Invalid BLIK code.","Niepoprawny kod BLIK."
+"Waiting for the confirmation of the transaction.","Oczekiwanie na potwierdzenie transakcji."
+"Confirm BLIK transaction","Potwierdź transakcję BLIK"
+"Potwierdź płatność w aplikacji swojego banku.","Confirm the payment in your bank's app."
+"-- Do not change status --", "-- Nie zmieniaj statusu --"
