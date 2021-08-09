@@ -19,6 +19,7 @@ define([
                  selectPaymentMethodAction,
                  paymentService,
                  url,
+                 $t,
                  quote,
                  checkoutData,
                  modal,
