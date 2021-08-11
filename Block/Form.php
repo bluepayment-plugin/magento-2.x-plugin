@@ -56,7 +56,7 @@ class Form extends \Magento\Payment\Block\Form
      */
     public function getLogoSrc()
     {
-        $logo_src = $this->getViewFileUrl('BlueMedia_BluePayment::images/logo.jpg');
+        $logo_src = $this->getViewFileUrl('BlueMedia_BluePayment::images/logo.svg');
 
         return $logo_src != '' ? $logo_src : false;
     }
