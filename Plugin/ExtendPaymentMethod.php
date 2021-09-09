@@ -53,6 +53,14 @@ class ExtendPaymentMethod
             $this->names[$code] = $separated['name'];
         }
 
+        if (isset($result['bluepayment'])) {
+            // Remove if any gateway is not available
+            $options = $this->configProvider->getPaymentConfig()['bluePaymentOptions'];
+            if ($options !== false && count($options) === 0) {
+                unset($result['bluepayment']);
+            }
+        }
+
         return $result;
     }
 

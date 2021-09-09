@@ -7,6 +7,7 @@
 - Dodaliśmy opcję **Nie zmieniaj statusu** przy ustawieniach statusów dla zwrotów.
 - Zaktualizowaliśmy Instrukcję użytkownika oraz README.md.
 - Zaktualizowaliśmy logo BlueMedia.
+- Ukryliśmy metodę BlueMedia, kiedy żaden kanał płatności nie jest dostępny (lub wszystkie dostępne są ustawione jako oddzielna metoda płatności).
 
 ## Wersja 2.15.0
 - Dodaliśmy obsługę „Dostawa na wiele adresów (multishipping)”.
