@@ -45,22 +45,24 @@ class ExtendPaymentMethod
      */
     public function afterGetPaymentMethods(Data $subject, $result)
     {
-        foreach ($this->configProvider->getPaymentConfig()['bluePaymentSeparated'] as $separated) {
-            $code = 'bluepayment_'.$separated['gateway_id'];
-            $result[$code] = $result['bluepayment'];
-            $result[$code]['title'] = $separated['name'];
+        if ($this->configProvider->getPaymentConfig()['bluePaymentOptions'] != false) {
+            foreach ($this->configProvider->getPaymentConfig()['bluePaymentSeparated'] as $separated) {
+                $code = 'bluepayment_'.$separated['gateway_id'];
+                $result[$code] = $result['bluepayment'];
+                $result[$code]['title'] = $separated['name'];
 
-            $this->names[$code] = $separated['name'];
-        }
+                $this->names[$code] = $separated['name'];
+            }
 
-        if (isset($result['bluepayment'])) {
-            // Remove if any gateway is not available
-            $options = $this->configProvider->getPaymentConfig()['bluePaymentOptions'];
-            if ($options !== false && count($options) === 0) {
-                unset($result['bluepayment']);
+            if (isset($result['bluepayment'])) {
+                // Remove if any gateway is not available
+                $options = $this->configProvider->getPaymentConfig()['bluePaymentOptions'];
+                if ($options !== false && count($options) === 0) {
+                    unset($result['bluepayment']);
+                }
             }
         }
-
+        
         return $result;
     }
 
