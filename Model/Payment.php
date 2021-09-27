@@ -842,7 +842,7 @@ class Payment extends AbstractMethod
                             $orderPayment->setIsTransactionPending(true);
                             break;
                         case self::PAYMENT_STATUS_SUCCESS:
-                            $orderPayment->registerCaptureNotification($amount);
+                            $orderPayment->registerCaptureNotification($amount, true);
                             $orderPayment->setIsTransactionApproved(true);
                             $orderPayment->setIsTransactionClosed(true);
                             break;

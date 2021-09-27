@@ -22,7 +22,7 @@ define([
     setPaymentInformationAction,
     additionalValidators,
     selectPaymentMethodAction,
-    url
+    url,
 ) {
     'use strict';
 
@@ -31,9 +31,9 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/multishipping/bluepayment',
-            gatewayId: null,
+            gatewayId: ko.observable(null),
             submitButtonSelector: '[id="parent-payment-continue"]',
-            reviewButtonHtml: ''
+            reviewButtonHtml: '',
         },
         imports: {
             onActiveChange: 'active'
@@ -153,7 +153,7 @@ define([
          * @override
          */
         setBlueMediaGatewayMethod: function (value) {
-            this.gatewayId = value.gateway_id;
+            this.gatewayId(value.gateway_id);
             setPaymentInformationAction(this.messageContainer, this.getData());
 
             this.getAgreements();

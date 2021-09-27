@@ -409,7 +409,7 @@ define([
                     }).done(function (response) {
                         if (response.params) {
                             if (response.params.confirmation && response.params.confirmation == 'NOTCONFIRMED') {
-                                this.messageContainer.addErrorMessage({message: $t('Invalid BLIK code.')});
+                                self.messageContainer.addErrorMessage({message: $t('Invalid BLIK code.')});
                             } else {
                                 self.handleBlikStatus(response.params.paymentStatus, response.params);
                             }
@@ -488,42 +488,42 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             }, $('<div />').html()),
-        callGPayPayment: function () {
-            var self = this;
+            callGPayPayment: function () {
+                var self = this;
 
-            self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
-                self.placeOrderAfterValidation(function () {
-                    var token = data.paymentMethodData.tokenizationData.token;
-                    var urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id='
-                        + self.selectedPaymentObject.gateway_id
-                        + '&automatic=true';
+                self.GPayClient.loadPaymentData(self.getGPayTransactionData()).then(function (data) {
+                    self.placeOrderAfterValidation(function () {
+                        var token = data.paymentMethodData.tokenizationData.token;
+                        var urlResponse = url.build('bluepayment/processing/create')
+                            + '?gateway_id='
+                            + self.selectedPaymentObject.gateway_id
+                            + '&automatic=true';
 
-                    $.ajax({
-                        showLoader: true,
-                        url: urlResponse,
-                        data: {'token': token},
-                        type: "POST",
-                        dataType: "json",
-                        }).done(function (response) {
-                            if (response.params) {
-                                if (response.params.redirectUrl) {
-                                    window.location.href = response.params.redirectUrl;
-                                } else {
-                                    if (response.params.paymentStatus) {
-                                        self.handleGPayStatus(response.params.paymentStatus, response.params);
+                        $.ajax({
+                            showLoader: true,
+                            url: urlResponse,
+                            data: {'token': token},
+                            type: "POST",
+                            dataType: "json",
+                            }).done(function (response) {
+                                if (response.params) {
+                                    if (response.params.redirectUrl) {
+                                        window.location.href = response.params.redirectUrl;
                                     } else {
-                                        console.error('Payment has no paymentStatus.');
+                                        if (response.params.paymentStatus) {
+                                            self.handleGPayStatus(response.params.paymentStatus, response.params);
+                                        } else {
+                                            console.error('Payment has no paymentStatus.');
+                                        }
                                     }
                                 }
-                            }
-                        });
-                });
-            })
-                .catch(function (errorMessage) {
-                    console.error(errorMessage);
-                });
-        },
+                            });
+                    });
+                })
+                    .catch(function (errorMessage) {
+                        console.error(errorMessage);
+                    });
+            },
             getGPayTransactionData: function () {
                 return {
                     apiVersion: 2,
