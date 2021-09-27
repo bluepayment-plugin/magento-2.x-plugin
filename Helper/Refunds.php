@@ -129,7 +129,7 @@ class Refunds extends Data
 
         $refundAmount = $this->refundTransactionRepository->getTotalRefundAmountOnTransaction($transaction);
         $availableRefundAmount = $transaction->getAmount() - $refundAmount;
-        if ($amount > ($availableRefundAmount)) {
+        if ($amount > $availableRefundAmount) {
             return [
                 'error' => true,
                 'message' => __(
@@ -405,16 +405,16 @@ class Refunds extends Data
 
         if ($status) {
             $order->setStatus($status);
+
+            $historyStatusComment = __(
+                'Refunded %1. Transaction ID: "%2"',
+                $this->formatAmount($amount) . ' ' . $transaction->getCurrency(),
+                $loadResult['remoteOutID']
+            );
+
+            $order
+                ->addStatusToHistory($status, $historyStatusComment, true)
+                ->save();
         }
-
-        $historyStatusComment = __(
-            'Refunded %1. Transaction ID: "%2"',
-            $this->formatAmount($amount) . ' ' . $transaction->getCurrency(),
-            $loadResult['remoteOutID']
-        );
-
-        $order
-            ->addStatusToHistory($status, $historyStatusComment, true)
-            ->save();
     }
 }

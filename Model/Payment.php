@@ -850,7 +850,6 @@ class Payment extends AbstractMethod
                             break;
                     }
 
-                    // $this->paymentRepository->save($orderPayment);
                     $this->orderRepository->save($order);
                 } else {
                     $orderComment =
