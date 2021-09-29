@@ -159,12 +159,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getPaymentConfig()
     {
-        $gatewaySelection = (bool) $this->scopeConfig->getValue(
-            'payment/bluepayment/gateway_selection',
-            ScopeInterface::SCOPE_STORE
-        );
-
-        if (! $gatewaySelection) {
+        if (! $this->isGatewaySelectionEnabled()) {
             return [
                 'bluePaymentOptions' => false,
                 'bluePaymentSeparated' => false,
@@ -219,6 +214,14 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $this->activeGateways[$currency];
+    }
+
+    public function isGatewaySelectionEnabled()
+    {
+        return (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/gateway_selection',
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     /**
