@@ -67,9 +67,18 @@ class Agreements implements HttpGetActionInterface
      */
     public function execute()
     {
+        $resultJson = $this->resultJsonFactory->create();
+
         $gatewayId = $this->request->getParam(self::PARAM_GATEWAY_ID);
         $currency = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
         $locale = $this->localeResolver->getLocale();
+
+        if ($currency != 'PLN') {
+            // Currently, not supported
+            $resultJson->setData([]);
+
+            return $resultJson;
+        }
 
         $response = $this->webapi->agreements(
             $this->request->getParam(self::PARAM_GATEWAY_ID),
@@ -77,7 +86,6 @@ class Agreements implements HttpGetActionInterface
             $this->localeResolver->getLocale(),
         );
 
-        $resultJson = $this->resultJsonFactory->create();
         if (is_array($response) && $response['result'] == 'OK') {
             $resultJson->setData($response['regulationList']);
         } else {
