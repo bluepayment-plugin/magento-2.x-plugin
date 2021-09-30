@@ -93,14 +93,13 @@ class Refunds extends Data
     }
 
     /**
-     * @param Order $order
      * @param TransactionInterface|null $transaction
      * @param null $amount
      * @param bool $addTransaction
      * @return array
      * @throws EmptyRemoteIdException
      */
-    public function makeRefund(Order $order, $transaction, $amount = null, $addTransaction = true)
+    public function makeRefund($transaction, $amount = null, $addTransaction = true)
     {
         if (null === $transaction || empty($transaction->getRemoteId())) {
             throw new EmptyRemoteIdException();
@@ -220,7 +219,7 @@ class Refunds extends Data
      *
      * @return mixed
      */
-    public function getRefundUrl(int $storeId)
+    public function getRefundUrl($storeId)
     {
         if ($this->getConfigValue('test_mode', $storeId)) {
             return $this->getConfigValue('test_address_refunds_url', $storeId);

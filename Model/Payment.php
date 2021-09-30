@@ -1174,7 +1174,7 @@ class Payment extends AbstractMethod
         try {
             $order = $payment->getOrder();
             $transaction = $this->transactionRepository->getSuccessTransactionFromOrder($order);
-            $result = $this->refunds->makeRefund($order, $transaction, $amount, false);
+            $result = $this->refunds->makeRefund($transaction, $amount);
 
             if (isset($result['error']) && $result['error'] === true) {
                 $payment->setIsTransactionDenied(true);

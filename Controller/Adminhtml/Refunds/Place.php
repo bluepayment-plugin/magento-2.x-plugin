@@ -76,7 +76,7 @@ class Place extends Action
         try {
             $order = $this->orderRepository->get((int)$this->getRequest()->getParam('order_id', 0));
             $transaction = $this->transactionRepository->getSuccessTransactionFromOrder($order);
-            $resultObject->setData($this->refunds->makeRefund($order, $transaction, $amount));
+            $resultObject->setData($this->refunds->makeRefund($transaction, $amount));
         } catch (InputException $e) {
             $resultObject->setData([
                 'error' => true,
