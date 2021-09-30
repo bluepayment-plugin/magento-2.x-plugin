@@ -252,7 +252,7 @@ class Refunds extends Data
      */
     public function callRefundAPI(
         string $hashMethod,
-        int $storeId,
+        $storeId,
         string $serviceId,
         string $messageId,
         string $remoteId,
