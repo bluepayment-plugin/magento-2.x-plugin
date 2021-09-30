@@ -55,7 +55,7 @@ define([
          */
         placeOrderClick: function () {
             // Selected payment method validation
-            if (this.renderSubOptions !== false && _.isNull(this.gatewayId)) {
+            if (this.renderSubOptions !== false && _.isNull(this.gatewayId())) {
                 this.validationFailed(true);
                 return false;
             }
@@ -70,7 +70,7 @@ define([
             return {
                 'method': this.item.method,
                 'additional_data': {
-                    'gateway_id': this.gatewayId,
+                    'gateway_id': this.gatewayId(),
                     'agreements_ids': this.getCheckedAgreementsIds(),
                 }
             };
@@ -85,7 +85,7 @@ define([
                 url: urlResponse,
                 type: 'GET',
                 data: {
-                    'gateway_id': this.gatewayId
+                    'gateway_id': this.gatewayId()
                 },
                 dataType: "json"
             }).done(function (response) {
@@ -153,6 +153,7 @@ define([
          * @override
          */
         setBlueMediaGatewayMethod: function (value) {
+            console.log(this.getData());
             this.gatewayId(value.gateway_id);
             setPaymentInformationAction(this.messageContainer, this.getData());
 

@@ -127,7 +127,7 @@ class PlaceOrder implements PlaceOrderInterface
                 $order->setBlueGatewayId((int) $gatewayId);
                 $order->setPaymentChannel($gateway->getData('gateway_name'));
 
-                $this->logger->info('PlaceOrder:' . __LINE__, ['gatewayID' => $gatewayId, 'w']);
+                $this->logger->info('PlaceOrder:' . __LINE__, ['gatewayID' => $gatewayId]);
 
                 foreach ($order->getAllItems() as $item) {
                     $productsList[] = [
