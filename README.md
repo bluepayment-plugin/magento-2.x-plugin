@@ -13,7 +13,7 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.2.
+- Wersja Magento: 2.3.0 – 2.4.3.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ### [Co nowego w BluePayment?](CHANGELOG.md)
@@ -280,6 +280,14 @@ Informacja tekstowa o kanale płatności będzie widoczna w tabeli.
 Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
+
+
+## Integracja z GraphQL oraz Magento PWA
+Moduł GraphQL dostępny jest pod adresem:
+https://github.com/bluepayment-plugin/module-bluepayment-graphql
+
+Moduł PWA Studio dostępny jest pod adresem: 
+https://github.com/bluepayment-plugin/bluepayment-pwa-studio
 
 ## Aktualizacja
 
