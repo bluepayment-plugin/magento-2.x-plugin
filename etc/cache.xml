@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="bluepayment_agreements" translate="label,description" instance="BlueMedia\BluePayment\Model\Cache\AgreementsCache">
+        <label>Bluepayment Agreements</label>
+        <description>Agreements for BluePayment module</description>
+    </type>
+</config>

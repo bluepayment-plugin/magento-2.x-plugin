@@ -7,7 +7,7 @@
     Wystąpił problem z Twoim zapytaniem.
 <?php else: ?>
     <div class="back"
-        data-mage-init='{
+         data-mage-init='{
             "BlueMedia_BluePayment/js/customer/back":{
                 "Status": "<?= /* @noEscape */ $block->getOrderStatus() ?>",
                 "OrderID": "<?= /* @noEscape */ $block->getOrderId() ?>",
@@ -16,20 +16,40 @@
             }
         }'>
         <?php if ($block->getOrderStatus() !== 'SUCCESS' && $block->getOrderStatus() !== 'FAILURE'): ?>
-            <img src="<?= /* @noEscape */ $block->getViewFileUrl('BlueMedia_BluePayment::images/pending.png') ?>"
-                 style="float: left; margin-right: 20px; " />
+            <img
+                src="<?= /* @noEscape */$block->getViewFileUrl('BlueMedia_BluePayment::images/pending.png') ?>"
+                style="float: left; margin-right: 20px; "/>
 
-            <h2>Zamówienie przyjęte - status transakcji: <strong>w trakcie weryfikacji</strong>.</h2>
+            <?php if ($block->isMultishipping()): ?>
+                <h2>Zamówienia przyjęte - status transakcji: <strong>w trakcie weryfikacji</strong>.</h2>
 
-            <p>
-                Twoje zamówienie zostało przyjęte - oczekujemy na płatność.<br>
-                Jak tylko otrzymamy pozytywną informację - zamówienie zostanie przekazane do realizacji.
-            </p>
+                <p>
+                    Twoje zamówienia zostały przyjęte - oczekujemy na płatność.<br>
+                    Jak tylko otrzymamy pozytywną informację - zamówienia zostaną przekazane do realizacji.
+                </p>
+
+                <p>
+                    Numery zamówień:<br>
+                    <?php foreach($block->getOrders() as $order): ?>
+                        <strong><a href="<?= $block->escapeUrl($block->getViewOrderUrl($order->getId())); ?>" target="_blank">
+                            <?= $block->escapeHtml($order->getIncrementId()); ?>
+                        </a></strong>
+                        <br>
+                    <?php endforeach; ?>
+                </p>
+            <?php else: ?>
+                <h2>Zamówienie przyjęte - status transakcji: <strong>w trakcie weryfikacji</strong>.</h2>
+
+                <p>
+                    Twoje zamówienie zostało przyjęte - oczekujemy na płatność.<br>
+                    Jak tylko otrzymamy pozytywną informację - zamówienie zostanie przekazane do realizacji.
+                </p>
+
+                <p>
+                    Numer zamówienia: <strong><?= /* @noEscape */ $block->getOrderId(); ?></strong>
+                </p>
+            <?php endif; ?>
         <?php endif; ?>
-
-        <p>
-            Numer zamówienia: <strong><?= /* @noEscape */ $block->getOrderId(); ?></strong>
-        </p>
 
     </div>
 <?php endif; ?>

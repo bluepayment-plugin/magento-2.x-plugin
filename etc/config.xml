@@ -8,29 +8,26 @@
                 <gateway_selection>1</gateway_selection>
                 <encoding>UTF</encoding>
                 <title>Online payment BM</title>
-                <title_automatic>Title Automatic Gateway</title_automatic>
-                <title_blik>BLIK</title_blik>
                 <payment_action>order</payment_action>
                 <allowspecific>0</allowspecific>
                 <test_address_url>https://pay-accept.bm.pl/payment</test_address_url>
                 <prod_address_url>https://pay.bm.pl/payment</prod_address_url>
-                <test_address_gateways_url>https://pay-accept.bm.pl/paywayList</test_address_gateways_url>
-                <prod_address_gateways_url>https://pay.bm.pl/paywayList</prod_address_gateways_url>
                 <test_address_refunds_url>https://pay-accept.bm.pl/transactionRefund</test_address_refunds_url>
                 <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
-                <test_address_gpay_merchant_info_url>https://pay-accept.bm.pl/webapi/googlePayMerchantInfo</test_address_gpay_merchant_info_url>
-                <prod_address_gpay_merchant_info_url>https://pay.bm.pl/webapi/googlePayMerchantInfo</prod_address_gpay_merchant_info_url>
+                <gpay_merchant_info_url_test>https://pay-accept.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
+                <gpay_merchant_info_url_prod>https://pay.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
+                <gateway_list_url_test>https://pay-accept.bm.pl/gatewayList</gateway_list_url_test>
+                <gateway_list_url_prod>https://pay.bm.pl/gatewayList</gateway_list_url_prod>
+                <legal_data_url_test>https://pay-accept.bm.pl/legalData</legal_data_url_test>
+                <legal_data_url_prod>https://pay.bm.pl/legalData</legal_data_url_prod>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
-                <autopay_gateway>1503</autopay_gateway>
-                <card_gateway>1500</card_gateway>
-                <blik_gateway>509</blik_gateway>
-                <gpay_gateway>1512</gpay_gateway>
                 <transaction_life_hours />
-                <info_automatic_payment>You will be redirected to the Blue Media secure service payment after submitting the order.</info_automatic_payment>
                 <autopay_agreement>Wyrażam zgodę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Blue Media S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>
+                <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
+                <privateInfoKeys>bluepayment_gateway</privateInfoKeys>
             </bluepayment>
         </payment>
     </default>

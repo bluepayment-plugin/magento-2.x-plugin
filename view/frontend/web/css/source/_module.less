@@ -99,6 +99,10 @@ and open the template in the editor.
                     z-index: 1;
                 }
 
+                &:hover {
+                    outline: 1px solid #ddd; outline-offset:0;
+                }
+
                 .radio {
                     display: none;
                 }
@@ -142,7 +146,7 @@ and open the template in the editor.
             }
             label {
                 position: absolute;
-                width: calc(~"100% - 30px");
+                width: calc(~"100% - 60px");
                 margin-left: 30px;
                 padding-left: 30px;
             }
@@ -198,6 +202,63 @@ and open the template in the editor.
                 &.collapse {
                     &::after {
                         content: '\e621';
+                    }
+                }
+            }
+        }
+
+        &.multishipping {
+            .bluepayment-options-list {
+                .payment-option {
+                    width: 33%;
+                }
+
+                .card-option {
+                    width: 100%;
+                }
+
+                span.title {
+                    margin-bottom: 0;
+                }
+            }
+
+            .mage-error {
+                clear: both;
+                font-size: 0.95em;
+                font-weight: bold;
+                line-height: 1.25em;
+                margin-top: 3px;
+                min-height: 15px;
+                padding-left: 17px;
+                color: #DF280A;
+            }
+        }
+    }
+
+    .bluepayment-agreements-block {
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        .bluepayment-agreement {
+            display: flex;
+            margin-top: 5px;
+
+            &.required {
+                label {
+                    content: none;
+
+                    span {
+                        &:after {
+                            content: '*';
+                            .lib-typography(
+                                @_font-size: @form-field-label-asterisk__font-size,
+                                @_color: @form-field-label-asterisk__color,
+                                @_font-family: @form-field-label-asterisk__font-family,
+                                @_font-weight: @form-field-label-asterisk__font-weight,
+                                @_line-height: @form-field-label-asterisk__line-height,
+                                @_font-style: @form-field-label-asterisk__font-style
+                            );
+                        }
                     }
                 }
             }

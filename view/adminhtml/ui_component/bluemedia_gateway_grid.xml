@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">bluemedia_gateway_grid.gateway_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="synchronize">
+                <url path="*/*/synchronize"/>
+                <class>primary</class>
+                <label translate="true">Synchronize Gateways</label>
+            </button>
+        </buttons>
+        <spinner>gateways_columns</spinner>
+        <deps>
+            <dep>bluemedia_gateway_grid.gateway_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="gateway_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="cacheRequests" xsi:type="boolean">false</param>
+                <param name="indexField" xsi:type="string">entity_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>BlueMedia_BluePayment::gateway</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="gateway_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+        <filters name="listing_filters"/>
+        <massaction name="listing_massaction">
+            <action name="delete">
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to delete selected items?</message>
+                        <title translate="true">Delete items</title>
+                    </confirm>
+                    <url path="adminbluepayment/gateway/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                </settings>
+            </action>
+        </massaction>
+        <paging name="listing_paging"/>
+        <columnsControls name="columns_controls"/>
+    </listingToolbar>
+
+    <columns name="gateways_columns">
+        <settings>
+            <editorConfig>
+                <param name="clientConfig" xsi:type="array">
+                    <item name="saveUrl" xsi:type="url" path="adminbluepayment/gateway/inlineEdit"/>
+                    <item name="validateBeforeSave" xsi:type="boolean">false</item>
+                </param>
+                <param name="indexField" xsi:type="string">entity_id</param>
+                <param name="enabled" xsi:type="boolean">true</param>
+                <param name="selectProvider" xsi:type="string">bluemedia_gateway_grid.bluemedia_gateway_grid.gateway_columns.ids</param>
+            </editorConfig>
+            <childDefaults>
+                <param name="fieldAction" xsi:type="array">
+                    <item name="provider" xsi:type="string">bluemedia_gateway_grid.bluemedia_gateway_grid.gateway_columns_editor</item>
+                    <item name="target" xsi:type="string">startEdit</item>
+                    <item name="params" xsi:type="array">
+                        <item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
+                        <item name="1" xsi:type="boolean">true</item>
+                    </item>
+                </param>
+            </childDefaults>
+        </settings>
+        <selectionsColumn name="ids" sortOrder="10">
+            <settings>
+                <indexField>entity_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="store_id" component="Magento_Ui/js/grid/columns/select" sortOrder="20">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Store</label>
+                <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
+            </settings>
+        </column>
+        <column name="gateway_currency" sortOrder="30">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Currency</label>
+            </settings>
+        </column>
+        <column name="gateway_id" sortOrder="40">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Gateway ID</label>
+            </settings>
+        </column>
+        <column name="gateway_status" component="Magento_Ui/js/grid/columns/select" sortOrder="50">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+            </settings>
+        </column>
+        <column name="force_disable" component="Magento_Ui/js/grid/columns/select" sortOrder="60">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Force Disable</label>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+            </settings>
+        </column>
+        <column name="bank_name" sortOrder="70">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Bank Name</label>
+            </settings>
+        </column>
+        <column name="gateway_name" sortOrder="80">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Gateway Name</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="gateway_description" sortOrder="90">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Gateway Description</label>
+                <editor>
+                    <editorType>text</editorType>
+                </editor>
+            </settings>
+        </column>
+        <column name="gateway_sort_order" sortOrder="100">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Gateway Sort Order</label>
+                <editor>
+                    <editorType>text</editorType>
+                </editor>
+            </settings>
+        </column>
+        <column name="gateway_type" sortOrder="110">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Gateway Type</label>
+            </settings>
+        </column>
+        <column name="is_separated_method" component="Magento_Ui/js/grid/columns/select" sortOrder="120">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Is separated method</label>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+            </settings>
+        </column>
+        <column name="use_own_logo" component="Magento_Ui/js/grid/columns/select" sortOrder="130">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Use Own Logo</label>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+            </settings>
+        </column>
+        <column name="gateway_logo_path" sortOrder="140">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Logo Path</label>
+            </settings>
+        </column>
+        <column name="status_date" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date" sortOrder="150">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Status Date</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Magento\Backend\Ui\Component\Listing\Column\EditAction" sortOrder="160">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="editUrlPath" xsi:type="string">adminbluepayment/gateway/edit</item>
+                </item>
+            </argument>
+            <settings>
+                <indexField>id</indexField>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

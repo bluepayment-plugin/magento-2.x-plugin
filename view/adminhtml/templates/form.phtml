@@ -1,0 +1,13 @@
+<?php
+/** @var \BlueMedia\BluePayment\Block\Form $block */
+
+// Unikatowy identyfikator
+$code = $block->getMethodCode();
+?>
+
+<div class="form-list"
+    id="payment_form_<?= /* @noEscape */ $code ?>"
+    style="display:none;"
+>
+    <span class="label admin__field-label"><?= /* @noEscape */ __('Client will get an e-mail with payment link.') ?></span>
+</div>

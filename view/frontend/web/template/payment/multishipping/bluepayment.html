@@ -1,0 +1,115 @@
+<div class="payment-method blue-payment multishipping"
+     data-bind="
+        css: {'_active': (getCode() == isChecked())},
+        attr: {
+            'data-name': name
+        }
+    ">
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+
+        <!-- ko if: renderSubOptions != false && renderSubOptions.length > 0 -->
+        <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
+            <div class="payment-method-note">
+                <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
+                    <ul data-bind="foreach: renderSubOptions, doSomething: renderSubOptions, addActiveClass: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <li data-bind="attr:{class: 'payment-option opt_'+ gateway_id + ($parent.gatewayId() == gateway_id ? ' _active' : '')}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 6)">
+                            <input required
+                                   data-bind="click: $parent.selectPaymentOption, checked: $parent.gatewayId, attr:{id:  $parent.getCode() + gateway_id, value: gateway_id }"
+                                   name="payment_method_bluepayment_gateway"
+                                   class="radio"
+                                   data-validate="{'validate-one-required-by-name':true}"
+                                   type="radio"/>
+                            <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
+                                <img data-bind="attr:{src: logo_url,alt: name}"
+                                     class="payment-logo"/>
+                            </label>
+                        </li>
+                    </ul>
+
+                    <!-- ko if: bluePaymentCollapsible -->
+                    <div class="gateway-collapsible">
+                        <a href="#" class="expand" data-bind="{visible: collapsed(), click: function() {this.collapsed(false)}}">
+                            <!-- ko i18n: 'Show all' --><!-- /ko -->
+                        </a>
+
+                        <a href="#" class="collapse" data-bind="{visible: !collapsed(), click: function() {this.collapsed(true)}}">
+                            <!-- ko i18n: 'Collapse' --><!-- /ko -->
+                        </a>
+                    </div>
+                    <!--/ko-->
+                </div>
+            </div>
+        </fieldset>
+        <!--/ko-->
+
+        <!-- ko if: (renderSubOptions != false && renderSubOptions.length == 0)-->
+        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+        <!--/ko-->
+
+        <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
+        <div class="payment-method-empty-gateway mage-error" data-bind="{visible: validationFailed}">
+            <p data-bind="i18n: 'No gateway was selected.'"></p>
+        </div>
+        <!--/ko-->
+
+        <div class="bluepayment-agreements-block" data-bind='foreach: agreements'>
+            <div data-bind='foreach: labelList'>
+                <div data-bind='attr: {
+                        class: "bluepayment-agreement" + (checkboxRequired ? " required" : "")
+                    }'>
+                    <!-- ko if: showCheckbox -->
+                    <!-- ko if: checkboxRequired -->
+                    <input type="checkbox"
+                           required
+                           class="required-entry"
+                           data-bind='event: {change: $parents[1].agreementChanged.bind($parents[1])}, attr: {
+                                           id: "agreement_bluepayment_" + $parent.regulationID,
+                                           name: "bluepayment_regulations[" + $parent.regulationID + "]",
+                                           value: $parent.regulationID
+                                       }' />
+                    <!-- /ko -->
+
+                    <!-- ko ifnot: checkboxRequired -->
+                    <input type="checkbox"
+                           data-bind='event: {change: $parents[1].agreementChanged.bind($parents[1])}, attr: {
+                                       id: "agreement_bluepayment_" + $parent.regulationID,
+                                       name: "bluepayment_regulations[" + $parent.regulationID + "]",
+                                       value: $parent.regulationID
+                                   }' />
+                    <!-- /ko -->
+                    <!-- /ko -->
+
+                    <!-- ko ifnot: showCheckbox -->
+                    <input type="hidden"
+                           data-bind='attr: {
+                                    name: "bluepayment_regulations[" + $parent.regulationID + "]",
+                                    value: $parent.regulationID
+                               }'
+                    >
+                    <!-- /ko -->
+
+                    <label class="label"
+                           data-bind='attr: {
+                                for: showCheckbox ? ("agreement_bluepayment_" + $parent.regulationID) : ""
+                           }'>
+                        <span data-bind="html: inputLabel"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-toolbar no-display">
+            <div class="primary">
+                <button data-role="review-save"
+                        type="submit"
+                        data-bind="{click: placeOrderClick}"
+                        class="action primary checkout">
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

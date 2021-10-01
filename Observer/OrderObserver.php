@@ -7,18 +7,18 @@ use Magento\Framework\DataObject;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
-use BlueMedia\BluePayment\Model\ResourceModel\Gateways\Collection as GatewaysCollection;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection as GatewayCollection;
 use Magento\Store\Model\ScopeInterface;
 
 class OrderObserver implements ObserverInterface
 {
-    /** @var GatewaysCollection */
+    /** @var GatewayCollection */
     public $gatewayCollection;
 
     /** @var ScopeConfigInterface */
     public $scopeConfig;
 
-    public function __construct(GatewaysCollection $gatewayCollection, ScopeConfigInterface $scopeConfig)
+    public function __construct(GatewayCollection $gatewayCollection, ScopeConfigInterface $scopeConfig)
     {
         $this->gatewayCollection = $gatewayCollection;
         $this->scopeConfig = $scopeConfig;
@@ -38,8 +38,8 @@ class OrderObserver implements ObserverInterface
         $currency = $order->getOrderCurrencyCode();
         $serviceId = $this->scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_WEBSITE,
-            $order->getStore()->getWebsite()->getCode()
+            ScopeInterface::SCOPE_STORE,
+            $order->getStoreId()
         );
 
         $gatewayId = $order->getBlueGatewayId();

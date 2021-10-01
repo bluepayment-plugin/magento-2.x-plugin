@@ -4,7 +4,8 @@
     <menu>
         <add id="BlueMedia_BluePayment::bluepayment" title="BluePayment" module="BlueMedia_BluePayment" sortOrder="200"
              resource="BlueMedia_BluePayment::bluepayment"/>
-        <add id="BlueMedia_BluePayment::gateways" title="Gateways" module="BlueMedia_BluePayment" sortOrder="10" action="adminbluepayment/gateways"
-             resource="BlueMedia_BluePayment::gateways" parent="BlueMedia_BluePayment::bluepayment"/>
+        <add id="BlueMedia_BluePayment::gateway" title="Gateways" module="BlueMedia_BluePayment" sortOrder="10"
+             action="adminbluepayment/gateway" resource="BlueMedia_BluePayment::gateway"
+             parent="BlueMedia_BluePayment::bluepayment"/>
     </menu>
 </config>
