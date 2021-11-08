@@ -116,7 +116,7 @@ class ContinuePayment extends Action
         try {
             $payment = $this->paymentFactory->create();
 
-            $orderId = (int)$this->getRequest()->getParam('order_id', 0);
+            $orderId = $this->getRequest()->getParam('order_id', 0);
             $hash = $this->getRequest()->getParam('hash');
 
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
@@ -134,10 +134,16 @@ class ContinuePayment extends Action
                 $order->getStoreId()
             );
 
-            $hashData = [$serviceId, $order->getIncrementId(), $sharedKey];
-            $hashLocal = $this->helper->generateAndReturnHash($hashData);
+            $hashLocal = $this->helper->generateAndReturnHash([
+                $serviceId,
+                $order->getIncrementId(),
+                $sharedKey
+            ]);
 
             $this->logger->info('CONTINUE:' . __LINE__, [
+                'serviceId' => $serviceId,
+                'orderId' => $order->getIncrementId(),
+                'sharedKey' => $sharedKey,
                 'hash' => $hash,
                 'hashLocal' => $hashLocal,
             ]);
