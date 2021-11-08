@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/**
+ * @var \BlueMedia\BluePayment\Block\Info $block
+ */
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$gatewayName = $block->getGatewayNameFromOrder();
+$link = $block->getContinuationLink();
+
+?>
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title ?> <?= ($gatewayName) ? ' - '.$gatewayName : null ?></dt><br />
+
+    <?php if ($link): ?>
+        <a href="<?= /* @noEscape */ $link ?>">
+            <?= /* @noEscape */__('Click here to continue payment') ?>
+        </a>
+    <?php endif; ?>
+</dl>
+<?= $block->getChildHtml() ?>

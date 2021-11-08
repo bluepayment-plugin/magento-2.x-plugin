@@ -7,13 +7,12 @@
 /**
  * @var \BlueMedia\BluePayment\Block\Info $block
  */
-$specificInfo = $block->getSpecificInformation();
 $title = $block->escapeHtml($block->getMethod()->getTitle());
 
 $gatewayId = $block->getInfo()->getAdditionalInformation('gateway_id');
 
 ?>
     <dl class="payment-method">
-        <dt class="title"><?= /* @noEscape */ $title ?> - <?= $block->getGatewayName() ?></dt>
+        <dt class="title"><?= /* @noEscape */ $title ?> - <?= $block->getGatewayNameFromQuote() ?></dt>
     </dl>
 <?= $block->getChildHtml() ?>
