@@ -1,0 +1,125 @@
+## Version 2.17.0
+- We added a configuration option to enable/disable **BLIK 0**.
+- We added a link to continue payment in the order detail and shopping thank you email.
+
+## Version 2.16.0
+- We added support for formal consents.
+- We changed the endpoint for downloading payment channels to `gatewayList` (REST API).
+- We fixed a bug with double entry of transactions at ITN.
+- We added an option **Do not change status** when setting statuses for returns.
+- We updated the User Manual and README.md.
+- We have updated the BlueMedia logo.
+- We hid the BlueMedia method when no payment channel is available (or all available ones are set as a separate payment method).
+
+## Version 2.15.0
+- We added support for "Delivery to multiple addresses (multishipping)".
+- We changed the configuration scope from SCOPE_WEBSITE to SCOPE_STORE.
+
+### Version 2.14.6
+- We improved payment channel selection.
+
+## Version 2.14.2
+- We changed amounts for "Smartney - Buy now, pay later". - from the range ~~100 zł - 2000 zł~~ to **100 zł - 2500 zł**.
+- We added a "Language" parameter to start the transaction - consistent with the store language of the order.
+
+## Version 2.14.1
+- We changed the amounts for "Smartney - Buy now, pay later" - from the range ~~200 zł - 1500 zł~~ to **100 zł - 2000 zł**.
+
+## Version 2.14.0
+- We added "Show payment channels in store" option - enabled by default.
+- We corrected the "Payment expiration time" option.
+
+## Version 2.13.7
+- We improved the behavior of the module when Google Pay is disabled.
+
+## Version 2.13.6
+- We unlocked Google Pay for all currencies.
+
+## Version 2.13.5
+- We corrected placing order - order method instead of authorize.
+- We improved db_schema.
+- We updated content security policy.
+- We updated composer.json.
+
+## Version 2.13.4
+- We improved ordering - **order** method instead of **authorize**.
+
+## Version 2.13.3
+- We improved payment channels configuration module.
+- We improved channel synchronization for multiple sites.
+- We disabled clickable overlay for BLIK 0 and Google Pay.
+
+## Version 2.13.2
+- We improved the display of the custom BLIK 0 logo.
+
+## Version 2.13.1
+- We fixed the custom validators (additional-validators) in placeOrder.
+
+## Version 2.13.0
+- We added a new payment method: Pay Smartney - Buy now, pay later (i.e. deferred payments). This service is available for transactions made in Polish currency.
+
+## Version 2.12.0
+- We added the ability to order refunds online via Credit Memo.
+
+## Version 2.11.0
+- Added a page to wait for redirection to payment.
+
+## Version 2.10.0
+- We added option to send payment link for orders created from admin panel.
+- We disabled unnecessary queries to pay.google.com.
+- We added informational text next to the Apple Pay channel.
+- We changed the logs creation path to `var/log/BlueMedia/Bluemedia-[data].log`.
+- We added payment method information to the order list table in the admin panel.
+- We added payment_channel variable containing payment channel name to email templates.
+
+## Version 2.9.0
+- We added an expandable list of channels.
+- We hid the payment channel name on the payment step.
+
+## Version 2.8.2
+- We made changes to the returns module and the payment return page
+- We added support for currencies: RON, HUF, BGN, UAH.
+- Changes to the return from payment page.
+
+## Version 2.8.1
+- We adapted the module to Magento Marketplace requirements.
+
+## Version 2.8.0
+- We have customized the module to meet Magento Marketplace requirements.
+
+## Version 2.7.7
+- We fixed a bug that sometimes caused the BLIK 0 window to not display after entering a code.
+
+## Version 2.7.6
+- We added support for a new currency: CZK.
+
+## Version 2.7.5
+- Displayed all available statuses in module configuration.
+
+## Version 2.7.4
+- We adjusted payment module to Google Pay API 2.0 requirements.
+- We simplified the Google Pay configuration.
+
+## Version 2.7.3.
+- We changed the sorting mechanism.
+- We fixed the bug related to lack of redirection to BM payment.
+
+## Version 2.7.2
+- We adjusted module to Magento Marketplace requirements.
+- With this version, the structure of the zip file and the command to install and update has changed!
+
+## Version 2.7.1
+- We added support for Magento 2.3.1
+
+## Version 2.7.0
+- We added automatic payments
+
+## Version 2.6.0
+- We added support for Magento 2.3.0
+- We added direct payment via Google Pay.
+
+## Version 2.4.0
+- We added support for currencies: GBP, EUR, USD.
+
+## Version 2.3.0
+- We added support for returns.
