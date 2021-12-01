@@ -15,6 +15,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -143,7 +144,7 @@ class Gateways extends Data
                             if (isset($loadResult['result']) && $loadResult['result'] == 'OK') {
                                 $result['success'] = $this->saveGateways(
                                     $serviceId,
-                                    $store->getId(),
+                                    $store,
                                     $loadResult['gatewayList'],
                                     $existingGateways,
                                     $currency
@@ -166,17 +167,20 @@ class Gateways extends Data
     }
 
     /**
-     * @param integer $serviceId
-     * @param integer $storeId
-     * @param array $gatewayList
-     * @param array $existingGateways
-     * @param string $currency
+     * @param  integer  $serviceId
+     * @param  StoreInterface  $store
+     * @param  array  $gatewayList
+     * @param  array  $existingGateways
+     * @param  string  $currency
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function saveGateways($serviceId, $storeId, $gatewayList, $existingGateways, $currency = 'PLN')
+    public function saveGateways($serviceId, $store, $gatewayList, $existingGateways, $currency = 'PLN')
     {
         $currentlyActiveGatewayIDs = [];
+        $storeId = $store->getId();
 
         foreach ($gatewayList as $gateway) {
             $gateway = (array)$gateway;
@@ -200,12 +204,16 @@ class Gateways extends Data
                     $gatewayModel->setName($gateway['gatewayName']);
                 }
 
-                if (in_array($gateway['gatewayID'], [
-                    ConfigProvider::AUTOPAY_GATEWAY_ID,
-                    ConfigProvider::GPAY_GATEWAY_ID,
-                    ConfigProvider::APPLE_PAY_GATEWAY_ID,
-                    ConfigProvider::CREDIT_GATEWAY_ID
-                ])) {
+                if (
+                    // Always separated
+                    in_array($gateway['gatewayID'], [
+                        ConfigProvider::AUTOPAY_GATEWAY_ID,
+                        ConfigProvider::GPAY_GATEWAY_ID,
+                        ConfigProvider::APPLE_PAY_GATEWAY_ID,
+                        ConfigProvider::CREDIT_GATEWAY_ID
+                    ])
+                    // BLIK 0
+                    || ($gateway['gatewayID'] == ConfigProvider::BLIK_GATEWAY_ID && $this->blikZero($store))) {
                     $gatewayModel->setIsSeparatedMethod(true);
                 }
 
@@ -315,5 +323,19 @@ class Gateways extends Data
         }
 
         return $existingGateways;
+    }
+
+    /**
+     * @param StoreInterface $store
+     *
+     * @return bool
+     */
+    protected function blikZero($store)
+    {
+        return (boolean) $this->scopeConfig->getValue(
+            'payment/bluepayment/blik_zero',
+            ScopeInterface::SCOPE_STORE,
+            $store->getCode()
+        );
     }
 }

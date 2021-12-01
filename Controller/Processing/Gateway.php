@@ -47,8 +47,7 @@ class Gateway extends Action
         OrderFactory $orderFactory,
         Session $session,
         Logger $logger
-    )
-    {
+    ) {
         $this->resultJsonFactory = $resultJsonFactory;
         $this->session = $session;
         $this->orderFactory = $orderFactory;

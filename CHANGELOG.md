@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.17.0
+- Dodaliśmy opcję konfiguracyjną włączenia/wyłączenia **BLIK 0**.
+- Dodaliśmy link do kontynuacji płatności w detalu zamówienia oraz mailu z podziękowaniem za zakupy.
+
 ## Wersja 2.16.0
 - Dodaliśmy obsługę zgód formalnych.
 - Zmieniliśmy endpoint pobierania kanałów płatności na `gatewayList` (REST API).

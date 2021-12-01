@@ -127,7 +127,7 @@ Opcja dostępna od wersji 2.9.0 - **domyślnie włączona**.
 ![configuration1.png](docs/configuration1.png "Screenshot")
 
 Jeżeli chcesz zawsze wyświetlać pełną listę kanałów płatności:
-1. Przejdź do [Konfiguracji modułu](#konfiguracja
+1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Kliknij **Wyłącz (Disabled)** w polu **Zwijalna lista kanałów (Collapsible gateway list)**
 3. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
 
@@ -147,7 +147,7 @@ Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia z
 ![iframe1.png](docs/iframe1.png)
 
 ### Aktywacja płatności iFrame
-1. Przejdź do [Konfiguracji modułu](#konfiguracja
+1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Kliknij **Włącz (Enable)** przy opcji **Płatność w iFrame (Iframe Payment)**.
 3. Przejdź do edycji kanału o ID *1500* i nazwie banku *Karty*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
@@ -159,9 +159,11 @@ BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję n
 ![blik1.png](docs/blik1.png)
 
 ### Aktywacja BLIK 0
-1. Przejdź do edycji kanału o ID *509* i nazwie kanału *BLIK*.
-2. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-3. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+1. Przejdź do [Konfiguracji modułu](#konfiguracja)
+2. Kliknij **Włącz (Enable)** przy opcji **BLIK 0**.
+3. Przejdź do edycji kanału o ID *509* i nazwie kanału *BLIK*.
+4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
+5. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
 
 ## Google Pay
 Opcja umożliwia dokonanie płatności z użyciem Google Pay bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -224,7 +226,7 @@ Wykorzystywany szablon: `view/frontend/template/redirect.phtml`
 ### Aktywacja
 Żeby aktywować stronę oczekiwania na przekierowanie:
 
-1. Przejdź do [Konfiguracji modułu](#konfiguracja
+1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Ustaw **Włącz (Enable)** przy opcji **Pokaż stronę przekierowania (Show waiting page before redirect)**
 3. Ustaw opcję **Sekund oczekiwania przed przekierowaniem (Seconds to wait before redirect)** – w celu określenia jak długo strona ma być wyświetlana.
 4. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)

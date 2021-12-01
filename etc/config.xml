@@ -26,6 +26,7 @@
                 <autopay_agreement>Wyrażam zgodę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Blue Media S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>
+                <blik_zero>1</blik_zero>
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
                 <privateInfoKeys>bluepayment_gateway</privateInfoKeys>
             </bluepayment>

@@ -1097,66 +1097,8 @@ class Payment extends AbstractMethod
                 -1,
                 $backUrl
             );
-            $url = $this->getUrlGateway();
 
-            $response = $this->sendRequest($params, $url);
-            $remoteId = $response->traansactionId;
-            $redirectUrl = $response->redirecturl;
-            $orderStatus = $response->status;
-            $confirmation = $response->confirmation;
-
-            if ($confirmation == 'NOTCONFIRMED') {
-                $orderComment = 'Unable to create transaction. Reason: '.$response->reason;
-                $order->addCommentToStatusHistory($orderComment);
-            } else {
-                $payment->setAdditionalInformation('bluepayment_redirect_url', (string)$redirectUrl);
-
-                $unchangeableStatuses = explode(
-                    ',',
-                    $this->_scopeConfig->getValue(
-                        'payment/bluepayment/unchangeable_statuses',
-                        ScopeInterface::SCOPE_STORE
-                    )
-                );
-                $statusWaitingPayment = $this->_scopeConfig->getValue(
-                    'payment/bluepayment/status_waiting_payment',
-                    ScopeInterface::SCOPE_STORE
-                );
-
-                if ($statusWaitingPayment != '') {
-                    $statusCollection = $this->collection;
-                    $orderStatusWaitingState = Order::STATE_NEW;
-                    foreach ($statusCollection->joinStates() as $status) {
-                        /** @var \Magento\Sales\Model\Order\Status $status */
-                        if ($status->getStatus() == $statusWaitingPayment) {
-                            $orderStatusWaitingState = $status->getState();
-                        }
-                    }
-                } else {
-                    $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-                    $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
-                }
-
-                if (!in_array($order->getStatus(), $unchangeableStatuses)) {
-                    $amount = $order->getGrandTotal();
-                    $formaattedAmount = number_format(round($amount, 2), 2, '.', '');
-
-                    $orderComment =
-                        '[BM] Transaction ID: ' . (string)$remoteId
-                        . ' | Amount: ' . $formaattedAmount
-                        . ' | Status: ' . $orderStatus
-                        . ' | URL: ' . $redirectUrl;
-
-                    $order->setState($orderStatusWaitingState)
-                        ->setStatus($statusWaitingPayment)
-                        ->addStatusToHistory(
-                            $statusWaitingPayment,
-                            $orderComment,
-                            false
-                        )
-                        ->save();
-                }
-            }
+            $this->createPaymentLink($order, $params);
         }
 
         return $this;
@@ -1214,7 +1156,7 @@ class Payment extends AbstractMethod
      *
      * @return SimpleXMLElement|false
      */
-    private function sendRequest($params, $urlGateway)
+    public function sendRequest($params, $urlGateway)
     {
         if (array_key_exists('ClientHash', $params)) {
             $this->curl->addHeader('BmHeader', 'pay-bm');
@@ -1291,5 +1233,76 @@ class Payment extends AbstractMethod
     public function setTitle($title)
     {
         $this->title = $title;
+    }
+
+    /**
+     * @param  Order  $order
+     * @param  array  $params
+     *
+     * @throws Exception
+     */
+    public function createPaymentLink($order, $params)
+    {
+        $url = $this->getUrlGateway();
+
+        $payment = $order->getPayment();
+
+        $response = $this->sendRequest($params, $url);
+        $remoteId = $response->transactionId;
+        $redirectUrl = $response->redirecturl;
+        $orderStatus = $response->status;
+        $confirmation = $response->confirmation;
+
+        if ($confirmation == 'NOTCONFIRMED') {
+            $orderComment = 'Unable to create transaction. Reason: '.$response->reason;
+            $order->addCommentToStatusHistory($orderComment);
+        } else {
+            $payment->setAdditionalInformation('bluepayment_redirect_url', (string) $redirectUrl);
+
+            $unchangeableStatuses = explode(
+                ',',
+                $this->_scopeConfig->getValue(
+                    'payment/bluepayment/unchangeable_statuses',
+                    ScopeInterface::SCOPE_STORE
+                )
+            );
+            $statusWaitingPayment = $this->_scopeConfig->getValue(
+                'payment/bluepayment/status_waiting_payment',
+                ScopeInterface::SCOPE_STORE
+            );
+
+            if (!empty($statusWaitingPayment)) {
+                $statusCollection = $this->collection;
+                $orderStatusWaitingState = Order::STATE_NEW;
+                foreach ($statusCollection->joinStates() as $status) {
+                    /** @var \Magento\Sales\Model\Order\Status $status */
+                    if ($status->getStatus() == $statusWaitingPayment) {
+                        $orderStatusWaitingState = $status->getState();
+                    }
+                }
+            } else {
+                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
+                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
+            }
+
+            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+                $amount = $order->getGrandTotal();
+                $formattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+                $orderComment = '[BM] Transaction ID: '. $remoteId
+                    .' | Amount: '.$formattedAmount
+                    .' | Status: '.$orderStatus
+                    .' | URL: '.$redirectUrl;
+
+                $order->setState($orderStatusWaitingState)
+                    ->setStatus($statusWaitingPayment)
+                    ->addStatusToHistory($statusWaitingPayment, $orderComment, false)
+                    ->save();
+            }
+
+            return $redirectUrl;
+        }
+
+        return false;
     }
 }

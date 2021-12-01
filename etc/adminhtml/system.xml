@@ -79,6 +79,14 @@
                         <field id="gateway_selection">1</field>
                     </depends>
                 </field>
+                <field id="blik_zero" translate="label comment" type="select" sortOrder="555" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>BLIK 0</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[Payment with BLIK code field directly on cart page, without redirecting to eblik.pl.]]></comment>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
+                </field>
                 <field id="collapsible" translate="label comment" type="select" sortOrder="560" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Collapsible gateway list</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>

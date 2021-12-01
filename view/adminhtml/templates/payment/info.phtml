@@ -1,0 +1,18 @@
+<?php
+/**
+ * @var \BlueMedia\BluePayment\Block\Info $block
+ */
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$gatewayName = $block->getGatewayNameFromOrder();
+$link = $block->getContinuationLink();
+
+?>
+    <dl class="payment-method">
+        <dt class="title"><?= /* @noEscape */ $title ?> <?= ($gatewayName) ? ' - '.$gatewayName : null ?></dt><br />
+
+        <?php if ($link): ?>
+            <?= /* @noEscape */__('Link to continue payment') ?>:<br />
+            <a href="<?= /* @noEscape */ $link ?>" target="_blank"><?= /* @noEscape */ $link ?></a>
+        <?php endif; ?>
+    </dl>
+<?= $block->getChildHtml() ?>

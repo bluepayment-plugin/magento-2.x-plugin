@@ -11,6 +11,7 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -246,31 +247,27 @@ class ConfigProvider implements ConfigProviderInterface
 
         $name = $gateway->getName();
         $isIframe = false;
-        $isBlik = false;
+        $isBlikZero = false;
         $isGPay = false;
         $isAutopay = false;
         $isApplePay = false;
 
         switch ($gateway->getGatewayId()) {
             case self::IFRAME_GATEWAY_ID:
-                if ($this->scopeConfig->getValue(
-                    'payment/bluepayment/iframe_payment',
-                    ScopeInterface::SCOPE_STORE
-                )) {
+                if ($this->iframePayment()) {
                     $isIframe = true;
                 }
                 break;
             case self::AUTOPAY_GATEWAY_ID:
                 $isAutopay = true;
-                if ($this->scopeConfig->getValue(
-                    'payment/bluepayment/iframe_payment',
-                    ScopeInterface::SCOPE_STORE
-                )) {
+                if ($this->iframePayment()) {
                     $isIframe = true;
                 }
                 break;
             case self::BLIK_GATEWAY_ID:
-                $isBlik = true;
+                if ($this->blikZero()) {
+                    $isBlikZero = true;
+                }
                 break;
             case self::GPAY_GATEWAY_ID:
                 $isGPay = true;
@@ -290,7 +287,7 @@ class ConfigProvider implements ConfigProviderInterface
             'logo_url' => $logoUrl,
             'is_separated_method' => $gateway->isSeparatedMethod(),
             'is_iframe' => $isIframe,
-            'is_blik' => $isBlik,
+            'is_blik' => $isBlikZero,
             'is_gpay' => $isGPay,
             'is_autopay' => $isAutopay,
             'is_apple_pay' => $isApplePay
@@ -398,5 +395,24 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $gateways->load();
+    }
+
+    protected function iframePayment()
+    {
+        return (boolean) $this->scopeConfig->getValue(
+            'payment/bluepayment/iframe_payment',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * @return bool
+     */
+    protected function blikZero()
+    {
+        return (boolean) $this->scopeConfig->getValue(
+            'payment/bluepayment/blik_zero',
+            ScopeInterface::SCOPE_STORE
+        );
     }
 }
