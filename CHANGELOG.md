@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.17.1
+- Poprawiliśmy sortowanie kanałów i metod płatności (tylko dla multishipping oraz GraphQL)
+
 ## Wersja 2.17.0
 - Dodaliśmy opcję konfiguracyjną włączenia/wyłączenia **BLIK 0**.
 - Dodaliśmy link do kontynuacji płatności w detalu zamówienia oraz mailu z podziękowaniem za zakupy.

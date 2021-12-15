@@ -1,3 +1,8 @@
+# What's new in BluePayment?
+
+## Version 2.17.1
+- We fixed sorting payment channels and methods (only for multishipping and GraphQL)
+
 ## Version 2.17.0
 - We added a configuration option to enable/disable **BLIK 0**.
 - We added a link to continue payment in the order detail and shopping thank you email.

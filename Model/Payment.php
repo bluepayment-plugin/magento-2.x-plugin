@@ -234,39 +234,45 @@ class Payment extends AbstractMethod
     private $title;
 
     /**
+     * @var ConfigProvider
+     */
+    private $configProvider;
+
+    /**
      * Payment constructor.
      *
-     * @param CollectionFactory $statusCollectionFactory
-     * @param OrderSender $orderSender
-     * @param Data $helper
-     * @param UrlInterface $url
-     * @param OrderFactory $orderFactory
-     * @param Context $context
-     * @param Registry $registry
-     * @param ExtensionAttributesFactory $extensionFactory
-     * @param AttributeValueFactory $customAttributeFactory
-     * @param PaymentData $paymentData
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Logger $logger
-     * @param TransactionFactory $transactionFactory
-     * @param TransactionRepositoryInterface $transactionRepository
-     * @param CardFactory $cardFactory
-     * @param CardCollectionFactory $cardCollectionFactory
-     * @param CardResource $cardResource
-     * @param EncryptorInterface $encryptor
-     * @param Curl $curl
-     * @param BMLogger $bmLogger
-     * @param Collection $collection
-     * @param StoreManagerInterface $storeManager
-     * @param OrderRepositoryInterface $orderRepository
-     * @param OrderPaymentRepositoryInterface $paymentRepository
-     * @param Config $orderConfig
-     * @param GatewayFactory $gatewayFactory
-     * @param Refunds $refunds
-     * @param AbstractResource|null $resource
-     * @param AbstractDb|null $resourceCollection
-     * @param array $data
-     * @throws LocalizedException
+     * @param  CollectionFactory  $statusCollectionFactory
+     * @param  OrderSender  $orderSender
+     * @param  Data  $helper
+     * @param  UrlInterface  $url
+     * @param  OrderFactory  $orderFactory
+     * @param  Context  $context
+     * @param  Registry  $registry
+     * @param  ExtensionAttributesFactory  $extensionFactory
+     * @param  AttributeValueFactory  $customAttributeFactory
+     * @param  PaymentData  $paymentData
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  Logger  $logger
+     * @param  TransactionFactory  $transactionFactory
+     * @param  TransactionRepositoryInterface  $transactionRepository
+     * @param  CardFactory  $cardFactory
+     * @param  CardCollectionFactory  $cardCollectionFactory
+     * @param  CardResource  $cardResource
+     * @param  OrderCollectionFactory  $orderCollectionFactory
+     * @param  EncryptorInterface  $encryptor
+     * @param  Curl  $curl
+     * @param  BMLogger  $bmLogger
+     * @param  Collection  $collection
+     * @param  StoreManagerInterface  $storeManager
+     * @param  OrderRepositoryInterface  $orderRepository
+     * @param  OrderPaymentRepositoryInterface  $paymentRepository
+     * @param  Config  $orderConfig
+     * @param  GatewayFactory  $gatewayFactory
+     * @param  Refunds  $refunds
+     * @param  ConfigProvider  $configProvider
+     * @param  AbstractResource|null  $resource
+     * @param  AbstractDb|null  $resourceCollection
+     * @param  array  $data
      */
     public function __construct(
         CollectionFactory $statusCollectionFactory,
@@ -297,6 +303,7 @@ class Payment extends AbstractMethod
         Config $orderConfig,
         GatewayFactory $gatewayFactory,
         Refunds $refunds,
+        ConfigProvider $configProvider,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -314,6 +321,14 @@ class Payment extends AbstractMethod
         $this->bmLooger = $bmLogger;
         $this->collection = $collection;
         $this->orderCollectionFactory = $orderCollectionFactory;
+        $this->transactionFactory = $transactionFactory;
+        $this->transactionRepository = $transactionRepository;
+        $this->orderRepository = $orderRepository;
+        $this->paymentRepository = $paymentRepository;
+        $this->orderConfig = $orderConfig;
+        $this->gatewayFactory = $gatewayFactory;
+        $this->refunds = $refunds;
+        $this->configProvider = $configProvider;
 
         parent::__construct(
             $context,
@@ -327,14 +342,6 @@ class Payment extends AbstractMethod
             $resourceCollection,
             $data
         );
-
-        $this->transactionFactory = $transactionFactory;
-        $this->transactionRepository = $transactionRepository;
-        $this->orderRepository = $orderRepository;
-        $this->paymentRepository = $paymentRepository;
-        $this->orderConfig = $orderConfig;
-        $this->gatewayFactory = $gatewayFactory;
-        $this->refunds = $refunds;
     }
 
     /**
@@ -1202,6 +1209,19 @@ class Payment extends AbstractMethod
         }
 
         if ($field === 'sort_order') {
+            if (false !== strpos($code, 'bluepayment_')) {
+                $separated = $this->configProvider->getPaymentConfig()['bluePaymentSeparated'];
+                if ($separated) {
+                    $gatewayId = (int) str_replace('bluepayment_', '', $code);
+
+                    foreach ($separated as $gateway) {
+                        if ($gateway['gateway_id'] == $gatewayId) {
+                            return $gateway['sort_order'];
+                        }
+                    }
+                }
+            }
+
             return parent::getConfigData('sort_order');
         }
 

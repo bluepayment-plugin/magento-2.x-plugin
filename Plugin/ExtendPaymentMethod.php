@@ -62,7 +62,7 @@ class ExtendPaymentMethod
                 }
             }
         }
-        
+
         return $result;
     }
 
