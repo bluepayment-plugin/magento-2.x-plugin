@@ -285,8 +285,26 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 
 
 ## Integracja z GraphQL oraz Magento PWA
-Moduł GraphQL dostępny jest pod adresem:
-https://github.com/bluepayment-plugin/module-bluepayment-graphql
+
+### PWA Studio (Venia)
+Dzięki integracji możesz stworzyć aplikację internetową uruchamianą jak zwykła strona www, ale sprawiającą wrażenie natywnej aplikacji mobilnej.
+W PWA dostępne są:
+
+→ przekierowania na paywall BM <br> 
+→ płatności white label, a w nich:
+  - możliwość wyboru osobnych metod płatności
+  - płatności Google Pay z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Google Pay"
+  - płatności Apple Pay  z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Apple Pay"
+  - płatności BLIK z przekierowaniem na eblik.pl
+
+Instalacja modułu
+
+Wykonaj polecenie: 
+```bash
+yarn add @bluemedia/bluepayment-pwa
+```
+
+### GraphQl
 
 Moduł PWA Studio dostępny jest pod adresem: 
 https://github.com/bluepayment-plugin/bluepayment-pwa-studio
