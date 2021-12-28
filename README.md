@@ -297,7 +297,7 @@ W PWA dostępne są:
   - płatności Apple Pay  z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Apple Pay"
   - płatności BLIK z przekierowaniem na eblik.pl
 
-Instalacja modułu
+### Instalacja modułu
 
 Wykonaj polecenie: 
 ```bash
@@ -305,6 +305,26 @@ yarn add @bluemedia/bluepayment-pwa
 ```
 
 ### GraphQl
+
+#### Instalacja modułu
+
+Wykonaj polecenie poprzez composer: 
+```bash
+composer require bluepayment-plugin/module-bluepayment-graphql
+```
+
+#### Aktywacja
+
+1. Wejdź do katalgu głównego Magento i wykonaj następujące polecenia:
+```bash
+bin/magento module:enable BlueMedia_BluePaymentGraphQl --clear-static-content
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+2. Gotowe. Moduł jest już aktywny.
+
 
 Moduł PWA Studio dostępny jest pod adresem: 
 https://github.com/bluepayment-plugin/bluepayment-pwa-studio
