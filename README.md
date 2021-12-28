@@ -297,6 +297,7 @@ W PWA dostępne są:
   - płatności Apple Pay  z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Apple Pay"
   - płatności BLIK z przekierowaniem na eblik.pl
 
+
 #### Instalacja modułu
 
 Wykonaj polecenie: 
@@ -304,7 +305,9 @@ Wykonaj polecenie:
 yarn add @bluemedia/bluepayment-pwa
 ```
 
+
 ### GraphQl
+
 
 #### Instalacja modułu
 
@@ -324,6 +327,7 @@ bin/magento cache:flush
 ```
 
 2. Gotowe. Moduł jest już aktywny.
+
 
 ### Szczegóły techniczne
 
@@ -371,6 +375,60 @@ query{
   }
 }
 Zapytanie zwraca nazwę kanału, np. "PG płatność testowa”.
+```
+
+8. **Przekazując bluemedia_509 mamy techniczną możliwość nieprzekazania payment_method:{bluepayment:{back_url}}. Czy dobrze zakładam, że jednak zawsze należy ją podać?**
+
+Jeżeli nie zostanie podana, wówczas użytkownik zostanie przekierowany na adres powrotu ustawiony w panelu oplacasie-accept.bm.pl (lub oplacasie.bm.pl dla wersji produkcyjnej).
+
+9. **Skąd pobrać aktualną konfigurację back_url, którą trzeba przekazać przy mutacji setPaymentMethodOnCart? Czy jest ona zdefiniowana gdzieś w panelu Blue Media? Czy może ten parametr jest niezależny od konfiguracji i możemy tutaj przekazać dowolne URL?**
+
+Można przekazać dowolny URL, zaczynający się od http:// lub https://.
+
+10. **Czy available_payment_methods.code: bluepayment jest stały, czy jest szansa zmiany tego klucza?**
+
+Klucz jest i będzie stały. Nie ma możliwości jego zmiany.
+
+11. **Ile czasu zajmuje powiadomienie serwera klienta/merchanta o statusie płatności?**
+
+System przekazuje powiadomienia o zmianie statusu transakcji niezwłocznie po otrzymaniu takiej informacji z Kanału Płatności (komunikat zawsze dotyczy pojedynczej transakcji). 
+
+12. **Zapytanie bluepaymentOrder(hash: String!, order_number: String!): BluePaymentOrder! wymaga podania hash, którego nie znamy i nie otrzymujemy ani przy mutacji placeOrder, ani w żadnym innym miejscu. Co teraz?**
+
+W tym przypadku hash jest doklejany do adresu back_url.
+    Np. dla ustawionego back_url na https://pwa-studio-latest-accept.blue.pl/bluepayment użytkownik zostanie przekierowany na:
+https://pwa-studio-latest-accept.blue.pl/bluepayment?ServiceID=101636&OrderID=k8s_000000139&Hash=30df99b5c49c3568ee465943e3cdab3742aef804f12646df8de66c39c281ee0e 
+
+Hash jest liczony wg. wzoru:
+sha256($id_serwisu|$orderId|$klucz_serwisu)
+
+13. **Jak pobrać aktualnie wybrany kanał płatności?**
+14. 
+Do available_payment_methods został dodany gateway_id. Dla oddzielnych metod płatności zwraca ID kanału bluemedia, dla wszystkich pozostałych metod płatności jest nullem. 
+    Przykład:
+    
+```
+query getPaymentInformation($cartId: String!) {
+  cart(cart_id: $cartId) {
+    id
+    selected_payment_method {
+      code
+      __typename
+    }
+    ...AvailablePaymentMethodsFragment
+    __typename
+  }
+}
+fragment AvailablePaymentMethodsFragment on Cart {
+  id
+  available_payment_methods {
+    code
+    title
+    gateway_id
+    __typename
+  }
+  __typename
+}
 ```
 
 ## Aktualizacja
