@@ -403,7 +403,7 @@ Hash jest liczony wg. wzoru:
 sha256($id_serwisu|$orderId|$klucz_serwisu)
 
 13. **Jak pobrać aktualnie wybrany kanał płatności?**
-14. 
+
 Do available_payment_methods został dodany gateway_id. Dla oddzielnych metod płatności zwraca ID kanału bluemedia, dla wszystkich pozostałych metod płatności jest nullem. 
     Przykład:
     
@@ -430,6 +430,33 @@ fragment AvailablePaymentMethodsFragment on Cart {
   __typename
 }
 ```
+
+14. **Czy można przekazać kanał płatności, podając kod w formacie bluepayment_509?**
+
+Dla mutacji **setPaymentMethodOnCart** została dodana obsługa kodów w formacie **bluepayment_509**. Jeśli w taki sposób zostanie wysłany kod metody płatności – backendowo zostanie on „przepisany” na odpowiednio bluepayment z kanałem 509.
+
+    Przykład:
+mutation setPaymentMethodOnCart($cartId: String!, $backUrl: String!, $agreementsIds: String) {
+  setPaymentMethodOnCart(input: {
+      cart_id: $cartId
+      payment_method: {
+          code: "bluepayment_1899"
+            bluepayment: {
+              create_payment: true
+              back_url: $backUrl,
+            agreements_ids: $agreementsIds
+            }
+      }
+  }) {
+    cart {
+      selected_payment_method {
+        code
+        title
+      }
+    }
+  }
+} 
+
 
 ## Aktualizacja
 
