@@ -28,7 +28,7 @@ composer require bluepayment-plugin/module-bluepayment
 2. Przejdź do aktywacji modułu
 
 ### Poprzez paczkę .zip
-1. Pobierz najnowszą wersję modułu z tej [strony](http://s.bm.pl/wtyczki).
+1. Pobierz najnowszą wersję modułu z tej [strony](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Wgraj plik .zip do katalogu głównego Magento.
 3. Będąc w katalogu głównym Magento, wykonaj komendę:
 ```bash
