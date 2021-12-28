@@ -327,17 +327,51 @@ bin/magento cache:flush
 
 ### Szczegóły techniczne
 
-**Czy w dostępnych kanałach płatności w query bluepaymentGateways() są od razu BLIK, płatność kartą i lista banków do szybkich przelewów? Jeśli w standardzie jest zwracanie listy banków, to czy można dostać sam "szybki przelew/PBL" z opcją wyboru konkretnego banku już w WebView?**
+1. **Czy w dostępnych kanałach płatności w query bluepaymentGateways() są od razu BLIK, płatność kartą i lista banków do szybkich przelewów? Jeśli w standardzie jest zwracanie listy banków, to czy można dostać sam "szybki przelew/PBL" z opcją wyboru konkretnego banku już w WebView?**
 
 Zostaną zwrócone wszystkie kanały, które zostały podpięte w ramach danego serwisu. Oczywiście istnieje możliwość podpięcia jedynie szybkich przelewów/PBL. 
 
 Doprecyzowując, **available_payment_methods** zwraca najpierw wszystkie metody, które są oznaczone jako 'Oddzielna metoda płatności'. To znaczy, że otrzymujemy np.  Płatności Blue Media, BLIK, karty. Następnie można wywołać **bluepaymentGateways** – to query da nam wszystkie kanały dostępne w ramach głównej metody płatności (tj. nieoznaczone jako 'Oddzielna metoda płatności'), np. w przypadku Płatność Blue Media zwracane są poszczególne banki w ramach PBL/szybki przelew.
 
-**Czy klucze płatności gateway_id są stałe i czy czy można je bezpiecznie zapisać na sztywno w kodzie, np. po stronie aplikacji lub backendu?**
+2. **Czy klucze płatności gateway_id są stałe i czy czy można je bezpiecznie zapisać na sztywno w kodzie, np. po stronie aplikacji lub backendu?**
 
 Klucze płatności **gateway_id** nie są stałe. Każdy z nich może w przyszłości ulec zmianie, ale takie modyfikacje są zazwyczaj rzadkością. Zdarzają się, gdy dochodzi do fuzji banków lub innej zmiany, która wymusza na nas zmianę danego kanału.
 
+3. **Czym się różni PBL od szybkich przelewów?**
 
+W PBL dane są podstawiane w bankowości (klient jedynie zatwierdza płatność),  w przypadku szybkiego przelewu klient musi przepisać otrzymane dane. To jedyna różnica między tymi dwiema metodami. Każdy z przelewów jest realizowany wewnątrzbankowo.
+
+4. **Kiedy możemy mieć do czynienia z is_separated_method?**
+
+Oznacza to, że można rozdzielić kanały jako osobne formy płatności, np wyodrębnić karty od pozostałych, lub pokazać te kanały, z których klienci najczęściej korzystają.
+
+**Gdzie można to ustawić? W panelu Magento?**
+
+Tak, można to ustawić bezpośrednio w panelu Magento 2 – w edycji konkretnego kanału. Można w ten sposób wyodrębnić np. Płatności Blue Media, BLIK, płatności kartą. To znaczy, że np. karty mogą być traktowane jako oddzielna metoda, pokazywane podczas wyboru głównej metody Płatności Blue Media lub być jedną z opcji wśród dostępnych kanałów płatności.
+
+5. **Dlaczego w mutacji setPaymentMethodOnCart() parametr gateway_id jest opcjonalny?** 
+
+Parametr jest opcjonalny, ponieważ możemy wywołać konkretne kanały, wskazując wówczas ich gateway_id. Nie jest to jednak konieczne – możemy pokazać wszystkie dostępne kanały po przekierowaniu użytkownika na stronę BlueMedia.
+
+6. **Czy redirecturl służy wyłącznie do odnotowania zakończenia procesu płatności, ale nie jest on tożsamy z pozytywnym/negatywnym/oczekującym statusem płatności? Czy jedyną opcją pobrania aktualnego statusu płatności jest cykliczne odpytywanie serwera?**
+
+RedirectUrl odnośni się jedynie do strony powrotu po płatności – widoku, na który klient ma zostać przekierowany po transakcji. Aktualny status transakcji przekazujemy w komunikacie ITN. 
+
+7. **W jaki sposób pobrać nazwę aktualnie wybranego sposobu płatności, np. "Przelew Volkswagen Bank"?**
+
+Proszę wykonać następującą zapytanie:
+```bash
+query{
+  cart(cart_id: „..."){
+    id
+    email
+    selected_payment_method {
+      title
+    }
+  }
+}
+Zapytanie zwraca nazwę kanału, np. "PG płatność testowa”.
+```
 
 ## Aktualizacja
 
