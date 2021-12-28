@@ -304,16 +304,25 @@ W PWA dostępne są:
 | 2.16.0 | 1.2.0 | 0.0.7 | 2.4.2 - 2.4.3 | 9.x - 10.x |
 | 2.15.0 | 1.1.0 | 0.0.3 | 2.4.2 | 9.x - 10.x |
 
+<br>
+
 #### Instalacja modułu
 
 Wykonaj polecenie: 
 ```bash
 yarn add @bluemedia/bluepayment-pwa
 ```
-
+<br>
 
 ### GraphQL
 
+#### Tabela kompatybilności
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQL | bluemedia/bluepayment-pwa (JS) | Magento | Magento PWA |
+| --- | --- | --- | --- |--- |
+| 2.17.1 | 1.2.4-1.2.5 | 0.0.8 | 2.4.2 - 2.4.3 | 10.x |
+| 2.16.0 | 1.2.2 | 0.0.4 | 2.4.2 - 2.4.3 | 10.x |
+| 2.15.0 | 1.1.0 | 0.0.3 | 2.4.2 | 10.x |
 
 #### Instalacja modułu
 
