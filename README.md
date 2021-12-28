@@ -297,7 +297,7 @@ W PWA dostępne są:
   - płatności Apple Pay  z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Apple Pay"
   - płatności BLIK z przekierowaniem na eblik.pl
 
-### Instalacja modułu
+#### Instalacja modułu
 
 Wykonaj polecenie: 
 ```bash
@@ -325,9 +325,19 @@ bin/magento cache:flush
 
 2. Gotowe. Moduł jest już aktywny.
 
+### Szczegóły techniczne
 
-Moduł PWA Studio dostępny jest pod adresem: 
-https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+**Czy w dostępnych kanałach płatności w query bluepaymentGateways() są od razu BLIK, płatność kartą i lista banków do szybkich przelewów? Jeśli w standardzie jest zwracanie listy banków, to czy można dostać sam "szybki przelew/PBL" z opcją wyboru konkretnego banku już w WebView?**
+
+Zostaną zwrócone wszystkie kanały, które zostały podpięte w ramach danego serwisu. Oczywiście istnieje możliwość podpięcia jedynie szybkich przelewów/PBL. 
+
+Doprecyzowując, **available_payment_methods** zwraca najpierw wszystkie metody, które są oznaczone jako 'Oddzielna metoda płatności'. To znaczy, że otrzymujemy np.  Płatności Blue Media, BLIK, karty. Następnie można wywołać **bluepaymentGateways** – to query da nam wszystkie kanały dostępne w ramach głównej metody płatności (tj. nieoznaczone jako 'Oddzielna metoda płatności'), np. w przypadku Płatność Blue Media zwracane są poszczególne banki w ramach PBL/szybki przelew.
+
+**Czy klucze płatności gateway_id są stałe i czy czy można je bezpiecznie zapisać na sztywno w kodzie, np. po stronie aplikacji lub backendu?**
+
+Klucze płatności **gateway_id** nie są stałe. Każdy z nich może w przyszłości ulec zmianie, ale takie modyfikacje są zazwyczaj rzadkością. Zdarzają się, gdy dochodzi do fuzji banków lub innej zmiany, która wymusza na nas zmianę danego kanału.
+
+
 
 ## Aktualizacja
 
