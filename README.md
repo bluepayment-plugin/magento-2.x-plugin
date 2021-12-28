@@ -297,6 +297,12 @@ W PWA dostępne są:
   - płatności Apple Pay  z przekierowaniem na dedykowany paywall z przyciskiem "Zapłać z Apple Pay"
   - płatności BLIK z przekierowaniem na eblik.pl
 
+#### Tabela kompatybilności
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQL | bluemedia/bluepayment-pwa (JS) | Magento | Magento PWA |
+| --- | --- | --- | --- |--- |
+| 2.16.0 | 1.2.0 | 0.0.7 | 2.4.2 - 2.4.3 | 9.x - 10.x |
+| 2.15.0 | 1.1.0 | 0.0.3 | 2.4.2 | 9.x - 10.x |
 
 #### Instalacja modułu
 
@@ -306,7 +312,7 @@ yarn add @bluemedia/bluepayment-pwa
 ```
 
 
-### GraphQl
+### GraphQL
 
 
 #### Instalacja modułu
@@ -436,6 +442,7 @@ fragment AvailablePaymentMethodsFragment on Cart {
 Dla mutacji **setPaymentMethodOnCart** została dodana obsługa kodów w formacie **bluepayment_509**. Jeśli w taki sposób zostanie wysłany kod metody płatności – backendowo zostanie on „przepisany” na odpowiednio bluepayment z kanałem 509.
 
     Przykład:
+ ```   
 mutation setPaymentMethodOnCart($cartId: String!, $backUrl: String!, $agreementsIds: String) {
   setPaymentMethodOnCart(input: {
       cart_id: $cartId
@@ -456,7 +463,7 @@ mutation setPaymentMethodOnCart($cartId: String!, $backUrl: String!, $agreements
     }
   }
 } 
-
+```
 
 ## Aktualizacja
 
