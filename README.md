@@ -286,7 +286,7 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 
 ## Integracja z GraphQL oraz Magento PWA
 
-Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym GraphQL[https://developers.bluemedia.pl/online/wtyczki/magento-2/pwa-studio] oraz Magento PWA[https://developers.bluemedia.pl/online/wtyczki/magento-2/graphql].
+Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.bluemedia.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.bluemedia.pl/online/wtyczki/magento-2/graphql).
 
 
 ## Aktualizacja
