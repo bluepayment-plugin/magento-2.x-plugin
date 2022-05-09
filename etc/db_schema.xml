@@ -18,6 +18,10 @@
     <column xsi:type="timestamp" name="status_date" on_update="false" nullable="true" default="CURRENT_TIMESTAMP" comment="Status Date"/>
     <column xsi:type="smallint" name="is_separated_method" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Use gateway as separated method."/>
     <column xsi:type="smallint" name="force_disable" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Force Disable Gateway"/>
+    <column xsi:type="decimal" name="min_amount" scale="4" precision="20" unsigned="false" nullable="true" comment="Minimum amount"/>
+    <column xsi:type="decimal" name="max_amount" scale="4" precision="20" unsigned="false" nullable="true" comment="Maximum amount"/>
+    <column xsi:type="int" name="min_validity_time" padding="11" unsigned="false" nullable="false" identity="false" comment="Minimum validity time"/>
+
     <constraint xsi:type="primary" referenceId="PRIMARY">
       <column name="entity_id"/>
     </constraint>

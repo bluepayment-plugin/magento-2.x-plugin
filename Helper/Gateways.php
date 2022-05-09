@@ -150,11 +150,9 @@ class Gateways extends Data
                                     $currency
                                 );
                                 break;
-                            } else {
-                                if ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
-                                    $result['error'] = 'Exceeded the limit of attempts to sync gateways list for ' . $serviceId . '!';
-                                    break;
-                                }
+                            } elseif ($tryCount >= self::FAILED_CONNECTION_RETRY_COUNT) {
+                                $result['error'] = 'Exceeded the limit of attempts to sync gateways list for ' . $serviceId . '!';
+                                break;
                             }
                             $tryCount++;
                         }
@@ -227,10 +225,26 @@ class Gateways extends Data
                 $gatewayModel->setLogoUrl(isset($gateway['iconURL']) ? $gateway['iconURL'] : null);
                 $gatewayModel->setData('status_date', $gateway['stateDate']);
 
-                try {
-                    $this->gatewayRepository->save($gatewayModel);
-                } catch (Exception $e) {
-                    $this->logger->info($e->getMessage());
+                $save = false;
+                foreach ($gateway['currencyList'] as $currencyInfo) {
+                    $currencyInfo = (array)$currencyInfo;
+
+                    if ($currencyInfo['currency'] == $currency) {
+                        // For now - we support only one currency per service
+                        $save = true;
+
+                        $gatewayModel->setMinAmount($currencyInfo['minAmount'] ?? null);
+                        $gatewayModel->setMaxAmount($currencyInfo['maxAmount'] ?? null);
+                    }
+                }
+
+
+                if ($save) {
+                    try {
+                        $this->gatewayRepository->save($gatewayModel);
+                    } catch (Exception $e) {
+                        $this->logger->info($e->getMessage());
+                    }
                 }
             }
         }

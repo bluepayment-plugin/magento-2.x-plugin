@@ -2,27 +2,28 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\Data\GatewayInterface;
 use BlueMedia\BluePayment\Block\Form;
-use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection as GatewayCollection;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    const IFRAME_GATEWAY_ID = 1500;
-    const BLIK_GATEWAY_ID = 509;
-    const GPAY_GATEWAY_ID = 1512;
-    const APPLE_PAY_GATEWAY_ID = 1513;
-    const AUTOPAY_GATEWAY_ID = 1503;
-    const CREDIT_GATEWAY_ID = 700;
+    public const IFRAME_GATEWAY_ID = 1500;
+    public const BLIK_GATEWAY_ID = 509;
+    public const GPAY_GATEWAY_ID = 1512;
+    public const APPLE_PAY_GATEWAY_ID = 1513;
+    public const AUTOPAY_GATEWAY_ID = 1503;
+    public const CREDIT_GATEWAY_ID = 700;
 
     /** @var GatewayCollection */
     private $gatewayCollection;
@@ -35,9 +36,6 @@ class ConfigProvider implements ConfigProviderInterface
 
     /** @var PriceCurrencyInterface */
     private $priceCurrency;
-
-    /** @var Logger */
-    private $logger;
 
     /** @var ScopeConfigInterface */
     private $scopeConfig;
@@ -116,7 +114,6 @@ class ConfigProvider implements ConfigProviderInterface
      * @param GatewayCollection $gatewayCollection
      * @param Form $block
      * @param PriceCurrencyInterface $priceCurrency
-     * @param Logger $logger
      * @param ScopeConfigInterface $scopeConfig
      * @param CustomerSession $customerSession
      * @param CheckoutSession $checkoutSession
@@ -127,7 +124,6 @@ class ConfigProvider implements ConfigProviderInterface
         GatewayCollection $gatewayCollection,
         Form $block,
         PriceCurrencyInterface $priceCurrency,
-        Logger $logger,
         ScopeConfigInterface $scopeConfig,
         CustomerSession $customerSession,
         CheckoutSession $checkoutSession,
@@ -137,7 +133,6 @@ class ConfigProvider implements ConfigProviderInterface
         $this->gatewayCollection = $gatewayCollection;
         $this->block = $block;
         $this->priceCurrency = $priceCurrency;
-        $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
@@ -148,7 +143,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return [
             'payment' => $this->getPaymentConfig(),
@@ -157,8 +152,10 @@ class ConfigProvider implements ConfigProviderInterface
 
     /**
      * @return array
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
-    public function getPaymentConfig()
+    public function getPaymentConfig(): array
     {
         if (! $this->isGatewaySelectionEnabled()) {
             return [
@@ -180,8 +177,8 @@ class ConfigProvider implements ConfigProviderInterface
 
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
-                if (
-                    ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID || $this->customerSession->isLoggedIn()) // AutoPay only for logger users
+                if ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID
+                    || $this->customerSession->isLoggedIn() // AutoPay only for logger users
                 ) {
                     if ($gateway->isSeparatedMethod()) {
                         $resultSeparated[] = $this->prepareGatewayStructure($gateway);
@@ -217,28 +214,20 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->activeGateways[$currency];
     }
 
-    public function isGatewaySelectionEnabled()
-    {
-        return (bool) $this->scopeConfig->getValue(
-            'payment/bluepayment/gateway_selection',
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
     /**
      * @return string
      */
-    public function getCurrentCurrencyCode()
+    public function getCurrentCurrencyCode(): string
     {
         return $this->priceCurrency->getCurrency()->getCurrencyCode();
     }
 
     /**
-     * @param Gateway $gateway
+     * @param  Gateway  $gateway
      *
      * @return array
      */
-    private function prepareGatewayStructure($gateway)
+    private function prepareGatewayStructure(GatewayInterface $gateway): array
     {
         $logoUrl = $gateway->getLogoUrl();
         if ($gateway->getUseOwnLogo()) {
@@ -295,10 +284,11 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param array $array
+     * @param  array  $array
+     *
      * @return array
      */
-    public function sortGateways(&$array)
+    public function sortGateways(array &$array): array
     {
         $sortOrder = $this->defaultSortOrder;
 
@@ -312,21 +302,21 @@ class ConfigProvider implements ConfigProviderInterface
 
                 if ($aPos === false) {
                     // New gateway
-                    return true;
+                    return 1;
                 }
 
                 if ($bPos === false) {
                     // New gateway
-                    return false;
+                    return 0;
                 }
 
             } elseif ($aPos == 0) {
-                return true;
+                return 1;
             } elseif ($bPos == 0) {
-                return false;
+                return 0;
             }
 
-            return $aPos >= $bPos;
+            return $aPos >= $bPos ? 1 : -1;
         });
 
         return $array;
@@ -335,7 +325,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @return array
      */
-    private function prepareCards()
+    private function prepareCards(): array
     {
         $collection = $this->cardCollectionFactory->create();
 
@@ -370,10 +360,13 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param string $currency
+     * @param  float  $amount
+     * @param  string  $currency
+     *
      * @return GatewayCollection
+     * @throws NoSuchEntityException
      */
-    public function getActiveGateways($amount, $currency)
+    public function getActiveGateways(float $amount, string $currency): GatewayCollection
     {
         $storeId = $this->storeManager->getStore()->getId();
 
@@ -387,17 +380,28 @@ class ConfigProvider implements ConfigProviderInterface
             ->addFieldToFilter('gateway_service_id', ['eq' => $serviceId])
             ->addFieldToFilter('gateway_currency', ['eq' => $currency])
             ->addFieldToFilter('gateway_status', ['eq' => 1])
-            ->addFieldToFilter('force_disable', ['eq' => 0]);
-
-        if ($amount < 100 || $amount > 2500) {
-            // Credit for 100-2500zł
-            $gateways->addFieldToFilter('gateway_id', ['neq' => self::CREDIT_GATEWAY_ID]);
-        }
+            ->addFieldToFilter('force_disable', ['eq' => 0])
+            ->addFieldToFilter('min_amount', [
+                ['lteq' => $amount],
+                ['null' => true]
+            ])
+            ->addFieldToFilter('max_amount', [
+                ['gteq' => $amount],
+                ['null' => true]
+            ]);
 
         return $gateways->load();
     }
 
-    protected function iframePayment()
+    public function isGatewaySelectionEnabled(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/gateway_selection',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    protected function iframePayment(): bool
     {
         return (boolean) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
@@ -405,10 +409,7 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    /**
-     * @return bool
-     */
-    protected function blikZero()
+    protected function blikZero(): bool
     {
         return (boolean) $this->scopeConfig->getValue(
             'payment/bluepayment/blik_zero',

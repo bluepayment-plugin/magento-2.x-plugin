@@ -73,7 +73,7 @@ class Agreements implements HttpGetActionInterface
         $currency = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
         $locale = $this->localeResolver->getLocale();
 
-        if ($currency != 'PLN') {
+        if ($currency !== 'PLN' || $gatewayId === null) {
             // Currently, not supported
             $resultJson->setData([]);
 
@@ -81,9 +81,9 @@ class Agreements implements HttpGetActionInterface
         }
 
         $response = $this->webapi->agreements(
-            $this->request->getParam(self::PARAM_GATEWAY_ID),
-            $this->checkoutSession->getQuote()->getQuoteCurrencyCode(),
-            $this->localeResolver->getLocale(),
+            $gatewayId,
+            $currency,
+            $locale
         );
 
         if (is_array($response) && $response['result'] == 'OK') {

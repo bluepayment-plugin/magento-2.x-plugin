@@ -17,23 +17,20 @@ use Magento\Framework\App\Response\Http;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Store\Model\ScopeInterface;
+use SimpleXMLElement;
 
 /**
  * Create payment (BM transaction) controller
  */
 class Create extends Action
 {
-    const IFRAME_GATEWAY_ID = 'IFRAME';
-    const BLIK_CODE_LENGTH = 6;
-
-    /** @var PaymentFactory */
-    public $paymentFactory;
+    public const IFRAME_GATEWAY_ID = 'IFRAME';
+    public const BLIK_CODE_LENGTH = 6;
 
     /** @var OrderFactory */
     public $orderFactory;
@@ -59,26 +56,26 @@ class Create extends Action
     /** @var Collection  */
     public $collection;
 
-    /** @var Curl */
-    public $curl;
-
     /** @var CollectionFactory */
     public $gatewayFactory;
+
+    /** @var Payment */
+    public $bluepayment;
 
     /**
      * Create constructor.
      *
-     * @param Context $context
-     * @param OrderSender $orderSender
-     * @param PaymentFactory $paymentFactory
-     * @param OrderFactory $orderFactory
-     * @param Session $session
-     * @param Logger $logger
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Data $helper
-     * @param JsonFactory $resultJsonFactory
-     * @param Collection $collection
-     * @param Curl $curl
+     * @param  Context  $context
+     * @param  OrderSender  $orderSender
+     * @param  PaymentFactory  $paymentFactory
+     * @param  OrderFactory  $orderFactory
+     * @param  Session  $session
+     * @param  Logger  $logger
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  Data  $helper
+     * @param  JsonFactory  $resultJsonFactory
+     * @param  Collection  $collection
+     * @param  CollectionFactory  $gatewayFactory
      */
     public function __construct(
         Context $context,
@@ -91,10 +88,8 @@ class Create extends Action
         Data $helper,
         JsonFactory $resultJsonFactory,
         Collection $collection,
-        Curl $curl,
         CollectionFactory $gatewayFactory
     ) {
-        $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
         $this->logger            = $logger;
         $this->session           = $session;
@@ -103,8 +98,9 @@ class Create extends Action
         $this->helper            = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->collection        = $collection;
-        $this->curl              = $curl;
         $this->gatewayFactory    = $gatewayFactory;
+
+        $this->bluepayment = $paymentFactory->create();
 
         parent::__construct($context);
     }
@@ -117,10 +113,7 @@ class Create extends Action
     public function execute()
     {
         try {
-            /** @var Payment $payment */
-            $payment       = $this->paymentFactory->create();
-
-            $session       = $this->getCheckout();
+            $session       = $this->session;
             $quoteModuleId = $session->getBluePaymentQuoteId();
             $this->logger->info('CREATE:' . __LINE__, ['quoteModuleId' => $quoteModuleId]);
             $session->setQuoteId($quoteModuleId);
@@ -134,16 +127,13 @@ class Create extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
-            $autopayGateway = ConfigProvider::AUTOPAY_GATEWAY_ID;
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
+                ScopeInterface::SCOPE_STORE
             );
             $sharedKey      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/shared_key',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
+                ScopeInterface::SCOPE_STORE
             );
             $orderId        = $order->getRealOrderId();
             $agreementsIds  = $order->getPayment()->hasAdditionalInformation('agreements_ids')
@@ -153,9 +143,10 @@ class Create extends Action
             if (!$order->getId()) {
                 $this->logger->info('CREATE:' . __LINE__, ['Zamówienie bez identyfikatora']);
             }
-            $gatewayId = (int)$this->getRequest()->getParam('gateway_id', 0);
+
+            $gatewayId = (int) $this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
-            $cardIndex = (int)$this->getRequest()->getParam('card_index', 0);
+            $cardIndex = (int) $this->getRequest()->getParam('card_index', 0);
 
             $resultJson = $this->resultJsonFactory->create();
 
@@ -163,14 +154,12 @@ class Create extends Action
                 ',',
                 $this->scopeConfig->getValue(
                     'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_STORE,
-                    $order->getStoreId()
+                    ScopeInterface::SCOPE_STORE
                 )
             );
             $statusWaitingPayment = $this->scopeConfig->getValue(
                 'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
+                ScopeInterface::SCOPE_STORE
             );
 
             if (!empty($statusWaitingPayment)) {
@@ -214,7 +203,7 @@ class Create extends Action
             }
 
             if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
-                $params = $payment->getFormRedirectFields(
+                $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,
                     $agreementsIds,
@@ -224,7 +213,7 @@ class Create extends Action
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $redirectHash = $this->helper->generateAndReturnHash($hashData);
 
-                $result = $this->prepareIframeJsonResponse($payment->getUrlGateway(), $redirectHash, $params);
+                $result = $this->prepareIframeJsonResponse($this->bluepayment->getUrlGateway(), $redirectHash, $params);
 
                 $resultJson->setData($result);
                 return $resultJson;
@@ -235,19 +224,17 @@ class Create extends Action
                 $this->logger->info('CREATE:' . __LINE__, ['authorizationCode' => $authorizationCode]);
 
                 if ($this->validateBlikCode($authorizationCode)) {
-                    $params = $payment->getFormRedirectFields(
+                    $params = $this->bluepayment->getFormRedirectFields(
                         $order,
                         $gatewayId,
                         $agreementsIds,
                         true,
                         $authorizationCode
                     );
-                    $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
-                    $responseParams = $this->sendRequestBlik($payment->getUrlGateway(), $params);
-                    $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
+                    $xml = $this->sendRequest($params);
 
-                    if ($responseParams === false) {
+                    if ($xml === false) {
                         $resultJson->setData([
                             'error' => true
                         ]);
@@ -265,10 +252,10 @@ class Create extends Action
                         'OrderID' => $orderId,
                         'GatewayID' => $gatewayId,
                         'hash' => $hash,
-                        'confirmation' => $responseParams['confirmation'],
-                        'paymentStatus' => $responseParams['paymentStatus']
+                        'confirmation' => property_exists($xml, 'confirmation') ? (string)$xml->confirmation : null,
+                        'paymentStatus' => property_exists($xml, 'paymentStatus') ? (string)$xml->paymentStatus : null,
                     ];
-                    $result = $this->prepareBlikJsonResponse($payment->getUrlGateway(), $authorizationCode, $params);
+                    $result = $this->prepareBlikJsonResponse($authorizationCode, $params);
 
                     $resultJson->setData($result);
                     return $resultJson;
@@ -288,7 +275,7 @@ class Create extends Action
 
                 $this->logger->info('CREATE:' . __LINE__, ['token' => $token]);
 
-                $params = $payment->getFormRedirectFields(
+                $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,
                     $agreementsIds,
@@ -296,12 +283,15 @@ class Create extends Action
                     '',
                     $token
                 );
-                $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
 
-                $responseParams = $this->sendRequestGPay($payment->getUrlGateway(), $params);
-                $this->logger->info('CREATE:' . __LINE__, ['responseParams' => $responseParams]);
+                var_dump($params);
 
-                if ($responseParams === false) {
+                $xml = $this->sendRequest($params);
+
+                var_dump($xml);
+                die;
+
+                if ($xml === false) {
                     $resultJson->setData([
                         'error' => true
                     ]);
@@ -319,17 +309,17 @@ class Create extends Action
                     'OrderID' => $orderId,
                     'GatewayID' => $gatewayId,
                     'hash' => $hash,
-                    'paymentStatus' => $responseParams['paymentStatus'],
-                    'redirectUrl' => $responseParams['redirectUrl']
+                    'paymentStatus' => property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null,
+                    'redirectUrl' => property_exists($xml, 'redirectUrl') ? (string) $xml->redirectUrl : null,
                 ];
-                $result = $this->prepareGPayJsonResponse($payment->getUrlGateway(), $params);
+                $result = $this->prepareGPayJsonResponse($this->bluepayment->getUrlGateway(), $params);
 
                 $resultJson->setData($result);
                 return $resultJson;
             }
 
-            if ($autopayGateway == $gatewayId) {
-                $params = $payment->getFormRedirectFields(
+            if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+                $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,
                     $agreementsIds,
@@ -343,31 +333,33 @@ class Create extends Action
                     $hashData  = [$serviceId, $orderId, $sharedKey];
                     $redirectHash = $this->helper->generateAndReturnHash($hashData);
 
-                    $result = $this->prepareIframeJsonResponse($payment->getUrlGateway(), $redirectHash, $params);
+                    $result = $this->prepareIframeJsonResponse($this->bluepayment->getUrlGateway(), $redirectHash, $params);
 
                     $resultJson->setData($result);
                     return $resultJson;
                 }
 
-                $result = $this->sendAutopayRequest($payment->getUrlGateway(), $params);
+                $xml = $this->sendRequest($params);
 
-                if ($result === false) {
+                if ($xml === false) {
                     $resultJson->setData([
                         'error' => true
                     ]);
                     return $resultJson;
                 }
 
-                if ($result['redirectUrl'] !== null) {
+                $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+                if ($redirectUrl) {
                     // 3DS
-                    $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $result['redirectUrl']]);
+                    $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
 
                     /** @var Http $response */
                     $response = $this->getResponse();
-                    return $response->setRedirect($result['redirectUrl']);
+                    return $response->setRedirect($redirectUrl);
                 }
 
-                if ($result['paymentStatus'] == Payment::PAYMENT_STATUS_SUCCESS) {
+                $paymentStatus = property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null;
+                if ($paymentStatus == Payment::PAYMENT_STATUS_SUCCESS) {
                     // Got success status
 
                     return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
@@ -387,12 +379,12 @@ class Create extends Action
                 ]);
             }
 
-            $params = $payment->getFormRedirectFields(
+            $params = $this->bluepayment->getFormRedirectFields(
                 $order,
                 $gatewayId,
                 $agreementsIds
             );
-            $xml = $this->sendRequest($params, $payment->getUrlGateway());
+            $xml = $this->sendRequest($params);
 
             $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
 
@@ -401,15 +393,13 @@ class Create extends Action
 
                 $waitingPage = $this->scopeConfig->getValue(
                     'payment/bluepayment/waiting_page',
-                    ScopeInterface::SCOPE_STORE,
-                    $order->getStoreId()
+                    ScopeInterface::SCOPE_STORE
                 );
 
                 if ($waitingPage) {
                     $waitingPageSeconds = $this->scopeConfig->getValue(
                         'payment/bluepayment/waiting_page_seconds',
-                        ScopeInterface::SCOPE_STORE,
-                        $order->getStoreId()
+                        ScopeInterface::SCOPE_STORE
                     );
 
                     // Redirect only if set in settings
@@ -425,7 +415,7 @@ class Create extends Action
                 return $response->setRedirect($redirectUrl);
             }
 
-            // Otherwise - redirect to "waiting" page
+            // Otherwise - redirect to "back" page
             $hashData  = [$serviceId, $orderId, $sharedKey];
             $redirectHash = $this->helper->generateAndReturnHash($hashData);
 
@@ -441,26 +431,27 @@ class Create extends Action
             $this->logger->critical($e);
         }
 
-        return parent::_redirect('checkout/cart');
+        return $this->_redirect('checkout/cart');
     }
 
     /**
-     * Zwraca singleton dla Checkout Session Model
+     * @param  string  $code
      *
-     * @return \Magento\Checkout\Model\Session
+     * @return bool
      */
-    public function getCheckout()
+    private function validateBlikCode(string $code): bool
     {
-        return $this->session;
+        return false === empty($code) && self::BLIK_CODE_LENGTH === strlen($code);
     }
 
     /**
-     * @param string $gatewayUrl
-     * @param string $redirectHash
-     * @param array  $params
+     * @param  string  $gatewayUrl
+     * @param  string  $redirectHash
+     * @param  array  $params
+     *
      * @return array
      */
-    private function prepareIframeJsonResponse($gatewayUrl, $redirectHash, $params)
+    private function prepareIframeJsonResponse(string $gatewayUrl, string $redirectHash, array $params): array
     {
         $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
         $params['GatewayID'] = (string) $params['GatewayID'];
@@ -473,28 +464,29 @@ class Create extends Action
     }
 
     /**
-     * @param string $gatewayUrl
-     * @param string $authorizationCode
-     * @param array  $params
+     * @param  string  $authorizationCode
+     * @param  array  $params
+     *
      * @return array
      */
-    private function prepareBlikJsonResponse($gatewayUrl, $authorizationCode, $params)
+    private function prepareBlikJsonResponse(string $authorizationCode, array $params): array
     {
         $params['GatewayID'] = (string) $params['GatewayID'];
         $params['AuthorizationCode'] = $authorizationCode;
 
         return [
-            'gateway_url' => $gatewayUrl,
+            'gateway_url' => $this->bluepayment->getUrlGateway(),
             'params' => $params,
         ];
     }
 
     /**
-     * @param string $gatewayUrl
-     * @param array  $params
+     * @param  string  $gatewayUrl
+     * @param  array  $params
+     *
      * @return array
      */
-    private function prepareGPayJsonResponse($gatewayUrl, $params)
+    private function prepareGPayJsonResponse(string $gatewayUrl, array $params): array
     {
         $params['GatewayID'] = (string) $params['GatewayID'];
 
@@ -505,103 +497,16 @@ class Create extends Action
     }
 
     /**
-     * @param string $code
-     * @return bool
-     */
-    private function validateBlikCode($code)
-    {
-        return false === empty($code) && self::BLIK_CODE_LENGTH === strlen($code);
-    }
-
-    /**
-     * @param string $urlGateway
-     * @param array $params
+     * @param  array  $params
      *
-     * @return array|false
+     * @return SimpleXMLElement|false
      */
-    private function sendRequestBlik($urlGateway, $params)
+    private function sendRequest(array $params)
     {
-        $xml = $this->sendRequest($params, $urlGateway);
-
-        if ($xml !== false) {
-            return [
-                'orderID' => (string)$xml->orderID,
-                'remoteID' => (string)$xml->remoteID,
-                'confirmation' => (string)$xml->confirmation,
-                'paymentStatus' => (string)$xml->paymentStatus
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $urlGateway
-     * @param array $params
-     *
-     * @return array|false
-     */
-    private function sendRequestGPay($urlGateway, $params)
-    {
-        $xml = $this->sendRequest($params, $urlGateway);
-
-        if ($xml !== false) {
-            return [
-                'orderID' => (string)$xml->orderID,
-                'remoteID' => (string)$xml->remoteID,
-                'paymentStatus' => (string)$xml->status,
-                'redirectUrl' => property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $urlGateway
-     * @param array $params
-     *
-     * @return array|false
-     */
-    private function sendAutopayRequest($urlGateway, $params)
-    {
-        $xml = $this->sendRequest($params, $urlGateway);
-
-        if ($xml !== false) {
-            return [
-                'orderID' => (string)$xml->orderID,
-                'remoteID' => (string)$xml->remoteID,
-                'paymentStatus' => (string)$xml->status,
-                'confirmation' => property_exists($xml, 'confirmation') ? (string)$xml->confirmation : null,
-                'redirectUrl' => property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $urlGateway
-     * @param array $params
-     *
-     * @return \SimpleXMLElement|false
-     */
-    private function sendRequest($params, $urlGateway)
-    {
-        if (array_key_exists('ClientHash', $params)) {
-            $this->curl->addHeader('BmHeader', 'pay-bm');
-        } else {
-            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
-        }
-
         $this->logger->info('CREATE:' . __LINE__, ['params' => $params]);
+        $response = $this->bluepayment->sendRequest($params);
+        $this->logger->info('CREATE:' . __LINE__, ['response' => (array) $response]);
 
-        $this->curl->post($urlGateway, $params);
-        $response = $this->curl->getBody();
-
-        $this->logger->info('CREATE:' . __LINE__, ['response' => $response]);
-        $xml = simplexml_load_string($response);
-
-        return $xml;
+        return $response;
     }
 }

@@ -9,7 +9,7 @@ use Magento\Framework\Model\AbstractModel;
 
 class Gateway extends AbstractModel implements IdentityInterface, GatewayInterface
 {
-    const CACHE_TAG = 'blue_gateway';
+    public const CACHE_TAG = 'blue_gateway';
 
     protected $_eventPrefix = 'blue_gateway';
     protected $_cacheTag = 'blue_gateway';
@@ -306,5 +306,53 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
     public function setForceDisable($forceDisable)
     {
         return $this->setData(self::IS_FORCE_DISABLED, $forceDisable);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMinAmount()
+    {
+        return $this->getData(self::MIN_AMOUNT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMinAmount($minAmount)
+    {
+        return $this->setData(self::MIN_AMOUNT, $minAmount);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMaxAmount()
+    {
+        return $this->getData(self::MAX_AMOUNT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMaxAmount($maxAmount)
+    {
+        return $this->setData(self::MAX_AMOUNT, $maxAmount);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMinValidityTime()
+    {
+        return $this->getData(self::MIN_VALIDITY_TIME);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMinValidityTime($minValidityTime)
+    {
+        return $this->setData(self::MIN_VALIDITY_TIME, $minValidityTime);
     }
 }

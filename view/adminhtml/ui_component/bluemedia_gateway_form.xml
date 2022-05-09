@@ -1,0 +1,210 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">bluemedia_gateway_form.bluemedia_gateway_form_data_source</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="label" xsi:type="string" translate="true">Gateway Form</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit\BackButton" />
+            <button name="save" class="BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit\SaveButton" />
+            <button name="save_and_continue" class="BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit\SaveAndContinueButton" />
+        </buttons>
+        <namespace>bluemedia_gateway_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>bluemedia_gateway_form.bluemedia_gateway_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="bluemedia_gateway_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider name="bluemedia_gateway_form_data_source" class="BlueMedia\BluePayment\Model\Gateway\DataProvider">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general">
+        <settings>
+            <label>General</label>
+        </settings>
+        <field name="entity_id" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+        <field name="store_id" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Store ID</label>
+                <disabled>true</disabled>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="gateway_status" formElement="checkbox">
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Gateway Status</label>
+                <disabled>true</disabled>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="force_disable" formElement="checkbox">
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Force Disable</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="gateway_service_id" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Service ID</label>
+            </settings>
+        </field>
+        <field name="gateway_currency" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Currency</label>
+            </settings>
+        </field>
+        <field name="gateway_id" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway ID</label>
+            </settings>
+        </field>
+        <field name="bank_name" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Bank Name</label>
+            </settings>
+        </field>
+        <field name="gateway_name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="gateway_description" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Description</label>
+            </settings>
+        </field>
+        <field name="gateway_sort_order" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Sort Order</label>
+            </settings>
+        </field>
+        <field name="gateway_type" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Type</label>
+            </settings>
+        </field>
+        <field name="is_separated_method" formElement="checkbox">
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Is separated method</label>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="gateway_logo_url" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Logo</label>
+            </settings>
+        </field>
+        <field name="use_own_logo" formElement="checkbox">
+            <settings>
+                <dataType>booleaan</dataType>
+                <label translate="true">Use Own Logo</label>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="gateway_logo_path" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Logo Path</label>
+            </settings>
+        </field>
+        <field name="status_date" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>date</dataType>
+                <label translate="true">Status Date</label>
+            </settings>
+        </field>
+    </fieldset>
+</form>

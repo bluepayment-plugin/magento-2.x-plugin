@@ -140,7 +140,7 @@ class ContinuePayment extends Action
                 $sharedKey
             ]);
 
-            $this->logger->info('CONTINUE:' . __LINE__, [
+            $this->logger->info('CONTINUE: ' . __LINE__, [
                 'serviceId' => $serviceId,
                 'orderId' => $order->getIncrementId(),
                 'sharedKey' => $sharedKey,
@@ -160,14 +160,14 @@ class ContinuePayment extends Action
 
             $backUrl = $payment->getAdditionalInformation('back_url');
 
-            $this->logger->info('CONTINUE:' . __LINE__, [
+            $this->logger->info('CONTINUE: ' . __LINE__, [
                 'orderId' => $orderId,
                 'backUrl' => $backUrl,
             ]);
 
             $params = $payment->getFormRedirectFields($order);
 
-            $this->logger->info('CONTINUE:' . __LINE__, $params);
+            $this->logger->info('CONTINUE: ' . __LINE__, $params);
 
             $returnUrl = $payment->createPaymentLink($order, $params);
 

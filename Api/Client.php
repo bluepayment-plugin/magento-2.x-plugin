@@ -11,7 +11,7 @@ use SimpleXMLElement;
  */
 class Client implements ClientInterface
 {
-    const RESPONSE_TIMEZONE = 'Europe/Warsaw';
+    public const RESPONSE_TIMEZONE = 'Europe/Warsaw';
 
     /**
      * @var Curl
@@ -27,18 +27,19 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param string $endPoint
-     * @param array $data
+     * @param  string  $uri
+     * @param  array  $params
      *
      * @return SimpleXMLElement|false
      * @throws ResponseException
      */
-    public function call($endPoint, $data)
+    public function call(string $uri, array $params)
     {
-        $this->curl->post($endPoint, $data);
+        $this->curl->addHeader('BmHeader', 'pay-bm');
+        $this->curl->post($uri, $params);
         $response = $this->curl->getBody();
 
-        if ($response == 'ERROR') {
+        if ($response === 'ERROR') {
             throw new ResponseException();
         }
 
@@ -46,23 +47,23 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param string $uri
-     * @param array $params
+     * @param  string  $uri
+     * @param  array  $params
      *
      * @return mixed
      * @throws ResponseException
      */
-    public function callJson($uri, $params)
+    public function callJson(string $uri, array $params)
     {
         $this->curl->addHeader('BmHeader', 'pay-bm');
         $this->curl->addHeader('Content-Type', 'application/json');
         $this->curl->post($uri, json_encode($params));
         $response = $this->curl->getBody();
 
-        if ($response == 'ERROR') {
+        if ($response === 'ERROR') {
             throw new ResponseException();
         }
 
-        return json_decode($response);
+        return json_decode($response, true);
     }
 }
