@@ -11,11 +11,11 @@ use SimpleXMLElement;
 interface ClientInterface
 {
     /**
-     * @param string $endPoint
-     * @param array $data
+     * @param  string  $uri
+     * @param  array  $params
      *
-     * @return SimpleXMLElement
+     * @return SimpleXMLElement|false
      * @throws ResponseException
      */
-    public function call($endPoint, $data);
+    public function call(string $uri, array $params);
 }

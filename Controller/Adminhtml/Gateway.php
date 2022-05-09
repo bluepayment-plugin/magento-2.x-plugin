@@ -65,4 +65,18 @@ abstract class Gateway extends Action
     {
         return $this->_authorization->isAllowed('BlueMedia_BluePayment::gateways');
     }
+
+    /**
+     * Init page
+     *
+     * @param \Magento\Backend\Model\View\Result\Page $resultPage
+     * @return \Magento\Backend\Model\View\Result\Page
+     */
+    public function initPage($resultPage)
+    {
+        $resultPage->setActiveMenu(self::ADMIN_RESOURCE)
+            ->addBreadcrumb(__('BlueMedia'), __('BlueMedia'))
+            ->addBreadcrumb(__('Gateway'), __('Gateway'));
+        return $resultPage;
+    }
 }

@@ -40,9 +40,6 @@
                 <field id="sort_order" translate="label" type="text" sortOrder="121" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Sort Order</label>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                </field>
                 <field id="disabled_gateways_notification_active" translate="label comment" type="select" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled disabled gateways notification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

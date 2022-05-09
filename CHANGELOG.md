@@ -1,5 +1,10 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.18.0
+- Zaktualizowaliśmy obsługę synchronizacji kanałów płatniczych do wersji v2.
+- Poprawiliśmy zachowanie podczas obsługi powiadomień o płatnościach (race-condition).
+- Zmieniliśmy nazwę kanału płatności.
+
 ## Wersja 2.17.1
 - Poprawiliśmy sortowanie kanałów i metod płatności (tylko dla multishipping oraz GraphQL)
 

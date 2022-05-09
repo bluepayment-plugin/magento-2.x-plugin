@@ -12,19 +12,20 @@ define([
         'Magento_Ui/js/modal/modal',
         'text!BlueMedia_BluePayment/template/blik-popup.html',
         'Magento_Checkout/js/model/payment/additional-validators'
-    ], function ($,
-                 _,
-                 ko,
-                 Component,
-                 selectPaymentMethodAction,
-                 paymentService,
-                 url,
-                 $t,
-                 quote,
-                 checkoutData,
-                 modal,
-                 blikTpl,
-                 additionalValidators
+    ], function (
+        $,
+        _,
+        ko,
+        Component,
+        selectPaymentMethodAction,
+        paymentService,
+        url,
+        $t,
+        quote,
+        checkoutData,
+        modal,
+        blikTpl,
+        additionalValidators
     ) {
         'use strict';
 
@@ -133,6 +134,15 @@ define([
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
             },
+            blikCodeAfterRender: function () {
+                // Only number for blik code
+                var blikInput = $(".blue-payment__blik input[name='payment_method_bluepayment_code']");
+                if (blikInput) {
+                    blikInput.keypress(function (e) {
+                        blikInput.val(this.value.match(/\d{0,6}/));
+                    });
+                }
+            },
             selectPaymentOption: function (value) {
                 widget.setBlueMediaGatewayMethod(value);
                 widget.getAgreements();
@@ -235,6 +245,23 @@ define([
             isAutopaySelected: function () {
                 return this.selectedPaymentObject.is_autopay === true;
             },
+
+            getTitle: function () {
+                if (this.renderSubOptions === false) {
+                    return $t('Quick payment');
+                }
+
+                return $t('Internet transfer');
+            },
+
+            getDescription: function () {
+                if (this.renderSubOptions === false) {
+                    return $t('Internet transfer, BLIK, payment card, Google Pay, Apple Pay');
+                }
+
+                return false;
+            },
+
             /**
              * @return {Boolean}
              */
@@ -287,6 +314,7 @@ define([
 
                 return true;
             },
+
             /**
              * Place order.
              */
@@ -488,6 +516,7 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             }, $('<div />').html()),
+
             callGPayPayment: function () {
                 var self = this;
 
@@ -506,6 +535,8 @@ define([
                             type: "POST",
                             dataType: "json",
                             }).done(function (response) {
+                                console.log(response);
+
                                 if (response.params) {
                                     if (response.params.redirectUrl) {
                                         window.location.href = response.params.redirectUrl;
@@ -524,6 +555,7 @@ define([
                         console.error(errorMessage);
                     });
             },
+
             getGPayTransactionData: function () {
                 return {
                     apiVersion: 2,
@@ -553,35 +585,6 @@ define([
                         currencyCode: this.currencyCode
                     },
                 };
-            },
-            getAgreements: function () {
-                var urlResponse = url.build('bluepayment/processing/agreements');
-                var self = this;
-
-                $.ajax({
-                    showLoader: true,
-                    url: urlResponse,
-                    type: 'GET',
-                    data: {
-                        'gateway_id': this.selectedPaymentObject.gateway_id
-                    },
-                    dataType: "json"
-                }).done(function (response) {
-                    if (!response.hasOwnProperty('error')) {
-                        self.agreements(response);
-                    }
-                });
-            },
-            getCheckedAgreementsIds: function () {
-                var agreementData = $('.payment-method._active .bluepayment-agreements-block input')
-                    .serializeArray();
-                var agreementsIds = [];
-
-                agreementData.forEach(function (item) {
-                    agreementsIds.push(item.value);
-                });
-
-                return agreementsIds.join(',');
             },
             initGPay: function () {
                 var urlResponse = url.build('bluepayment/processing/googlepay');
@@ -671,6 +674,37 @@ define([
                 }).done(function (response) {
                     self.handleGPayStatus(response.Status, response);
                 });
+            },
+
+            /** Agreements */
+            getAgreements: function () {
+                var urlResponse = url.build('bluepayment/processing/agreements');
+                var self = this;
+
+                $.ajax({
+                    showLoader: true,
+                    url: urlResponse,
+                    type: 'GET',
+                    data: {
+                        'gateway_id': this.selectedPaymentObject.gateway_id
+                    },
+                    dataType: "json"
+                }).done(function (response) {
+                    if (!response.hasOwnProperty('error')) {
+                        self.agreements(response);
+                    }
+                });
+            },
+            getCheckedAgreementsIds: function () {
+                var agreementData = $('.payment-method._active .bluepayment-agreements-block input')
+                    .serializeArray();
+                var agreementsIds = [];
+
+                agreementData.forEach(function (item) {
+                    agreementsIds.push(item.value);
+                });
+
+                return agreementsIds.join(',');
             }
         });
     });

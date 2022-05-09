@@ -16,10 +16,12 @@
                 <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
                 <gpay_merchant_info_url_test>https://pay-accept.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
                 <gpay_merchant_info_url_prod>https://pay.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
-                <gateway_list_url_test>https://pay-accept.bm.pl/gatewayList</gateway_list_url_test>
-                <gateway_list_url_prod>https://pay.bm.pl/gatewayList</gateway_list_url_prod>
+                <gateway_list_url_test>https://pay-accept.bm.pl/gatewayList/v2</gateway_list_url_test>
+                <gateway_list_url_prod>https://pay.bm.pl/gatewayList/v2</gateway_list_url_prod>
                 <legal_data_url_test>https://pay-accept.bm.pl/legalData</legal_data_url_test>
                 <legal_data_url_prod>https://pay.bm.pl/legalData</legal_data_url_prod>
+                <transaction_status_url_test>https://pay-accept.bm.pl/webapi/transactionStatus</transaction_status_url_test>
+                <transaction_status_url_prod>https://pay.bm.pl/webapi/transactionStatus</transaction_status_url_prod>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <transaction_life_hours />

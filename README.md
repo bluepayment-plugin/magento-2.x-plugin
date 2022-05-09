@@ -28,7 +28,7 @@ composer require bluepayment-plugin/module-bluepayment
 2. Przejdź do aktywacji modułu
 
 ### Poprzez paczkę .zip
-1. Pobierz najnowszą wersję modułu z tej [strony](http://s.bm.pl/wtyczki).
+1. Pobierz najnowszą wersję modułu z tej [strony](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Wgraj plik .zip do katalogu głównego Magento.
 3. Będąc w katalogu głównym Magento, wykonaj komendę:
 ```bash
@@ -284,12 +284,10 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
 
 
-## Integracja z GraphQL oraz Magento PWA
-Moduł GraphQL dostępny jest pod adresem:
-https://github.com/bluepayment-plugin/module-bluepayment-graphql
+## Obsługa GraphQL oraz integracja z Magento PWA
 
-Moduł PWA Studio dostępny jest pod adresem: 
-https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.bluemedia.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.bluemedia.pl/online/wtyczki/magento-2/graphql).
+
 
 ## Aktualizacja
 

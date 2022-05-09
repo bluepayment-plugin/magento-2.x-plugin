@@ -11,7 +11,14 @@
                      data-bind="attr: {alt: $t('Acceptance Mark'), src: logoUrl}"
                      class="payment-icon"/>
                 <!-- BM Logo -->
-                <span data-bind="text: getTitle()"></span>
+
+                <p class="method-name">
+                    <span data-bind="text: getTitle()"></span>
+                    <!-- ko if: getDescription() -->
+                    <br />
+                    <span data-bind="text: getDescription()" class="payment-method-description"></span>
+                    <!-- /ko -->
+                </p>
             </label>
         </div>
         <!--ko if: getCode() == isChecked()-->
@@ -182,13 +189,16 @@
                      class="blik-logo"/>
                 <!-- BLIK Logo -->
 
-                <input type="number"
+                <input type="tel"
                        name="payment_method_bluepayment_code"
                        class="blik-code"
                        min="000000"
                        max="999999"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
                        data-validate="{required:true, 'pattern':'000000'}"
-                       placeholder="Wprowadź kod BLIK" />
+                       placeholder="Wprowadź kod BLIK"
+                       afterRender="$parent.blikCodeAfterRender" />
 
                 <div style="clear: both;"></div>
             <!--/ko-->

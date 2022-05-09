@@ -8,7 +8,7 @@ use Magento\Framework\App\ResponseInterface;
 
 class Edit extends Gateway
 {
-    const GATEWAY_REGISTER_CODE = 'adminbluepayment_gateway';
+    public const GATEWAY_REGISTER_CODE = 'adminbluepayment_gateway';
 
     /**
      * @return Page|ResponseInterface

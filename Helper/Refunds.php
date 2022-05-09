@@ -156,8 +156,7 @@ class Refunds extends Data
                 $loadResult['remoteOutID'],
                 $sharedKey,
             ];
-            $hashSeparator = $this->getConfigValue('hash_separator', $storeId)
-                ? $this->getConfigValue('hash_separator', $storeId) : self::DEFAULT_HASH_SEPARATOR;
+            $hashSeparator = $this->getConfigValue('hash_separator', $storeId) ?: self::DEFAULT_HASH_SEPARATOR;
 
             if ($loadResult['hash'] != hash($hashMethod, implode($hashSeparator, $valuesForHash))) {
                 $result = [
@@ -219,7 +218,7 @@ class Refunds extends Data
      *
      * @return mixed
      */
-    public function getRefundUrl($storeId)
+    public function getRefundUrl(int $storeId)
     {
         if ($this->getConfigValue('test_mode', $storeId)) {
             return $this->getConfigValue('test_address_refunds_url', $storeId);
@@ -268,8 +267,7 @@ class Refunds extends Data
         if (!empty($amount)) {
             $data['Amount'] = number_format($amount, 2, '.', '');
         }
-        $hashSeparator = $this->getConfigValue('hash_separator', $storeId)
-            ? $this->getConfigValue('hash_separator', $storeId) : self::DEFAULT_HASH_SEPARATOR;
+        $hashSeparator = $this->getConfigValue('hash_separator', $storeId) ?: self::DEFAULT_HASH_SEPARATOR;
         $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
 
         $this->logger->info('REFUNDS:' . __LINE__, ['data' => $data]);

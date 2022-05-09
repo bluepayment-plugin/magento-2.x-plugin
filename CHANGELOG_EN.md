@@ -1,5 +1,10 @@
 # What's new in BluePayment?
 
+## Version 2.18.0
+- We have updated the payment channel synchronization support to v2.
+- We have improved the behavior when handling payment notifications (race-condition).
+- We have changed the name of the payment gateway.
+
 ## Version 2.17.1
 - We fixed sorting payment channels and methods (only for multishipping and GraphQL)
 

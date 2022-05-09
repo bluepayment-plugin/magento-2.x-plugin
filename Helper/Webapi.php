@@ -19,14 +19,15 @@ use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use SimpleXMLElement;
 use Zend\Uri\Http;
 
 /**
- * Class Gateways
+ * Class Webapi
  */
 class Webapi extends Data
 {
-    const DEFAULT_HASH_SEPARATOR = '|';
+    public const DEFAULT_HASH_SEPARATOR = '|';
 
     /** @var Http */
     public $zendUri;
@@ -40,16 +41,18 @@ class Webapi extends Data
     /**
      * Gateways constructor.
      *
-     * @param Context $context
-     * @param LayoutFactory $layoutFactory
-     * @param Factory $paymentMethodFactory
-     * @param Emulation $appEmulation
-     * @param Config $paymentConfig
-     * @param Initial $initialConfig
-     * @param Client $apiClient
-     * @param Logger $logger
-     * @param StoreManagerInterface $storeManager
-     * @param Http $zendUri
+     * @param  Context  $context
+     * @param  LayoutFactory  $layoutFactory
+     * @param  Factory  $paymentMethodFactory
+     * @param  Emulation  $appEmulation
+     * @param  Config  $paymentConfig
+     * @param  Initial  $initialConfig
+     * @param  Client  $apiClient
+     * @param  Logger  $logger
+     * @param  StoreManagerInterface  $storeManager
+     * @param  CacheInterface  $cache
+     * @param  SerializerInterface  $serializer
+     * @param  Http  $zendUri
      */
     public function __construct(
         Context $context,
@@ -116,13 +119,13 @@ class Webapi extends Data
     /**
      * Get gateway list for service.
      *
-     * @param int $serviceId
-     * @param string $sharedKey
-     * @param string $currency
+     * @param  int  $serviceId
+     * @param  string  $sharedKey
+     * @param  string  $currency
      *
      * @return array|bool
      */
-    public function gatewayList($serviceId, $sharedKey, $currency)
+    public function gatewayList(int $serviceId, string $sharedKey, string $currency)
     {
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
         $data = [
@@ -141,12 +144,13 @@ class Webapi extends Data
     /**
      * Get agreements for payment gateway.
      *
-     * @param int $gatewayId
-     * @param string $currency
-     * @param string $locale
+     * @param  int  $gatewayId
+     * @param  string  $currency
+     * @param  string  $locale
+     *
      * @return array|bool
      */
-    public function agreements($gatewayId, $currency, $locale)
+    public function agreements(int $gatewayId, string $currency, string $locale)
     {
         $serviceId = $this->getConfigValue('service_id', $currency);
         $sharedKey = $this->getConfigValue('shared_key', $currency);
@@ -178,13 +182,25 @@ class Webapi extends Data
         return $result;
     }
 
+    public function transactionStatus(int $serviceId, string $orderId, string $currency)
+    {
+        return $this->callXMLApi(
+            [
+                'ServiceID' => $serviceId,
+                'OrderID' => $orderId,
+            ],
+            $this->getConfigValue('shared_key', $currency),
+            $this->getTransactionStatusUrl()
+        );
+    }
+
     /**
-     * @param string $name
-     * @param string $currency
+     * @param  string  $name
+     * @param  string|null  $currency
      *
      * @return mixed
      */
-    private function getConfigValue($name, $currency = null)
+    private function getConfigValue(string $name, string $currency = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
@@ -202,7 +218,7 @@ class Webapi extends Data
     /**
      * @return string
      */
-    private function getGPayMerchantInfoURL()
+    private function getGPayMerchantInfoURL(): string
     {
         if ($this->getConfigValue('test_mode')) {
             return $this->getConfigValue('gpay_merchant_info_url_test');
@@ -214,7 +230,7 @@ class Webapi extends Data
     /**
      * @return string
      */
-    private function getGatewayListUrl()
+    private function getGatewayListUrl(): string
     {
         if ($this->getConfigValue('test_mode')) {
             return $this->getConfigValue('gateway_list_url_test');
@@ -226,7 +242,7 @@ class Webapi extends Data
     /**
      * @return string
      */
-    private function getLegalDataUrl()
+    private function getLegalDataUrl(): string
     {
         if ($this->getConfigValue('test_mode')) {
             return $this->getConfigValue('legal_data_url_test');
@@ -236,24 +252,67 @@ class Webapi extends Data
     }
 
     /**
-     * @param array $data
-     * @param string $hashKey
-     * @param string $url
-     *
-     * @return bool|array
+     * @return string
      */
-    private function callAPI(array $data, $hashKey, $url)
+    private function getTransactionStatusUrl(): string
     {
-        $hashMethod = $this->getConfigValue('hash_algorithm');
-        $hashSeparator = $this->getConfigValue('hash_separator') ? $this->getConfigValue('hash_separator') :
-            self::DEFAULT_HASH_SEPARATOR;
-        $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
+        if ($this->getConfigValue('test_mode')) {
+            return $this->getConfigValue('transaction_status_url_test');
+        }
+
+        return $this->getConfigValue('transaction_status_url_prod');
+    }
+
+    /**
+     * @param array $data
+     * @param  string  $hashKey
+     * @param  string  $url
+     *
+     * @return SimpleXMLElement|false
+     */
+    private function callXMLApi(array $data, string $hashKey, string $url)
+    {
+        $data = $this->prepareData($data, $hashKey);
 
         try {
-            return (array)$this->apiClient->callJson($url, $data);
+            return $this->apiClient->call($url, $data);
         } catch (Exception $e) {
             $this->logger->info($e->getMessage());
             return false;
         }
     }
+
+    /**
+     * @param array $data
+     * @param  string  $hashKey
+     * @param  string  $url
+     *
+     * @return bool|array
+     */
+    private function callAPI(array $data, string $hashKey, string $url)
+    {
+        $data = $this->prepareData($data, $hashKey);
+
+        try {
+            return $this->apiClient->callJson($url, $data);
+        } catch (Exception $e) {
+            $this->logger->info($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @param  array  $data
+     * @param  string  $hashKey
+     *
+     * @return array
+     */
+    private function prepareData(array $data, string $hashKey): array
+    {
+        $hashMethod = $this->getConfigValue('hash_algorithm');
+        $hashSeparator = $this->getConfigValue('hash_separator') ?? self::DEFAULT_HASH_SEPARATOR;
+        $data['Hash'] = hash($hashMethod, implode($hashSeparator, array_merge(array_values($data), [$hashKey])));
+        return $data;
+    }
+
 }

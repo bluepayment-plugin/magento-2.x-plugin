@@ -48,61 +48,35 @@ class Save extends Gateway
      */
     public function execute()
     {
-        /** @var Http $request */
-        $request = $this->getRequest();
+        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $data = $this->getRequest()->getPostValue();
 
-        $isPost = $request->getPost();
+        if ($data) {
+            $id = $this->getRequest()->getParam('entity_id');
+            $gateway = $this->gatewayRepository->getById($id);
 
-        if ($isPost) {
-            $gatewaysId = (int)$this->getRequest()->getParam('id', 0);
+            $gateway->setData($data);
 
-            $formData = $this->getRequest()->getParam('gateways');
-            $formData['entity_id'] = (int)$formData['id'];
+            try {
+                $this->gatewayRepository->save($gateway);
+                $this->messageManager->addSuccessMessage(__('The gateway has been saved.'));
 
-            if ($gatewaysId) {
-                $gatewaysModel = $this->gatewayRepository->getById($gatewaysId);
-            } elseif ($formData['entity_id']) {
-                $gatewaysModel = $this->gatewayRepository->getById($formData['entity_id']);
-            }
-
-            if ($gatewaysModel) {
-                if (isset($formData['gateway_status'])
-                    && $gatewaysModel->getId()
-                    && $gatewaysModel->getStatus()
-                    && !$formData['gateway_status']
-                ) {
-                    $disabledGateways = [
-                        [
-                            'gateway_name' => $gatewaysModel->getName(),
-                            'gateway_id' => $gatewaysModel->getGatewayId(),
-                        ],
-                    ];
-                    $this->emailHelper->sendGatewayDeactivationEmail($disabledGateways);
+                if ($this->getRequest()->getParam('back')) {
+                    return $resultRedirect->setPath('*/*/edit', ['entity_id' => $gateway->getId(), '_current' => true]);
                 }
 
-                $gatewaysModel->setData($formData);
-
-                try {
-                    $this->gatewayRepository->save($gatewaysModel);
-                    $this->messageManager->addSuccessMessage(__('The gateway has been saved.'));
-                    if ($this->getRequest()->getParam('back')) {
-                        $this->_redirect('*/*/edit', ['id' => $gatewaysModel->getId(), '_current' => true]);
-
-                        return;
-                    }
-
-                    $this->_redirect('*/*/');
-
-                    return;
-                } catch (Exception $e) {
-                    $this->messageManager->addErrorMessage($e->getMessage());
-                }
+                return $resultRedirect->setPath('*/*/');
+            } catch (Exception $e) {
+                $this->messageManager->addErrorMessage($e->getMessage());
             }
 
             $this->messageManager->addErrorMessage(__('Invalid request'));
 
-            $this->_getSession()->setFormData($formData);
-            $this->_redirect('*/*/edit', ['id' => $gatewaysId]);
+            $this->dataPersistor->set('bluemedia_bluepayment_gateway', $data);
+            return $resultRedirect->setPath('*/*/edit', ['entity_id' => $id]);
         }
+
+        return $resultRedirect->setPath('*/*/');
     }
 }

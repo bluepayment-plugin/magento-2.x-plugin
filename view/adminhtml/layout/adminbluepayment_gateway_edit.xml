@@ -1,15 +1,11 @@
 <?xml version="1.0"?>
 
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+      layout="admin-1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="left">
-            <block class="BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit\Tabs"
-                   name="bluemedia_gateway.edit.tabs"/>
-        </referenceContainer>
         <referenceContainer name="content">
-            <block class="BlueMedia\BluePayment\Block\Adminhtml\Gateway\Edit"
-                   name="bluemedia_gateway.edit"/>
+            <uiComponent name="bluemedia_gateway_form"/>
         </referenceContainer>
     </body>
 </page>
