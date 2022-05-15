@@ -256,25 +256,12 @@ class QuoteManagement implements QuoteManagementInterface
 
         $orderId = $this->cartManagement->placeOrder($cartId, $paymentMethod);
         $order = $this->orderRepository->get($orderId);
-        $orderPayment = $order->getPayment();
 
         $orderComment =
             '[Autopay] Transaction ID: ' . $paymentId
             . ' | Amount: ' . $amount;
 
-        $state = Order::STATE_PROCESSING;
-
-
-        $order->setState($state);
-//        $order->addStatusToHistory($status, $orderComment);
-
-        if ($orderPayment) {
-            $orderPayment->setTransactionId($paymentId);
-            $orderPayment->registerCaptureNotification($amount);
-            $orderPayment->setIsTransactionApproved(true);
-            $orderPayment->setIsTransactionClosed(true);
-        }
-
+        $order->addCommentToStatusHistory($orderComment);
         $this->orderRepository->save($order);
 
         return $orderId;
