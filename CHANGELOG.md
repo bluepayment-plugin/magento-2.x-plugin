@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.19.0
+- Dodaliśmy obsługę AutoPay
+
 ## Wersja 2.18.0
 - Zaktualizowaliśmy obsługę synchronizacji kanałów płatniczych do wersji v2.
 - Poprawiliśmy zachowanie podczas obsługi powiadomień o płatnościach (race-condition).
