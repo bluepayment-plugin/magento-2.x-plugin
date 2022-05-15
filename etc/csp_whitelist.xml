@@ -30,6 +30,8 @@
                 <value id="frame_bm_pay_prod" type="host">pay.bm.pl</value>
                 <value id="frame_bm_cards_accept" type="host">cards-accept.bm.pl</value>
                 <value id="frame_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="frame_autopay" type="host">app-accept.autopay.pl</value>
+                <value id="frame_autopay_accept" type="host">app.autopay.pl</value>
             </values>
         </policy>
     </policies>

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/autopay/get-cart-details" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="getCartDetails"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/get-addresses" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="getAddresses"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/set-shipping-address" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="setShippingAddress"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/set-shipping-address-by-id" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="setShippingAddressById"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/set-billing-address" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="setBillingAddress"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/set-billing-address-by-id" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="setBillingAddressById"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/get-shipping-methods" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="getShippingMethods"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/set-shipping-method" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="setShippingMethod"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/autopay/place-order" method="POST">
+        <service class="BlueMedia\Autopay\Api\QuoteManagementInterface" method="placeOrder"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+</routes>

@@ -3,7 +3,8 @@
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
-                <item name="custom_payment_config_provider" xsi:type="object">BlueMedia\BluePayment\Model\ConfigProvider</item>
+                <item name="bluepayment_config_provider" xsi:type="object">BlueMedia\BluePayment\Model\ConfigProvider</item>
+                <item name="autopay_config_provider" xsi:type="object">BlueMedia\Autopay\Model\Ui\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

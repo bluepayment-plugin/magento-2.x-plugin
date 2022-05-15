@@ -32,6 +32,20 @@
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
                 <privateInfoKeys>bluepayment_gateway</privateInfoKeys>
             </bluepayment>
+            <autopay>
+                <active>1</active>
+                <model>AutopayFacade</model>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_void>0</can_void>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <currency>PLN</currency>
+                <is_gateway>1</is_gateway>
+                <payment_action>authorize_capture</payment_action>
+                <sort_order>1</sort_order>
+                <title>Autopay</title>
+            </autopay>
         </payment>
     </default>
 </config>

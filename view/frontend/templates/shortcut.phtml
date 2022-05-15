@@ -1,0 +1,13 @@
+<?php
+/** @var \BlueMedia\Autopay\Block\ShortcutButton $block */
+
+$isInCatalogProduct = false;
+if ($block->getIsInCatalogProduct()) {
+    $isInCatalogProduct = $block->getIsInCatalogProduct();
+}
+?>
+<div class="autopay-shortcut" data-mage-init='{"autopayShortcut":{
+    "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>"
+}}'>
+    <div class="autopay-button"></div>
+</div>

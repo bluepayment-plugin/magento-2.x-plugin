@@ -32,6 +32,14 @@
                                                                         </item>
                                                                     </item>
                                                                 </item>
+                                                                <item name="autopay" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">BlueMedia_BluePayment/js/view/payment/autopay</item>
+                                                                    <item name="methods" xsi:type="array">
+                                                                        <item name="autopay" xsi:type="array">
+                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
                                                             </item>
                                                         </item>
                                                         <item name="additional-payment-validators" xsi:type="array">

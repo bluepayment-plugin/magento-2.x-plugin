@@ -51,4 +51,102 @@
     <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface" type="BlueMedia\BluePayment\Model\Transaction"/>
     <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
     <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface" type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+
+    <virtualType name="AutopayFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">BlueMedia\Autopay\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="valueHandlerPool" xsi:type="object">AutopayValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">AutopayCommandPool</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\ConfigurableInfo</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">AutopayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">AutopayConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">BlueMedia\Autopay\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">AutopayAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">AutopayCaptureCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">AutopayAuthorizationRequestBuilder</argument>
+            <argument name="transferFactory" xsi:type="object">BlueMedia\Autopay\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">BlueMedia\Autopay\Gateway\Http\Client\AutopayClient</argument>
+            <argument name="handler" xsi:type="object">AutopayAuthorizationHandler</argument>
+            <argument name="validator" xsi:type="object">BlueMedia\Autopay\Gateway\Validator\ResponseValidator</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayAuthorizationRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">BlueMedia\Autopay\Gateway\Request\AuthorizationRequestBuilder</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayAuthorizationHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">AutopayCaptureRequestBuilder</argument>
+            <argument name="transferFactory" xsi:type="object">BlueMedia\Autopay\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">BlueMedia\Autopay\Gateway\Http\Client\AutopayClient</argument>
+            <argument name="handler" xsi:type="object">AutopayCaptureHandler</argument>
+            <argument name="validator" xsi:type="object">BlueMedia\Autopay\Gateway\Validator\ResponseValidator</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayCaptureRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">BlueMedia\Autopay\Gateway\Request\CaptureRequestBuilder</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="AutopayCaptureHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="BlueMedia\Autopay\Block\ShortcutButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="template" xsi:type="string">BlueMedia_Autopay::shortcut.phtml</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Checkout\CustomerData\Cart">
+        <plugin name="autopay_cart_data_plugin" type="BlueMedia\Autopay\Plugin\CartDataPlugin"/>
+    </type>
+
+    <preference for="BlueMedia\Autopay\Api\QuoteManagementInterface"
+                type="BlueMedia\Autopay\Model\QuoteManagement"/>
+    <preference for="BlueMedia\Autopay\Api\Data\ShippingMethodInterface"
+                type="BlueMedia\Autopay\Model\Data\ShippingMethod"/>
+    <preference for="BlueMedia\Autopay\Api\Data\ShippingMethodAdditionalInterface"
+                type="BlueMedia\Autopay\Model\Data\ShippingMethodAdditional"/>
 </config>
