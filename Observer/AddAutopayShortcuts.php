@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\Autopay\Observer;
+namespace BlueMedia\BluePayment\Observer;
 
-use BlueMedia\Autopay\Block\ShortcutButton;
+use BlueMedia\BluePayment\Block\ShortcutButton;
 use Magento\Catalog\Block\ShortcutButtons;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;

@@ -6,7 +6,7 @@ define([
     return Component.extend({
         defaults: {
             code: 'autopay',
-            template: 'BlueMedia_Autopay/payment/autopay',
+            template: 'BlueMedia_BluePayment/payment/autopay',
         },
 
         getLogoSrc: function () {

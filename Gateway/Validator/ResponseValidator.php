@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Gateway\Validator;
+namespace BlueMedia\BluePayment\Gateway\Validator;
 
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterface;

@@ -13,7 +13,7 @@ define(
         rendererList.push(
             {
                 type: 'autopay',
-                component: 'BlueMedia_Autopay/js/view/payment/method-renderer/autopay'
+                component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/autopay'
             },
         );
 

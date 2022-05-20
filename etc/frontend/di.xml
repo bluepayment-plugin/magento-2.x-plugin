@@ -4,7 +4,7 @@
         <arguments>
             <argument name="configProviders" xsi:type="array">
                 <item name="bluepayment_config_provider" xsi:type="object">BlueMedia\BluePayment\Model\ConfigProvider</item>
-                <item name="autopay_config_provider" xsi:type="object">BlueMedia\Autopay\Model\Ui\ConfigProvider</item>
+                <item name="autopay_config_provider" xsi:type="object">BlueMedia\BluePayment\Model\Ui\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

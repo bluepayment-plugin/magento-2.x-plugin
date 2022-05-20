@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Gateway\Request;
+namespace BlueMedia\BluePayment\Gateway\Request;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Plugin;
+namespace BlueMedia\BluePayment\Plugin;
 
 use Magento\Checkout\CustomerData\Cart;
 use Magento\Checkout\Model\Session;

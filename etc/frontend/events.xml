@@ -17,6 +17,6 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="shortcut_buttons_container">
-        <observer name="autopay_button" instance="BlueMedia\Autopay\Observer\AddAutopayShortcuts"/>
+        <observer name="autopay_button" instance="BlueMedia\BluePayment\Observer\AddAutopayShortcuts"/>
     </event>
 </config>

@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Model\Authorization;
+namespace BlueMedia\BluePayment\Model\Authorization;
 
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Framework\Webapi\Rest\Request;

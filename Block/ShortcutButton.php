@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Block;
+namespace BlueMedia\BluePayment\Block;
 
 use Magento\Framework\View\Element\Template;
 use Magento\Catalog\Block\ShortcutInterface;

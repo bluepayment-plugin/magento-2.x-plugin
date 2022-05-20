@@ -32,8 +32,6 @@ define([
                 language: 'pl'
             });
 
-            let cartData = customerData.get('cart')();
-
             autopay.onBeforeCheckout = () => {
                 if (self.isCatalogProduct()) {
                     self.addToCart();

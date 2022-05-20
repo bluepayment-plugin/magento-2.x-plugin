@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\Autopay\Api;
+namespace BlueMedia\BluePayment\Api;
 
-use BlueMedia\Autopay\Api\Data\ShippingMethodAdditionalInterface;
+use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use Magento\Quote\Api\Data\AddressInterface;
 
 /**
@@ -76,7 +76,7 @@ interface QuoteManagementInterface
      * @param  int  $cartId
      * @param  string  $hash
      *
-     * @return \BlueMedia\Autopay\Api\Data\ShippingMethodInterface[]
+     * @return \BlueMedia\BluePayment\Api\Data\ShippingMethodInterface[]
      */
     public function getShippingMethods($cartId, $hash);
 
@@ -85,7 +85,7 @@ interface QuoteManagementInterface
      * @param  string  $hash
      * @param  string  $carrierCode
      * @param  string  $methodCode
-     * @param  \BlueMedia\Autopay\Api\Data\ShippingMethodAdditionalInterface  $additional
+     * @param  \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface  $additional
      *
      * @return boolean
      */
@@ -100,10 +100,9 @@ interface QuoteManagementInterface
     /**
      * @param int $cartId
      * @param string $hash
-     * @param string $paymentId
      * @param float $amount
      *
      * @return int Order ID
      */
-    public function placeOrder($cartId, $hash, $paymentId, $amount);
+    public function placeOrder($cartId, $hash, $amount);
 }

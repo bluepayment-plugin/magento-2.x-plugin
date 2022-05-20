@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\Autopay\Model\Data;
+namespace BlueMedia\BluePayment\Model\Data;
 
-use BlueMedia\Autopay\Api\Data\ShippingMethodInterface;
+use BlueMedia\BluePayment\Api\Data\ShippingMethodInterface;
 use Magento\Framework\DataObject;
 
 class ShippingMethod extends DataObject implements ShippingMethodInterface

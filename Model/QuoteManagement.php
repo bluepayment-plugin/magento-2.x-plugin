@@ -1,10 +1,10 @@
 <?php
 
-namespace BlueMedia\Autopay\Model;
+namespace BlueMedia\BluePayment\Model;
 
-use BlueMedia\Autopay\Api\Data\ShippingMethodAdditionalInterface;
-use BlueMedia\Autopay\Api\Data\ShippingMethodInterfaceFactory;
-use BlueMedia\Autopay\Api\QuoteManagementInterface;
+use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
+use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
+use BlueMedia\BluePayment\Api\QuoteManagementInterface;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address\CustomerAddressDataProvider;
 use Magento\Framework\Api\ExtensibleDataInterface;
@@ -249,7 +249,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function placeOrder($cartId, $hash, $paymentId, $amount)
+    public function placeOrder($cartId, $hash, $amount)
     {
         $paymentMethod = $this->paymentFactory->create();
         $paymentMethod->setMethod('autopay');
@@ -257,9 +257,7 @@ class QuoteManagement implements QuoteManagementInterface
         $orderId = $this->cartManagement->placeOrder($cartId, $paymentMethod);
         $order = $this->orderRepository->get($orderId);
 
-        $orderComment =
-            '[Autopay] Transaction ID: ' . $paymentId
-            . ' | Amount: ' . $amount;
+        $orderComment = '[Autopay] Amount: ' . $amount;
 
         $order->addCommentToStatusHistory($orderComment);
         $this->orderRepository->save($order);

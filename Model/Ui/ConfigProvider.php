@@ -1,15 +1,15 @@
 <?php
 
-namespace BlueMedia\Autopay\Model\Ui;
+namespace BlueMedia\BluePayment\Model\Ui;
 
-use BlueMedia\Autopay\Gateway\Config;
+use BlueMedia\BluePayment\Gateway\Config;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Framework\View\Asset\Repository as AssetRepository;
 
 class ConfigProvider implements ConfigProviderInterface
 {
     public const CODE = 'autopay';
-    public const LOGO_SRC = 'BlueMedia_Autopay::images/autopay_logo.png';
+    public const LOGO_SRC = 'BlueMedia_BluePayment::images/autopay_logo.png';
 
     /** @var Config */
     private $config;

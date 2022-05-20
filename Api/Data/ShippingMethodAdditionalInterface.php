@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Api\Data;
+namespace BlueMedia\BluePayment\Api\Data;
 
 interface ShippingMethodAdditionalInterface
 {

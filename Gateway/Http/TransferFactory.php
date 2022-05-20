@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Gateway\Http;
+namespace BlueMedia\BluePayment\Gateway\Http;
 
 use Magento\Payment\Gateway\Http\TransferBuilder;
 use Magento\Payment\Gateway\Http\TransferFactoryInterface;

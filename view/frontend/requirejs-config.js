@@ -7,8 +7,8 @@ var config = {
     map: {
         '*': {
             'Magento_Checkout/js/model/place-order': 'BlueMedia_BluePayment/js/model/place-order',
-            autopaySDK: 'BlueMedia_Autopay/js/autopay-sdk',
-            autopayShortcut: 'BlueMedia_Autopay/js/view/shortcut',
+            autopaySDK: 'BlueMedia_BluePayment/js/autopay-sdk',
+            autopayShortcut: 'BlueMedia_BluePayment/js/view/shortcut',
         }
     }
 };

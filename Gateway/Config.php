@@ -1,8 +1,8 @@
 <?php
 
-namespace BlueMedia\Autopay\Gateway;
+namespace BlueMedia\BluePayment\Gateway;
 
-use BlueMedia\Autopay\Model\StoreConfigResolver;
+use BlueMedia\BluePayment\Model\StoreConfigResolver;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\InputException;

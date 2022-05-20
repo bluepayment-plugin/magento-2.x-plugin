@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Model;
+namespace BlueMedia\BluePayment\Model;
 
 use Magento\Backend\Model\Session\Quote as SessionQuote;
 use Magento\Framework\App\Request\Http as RequestHttp;

@@ -1,6 +1,6 @@
 <?php
 
-namespace BlueMedia\Autopay\Plugin;
+namespace BlueMedia\BluePayment\Plugin;
 
 use Magento\Framework\Webapi\Exception as WebapiException;
 use Magento\Framework\Webapi\Rest\Request;
