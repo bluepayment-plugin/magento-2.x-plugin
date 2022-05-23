@@ -1,0 +1,61 @@
+<?php
+/** @var $block \BlueMedia\BluePayment\Block\Analytics\Ga */
+/** @var $escaper \Magento\Framework\Escaper */
+
+$accountId = $block->getAccountId();
+$accountIdGa4 = $block->getAccountIdGa4();
+?>
+
+<?php if ($accountId): ?>
+    <!-- BEGIN GOOGLE ANALYTICS CODE -->
+    <script type="text/x-magento-init">
+    {
+        "*": {
+            "BlueMedia_BluePayment/js/analytics/google-analytics": {
+                "pageTrackingData": <?= /* @noEscape */ json_encode([
+                    'isAnonymizedIpActive' => $block->isAnonymizedIpActive(),
+                    'anonymizeIp' => $accountId,
+                ]) ?>
+            }
+        }
+    }
+    </script>
+    <!-- END GOOGLE ANALYTICS CODE -->
+<?php endif; ?>
+
+<?php if ($accountIdGa4): ?>
+    <script async
+            src="https://www.googletagmanager.com/gtag/js?id=<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>">
+    </script>
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag () {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('set', {'currency': '<?= /** @noEscape */ $block->getCurrency() ?>'});
+
+        <?php if ($block->isAnonymizedIpActive()): ?>
+            gtag('set', {'anonymize_ip': true});
+        <?php endif; ?>
+
+        gtag(
+            'config',
+            '<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>'
+        );
+    </script>
+
+    <script type="text/x-magento-init">
+    {
+        "*": {
+            "BlueMedia_BluePayment/js/analytics/ga4-client-id": {
+                "client_id": "<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>"
+            }
+        }
+    }
+    </script>
+<?php endif; ?>

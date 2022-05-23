@@ -1,83 +1,118 @@
 <?xml version="1.0"?>
-<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
-  <table name="blue_gateways" resource="default" engine="innodb" comment="BlueMedia BluePayment Gateways Table">
-    <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
-    <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false" comment="Store ID"/>
-    <column xsi:type="int" name="gateway_service_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Gateway Service ID"/>
-    <column xsi:type="varchar" name="gateway_currency" nullable="false" length="5" default="PLN" comment="Gateway Currency"/>
-    <column xsi:type="int" name="gateway_status" padding="11" unsigned="false" nullable="false" identity="false" comment="Gateway Status"/>
-    <column xsi:type="int" name="gateway_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Gateway ID"/>
-    <column xsi:type="varchar" name="bank_name" nullable="false" length="100" comment="Bank Name"/>
-    <column xsi:type="varchar" name="gateway_name" nullable="false" length="100" comment="Gateway name"/>
-    <column xsi:type="text" name="gateway_description" nullable="true" comment="Gateway Description"/>
-    <column xsi:type="int" name="gateway_sort_order" padding="11" unsigned="false" nullable="true" identity="false" comment="Gateway Sort Order"/>
-    <column xsi:type="varchar" name="gateway_type" nullable="false" length="50" comment="Gateway Type"/>
-    <column xsi:type="text" name="gateway_logo_url" nullable="true" comment="Gateway Logo URL"/>
-    <column xsi:type="int" name="use_own_logo" padding="11" unsigned="false" nullable="false" identity="false" comment="Use Own Logo"/>
-    <column xsi:type="text" name="gateway_logo_path" nullable="true" comment="Gateway Logo Path"/>
-    <column xsi:type="timestamp" name="status_date" on_update="false" nullable="true" default="CURRENT_TIMESTAMP" comment="Status Date"/>
-    <column xsi:type="smallint" name="is_separated_method" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Use gateway as separated method."/>
-    <column xsi:type="smallint" name="force_disable" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Force Disable Gateway"/>
-    <column xsi:type="decimal" name="min_amount" scale="4" precision="20" unsigned="false" nullable="true" comment="Minimum amount"/>
-    <column xsi:type="decimal" name="max_amount" scale="4" precision="20" unsigned="false" nullable="true" comment="Maximum amount"/>
-    <column xsi:type="int" name="min_validity_time" padding="11" unsigned="false" nullable="false" identity="false" comment="Minimum validity time"/>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="blue_gateways" resource="default" engine="innodb" comment="BlueMedia BluePayment Gateways Table">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false"
+                comment="Store ID"/>
+        <column xsi:type="int" name="gateway_service_id" padding="11" unsigned="false" nullable="false" identity="false"
+                comment="Gateway Service ID"/>
+        <column xsi:type="varchar" name="gateway_currency" nullable="false" length="5" default="PLN"
+                comment="Gateway Currency"/>
+        <column xsi:type="int" name="gateway_status" padding="11" unsigned="false" nullable="false" identity="false"
+                comment="Gateway Status"/>
+        <column xsi:type="int" name="gateway_id" padding="11" unsigned="false" nullable="false" identity="false"
+                comment="Gateway ID"/>
+        <column xsi:type="varchar" name="bank_name" nullable="false" length="100" comment="Bank Name"/>
+        <column xsi:type="varchar" name="gateway_name" nullable="false" length="100" comment="Gateway name"/>
+        <column xsi:type="text" name="gateway_description" nullable="true" comment="Gateway Description"/>
+        <column xsi:type="int" name="gateway_sort_order" padding="11" unsigned="false" nullable="true" identity="false"
+                comment="Gateway Sort Order"/>
+        <column xsi:type="varchar" name="gateway_type" nullable="false" length="50" comment="Gateway Type"/>
+        <column xsi:type="text" name="gateway_logo_url" nullable="true" comment="Gateway Logo URL"/>
+        <column xsi:type="int" name="use_own_logo" padding="11" unsigned="false" nullable="false" identity="false"
+                comment="Use Own Logo"/>
+        <column xsi:type="text" name="gateway_logo_path" nullable="true" comment="Gateway Logo Path"/>
+        <column xsi:type="timestamp" name="status_date" on_update="false" nullable="true" default="CURRENT_TIMESTAMP"
+                comment="Status Date"/>
+        <column xsi:type="smallint" name="is_separated_method" padding="6" unsigned="false" nullable="true"
+                identity="false" default="0" comment="Use gateway as separated method."/>
+        <column xsi:type="smallint" name="force_disable" padding="6" unsigned="false" nullable="true" identity="false"
+                default="0" comment="Force Disable Gateway"/>
+        <column xsi:type="decimal" name="min_amount" scale="4" precision="20" unsigned="false" nullable="true"
+                comment="Minimum amount"/>
+        <column xsi:type="decimal" name="max_amount" scale="4" precision="20" unsigned="false" nullable="true"
+                comment="Maximum amount"/>
+        <column xsi:type="int" name="min_validity_time" padding="11" unsigned="false" nullable="false" identity="false"
+                comment="Minimum validity time"/>
 
-    <constraint xsi:type="primary" referenceId="PRIMARY">
-      <column name="entity_id"/>
-    </constraint>
-    <constraint xsi:type="foreign" referenceId="BLUE_GATEWAYS_STORE_ID_STORE_STORE_ID" table="blue_gateways" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
-  </table>
-  <table name="blue_transaction" resource="default" engine="innodb" comment="blue_transaction">
-    <column xsi:type="int" name="transaction_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
-    <column xsi:type="varchar" name="order_id" nullable="false" length="50" comment="Order increment ID"/>
-    <column xsi:type="varchar" name="remote_id" nullable="false" length="50" comment="Remote transaction ID"/>
-    <column xsi:type="decimal" name="amount" scale="4" precision="12" unsigned="true" nullable="false" default="0" comment="Transaction amount"/>
-    <column xsi:type="varchar" name="currency" nullable="true" length="10" comment="Transaction currency"/>
-    <column xsi:type="smallint" name="gateway_id" padding="6" unsigned="false" nullable="true" identity="false" comment="Payment gateway ID"/>
-    <column xsi:type="timestamp" name="payment_date" on_update="false" nullable="true" comment="Payment date"/>
-    <column xsi:type="varchar" name="payment_status" nullable="false" length="50" comment="Remote transaction status"/>
-    <column xsi:type="varchar" name="payment_status_details" nullable="true" length="50" comment="Remote transaction status details"/>
-    <column xsi:type="timestamp" name="creation_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
-    <constraint xsi:type="primary" referenceId="PRIMARY">
-      <column name="transaction_id"/>
-    </constraint>
-  </table>
-  <table name="blue_refund" resource="default" engine="innodb" comment="blue_refund">
-    <column xsi:type="int" name="refund_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
-    <column xsi:type="varchar" name="order_id" nullable="false" length="50" comment="Order increment ID"/>
-    <column xsi:type="varchar" name="remote_id" nullable="false" length="50" comment="Remote transaction ID"/>
-    <column xsi:type="varchar" name="remote_out_id" nullable="false" length="50" comment="Remote refund ID"/>
-    <column xsi:type="decimal" name="amount" scale="4" precision="12" unsigned="true" nullable="false" default="0" comment="Refund amount"/>
-    <column xsi:type="varchar" name="currency" nullable="true" length="10" comment="Transaction currency"/>
-    <column xsi:type="boolean" name="is_partial" nullable="true" comment="Is partial refund"/>
-    <column xsi:type="timestamp" name="creation_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
-    <column xsi:type="timestamp" name="update_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
-    <constraint xsi:type="primary" referenceId="PRIMARY">
-      <column name="refund_id"/>
-    </constraint>
-  </table>
-  <table name="blue_card" resource="default" engine="innodb" comment="blue_card">
-    <column xsi:type="int" name="card_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
-    <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Customer ID"/>
-    <column xsi:type="int" name="card_index" padding="10" unsigned="true" nullable="false" identity="false" comment="Card index"/>
-    <column xsi:type="varchar" name="validity_year" nullable="false" length="4" comment="Validity year"/>
-    <column xsi:type="varchar" name="validity_month" nullable="false" length="2" comment="Validity month"/>
-    <column xsi:type="varchar" name="issuer" nullable="false" length="100" comment="Card issuer"/>
-    <column xsi:type="text" name="mask" nullable="false" comment="Card mask"/>
-    <column xsi:type="varchar" name="client_hash" nullable="false" length="64" comment="Client hash"/>
-    <constraint xsi:type="primary" referenceId="PRIMARY">
-      <column name="card_id"/>
-    </constraint>
-    <constraint xsi:type="foreign" referenceId="BLUE_CARD_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID" table="blue_card" column="customer_id" referenceTable="customer_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
-    <constraint xsi:type="unique" referenceId="BLUE_CARD_CLIENT_HASH_UNIQUE_INDEX_CLIENT_HASH">
-      <column name="client_hash"/>
-    </constraint>
-  </table>
-  <table name="sales_order">
-    <column xsi:type="int" name="blue_gateway_id" padding="10" unsigned="true" nullable="true" identity="false" comment="Payment channel ID"/>
-    <column xsi:type="varchar" name="payment_channel" nullable="true" length="255" comment="Payment channel"/>
-  </table>
-  <table name="sales_order_grid">
-    <column xsi:type="varchar" name="payment_channel" nullable="true" length="255" comment="Payment channel"/>
-  </table>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BLUE_GATEWAYS_STORE_ID_STORE_STORE_ID" table="blue_gateways"
+                    column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+    </table>
+    <table name="blue_transaction" resource="default" engine="innodb" comment="blue_transaction">
+        <column xsi:type="int" name="transaction_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="varchar" name="order_id" nullable="false" length="50" comment="Order increment ID"/>
+        <column xsi:type="varchar" name="remote_id" nullable="false" length="50" comment="Remote transaction ID"/>
+        <column xsi:type="decimal" name="amount" scale="4" precision="12" unsigned="true" nullable="false" default="0"
+                comment="Transaction amount"/>
+        <column xsi:type="varchar" name="currency" nullable="true" length="10" comment="Transaction currency"/>
+        <column xsi:type="smallint" name="gateway_id" padding="6" unsigned="false" nullable="true" identity="false"
+                comment="Payment gateway ID"/>
+        <column xsi:type="timestamp" name="payment_date" on_update="false" nullable="true" comment="Payment date"/>
+        <column xsi:type="varchar" name="payment_status" nullable="false" length="50"
+                comment="Remote transaction status"/>
+        <column xsi:type="varchar" name="payment_status_details" nullable="true" length="50"
+                comment="Remote transaction status details"/>
+        <column xsi:type="timestamp" name="creation_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Creation Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="transaction_id"/>
+        </constraint>
+    </table>
+    <table name="blue_refund" resource="default" engine="innodb" comment="blue_refund">
+        <column xsi:type="int" name="refund_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="varchar" name="order_id" nullable="false" length="50" comment="Order increment ID"/>
+        <column xsi:type="varchar" name="remote_id" nullable="false" length="50" comment="Remote transaction ID"/>
+        <column xsi:type="varchar" name="remote_out_id" nullable="false" length="50" comment="Remote refund ID"/>
+        <column xsi:type="decimal" name="amount" scale="4" precision="12" unsigned="true" nullable="false" default="0"
+                comment="Refund amount"/>
+        <column xsi:type="varchar" name="currency" nullable="true" length="10" comment="Transaction currency"/>
+        <column xsi:type="boolean" name="is_partial" nullable="true" comment="Is partial refund"/>
+        <column xsi:type="timestamp" name="creation_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Creation Time"/>
+        <column xsi:type="timestamp" name="update_time" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Creation Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="refund_id"/>
+        </constraint>
+    </table>
+    <table name="blue_card" resource="default" engine="innodb" comment="blue_card">
+        <column xsi:type="int" name="card_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Customer ID"/>
+        <column xsi:type="int" name="card_index" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Card index"/>
+        <column xsi:type="varchar" name="validity_year" nullable="false" length="4" comment="Validity year"/>
+        <column xsi:type="varchar" name="validity_month" nullable="false" length="2" comment="Validity month"/>
+        <column xsi:type="varchar" name="issuer" nullable="false" length="100" comment="Card issuer"/>
+        <column xsi:type="text" name="mask" nullable="false" comment="Card mask"/>
+        <column xsi:type="varchar" name="client_hash" nullable="false" length="64" comment="Client hash"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="card_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BLUE_CARD_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID" table="blue_card"
+                    column="customer_id" referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="BLUE_CARD_CLIENT_HASH_UNIQUE_INDEX_CLIENT_HASH">
+            <column name="client_hash"/>
+        </constraint>
+    </table>
+    <table name="sales_order">
+        <column xsi:type="int" name="blue_gateway_id" padding="10" unsigned="true" nullable="true" identity="false"
+                comment="Payment channel ID"/>
+        <column xsi:type="varchar" name="payment_channel" nullable="true" length="255" comment="Payment channel"/>
+    </table>
+    <table name="sales_order_grid">
+        <column xsi:type="varchar" name="payment_channel" nullable="true" length="255" comment="Payment channel"/>
+    </table>
+    <table name="quote">
+        <column xsi:type="varchar" name="ga_client_id" nullable="true" length="255" comment="Google Analytics Client ID"/>
+    </table>
 </schema>

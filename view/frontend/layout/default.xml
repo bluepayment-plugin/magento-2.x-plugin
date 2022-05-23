@@ -1,0 +1,16 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="head.components">
+            <block class="Magento\Framework\View\Element\Js\Components" name="autopay_head_components" template="BlueMedia_BluePayment::js/components.phtml" />
+        </referenceBlock>
+
+        <referenceBlock name="head.additional">
+            <referenceBlock name="google_analytics" remove="true" />
+            <block class="BlueMedia\BluePayment\Block\Analytics\Ga" name="bm_ga" as="bm_ga" template="BlueMedia_BluePayment::analytics/ga.phtml"/>
+        </referenceBlock>
+
+        <referenceContainer name="before.body.end">
+            <block class="BlueMedia\BluePayment\Block\Analytics\GaData" name="bm_ga_data" as="bm_ga_data" template="BlueMedia_BluePayment::analytics/ga_data.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

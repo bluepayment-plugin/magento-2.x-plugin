@@ -1159,7 +1159,7 @@ class Payment extends AbstractMethod
             $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
         }
 
-        $params = (object) $params;
+        $params = (array) $params;
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, ['params' => $params]);
 
