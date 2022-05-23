@@ -1,0 +1,23 @@
+<?php
+/** @var \BlueMedia\BluePayment\Block\Analytics\GaData $block */
+$events = $block->getAnalyticsData();
+$serializer = $block->getJsonSerializer();
+?>
+
+<?php if (is_array($events)): ?>
+    <script>
+        <?php foreach ($events as $event): ?>
+        gtag(
+            'event',
+            '<?= /** @noEscape */ $event['event'] ?>',
+            <?= /** @noEscape */ $serializer->serialize($event['data']) ?>
+        );
+
+        console.log([
+            'event',
+            '<?= /** @noEscape */ $event['event'] ?>',
+            <?= /** @noEscape */ $serializer->serialize($event['data']) ?>
+        ]);
+        <?php endforeach; ?>
+    </script>
+<?php endif; ?>
