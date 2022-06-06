@@ -1,8 +1,7 @@
 define([
     'jquery',
     'uiComponent',
-    'Magento_Customer/js/customer-data',
-    'autopaySDK'
+    'Magento_Customer/js/customer-data'
 ], function ($, Component, customerData) {
     'use strict';
 
@@ -24,11 +23,16 @@ define([
         },
 
         initAutopay: function () {
-            let self = this;
-            let autopay = new window.autopay.checkout({
-                button: {
-                    element: '.autopay-button'
-                },
+            let self = this,
+                autopay = new window.autopay.checkout({
+                    merchantId: this.merchantId,
+                    language: 'pl'
+                }),
+                button = autopay.createButton(),
+                container = $('.' + this.selector + ' .autopay-button');
+
+            console.log('Autopay Init params', {
+                merchantId: this.merchantId,
                 language: 'pl'
             });
 
@@ -37,22 +41,27 @@ define([
                     self.addToCart();
                 }
 
+                customerData.reload(['cart'], false);
                 let cartData = customerData.get('cart')();
 
                 console.log({
-                    order: cartData.cartId,
+                    id: cartData.cart_id,
                     amount: cartData.subtotalAmount,
                     currency: cartData.currency,
+                    label: cartData.cart_id,
                     productList: cartData.items,
                 });
 
                 autopay.setTransactionData({
-                    order: cartData.cartId,
+                    id: cartData.cart_id,
                     amount: cartData.subtotalAmount,
                     currency: cartData.currency,
+                    label: cartData.cart_id,
                     productList: cartData.items,
                 });
             }
+
+            container.append(button);
         },
 
         addToCart: function () {

@@ -26,7 +26,7 @@ class CartDataPlugin
     {
         $quote = $this->checkoutSession->getQuote();
 
-        $result['cartId'] = $quote->getId();
+        $result['cart_id'] = $quote->getId();
         $result['currency'] = $quote->getQuoteCurrencyCode();
 
         return $result;

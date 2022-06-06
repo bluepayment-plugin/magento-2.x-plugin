@@ -1,0 +1,10 @@
+<?php
+/** @var $block \BlueMedia\BluePayment\Block\AutopaySdk */
+/** @var $escaper \Magento\Framework\Escaper */
+
+$serviceId = $block->getServiceId();
+?>
+
+<?php if ($serviceId): ?>
+<script async src="https://oapi-accept.autopay.pl/checkout/www/sdk/<?= $serviceId; ?>"></script>
+<?php endif; ?>

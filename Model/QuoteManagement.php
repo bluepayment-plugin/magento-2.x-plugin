@@ -75,12 +75,12 @@ class QuoteManagement implements QuoteManagementInterface
         $this->orderRepository = $orderRepository;
     }
 
-    public function getCartDetails($cartId, $hash)
+    public function getCartDetails($cartId)
     {
         return $this->getCart($cartId);
     }
 
-    public function getAddresses($cartId, $hash)
+    public function getAddresses($cartId)
     {
         $cart = $this->getCart($cartId);
         $customer = $cart->getCustomerIsGuest() ? null : $cart->getCustomer();
@@ -92,7 +92,7 @@ class QuoteManagement implements QuoteManagementInterface
         return [];
     }
 
-    public function setShippingAddress($cartId, $hash, AddressInterface $address)
+    public function setShippingAddress($cartId, AddressInterface $address)
     {
         $cart = $this->getCart($cartId);
 
@@ -113,7 +113,7 @@ class QuoteManagement implements QuoteManagementInterface
      * @throws InputException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function setShippingAddressById($cartId, $hash, $addressId)
+    public function setShippingAddressById($cartId, $addressId)
     {
         $cart = $this->getCart($cartId);
 
@@ -141,7 +141,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function setBillingAddress($cartId, $hash, AddressInterface $address)
+    public function setBillingAddress($cartId, AddressInterface $address)
     {
         $cart = $this->getCart($cartId);
 
@@ -158,7 +158,7 @@ class QuoteManagement implements QuoteManagementInterface
      * @throws InputException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function setBillingAddressById($cartId, $hash, $addressId)
+    public function setBillingAddressById($cartId, $addressId)
     {
         $cart = $this->getCart($cartId);
 
@@ -181,7 +181,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function getShippingMethods($cartId, $hash)
+    public function getShippingMethods($cartId)
     {
         $cart = $this->getCart($cartId);
         $currency = $cart->getStore()->getBaseCurrency();
@@ -220,7 +220,6 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function setShippingMethod(
         $cartId,
-        $hash,
         $carrierCode,
         $methodCode,
         ShippingMethodAdditionalInterface $additional
@@ -249,7 +248,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function placeOrder($cartId, $hash, $amount)
+    public function placeOrder($cartId, $amount)
     {
         $paymentMethod = $this->paymentFactory->create();
         $paymentMethod->setMethod('autopay');
