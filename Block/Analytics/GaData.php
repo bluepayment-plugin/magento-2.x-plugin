@@ -47,12 +47,9 @@ class GaData extends Template
                 case 'catalog_product_view': // Product detail
                     $this->loadProductViewData();
                     break;
-                case 'checkout_cart_index':   // Cart
-                    $this->loadCheckoutData();
-                    break;
                 case 'checkout_index_index':  // Checkout
                 case 'onestepcheckout_index_index': // Mageplaza One step check out page
-                    $this->loadCheckoutData(true);
+                    $this->loadCheckoutData();
                     break;
             }
         } catch (\Exception $e) {}
@@ -149,7 +146,7 @@ class GaData extends Template
             'event' => 'set_checkout_option',
             'data' => [
                 'checkout_step'   => $checkout ? 2 : 1,
-                'checkout_option' => $checkout ? 'checkout' : 'cart',
+                'checkout_option' => 'checkout',
             ]
         ]);
     }
