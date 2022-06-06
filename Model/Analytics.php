@@ -6,6 +6,7 @@ use BlueMedia\BluePayment\Helper\Analytics\Data as AnalyticsHelper;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
@@ -140,5 +141,30 @@ class Analytics
     public function getQuote()
     {
         return $this->checkoutSession->getQuote();
+    }
+
+    public function parseProductCollection(Collection $collection)
+    {
+        $position = 0;
+
+        foreach ($collection as $product) {
+            $items[] = [
+                'id'            => $product->getSku(),
+                'name'          => $product->getName(),
+                'category'      => $this->getCategoryName($product),
+                'list_position' => ++$position,
+                'quantity'      => 1,
+                'price'         => $this->getPrice($product),
+            ];
+        }
+
+        if (count($items)) {
+            $this->addEvent([
+                'event' => 'view_item_list',
+                'data' => [
+                    'items' => $items,
+                ],
+            ]);
+        }
     }
 }
