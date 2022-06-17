@@ -117,11 +117,14 @@ class CheckoutSubmitObserver implements ObserverInterface
 
                 $this->curl->addHeader('Content-Type', 'application/json');
                 $this->curl->post($url, json_encode($payload));
+
+                $statusCode = $this->curl->getStatus();
                 $response = $this->curl->getBody();
 
                 $this->logger->info('CheckoutSubmitObserver:' . __LINE__.' - Checkout submit', [
                     'urlParams' => $urlParams,
                     'payload' => $payload,
+                    'statusCode' => $statusCode,
                     'response' => $response,
                 ]);
             }
