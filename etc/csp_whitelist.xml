@@ -14,6 +14,7 @@
                 <value id="script_gpay" type="host">pay.google.com</value>
                 <value id="script_ga" type="host">*.google-analytics.com</value>
                 <value id="script_gtm" type="host">*.googletagmanager.com</value>
+                <value id="script_autopay" type="host">*.autopay.pl</value>
             </values>
         </policy>
         <policy id="style-src">

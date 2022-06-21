@@ -2,9 +2,12 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\Data\ConfigurationInterface;
+use BlueMedia\BluePayment\Api\Data\ConfigurationInterfaceFactory;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
 use BlueMedia\BluePayment\Api\QuoteManagementInterface;
+use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address\CustomerAddressDataProvider;
 use Magento\Framework\Api\ExtensibleDataInterface;
@@ -17,7 +20,6 @@ use Magento\Quote\Api\Data\CartExtensionFactory;
 use Magento\Quote\Api\Data\PaymentInterfaceFactory;
 use Magento\Quote\Model\Quote\TotalsCollector;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order;
 
 class QuoteManagement implements QuoteManagementInterface
 {
@@ -51,6 +53,12 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var OrderRepositoryInterface */
     private $orderRepository;
 
+    /** @var ConfigurationInterfaceFactory */
+    private $configurationFactory;
+
+    /** @var ConfigProvider */
+    private $configProvider;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
@@ -61,7 +69,9 @@ class QuoteManagement implements QuoteManagementInterface
         AddressRepositoryInterface $addressRepository,
         CartManagementInterface $cartManagement,
         PaymentInterfaceFactory $paymentFactory,
-        OrderRepositoryInterface $orderRepository
+        OrderRepositoryInterface $orderRepository,
+        ConfigurationInterfaceFactory $configurationFactory,
+        ConfigProvider $configProvider
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -73,14 +83,25 @@ class QuoteManagement implements QuoteManagementInterface
         $this->cartManagement = $cartManagement;
         $this->paymentFactory = $paymentFactory;
         $this->orderRepository = $orderRepository;
+        $this->configurationFactory = $configurationFactory;
+        $this->configProvider = $configProvider;
     }
 
-    public function getCartDetails($cartId, $hash)
+    public function getConfiguration()
+    {
+        /** @var ConfigurationInterface $configuration */
+        $configuration = $this->configurationFactory->create();
+        $configuration->setQuoteLifetime($this->configProvider->getQuoteLifetime());
+
+        return $configuration;
+    }
+
+    public function getCartDetails($cartId)
     {
         return $this->getCart($cartId);
     }
 
-    public function getAddresses($cartId, $hash)
+    public function getAddresses($cartId)
     {
         $cart = $this->getCart($cartId);
         $customer = $cart->getCustomerIsGuest() ? null : $cart->getCustomer();
@@ -92,7 +113,7 @@ class QuoteManagement implements QuoteManagementInterface
         return [];
     }
 
-    public function setShippingAddress($cartId, $hash, AddressInterface $address)
+    public function setShippingAddress($cartId, AddressInterface $address)
     {
         $cart = $this->getCart($cartId);
 
@@ -113,7 +134,7 @@ class QuoteManagement implements QuoteManagementInterface
      * @throws InputException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function setShippingAddressById($cartId, $hash, $addressId)
+    public function setShippingAddressById($cartId, $addressId)
     {
         $cart = $this->getCart($cartId);
 
@@ -141,7 +162,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function setBillingAddress($cartId, $hash, AddressInterface $address)
+    public function setBillingAddress($cartId, AddressInterface $address)
     {
         $cart = $this->getCart($cartId);
 
@@ -158,7 +179,7 @@ class QuoteManagement implements QuoteManagementInterface
      * @throws InputException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function setBillingAddressById($cartId, $hash, $addressId)
+    public function setBillingAddressById($cartId, $addressId)
     {
         $cart = $this->getCart($cartId);
 
@@ -181,7 +202,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function getShippingMethods($cartId, $hash)
+    public function getShippingMethods($cartId)
     {
         $cart = $this->getCart($cartId);
         $currency = $cart->getStore()->getBaseCurrency();
@@ -220,7 +241,6 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function setShippingMethod(
         $cartId,
-        $hash,
         $carrierCode,
         $methodCode,
         ShippingMethodAdditionalInterface $additional
@@ -249,7 +269,7 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function placeOrder($cartId, $hash, $amount)
+    public function placeOrder($cartId, $amount)
     {
         $paymentMethod = $this->paymentFactory->create();
         $paymentMethod->setMethod('autopay');

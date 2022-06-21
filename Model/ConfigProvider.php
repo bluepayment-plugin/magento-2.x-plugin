@@ -370,10 +370,7 @@ class ConfigProvider implements ConfigProviderInterface
     {
         $storeId = $this->storeManager->getStore()->getId();
 
-        $serviceId = $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
-        );
+        $serviceId = $this->getServiceId($currency);
 
         $gateways = $this->gatewayCollection
             ->addFieldToFilter('store_id', ['eq' => $storeId])
@@ -401,7 +398,7 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function iframePayment(): bool
+    public function iframePayment(): bool
     {
         return (boolean) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
@@ -409,10 +406,26 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function blikZero(): bool
+    public function blikZero(): bool
     {
         return (boolean) $this->scopeConfig->getValue(
             'payment/bluepayment/blik_zero',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getServiceId(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getSharedKey(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
             ScopeInterface::SCOPE_STORE
         );
     }

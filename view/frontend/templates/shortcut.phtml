@@ -5,9 +5,14 @@ $isInCatalogProduct = false;
 if ($block->getIsInCatalogProduct()) {
     $isInCatalogProduct = $block->getIsInCatalogProduct();
 }
+
+$randStr = random_int(10, 1000);
+
 ?>
-<div class="autopay-shortcut" data-mage-init='{"autopayShortcut":{
-    "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>"
+<div class="autopay-shortcut autopay-shortcut-<?= $randStr ?>" data-mage-init='{"autopayShortcut":{
+    "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>",
+    "selector": "autopay-shortcut-<?= $randStr ?>",
+    "merchantId": "<?= $block->getMerchantId() ?>"
 }}'>
     <div class="autopay-button"></div>
 </div>

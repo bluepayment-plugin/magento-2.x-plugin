@@ -149,4 +149,6 @@
                 type="BlueMedia\BluePayment\Model\Data\ShippingMethod"/>
     <preference for="BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface"
                 type="BlueMedia\BluePayment\Model\Data\ShippingMethodAdditional"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\ConfigurationInterface"
+                type="BlueMedia\BluePayment\Model\Data\Configuration"/>
 </config>

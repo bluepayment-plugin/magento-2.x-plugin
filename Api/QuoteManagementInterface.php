@@ -2,9 +2,6 @@
 
 namespace BlueMedia\BluePayment\Api;
 
-use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
-use Magento\Quote\Api\Data\AddressInterface;
-
 /**
  * Interface for quote management for AutoPay
  * @api
@@ -12,77 +9,74 @@ use Magento\Quote\Api\Data\AddressInterface;
 interface QuoteManagementInterface
 {
     /**
-     * @param int cartId
-     * @param string $hash
+     * @return \BlueMedia\BluePayment\Api\Data\ConfigurationInterface
+     */
+    public function getConfiguration();
+
+    /**
+     * @param int $cartId
      *
      * @return \Magento\Quote\Api\Data\CartInterface
      */
-    public function getCartDetails($cartId, $hash);
+    public function getCartDetails($cartId);
 
     /**
      * @param  int  $cartId
-     * @param  string  $hash
      *
      * @return mixed
      */
-    public function getAddresses($cartId, $hash);
+    public function getAddresses($cartId);
 
     /**
      * Set shipping address
      *
      * @param  int  $cartId
-     * @param  string  $hash
-     * @param  AddressInterface  $address
+     * @param  \Magento\Quote\Api\Data\AddressInterface  $address
      *
      * @return boolean
      */
-    public function setShippingAddress($cartId, $hash, AddressInterface $address);
+    public function setShippingAddress($cartId, \Magento\Quote\Api\Data\AddressInterface $address);
 
     /**
      * Set shipping address by ID
      *
      * @param  int  $cartId
-     * @param  string  $hash
      * @param  int  $addressId
      *
      * @return boolean
      */
-    public function setShippingAddressById($cartId, $hash, $addressId);
+    public function setShippingAddressById($cartId, $addressId);
 
 
     /**
      * Set billing address
      *
      * @param  int  $cartId
-     * @param  string  $hash
-     * @param  AddressInterface  $address
+     * @param  \Magento\Quote\Api\Data\AddressInterface  $address
      *
      * @return boolean
      */
-    public function setBillingAddress($cartId, $hash, AddressInterface $address);
+    public function setBillingAddress($cartId, \Magento\Quote\Api\Data\AddressInterface $address);
 
     /**
      * Set billing address by ID
      *
      * @param  int  $cartId
-     * @param  string  $hash
      * @param  int  $addressId
      *
      * @return boolean
      */
-    public function setBillingAddressById($cartId, $hash, $addressId);
+    public function setBillingAddressById($cartId, $addressId);
 
     /**
      * @param  int  $cartId
-     * @param  string  $hash
      *
      * @return \BlueMedia\BluePayment\Api\Data\ShippingMethodInterface[]
      */
-    public function getShippingMethods($cartId, $hash);
+    public function getShippingMethods($cartId);
 
     /**
      * @param  int  $cartId
-     * @param  string  $hash
      * @param  string  $carrierCode
      * @param  string  $methodCode
      * @param  \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface  $additional
@@ -91,18 +85,16 @@ interface QuoteManagementInterface
      */
     public function setShippingMethod(
         $cartId,
-        $hash,
         $carrierCode,
         $methodCode,
-        ShippingMethodAdditionalInterface $additional
+        \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface $additional
     );
 
     /**
      * @param int $cartId
-     * @param string $hash
      * @param float $amount
      *
      * @return int Order ID
      */
-    public function placeOrder($cartId, $hash, $amount);
+    public function placeOrder($cartId, $amount);
 }
