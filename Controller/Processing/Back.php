@@ -127,7 +127,7 @@ class Back extends Action
             }
 
             /** @var Order $order */
-            $currency = strtolower($order->getOrderCurrencyCode());
+            $currency = strtolower($order->getOrderCurrencyCode() ?? '');
 
             /** @var Order\Payment $payment */
             $payment = $order->getPayment();

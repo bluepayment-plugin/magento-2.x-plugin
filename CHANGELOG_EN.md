@@ -1,7 +1,11 @@
 # What's new in BluePayment?
 
-## Version 2.19.0
+## Version 2.20.0
 - We added Autopay support.
+
+## Version 2.19.0
+- We added extended Google Analytics 4.
+- We've improved calculation of the order amount when selecting a different currency.
 
 ## Version 2.18.0
 - We have updated the payment channel synchronization support to v2.
