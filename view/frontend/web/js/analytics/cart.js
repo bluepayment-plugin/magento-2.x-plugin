@@ -30,24 +30,25 @@ define([
                 formData = new FormData(data.form[0]),
                 qty = formData.get('qty') || 1;
 
-            let response = getProductData(productId);
+            let response = await getProductData(productId);
 
             if (response) {
                 let data = {
                     id: response.id,
                     name: response.name,
                     category: response.category,
-                    price: response.price
+                    price: response.price,
+                    qty: qty
                 };
                 gtag('event', 'add_to_cart', {'items': [data]});
                 console.log('event', 'add_to_cart', {'items': [data]});
             }
         });
 
-        $(document).on('ajax:removeFromCart', function (event, data) {
+        $(document).on('ajax:removeFromCart', async function (event, data) {
             let productId = data.productIds[0];
 
-            let response = getProductData(productId);
+            let response = await getProductData(productId);
 
             if (response) {
                 let data = {

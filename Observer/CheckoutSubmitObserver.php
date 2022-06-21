@@ -111,7 +111,7 @@ class CheckoutSubmitObserver implements ObserverInterface
 
                 $urlParams = [
                     'api_secret' => $apiSecret,
-                    'measurement_id' => $clientId,
+                    'measurement_id' => $this->analytics->getAccountIdGa4(),
                 ];
                 $url = 'https://www.google-analytics.com/mp/collect?' . http_build_query($urlParams);
 
