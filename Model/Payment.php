@@ -22,7 +22,6 @@ use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
@@ -37,8 +36,6 @@ use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
-use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
@@ -815,6 +812,8 @@ class Payment extends AbstractMethod
             }
 
             try {
+                $eventToCall = null;
+
                 if ($changeable && $orderPaymentState != $paymentStatus) {
                     $orderComment =
                         '[BM] Transaction ID: ' . $remoteId
@@ -832,10 +831,16 @@ class Payment extends AbstractMethod
                     $orderPayment->setAdditionalInformation('bluepayment_gateway', $gatewayId);
 
                     switch ($paymentStatus) {
+                        case self::PAYMENT_STATUS_FAILURE:
+                            $eventToCall = 'bluemedia_payment_failure';
+                            break;
                         case self::PAYMENT_STATUS_PENDING:
+                            $eventToCall = 'bluemedia_payment_pending';
                             $orderPayment->setIsTransactionPending(true);
                             break;
                         case self::PAYMENT_STATUS_SUCCESS:
+                            $eventToCall = 'bluemedia_payment_success';
+
                             if ($order->getBaseCurrencyCode() !== $currency) {
                                 $rate = $order->getBaseToOrderRate();
                                 $amount = $amount / $rate;
@@ -847,6 +852,15 @@ class Payment extends AbstractMethod
                             break;
                         default:
                             break;
+                    }
+
+                    if ($eventToCall) {
+                        // Dispatch event
+                        $this->_eventManager->dispatch($eventToCall, [
+                            'order' => $order,
+                            'payment' => $payment,
+                            'transaction_id' => $remoteId
+                        ]);
                     }
                 } else {
                     $orderComment =

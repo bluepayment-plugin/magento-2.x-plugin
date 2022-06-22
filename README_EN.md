@@ -283,6 +283,19 @@ Information about the selected payment channel is stored in the database:
 - in the **blue_gateway_id** (channel id) and **payment_channel** (channel name) column in the **sales_order** table,
 - in the **payment_channel** (channel name) column in the **sales_order_grid** table.
 
+## Custom event
+Option available since version 2.19.0.
+
+When a new payment status is received - one of the events is triggered:
+- `bluemedia_payment_failure` - payment failed,
+- `bluemedia_payment_pending` - payment pending,
+- `bluemedia_payment_success` - payment success.
+
+Events are triggered when a new order status is saved.
+Provided event data:
+- `order` - `\Magento\Sales\Model\Order` instance
+- `payment` - `\Magento\Sales\Model\OrderPayment` instance
+- `transaction_id` - `string` transaction identifier in BlueMedia system
 
 ## Integration with GraphQL and Magento PWA
 GraphQL module is available at:
