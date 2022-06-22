@@ -20,7 +20,7 @@ use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 
-class CheckoutSubmitObserver implements ObserverInterface
+class PaymentSuccessObserver implements ObserverInterface
 {
     /** @var ProductRepositoryInterface */
     private $productRepository;
@@ -51,20 +51,19 @@ class CheckoutSubmitObserver implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $this->logger->info('CheckoutSubmitObserver:' . __LINE__);
+        /** @var OrderInterface $order */
+        $order = $observer->getData('order');
+
+        $this->logger->info('PaymentSuccessObserver:' . __LINE__, [
+            'ga_client_id' => $order->getGaClientId(),
+        ]);
 
         if ($this->analytics->isGoogleAnalytics4Available()) {
-            /** @var OrderInterface $order */
-            $order = $observer->getData('order');
-
-            /** @var CartInterface $quote */
-            $quote = $observer->getData('quote');
-
-            $clientId = $quote->getGaClientId();
+            $clientId = $order->getGaClientId();
             $apiSecret = $this->analytics->getApiSecret();
 
             $this->logger->info('CheckoutSubmitObserver:' . __LINE__.' - Checkout submit', [
-                'quote_id' => $quote->getId(),
+                'order_id' => $order->getId(),
                 'client_id' => $clientId,
                 'api_secret' => $apiSecret
             ]);

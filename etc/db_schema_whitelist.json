@@ -77,12 +77,18 @@
     "sales_order": {
         "column": {
             "blue_gateway_id": true,
-            "payment_channel": true
+            "payment_channel": true,
+            "ga_client_id": true
         }
     },
     "sales_order_grid": {
         "column": {
             "payment_channel": true
+        }
+    },
+    "quote": {
+        "column": {
+            "ga_client_id": true
         }
     }
 }
