@@ -34,4 +34,9 @@
         <plugin sortOrder="10" name="bluepayment_set_payment_method" type="BlueMedia\BluePayment\Plugin\SetPaymentMethod"/>
     </type>
     <!-- Extend payments methods for multishipping -->
+
+
+    <type name="Magento\CatalogWidget\Block\Product\ProductsList">
+        <plugin name="analytics_catalog_widget_product_list_plugin" type="BlueMedia\BluePayment\Plugin\CatalogWidgetProductsListPlugin"/>
+    </type>
 </config>

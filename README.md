@@ -283,6 +283,19 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
 
+## Wywoływanie eventów
+Opcja dostępna od wersji 2.19.0.
+
+Po otrzymaniu nowego statusu płatności - wywoływany jest jeden z eventów:
+- `bluemedia_payment_failure` - płatność zakończona niepowodzeniem,
+- `bluemedia_payment_pending` - płatność oczekująca,
+- `bluemedia_payment_success` - płatność zakończona sukcesem.
+
+Eventy uruchamiane są po zapisaniu nowego statusu zamówienia.  
+W ramach eventu, przekazywane są dane:
+- `order` - instancja `\Magento\Sales\Model\Order`
+- `payment` - instancja `\Magento\Sales\Model\OrderPayment`
+- `transaction_id` - identyfikator transakcji w systemie BlueMedia (`string`)
 
 ## Obsługa GraphQL oraz integracja z Magento PWA
 

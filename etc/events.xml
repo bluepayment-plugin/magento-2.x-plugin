@@ -15,4 +15,12 @@
     <event name="payment_method_assign_data_bluepayment">
         <observer name="bluepayment_gateway_data_assign" instance="BlueMedia\BluePayment\Observer\DataAssignObserver" />
     </event>
+
+    <!-- Analytics -->
+    <event name="catalog_block_product_list_collection">
+        <observer name="analytics_product_list" instance="BlueMedia\BluePayment\Observer\CatalogProductListObserver" />
+    </event>
+    <event name="bluemedia_payment_success">
+        <observer name="analytics_checkout_submit" instance="BlueMedia\BluePayment\Observer\PaymentSuccessObserver"/>
+    </event>
 </config>

@@ -1,5 +1,10 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.19.0
+- Dodaliśmy rozszerzoną analitykę Google Analytics 4.
+- Poprawiliśmy wyliczanie kwoty zamówienia przy wybraniu innej waluty.
+- Dodaliśmy wywyoływanie eventów `bluemedia_payment_failure`, `bluemedia_payment_pending` oraz `bluemedia_payment_success` po otrzymaniu nowego statusu płatności.
+
 ## Wersja 2.18.0
 - Zaktualizowaliśmy obsługę synchronizacji kanałów płatniczych do wersji v2.
 - Poprawiliśmy zachowanie podczas obsługi powiadomień o płatnościach (race-condition).

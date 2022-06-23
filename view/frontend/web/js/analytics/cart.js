@@ -1,0 +1,65 @@
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+/* jscs:disable */
+/* eslint-disable */
+define([
+    'jquery',
+    'mage/url'
+], function ($, url) {
+    'use strict';
+
+    /**
+     * @param {Object} config
+     */
+    return function (config) {
+        let getProductData = async function (productId) {
+            return await $.ajax({
+                url: url.build('/bluepayment/analytics/getproductdetails'),
+                type: 'POST',
+                data: {
+                    product_id: productId
+                }
+            })
+        }
+
+        $(document).on('ajax:addToCart', async function (event, data) {
+            let productId = data.productIds[0],
+                sku = data.sku,
+                formData = new FormData(data.form[0]),
+                qty = formData.get('qty') || 1;
+
+            let response = await getProductData(productId);
+
+            if (response) {
+                let data = {
+                    id: response.id,
+                    name: response.name,
+                    category: response.category,
+                    price: response.price,
+                    qty: qty
+                };
+                gtag('event', 'add_to_cart', {'items': [data]});
+                console.log('event', 'add_to_cart', {'items': [data]});
+            }
+        });
+
+        $(document).on('ajax:removeFromCart', async function (event, data) {
+            let productId = data.productIds[0];
+
+            let response = await getProductData(productId);
+
+            if (response) {
+                let data = {
+                    id: response.id,
+                    name: response.name,
+                    category: response.category,
+                    price: response.price
+                };
+                gtag('event', 'remove_from_cart', {'items': [data]});
+                console.log('event', 'remove_from_cart', {'items': [data]});
+            }
+        });
+    }
+});

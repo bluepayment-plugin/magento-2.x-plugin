@@ -22,7 +22,6 @@ use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
@@ -37,8 +36,6 @@ use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
-use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
@@ -713,7 +710,8 @@ class Payment extends AbstractMethod
         $remoteId = (string) $payment->remoteID;
         $orderId = (string) $payment->orderID;
         $gatewayId = (int) $payment->gatewayID;
-        $currency = (string)$payment->currency;
+        $currency = (string) $payment->currency;
+        $amount = (float) str_replace(',', '.', $payment->amount);
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'remoteId' => $remoteId,
@@ -790,7 +788,6 @@ class Payment extends AbstractMethod
         $confirmed = true;
 
         foreach ($orders as $order) {
-            /** @var Order\Payment|OrderPaymentInterface|null $orderPayment */
             $orderPayment = $order->getPayment();
 
             if ($orderPayment === null || $orderPayment->getMethod() !== self::METHOD_CODE) {
@@ -799,7 +796,6 @@ class Payment extends AbstractMethod
 
             /** @var string $orderPaymentState */
             $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-            $amount = $order->getGrandTotal();
             $formattedAmount = number_format(round($amount, 2), 2, '.', '');
 
             $changeable = $updateOrders;
@@ -816,10 +812,12 @@ class Payment extends AbstractMethod
             }
 
             try {
+                $eventToCall = null;
+
                 if ($changeable && $orderPaymentState != $paymentStatus) {
                     $orderComment =
                         '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $formattedAmount
+                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
                         . ' | Status: ' . $paymentStatus;
 
                     $order->setState($state);
@@ -833,10 +831,21 @@ class Payment extends AbstractMethod
                     $orderPayment->setAdditionalInformation('bluepayment_gateway', $gatewayId);
 
                     switch ($paymentStatus) {
+                        case self::PAYMENT_STATUS_FAILURE:
+                            $eventToCall = 'bluemedia_payment_failure';
+                            break;
                         case self::PAYMENT_STATUS_PENDING:
+                            $eventToCall = 'bluemedia_payment_pending';
                             $orderPayment->setIsTransactionPending(true);
                             break;
                         case self::PAYMENT_STATUS_SUCCESS:
+                            $eventToCall = 'bluemedia_payment_success';
+
+                            if ($order->getBaseCurrencyCode() !== $currency) {
+                                $rate = $order->getBaseToOrderRate();
+                                $amount = $amount / $rate;
+                            }
+
                             $orderPayment->registerCaptureNotification($amount, true);
                             $orderPayment->setIsTransactionApproved(true);
                             $orderPayment->setIsTransactionClosed(true);
@@ -844,10 +853,19 @@ class Payment extends AbstractMethod
                         default:
                             break;
                     }
+
+                    if ($eventToCall) {
+                        // Dispatch event
+                        $this->_eventManager->dispatch($eventToCall, [
+                            'order' => $order,
+                            'payment' => $payment,
+                            'transaction_id' => $remoteId
+                        ]);
+                    }
                 } else {
                     $orderComment =
                         '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $amount
+                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
                         . ' | Status: ' . $paymentStatus . ' [IGNORED]'
                         . (!$updateOrders ? ' Status SUCCESS is in other transaction based on WebAPI.' : '');
 
@@ -1159,7 +1177,7 @@ class Payment extends AbstractMethod
             $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
         }
 
-        $params = (object) $params;
+        $params = (array) $params;
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, ['params' => $params]);
 
