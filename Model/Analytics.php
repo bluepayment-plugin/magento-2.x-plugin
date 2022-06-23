@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Model;
 use BlueMedia\BluePayment\Helper\Analytics\Data as AnalyticsHelper;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Helper\Data;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Pricing\Price\FinalPrice;
@@ -29,16 +30,21 @@ class Analytics
     /** @var PriceCurrencyInterface */
     private $priceCurrency;
 
+    /** @var Data */
+    private $taxHelper;
+
     public function __construct(
         AnalyticsHelper $analyticsHelper,
         CategoryRepositoryInterface $categoryRepository,
         Session $checkoutSession,
-        PriceCurrencyInterface $priceCurrency
+        PriceCurrencyInterface $priceCurrency,
+        Data $taxHelper
     ) {
         $this->analyticsHelper = $analyticsHelper;
         $this->categoryRepository = $categoryRepository;
         $this->checkoutSession = $checkoutSession;
         $this->priceCurrency = $priceCurrency;
+        $this->taxHelper = $taxHelper;
     }
 
     public function isGoogleAnalytics4Available()
@@ -93,14 +99,10 @@ class Analytics
      */
     public function getPrice($product)
     {
-        $price = $product->getPriceInfo() ? $product->getPriceInfo()
-            ->getPrice(FinalPrice::PRICE_CODE) : $product->getPrice();
-
-        if (is_object($price)) {
-            $price = $price->getValue();
-        }
-
-        return $price;
+        return $this->taxHelper->getTaxPrice(
+            $product,
+            $product->getFinalPrice()
+        );
     }
 
     /**

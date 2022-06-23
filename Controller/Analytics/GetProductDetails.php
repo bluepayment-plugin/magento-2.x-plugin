@@ -52,7 +52,7 @@ class GetProductDetails implements HttpPostActionInterface
             'id' => $product->getSku(),
             'name' => $product->getName(),
             'category' => $this->analytics->getCategoryName($product),
-            'price' => $this->analytics->convertPrice($product->getFinalPrice())
+            'price' => $this->analytics->getPrice($product)
         ]);
     }
 }
