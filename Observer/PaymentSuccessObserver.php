@@ -77,9 +77,9 @@ class PaymentSuccessObserver implements ObserverInterface
                     $item = [
                         'item_id' => $orderItem->getSku(),
                         'item_name' => $orderItem->getName(),
-                        'quantity' => $orderItem->getQtyOrdered(),
-                        'tax' => $orderItem->getTaxAmount(),
-                        'price' => $orderItem->getRowTotal(),
+                        'quantity' => (float) $orderItem->getQtyOrdered(),
+                        'tax' => (float) $orderItem->getTaxAmount(),
+                        'price' => (float) $orderItem->getRowTotal(),
                     ];
 
                     if ($product) {
@@ -91,13 +91,14 @@ class PaymentSuccessObserver implements ObserverInterface
 
                 $payload = [
                     'client_id' => $clientId,
+                    'timestamp_micros' => round(microtime(true) * 1000) . '000',
                     'events' => [[
                         'name' => 'purchase',
                         'params' => [
                             'transaction_id' => $order->getIncrementId(),
-                            'value' => $order->getGrandTotal(),
-                            'tax' => $order->getTaxAmount(),
-                            'shipping' => $order->getShippingAmount(),
+                            'value' => (float) $order->getGrandTotal(),
+                            'tax' => (float) $order->getTaxAmount(),
+                            'shipping' => (float) $order->getShippingAmount(),
                             'currency' => $order->getOrderCurrencyCode(),
                             'items' => $items,
                         ],
