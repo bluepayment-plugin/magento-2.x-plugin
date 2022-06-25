@@ -79,7 +79,7 @@ class PaymentSuccessObserver implements ObserverInterface
                         'item_name' => $orderItem->getName(),
                         'quantity' => (float) $orderItem->getQtyOrdered(),
                         'tax' => (float) $orderItem->getTaxAmount(),
-                        'price' => (float) $orderItem->getRowTotal(),
+                        'price' => (float) $orderItem->getBasePriceInclTax(),
                     ];
 
                     if ($product) {
