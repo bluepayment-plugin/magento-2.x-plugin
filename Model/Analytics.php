@@ -149,6 +149,7 @@ class Analytics
     {
         $position = 0;
 
+        $items = [];
         foreach ($collection as $product) {
             $items[] = [
                 'id'            => $product->getSku(),
