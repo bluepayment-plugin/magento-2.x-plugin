@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.19.1
+- Bugfix - usunięcie błędnego komponentu w default.xml
+
 ## Wersja 2.19.0
 - Dodaliśmy rozszerzoną analitykę Google Analytics 4.
 - Poprawiliśmy wyliczanie kwoty zamówienia przy wybraniu innej waluty.

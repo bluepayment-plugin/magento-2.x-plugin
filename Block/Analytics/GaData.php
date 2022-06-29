@@ -40,6 +40,10 @@ class GaData extends Template
 
     public function getAnalyticsData(): array
     {
+        if (! $this->analytics->isGoogleAnalytics4Available()) {
+            return [];
+        }
+
         try {
             $action = $this->getRequest()->getFullActionName();
 
@@ -64,6 +68,10 @@ class GaData extends Template
 
     private function getDefault(): array
     {
+        if (! $this->analytics->isGoogleAnalytics4Available()) {
+            return [];
+        }
+
         $events = $this->analytics->getEvents();
         $this->analytics->clearEvents();
 
