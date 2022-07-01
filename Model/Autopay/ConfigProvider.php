@@ -21,6 +21,14 @@ class ConfigProvider implements ConfigProviderInterface
         return [];
     }
 
+    public function isTestMode()
+    {
+        return (boolean) $this->scopeConfig->getValue(
+            'payment/autopay/test_mode',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
     public function getServiceId()
     {
         return $this->scopeConfig->getValue(
@@ -40,7 +48,7 @@ class ConfigProvider implements ConfigProviderInterface
     public function getMerchantId()
     {
         return $this->scopeConfig->getValue(
-            'payment/bluepayment/pln/merchant_id',
+            'payment/autopay/merchant_id',
             ScopeInterface::SCOPE_STORE
         );
     }
