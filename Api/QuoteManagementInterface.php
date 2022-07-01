@@ -79,7 +79,7 @@ interface QuoteManagementInterface
      * @param  int  $cartId
      * @param  string  $carrierCode
      * @param  string  $methodCode
-     * @param  \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface  $additional
+     * @param  \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface|null  $additional
      *
      * @return boolean
      */
@@ -87,7 +87,7 @@ interface QuoteManagementInterface
         $cartId,
         $carrierCode,
         $methodCode,
-        \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface $additional
+        \BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface $additional = null
     );
 
     /**

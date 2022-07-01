@@ -243,7 +243,7 @@ class QuoteManagement implements QuoteManagementInterface
         $cartId,
         $carrierCode,
         $methodCode,
-        ShippingMethodAdditionalInterface $additional
+        ShippingMethodAdditionalInterface $additional = null
     ) {
         $cart = $this->getCart($cartId);
 
