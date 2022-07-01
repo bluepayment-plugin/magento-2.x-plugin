@@ -7,7 +7,6 @@ define([
 
     return Component.extend({
         defaults: {
-            productFormSelector: '#product_addtocart_form',
             formInvalid: false,
             productAddedToCart: false
         },
@@ -37,27 +36,42 @@ define([
             });
 
             autopay.onBeforeCheckout = () => {
-                if (self.isCatalogProduct()) {
-                    self.addToCart();
-                }
+                return new Promise((resolve, reject) => {
+                    if (self.isCatalogProduct()) {
+                        $(document).one('ajax:addToCart', () => {
+                            console.log('addToCart event');
 
-                customerData.reload(['cart'], false);
-                let cartData = customerData.get('cart')();
+                            customerData.reload(['cart'], true);
+                        });
 
-                console.log({
-                    id: cartData.cart_id,
-                    amount: cartData.subtotalAmount,
-                    currency: cartData.currency,
-                    label: cartData.cart_id,
-                    productList: cartData.items,
-                });
+                        $(document).one('customer-data-reloaded', () => {
+                            console.log('customer-data-reloaded event');
 
-                autopay.setTransactionData({
-                    id: cartData.cart_id,
-                    amount: cartData.subtotalAmount,
-                    currency: cartData.currency,
-                    label: cartData.cart_id,
-                    productList: cartData.items,
+                            let cartData = customerData.get('cart')();
+
+                            console.log({
+                                id: cartData.cart_id,
+                                amount: cartData.subtotalAmount,
+                                currency: cartData.currency,
+                                label: cartData.cart_id,
+                                productList: cartData.items,
+                            });
+
+                            autopay.setTransactionData({
+                                id: cartData.cart_id,
+                                amount: cartData.subtotalAmount,
+                                currency: cartData.currency,
+                                label: cartData.cart_id,
+                                productList: cartData.items,
+                            });
+
+                            resolve();
+                        });
+
+                        self.addToCart();
+                    } else {
+                        resolve();
+                    }
                 });
             }
 
@@ -65,11 +79,15 @@ define([
         },
 
         addToCart: function () {
-            var $form = $(this.productFormSelector);
+            var $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
 
             if (!this.productAddedToCart) {
                 $form.trigger('submit');
-                this.formInvalid = !$form.validation('isValid');
+
+                if ($form.validation) {
+                    this.formInvalid = !$form.validation('isValid');
+                }
+
                 this.productAddedToCart = true;
             }
         },
