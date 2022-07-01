@@ -23,4 +23,9 @@ class AutopaySdk extends Template
     {
         return $this->configProvider->getServiceId();
     }
+
+    public function isTestMode()
+    {
+        return $this->configProvider->isTestMode();
+    }
 }
