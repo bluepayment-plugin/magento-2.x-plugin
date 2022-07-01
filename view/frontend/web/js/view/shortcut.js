@@ -70,6 +70,15 @@ define([
 
                         self.addToCart();
                     } else {
+                        let cartData = customerData.get('cart')();
+                        autopay.setTransactionData({
+                            id: cartData.cart_id,
+                            amount: cartData.subtotalAmount,
+                            currency: cartData.currency,
+                            label: cartData.cart_id,
+                            productList: cartData.items,
+                        });
+
                         resolve();
                     }
                 });
