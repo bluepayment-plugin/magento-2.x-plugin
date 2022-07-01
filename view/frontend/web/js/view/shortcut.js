@@ -7,7 +7,6 @@ define([
 
     return Component.extend({
         defaults: {
-            productFormSelector: '#product_addtocart_form',
             formInvalid: false,
             productAddedToCart: false
         },
@@ -65,11 +64,15 @@ define([
         },
 
         addToCart: function () {
-            var $form = $(this.productFormSelector);
+            var $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
 
             if (!this.productAddedToCart) {
                 $form.trigger('submit');
-                this.formInvalid = !$form.validation('isValid');
+
+                if ($form.validation) {
+                    this.formInvalid = !$form.validation('isValid');
+                }
+
                 this.productAddedToCart = true;
             }
         },
