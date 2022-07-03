@@ -41,7 +41,7 @@ define([
 
             autopay.onBeforeCheckout = () => {
                 return new Promise((resolve, reject) => {
-                    if (self.isCatalogProduct() && ! this.productAddedToCart) {
+                    if (self.isCatalogProduct()) {
                         $(document).one('ajax:addToCart', () => {
                             console.log('addToCart event');
 
