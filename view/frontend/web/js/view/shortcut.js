@@ -11,6 +11,8 @@ define([
             productAddedToCart: false
         },
 
+        autopay: false,
+
         /**
          * @return {exports}
          */
@@ -30,6 +32,8 @@ define([
                 button = autopay.createButton(),
                 container = $('.' + this.selector + ' .autopay-button');
 
+            this.autopay = autopay;
+
             console.log('Autopay Init params', {
                 merchantId: this.merchantId,
                 language: 'pl'
@@ -37,7 +41,7 @@ define([
 
             autopay.onBeforeCheckout = () => {
                 return new Promise((resolve, reject) => {
-                    if (self.isCatalogProduct()) {
+                    if (self.isCatalogProduct() && ! this.productAddedToCart) {
                         $(document).one('ajax:addToCart', () => {
                             console.log('addToCart event');
 
@@ -47,35 +51,24 @@ define([
                         $(document).one('customer-data-reloaded', () => {
                             console.log('customer-data-reloaded event');
 
-                            let cartData = customerData.get('cart')();
-
-                            console.log({
-                                id: cartData.cart_id,
-                                amount: cartData.subtotalAmount,
-                                currency: cartData.currency,
-                                label: cartData.cart_id,
-                                productList: cartData.items,
-                            });
-
-                            autopay.setTransactionData({
-                                id: cartData.cart_id,
-                                amount: cartData.subtotalAmount,
-                                currency: cartData.currency,
-                                label: cartData.cart_id,
-                                productList: cartData.items,
-                            });
-
+                            this.setAutopayData();
                             resolve();
                         });
 
                         self.addToCart();
                     } else {
+                        this.setAutopayData();
                         resolve();
                     }
                 });
             }
 
             container.append(button);
+
+            // Prevent default action on APC button click - because we're manually executing addToCart function
+            button.querySelector('.apc-btn').addEventListener('click', (event) => {
+                event.preventDefault();
+            });
         },
 
         addToCart: function () {
@@ -95,5 +88,25 @@ define([
         isCatalogProduct: function() {
             return Boolean(this.isInCatalogProduct);
         },
+
+        setAutopayData: function () {
+            let cartData = customerData.get('cart')();
+
+            console.log({
+                id: cartData.cart_id,
+                amount: cartData.subtotalAmount,
+                currency: cartData.currency,
+                label: cartData.cart_id,
+                productList: cartData.items,
+            });
+
+            this.autopay.setTransactionData({
+                id: cartData.cart_id,
+                amount: cartData.subtotalAmount,
+                currency: cartData.currency,
+                label: cartData.cart_id,
+                productList: cartData.items,
+            });
+        }
     });
 });
