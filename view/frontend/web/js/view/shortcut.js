@@ -24,53 +24,70 @@ define([
             return this;
         },
 
+        whenAvailable: function(name, callback) {
+            var interval = 10;
+            window.setTimeout(function() {
+                if (window[name]) {
+                    callback(window[name]);
+                } else {
+                    this.whenAvailable(name, callback);
+                }
+            }, interval);
+        },
+
+
         initAutopay: function () {
             let self = this,
+                autopay,
+                button,
+                container = $('.' + this.selector + ' .autopay-button');
+
+            this.whenAvailable('autopay', function() {
                 autopay = new window.autopay.checkout({
                     merchantId: this.merchantId,
                     theme: 'dark',
                     language: 'en'
-                }),
-                button = autopay.createButton(),
-                container = $('.' + this.selector + ' .autopay-button');
+                });
+                button = autopay.createButton();
 
-            this.autopay = autopay;
+                this.autopay = autopay;
 
-            console.log('Autopay Init params', {
-                merchantId: this.merchantId,
-                theme: 'dark',
-                language: 'en'
-            });
+                console.log('Autopay Init params', {
+                    merchantId: this.merchantId,
+                    theme: 'dark',
+                    language: 'en'
+                });
 
-            autopay.onBeforeCheckout = () => {
-                return new Promise((resolve, reject) => {
-                    if (self.isCatalogProduct()) {
-                        $(document).one('ajax:addToCart', () => {
-                            console.log('addToCart event');
+                autopay.onBeforeCheckout = () => {
+                    return new Promise((resolve, reject) => {
+                        if (self.isCatalogProduct()) {
+                            $(document).one('ajax:addToCart', () => {
+                                console.log('addToCart event');
 
-                            customerData.reload(['cart'], true);
-                        });
+                                customerData.reload(['cart'], true);
+                            });
 
-                        $(document).one('customer-data-reloaded', () => {
-                            console.log('customer-data-reloaded event');
+                            $(document).one('customer-data-reloaded', () => {
+                                console.log('customer-data-reloaded event');
 
+                                this.setAutopayData();
+                                resolve();
+                            });
+
+                            self.addToCart();
+                        } else {
                             this.setAutopayData();
                             resolve();
-                        });
+                        }
+                    });
+                }
 
-                        self.addToCart();
-                    } else {
-                        this.setAutopayData();
-                        resolve();
-                    }
+                container.append(button);
+
+                // Prevent default action on APC button click - because we're manually executing addToCart function
+                button.querySelector('.apc-btn').addEventListener('click', (event) => {
+                    event.preventDefault();
                 });
-            }
-
-            container.append(button);
-
-            // Prevent default action on APC button click - because we're manually executing addToCart function
-            button.querySelector('.apc-btn').addEventListener('click', (event) => {
-                event.preventDefault();
             });
         },
 
