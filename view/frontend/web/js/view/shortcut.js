@@ -1,7 +1,8 @@
 define([
     'jquery',
     'uiComponent',
-    'Magento_Customer/js/customer-data'
+    'Magento_Customer/js/customer-data',
+    'domReady!'
 ], function ($, Component, customerData) {
     'use strict';
 
