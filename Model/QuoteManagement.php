@@ -282,7 +282,7 @@ class QuoteManagement implements QuoteManagementInterface
         $order->addCommentToStatusHistory($orderComment);
         $this->orderRepository->save($order);
 
-        return $orderId;
+        return $order->getIncrementId();
     }
 
     private function getCart($cartId)
