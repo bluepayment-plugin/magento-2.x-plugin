@@ -726,10 +726,13 @@ class Payment extends AbstractMethod
 
         $this->saveTransactionResponse($payment);
 
-        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue(
+        $unchangeableStatusesValue = $this->_scopeConfig->getValue(
             'payment/bluepayment/unchangeable_statuses',
             ScopeInterface::SCOPE_STORE
-        ));
+        );
+        $unchangeableStatuses = $unchangeableStatusesValue === null
+            ? []
+            : explode(',', $unchangeableStatusesValue);
 
         $statusAcceptPayment = $this->_scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',

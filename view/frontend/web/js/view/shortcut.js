@@ -28,7 +28,8 @@ define([
             let self = this,
                 autopay = new window.autopay.checkout({
                     merchantId: this.merchantId,
-                    language: 'pl'
+                    theme: 'dark',
+                    language: 'en'
                 }),
                 button = autopay.createButton(),
                 container = $('.' + this.selector + ' .autopay-button');
@@ -37,7 +38,8 @@ define([
 
             console.log('Autopay Init params', {
                 merchantId: this.merchantId,
-                language: 'pl'
+                theme: 'dark',
+                language: 'en'
             });
 
             autopay.onBeforeCheckout = () => {
