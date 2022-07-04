@@ -32,7 +32,7 @@ define([
                 } else {
                     this.whenAvailable(name, callback);
                 }
-            }, interval);
+            }.bind(this), interval);
         },
 
 
@@ -44,16 +44,16 @@ define([
 
             this.whenAvailable('autopay', function() {
                 autopay = new window.autopay.checkout({
-                    merchantId: this.merchantId,
+                    merchantId: self.merchantId,
                     theme: 'dark',
                     language: 'en'
                 });
                 button = autopay.createButton();
 
-                this.autopay = autopay;
+                self.autopay = autopay;
 
                 console.log('Autopay Init params', {
-                    merchantId: this.merchantId,
+                    merchantId: self.merchantId,
                     theme: 'dark',
                     language: 'en'
                 });
@@ -70,13 +70,13 @@ define([
                             $(document).one('customer-data-reloaded', () => {
                                 console.log('customer-data-reloaded event');
 
-                                this.setAutopayData();
+                                self.setAutopayData();
                                 resolve();
                             });
 
                             self.addToCart();
                         } else {
-                            this.setAutopayData();
+                            self.setAutopayData();
                             resolve();
                         }
                     });
