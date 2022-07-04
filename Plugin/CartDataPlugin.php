@@ -28,6 +28,7 @@ class CartDataPlugin
 
         $result['cart_id'] = $quote->getId();
         $result['currency'] = $quote->getQuoteCurrencyCode();
+        $result['grand_total'] = $quote->getGrandTotal();
 
         return $result;
     }

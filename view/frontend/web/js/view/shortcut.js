@@ -114,7 +114,7 @@ define([
 
             console.log({
                 id: cartData.cart_id,
-                amount: cartData.subtotalAmount,
+                amount: cartData.grand_total,
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,
@@ -122,7 +122,7 @@ define([
 
             this.autopay.setTransactionData({
                 id: cartData.cart_id,
-                amount: cartData.subtotalAmount,
+                amount: cartData.grand_total,
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,
