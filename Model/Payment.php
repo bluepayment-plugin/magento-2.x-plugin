@@ -56,6 +56,7 @@ use SimpleXMLElement;
 class Payment extends AbstractMethod
 {
     public const METHOD_CODE = 'bluepayment';
+    public const METHOD_CODE_AUTOPAY = 'autopay';
     public const IFRAME_GATEWAY_ID = 'IFRAME';
     public const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
@@ -793,7 +794,7 @@ class Payment extends AbstractMethod
         foreach ($orders as $order) {
             $orderPayment = $order->getPayment();
 
-            if ($orderPayment === null || $orderPayment->getMethod() !== self::METHOD_CODE) {
+            if ($orderPayment === null || !in_array($orderPayment->getMethod(), [self::METHOD_CODE, self::METHOD_CODE_AUTOPAY])) {
                 continue;
             }
 
