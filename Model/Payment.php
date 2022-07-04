@@ -1354,8 +1354,14 @@ class Payment extends AbstractMethod
                 'orderIds' => $orderIds
             ]);
         } else {
+            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+
+            if (! $order->getId()) {
+                $order = $this->orderFactory->create()->load($orderId);
+            }
+
             /** @var Order[] $orders */
-            $orders = [$this->orderFactory->create()->loadByIncrementId($orderId)];
+            $orders = [$order];
         }
 
         return $orders;

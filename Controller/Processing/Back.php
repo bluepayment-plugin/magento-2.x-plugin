@@ -124,6 +124,10 @@ class Back extends Action
                 $order = $orders->getFirstItem();
             } else {
                 $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+
+                if (! $order->getId()) {
+                    $order = $this->orderFactory->create()->load($orderId);
+                }
             }
 
             /** @var Order $order */
