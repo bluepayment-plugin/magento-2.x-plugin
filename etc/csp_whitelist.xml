@@ -43,5 +43,10 @@
                 <value id="connect_ga" type="host">*.google-analytics.com</value>
             </values>
         </policy>
+        <policy id="font-src">
+            <values>
+                <value id="google_fonts" type="host">fonts.gstatic.com</value>
+            </values>
+        </policy>
     </policies>
 </csp_whitelist>
