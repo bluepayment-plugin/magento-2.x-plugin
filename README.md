@@ -287,7 +287,7 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 Opcja dostępna od wersji 2.19.0.
 
 **Dzięki temu rozwiąznaiu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
-Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowania użytkowników.
+Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowań użytkowników.
 
 Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
 - **view_item_list** – użytkownik zobaczył produkt na liście,
