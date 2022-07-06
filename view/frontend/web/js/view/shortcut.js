@@ -74,7 +74,14 @@ define([
                                 resolve();
                             });
 
-                            self.addToCart();
+                            if (!self.productAddedToCart) {
+                                // Add to cart
+                                self.addToCart();
+                            } else {
+                                // If already added - just set data and resolve promise.
+                                self.setAutopayData();
+                                resolve();
+                            }
                         } else {
                             self.setAutopayData();
                             resolve();
@@ -93,16 +100,13 @@ define([
 
         addToCart: function () {
             var $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
+            $form.trigger('submit');
 
-            if (!this.productAddedToCart) {
-                $form.trigger('submit');
-
-                if ($form.validation) {
-                    this.formInvalid = !$form.validation('isValid');
-                }
-
-                this.productAddedToCart = true;
+            if ($form.validation) {
+                this.formInvalid = !$form.validation('isValid');
             }
+
+            this.productAddedToCart = true;
         },
 
         isCatalogProduct: function() {
