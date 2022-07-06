@@ -56,6 +56,7 @@ use SimpleXMLElement;
 class Payment extends AbstractMethod
 {
     public const METHOD_CODE = 'bluepayment';
+    public const METHOD_CODE_AUTOPAY = 'autopay';
     public const IFRAME_GATEWAY_ID = 'IFRAME';
     public const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
@@ -726,10 +727,13 @@ class Payment extends AbstractMethod
 
         $this->saveTransactionResponse($payment);
 
-        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue(
+        $unchangeableStatusesValue = $this->_scopeConfig->getValue(
             'payment/bluepayment/unchangeable_statuses',
             ScopeInterface::SCOPE_STORE
-        ));
+        );
+        $unchangeableStatuses = $unchangeableStatusesValue === null
+            ? []
+            : explode(',', $unchangeableStatusesValue);
 
         $statusAcceptPayment = $this->_scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
@@ -790,7 +794,7 @@ class Payment extends AbstractMethod
         foreach ($orders as $order) {
             $orderPayment = $order->getPayment();
 
-            if ($orderPayment === null || $orderPayment->getMethod() !== self::METHOD_CODE) {
+            if ($orderPayment === null || !in_array($orderPayment->getMethod(), [self::METHOD_CODE, self::METHOD_CODE_AUTOPAY])) {
                 continue;
             }
 
@@ -1351,8 +1355,14 @@ class Payment extends AbstractMethod
                 'orderIds' => $orderIds
             ]);
         } else {
+            $order = $this->orderFactory->create()->loadByIncrementId($orderId);
+
+            if (! $order->getId()) {
+                $order = $this->orderFactory->create()->load($orderId);
+            }
+
             /** @var Order[] $orders */
-            $orders = [$this->orderFactory->create()->loadByIncrementId($orderId)];
+            $orders = [$order];
         }
 
         return $orders;

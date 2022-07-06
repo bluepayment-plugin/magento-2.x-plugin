@@ -5,6 +5,7 @@
             <values>
                 <value id="img_bm" type="host">platnosci.bm.pl</value>
                 <value id="img_gpay" type="host">www.gstatic.com</value>
+                <value id="img_autopay" type="host">app.autopay.pl</value>
             </values>
         </policy>
         <policy id="script-src">
@@ -40,6 +41,11 @@
         <policy id="connect-src">
             <values>
                 <value id="connect_ga" type="host">*.google-analytics.com</value>
+            </values>
+        </policy>
+        <policy id="font-src">
+            <values>
+                <value id="google_fonts" type="host">fonts.gstatic.com</value>
             </values>
         </policy>
     </policies>
