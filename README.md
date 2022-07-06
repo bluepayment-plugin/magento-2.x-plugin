@@ -283,6 +283,45 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
 
+## Rozszerzona Analityka - Google Analytics 4 e-commerce
+Opcja dostępna od wersji 2.19.0.
+
+**Dzięki temu rozwiąznaiu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
+Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowania użytkowników.
+
+Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
+- **view_item_list** - produkt został wyświetlony użytkownikowi na liście,
+- **view_item** - użytkownik wyświetlił stronę produktu,
+- **add_to_cart** - użytkownik dodał produkt do koszyka,
+- **remove_from_cart** - użytkownik usunął produkt z koszyka,
+- **begin_checkout** - użytkownik rozpoczął proces zamówienia (koszyk i/lub wybór metody dostawy),
+- **checkout_progress** - użytkownik przeszedł do drugiego kroku zamówienia (wybór metody płatności),
+- **set_checkout_option** - użytkownik uzupełnił dane zamówienia,
+- **purchase** - użytkownik złożył zamówienie **oraz opłacił je poprzez płatność BlueMedia** (oznaczenie jako konwersja).
+
+### Utworzenie nowego klucza API Google Analytics
+1. Przejdź do [Google Analytics](http://analytics.google.com).
+2. Przejdź do **Administracja (Admin)**.
+3. Wybiecz odpowiednie konto oraz usługę.
+4. Kliknij **Strumienie danych (Streams)**.  
+   ![ga1.png](docs/ga1.png "Screenshot")
+5. Kliknij odpowiedni stream.  
+   ![ga2.png](docs/ga2.png "Screenshot")
+6. Wybierz **Tajne klucze API platformy Measurement Protocol (Measurement Protocol)** (w tabeli **Ustawienia dodatkowe**).  
+   ![ga3.png](docs/ga3.png "Screenshot")
+7. Kliknij **Utwórz (Create)**.
+
+### Konfiguracja Google Analytics
+1. Wybierz z menu **Sklepy (Stores)** -> **Konfiguracja (Configuration)** -> **Sprzedaż (Sales)** -> **Google API**.    
+   ![analytics1.png](docs/analytics1.png "Screenshot")
+2. Zaznacz opcję **Włączony (Enabled)** na **Tak (Yes)**.
+3. Wprowadź kod śledzenia w polu **Account Number (GA4)** (w formacie G-XXXXXXXXXX).
+4. Wprowadź **API Secret** wygenerowany zgodnie z instrukcją powyżej.  
+   ![analytics2.png](docs/analytics2.png "Screenshot")
+5. Kliknij **Zapisz konfigurację (Save Config)**.
+6. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+
+
 ## Wywoływanie eventów
 Opcja dostępna od wersji 2.19.0.
 
