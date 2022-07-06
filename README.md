@@ -79,7 +79,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
    1. **ID serwisu (Service partner ID)**
    2. **Klucz współdzielony (Shared Key)** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Konfiguracja hasha** -> **klucz**
       ![configuration3.png](docs/configuration3.png "Screenshot")
-4. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 ### Konfiguracja kanałów płatności
 1. Zaloguj się do panelu administracyjnego w platformie Magento 2
@@ -88,7 +88,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
 #### Wybór kanału płatności w sklepie
 1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Zaznacz **Tak (whitelabel) (YES (whitelabel)** przy polu **Pokaż kanały płatności w sklepie (Show payment gateways in store)**
-3. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+3. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 #### Odświeżenie listy kanałów płatności
 
@@ -129,7 +129,7 @@ Opcja dostępna od wersji 2.9.0 - **domyślnie włączona**.
 Jeżeli chcesz zawsze wyświetlać pełną listę kanałów płatności:
 1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Kliknij **Wyłącz (Disabled)** w polu **Zwijalna lista kanałów (Collapsible gateway list)**
-3. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+3. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 ### Odświeżenie pamięci podręcznej
 Odśwież pamięć podręczną po każdej edycji konfiguracji. Żeby to zrobić:
@@ -151,7 +151,7 @@ Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia z
 2. Kliknij **Włącz (Enable)** przy opcji **Płatność w iFrame (Iframe Payment)**.
 3. Przejdź do edycji kanału o ID *1500* i nazwie banku *Karty*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-5. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 ## BLIK 0
 BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję należy wpisać bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -163,7 +163,7 @@ BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję n
 2. Kliknij **Włącz (Enable)** przy opcji **BLIK 0**.
 3. Przejdź do edycji kanału o ID *509* i nazwie kanału *BLIK*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-5. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 ## Google Pay
 Opcja umożliwia dokonanie płatności z użyciem Google Pay bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -187,7 +187,7 @@ Płatność automatyczna dostępna jest tylko dla zalogowanych klientów Twojego
 2. Wypełnij **Autopay Agreement** odpowiednim regulaminem – do akceptacji przez klienta.
 3. Przejdź do edycji kanału o ID *1503* i rodzaju *Płatność automatyczna*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-5. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 
 ### Zarządzanie kartami
@@ -229,7 +229,7 @@ Wykorzystywany szablon: `view/frontend/template/redirect.phtml`
 1. Przejdź do [Konfiguracji modułu](#konfiguracja)
 2. Ustaw **Włącz (Enable)** przy opcji **Pokaż stronę przekierowania (Show waiting page before redirect)**
 3. Ustaw opcję **Sekund oczekiwania przed przekierowaniem (Seconds to wait before redirect)** – w celu określenia jak długo strona ma być wyświetlana.
-4. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 ## Zwroty
 Moduł umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność, poprzez fakturę korygującą (**Credit Memo on-line**) oraz bezpośrednio z zamówienia.
@@ -283,31 +283,32 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
 
-## Rozszerzona Analityka - Google Analytics 4 e-commerce
+## Rozszerzona Analityka – Google Analytics 4 e-commerce
 Opcja dostępna od wersji 2.19.0.
 
 **Dzięki temu rozwiąznaiu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
 Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowania użytkowników.
 
 Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
-- **view_item_list** - produkt został wyświetlony użytkownikowi na liście,
-- **view_item** - użytkownik wyświetlił stronę produktu,
-- **add_to_cart** - użytkownik dodał produkt do koszyka,
-- **remove_from_cart** - użytkownik usunął produkt z koszyka,
-- **begin_checkout** - użytkownik rozpoczął proces zamówienia (koszyk i/lub wybór metody dostawy),
-- **checkout_progress** - użytkownik przeszedł do drugiego kroku zamówienia (wybór metody płatności),
-- **set_checkout_option** - użytkownik uzupełnił dane zamówienia,
-- **purchase** - użytkownik złożył zamówienie **oraz opłacił je poprzez płatność BlueMedia** (oznaczenie jako konwersja).
+- **view_item_list** – użytkownik zobaczył produkt na liście,
+- **view_item** – użytkownik wyświetlił stronę produktu,
+- **add_to_cart** – użytkownik dodał produkt do koszyka,
+- **remove_from_cart** – użytkownik usunął produkt z koszyka,
+- **begin_checkout** – użytkownik rozpoczął proces zamówienia (koszyk i/lub wybór metody dostawy),
+- **checkout_progress** – użytkownik przeszedł do drugiego kroku zamówienia (wybór metody płatności),
+- **set_checkout_option** – użytkownik uzupełnił dane zamówienia,
+- **purchase** – użytkownik złożył zamówienie **oraz opłacił je poprzez płatność BlueMedia** (oznaczenie jako konwersja).
 
 ### Utworzenie nowego klucza API Google Analytics
 1. Przejdź do [Google Analytics](http://analytics.google.com).
 2. Przejdź do **Administracja (Admin)**.
-3. Wybiecz odpowiednie konto oraz usługę.
+3. Wybierz odpowiednie konto oraz usługę.
 4. Kliknij **Strumienie danych (Streams)**.  
    ![ga1.png](docs/ga1.png "Screenshot")
-5. Kliknij odpowiedni stream.  
+5. Kliknij odpowiedni stream, który jest przypisany do Twojego sklepu. 
    ![ga2.png](docs/ga2.png "Screenshot")
-6. Wybierz **Tajne klucze API platformy Measurement Protocol (Measurement Protocol)** (w tabeli **Ustawienia dodatkowe**).  
+   i. Jeśli nie utworzyłeś wcześniej streamu, możesz to zrobić klikając w przycisk **Dodaj strumień (Add stream)** -> **Sieć (Web)** -> Uzupełnij adres URL sklepu, nazwę strumienia i następnie kliknij **Utwórz strumień (Create stream)**.
+6. Wybierz **Tajne klucze API platformy Measurement Protocol (Measurement Protocol)** (w tabeli **Ustawienia dodatkowe**).
    ![ga3.png](docs/ga3.png "Screenshot")
 7. Kliknij **Utwórz (Create)**.
 
@@ -319,22 +320,22 @@ Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
 4. Wprowadź **API Secret** wygenerowany zgodnie z instrukcją powyżej.  
    ![analytics2.png](docs/analytics2.png "Screenshot")
 5. Kliknij **Zapisz konfigurację (Save Config)**.
-6. [Odśwież pamięć podręczną](#odświeżenie-pamięci-podręcznej)
+6. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 
 ## Wywoływanie eventów
 Opcja dostępna od wersji 2.19.0.
 
 Po otrzymaniu nowego statusu płatności - wywoływany jest jeden z eventów:
-- `bluemedia_payment_failure` - płatność zakończona niepowodzeniem,
-- `bluemedia_payment_pending` - płatność oczekująca,
-- `bluemedia_payment_success` - płatność zakończona sukcesem.
+- `bluemedia_payment_failure` – płatność zakończona niepowodzeniem,
+- `bluemedia_payment_pending` – płatność oczekująca,
+- `bluemedia_payment_success` – płatność zakończona sukcesem.
 
 Eventy uruchamiane są po zapisaniu nowego statusu zamówienia.  
 W ramach eventu, przekazywane są dane:
-- `order` - instancja `\Magento\Sales\Model\Order`
-- `payment` - instancja `\Magento\Sales\Model\OrderPayment`
-- `transaction_id` - identyfikator transakcji w systemie BlueMedia (`string`)
+- `order` – instancja `\Magento\Sales\Model\Order`
+- `payment` – instancja `\Magento\Sales\Model\OrderPayment`
+- `transaction_id` – identyfikator transakcji w systemie BlueMedia (`string`)
 
 ## Obsługa GraphQL oraz integracja z Magento PWA
 
@@ -344,7 +345,7 @@ Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegół
 ## Aktualizacja
 
 ### Przez composera
-1. Wykonać komendę
+1. Wykonaj komendę
 ```bash
 composer update bluepayment-plugin/module-bluepayment
 bin/magento setup:upgrade
@@ -377,7 +378,7 @@ bin/magento cache:flush
 
 ### Dezaktywacja za pośrednictwem panelu administracyjnego (tylko do wersji Magneto 2.3)
 1. Będąc zalogowanym do panelu administracyjnego, wybierz z menu głównego **System** -> **Web Setup Wizard**. System poprosi Cię o ponowne zalogowanie się.
-2. Przejdź do **Menadżera komponentów (Component Manager) i znajdź na liście moduł **BlueMedia/BluePayment** i Kkliknij **Select**, a póżniej **Disable**.
+2. Przejdź do **Menadżera komponentów (Component Manager)** i znajdź na liście moduł **BlueMedia/BluePayment** i kliknij **Select**, a póżniej **Disable**.
 
    ![dezactivation1.png](docs/dezactivation1.png)
 3. Kliknij **Start Readiness Check**, żeby zainicjować wykonanie weryfikacji zależności, po czym kliknij **Next**. 
