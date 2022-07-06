@@ -54,44 +54,58 @@ define([
 
                 self.autopay = autopay;
 
-                console.log('Autopay Init params', {
+                self.log('Init params', {
                     merchantId: self.merchantId,
                     theme: 'dark',
                     language: 'en'
                 });
 
+                self.onRemoveFromCartListener();
+
                 autopay.onBeforeCheckout = () => {
+                    self.log('onBeforeCheckout executed');
+
                     return new Promise((resolve, reject) => {
                         if (self.isCatalogProduct()) {
-                            $(document).one('ajax:addToCart', () => {
-                                console.log('addToCart event');
-
-                                customerData.reload(['cart'], true);
-                            });
-
-                            $(document).one('customer-data-reloaded', () => {
-                                console.log('customer-data-reloaded event');
-
-                                self.setAutopayData();
-                                resolve();
-                            });
-
                             if (!self.productAddedToCart) {
+                                $(document).one('autopay:cart-cleared', () => {
+                                    self.log('Cart cleared event');
+
+                                    // After clear Cart
+                                    self.addToCart();
+                                });
+
+                                $(document).one('ajax:addToCart', () => {
+                                    // After add to cart
+                                    self.log('addToCart event');
+
+                                    customerData.reload(['cart'], true);
+
+                                    if (! self.productAddedToCart) {
+                                        reject('Product not added to cart');
+                                    } else {
+                                        $(document).one('customer-data-reloaded', () => {
+                                            self.log('customer-data-reloaded event');
+
+                                            // After customerData reloaded
+                                            self.setAutopayData();
+                                            resolve();
+                                        });
+                                    }
+                                });
+
                                 // Clear whole cart
-                                self.clearCart();
-
-                                // Add to cart
-                                self.addToCart();
-
-                                if (! self.productAddedToCart) {
-                                    reject('Product not added to cart');
-                                }
+                                self.clearCart(reject);
                             } else {
+                                self.log('Product already added to cart');
+
                                 // If already added - just set data and resolve promise.
                                 self.setAutopayData();
                                 resolve();
                             }
                         } else {
+                            self.log('Not catalog product');
+
                             self.setAutopayData();
                             resolve();
                         }
@@ -115,9 +129,15 @@ define([
                 this.formInvalid = !$form.validation('isValid');
 
                 if (! this.formInvalid) {
+                    this.log('Form is valid');
+
                     this.productAddedToCart = true;
+                } else {
+                    this.log('Form is invalid');
                 }
             } else {
+                this.log('Form validation is not available');
+
                 this.productAddedToCart = true;
             }
         },
@@ -129,7 +149,7 @@ define([
         setAutopayData: function () {
             let cartData = customerData.get('cart')();
 
-            console.log({
+            this.log('SetTransactionData', {
                 id: cartData.cart_id,
                 amount: cartData.grand_total,
                 currency: cartData.currency,
@@ -146,7 +166,11 @@ define([
             });
         },
 
-        clearCart: function () {
+        clearCart: function (reject) {
+            const self = this;
+
+            self.log('Clear cart started');
+
             $.ajax({
                 url: url.build('checkout/cart/updatePost'),
                 data: {
@@ -154,7 +178,6 @@ define([
                     update_cart_action: 'empty_cart',
                 },
                 type: 'post',
-                dataType: 'json',
                 context: this,
                 beforeSend: function () {
                     $(document.body).trigger('processStart');
@@ -164,37 +187,47 @@ define([
                 }
             })
                 .done((response) => {
-                    if (response.success) {
-                        $(document).trigger('ajax:updateCartItemQty');
+                    self.log('Cart cleared');
 
-                        this.onSuccess();
-                    } else {
-                        console.log(response);
-                        this.onError(response);
-                    }
-                }).fail((err) => {
-                    console.warn(err.error);
-                    console.log('Fail');
+                    $(document).trigger('autopay:cart-cleared');
+                })
+                .fail((response) => {
+                    self.log('Cart clear failed', response);
+
+                    reject('Unable to clear cart...');
                 });
         },
 
-        onError: function (response) {
-            console.error(response);
+        onRemoveFromCartListener: function () {
+            const self = this;
 
-            // if (response['error_message']) {
-            //
-            //     alert({
-            //         content: response['error_message'],
-            //         actions: {
-            //             /** @inheritdoc */
-            //             always: function () {
-            //                 that.submitForm();
-            //             }
-            //         }
-            //     });
-            // } else {
-            //     this.submitForm();
-            // }
+            $(document).on('ajax:removeFromCart', function (event, data) {
+                self.log('Remove from cart event');
+                self.productAddedToCart = false;
+            });
+        },
+
+        log: function (message, object = null) {
+            message = '[AutoPay]' + this.formatConsoleDate(new Date()) + message;
+
+            console.log(message, object);
+        },
+
+        formatConsoleDate: (date) => {
+            var hour = date.getHours();
+            var minutes = date.getMinutes();
+            var seconds = date.getSeconds();
+            var milliseconds = date.getMilliseconds();
+
+            return '[' +
+                ((hour < 10) ? '0' + hour: hour) +
+                ':' +
+                ((minutes < 10) ? '0' + minutes: minutes) +
+                ':' +
+                ((seconds < 10) ? '0' + seconds: seconds) +
+                '.' +
+                ('00' + milliseconds).slice(-3) +
+                '] ';
         }
     });
 });
