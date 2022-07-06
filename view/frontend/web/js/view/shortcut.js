@@ -2,8 +2,10 @@ define([
     'jquery',
     'uiComponent',
     'Magento_Customer/js/customer-data',
+    'mage/url',
+    'Magento_Ui/js/modal/alert',
     'domReady!'
-], function ($, Component, customerData) {
+], function ($, Component, customerData, url, alert) {
     'use strict';
 
     return Component.extend({
@@ -75,8 +77,15 @@ define([
                             });
 
                             if (!self.productAddedToCart) {
+                                // Clear whole cart
+                                self.clearCart();
+
                                 // Add to cart
                                 self.addToCart();
+
+                                if (! self.productAddedToCart) {
+                                    reject('Product not added to cart');
+                                }
                             } else {
                                 // If already added - just set data and resolve promise.
                                 self.setAutopayData();
@@ -99,14 +108,18 @@ define([
         },
 
         addToCart: function () {
-            var $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
+            const $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
             $form.trigger('submit');
 
             if ($form.validation) {
                 this.formInvalid = !$form.validation('isValid');
-            }
 
-            this.productAddedToCart = true;
+                if (! this.formInvalid) {
+                    this.productAddedToCart = true;
+                }
+            } else {
+                this.productAddedToCart = true;
+            }
         },
 
         isCatalogProduct: function() {
@@ -131,6 +144,57 @@ define([
                 label: cartData.cart_id,
                 productList: cartData.items,
             });
+        },
+
+        clearCart: function () {
+            $.ajax({
+                url: url.build('checkout/cart/updatePost'),
+                data: {
+                    form_key: $('[name=form_key]').val(),
+                    update_cart_action: 'empty_cart',
+                },
+                type: 'post',
+                dataType: 'json',
+                context: this,
+                beforeSend: function () {
+                    $(document.body).trigger('processStart');
+                },
+                complete: () => {
+                    $(document.body).trigger('processStop');
+                }
+            })
+                .done((response) => {
+                    if (response.success) {
+                        $(document).trigger('ajax:updateCartItemQty');
+
+                        this.onSuccess();
+                    } else {
+                        console.log(response);
+                        this.onError(response);
+                    }
+                }).fail((err) => {
+                    console.warn(err.error);
+                    console.log('Fail');
+                });
+        },
+
+        onError: function (response) {
+            console.error(response);
+
+            // if (response['error_message']) {
+            //
+            //     alert({
+            //         content: response['error_message'],
+            //         actions: {
+            //             /** @inheritdoc */
+            //             always: function () {
+            //                 that.submitForm();
+            //             }
+            //         }
+            //     });
+            // } else {
+            //     this.submitForm();
+            // }
         }
     });
 });
