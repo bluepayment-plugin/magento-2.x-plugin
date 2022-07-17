@@ -1,7 +1,12 @@
 # What's new in BluePayment?
 
+## Version 2.19.2
+- We've separated the consent display into a separate knockout view.
+- We've added the host `platnosci-accept.bm.pl` to CSP.
+- We've corrected an error when creating Google Pay payments.
+
 ## Version 2.19.1
-- Bugfix - remove invalid component in default.xml
+- Bugfix - we've removed invalid component in default.xml
 
 ## Version 2.19.0
 - We added extended Google Analytics 4.
