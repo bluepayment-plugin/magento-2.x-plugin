@@ -39,7 +39,7 @@ define([
 
 
         initAutopay: function () {
-            let self = this,
+            var self = this,
                 autopay,
                 button,
                 container = $('.' + this.selector + ' .autopay-button');
@@ -147,7 +147,7 @@ define([
         },
 
         setAutopayData: function () {
-            let cartData = customerData.get('cart')();
+            var cartData = customerData.get('cart')();
 
             this.log('SetTransactionData', {
                 id: cartData.cart_id,

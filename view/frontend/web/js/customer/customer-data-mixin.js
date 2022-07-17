@@ -7,7 +7,7 @@ define(['ko', 'jquery', 'Magento_Customer/js/section-config', 'mage/url'],
             url.setBaseUrl(window.BASE_URL);
             options.sectionLoadUrl = url.build('customer/section/load');
 
-            let dataProvider = {
+            var dataProvider = {
                 /**
                  * @param {Object} sectionNames
                  * @param {Boolean} forceNewSectionTimestamp

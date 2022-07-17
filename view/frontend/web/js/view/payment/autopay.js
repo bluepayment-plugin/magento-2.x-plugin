@@ -8,7 +8,7 @@ define(
         rendererList
     ) {
         'use strict';
-        let config = window.checkoutConfig.payment;
+        var config = window.checkoutConfig.payment;
 
         rendererList.push(
             {

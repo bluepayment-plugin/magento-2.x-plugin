@@ -1,0 +1,44 @@
+<div data-bind="foreach: agreements">
+    <div data-bind='foreach: labelList'>
+        <div data-bind='attr: {
+            class: "bluepayment-agreement" + (checkboxRequired ? " required" : "")
+        }'>
+            <!-- ko if: showCheckbox -->
+                <!-- ko if: checkboxRequired -->
+                <input type="checkbox"
+                       required
+                       class="required-entry"
+                       data-bind='
+                           attr: {
+                                id: "agreement_bluepayment_" + $parent.regulationID,
+                                name: "bluepayment_regulations[" + $parent.regulationID + "]",
+                                value: $parent.regulationID
+                           },
+                           checkedValue: $parent.regulationID,
+                           checked: $parents[1].selected
+                        ' />
+                <!-- /ko -->
+
+                <!-- ko ifnot: checkboxRequired -->
+                <input type="checkbox"
+                       data-bind='
+                           attr: {
+                                id: "agreement_bluepayment_" + $parent.regulationID,
+                                name: "bluepayment_regulations[" + $parent.regulationID + "]",
+                                value: $parent.regulationID
+                           },
+                           checkedValue: $parent.regulationID,
+                           checked: $parents[1].selected
+                        ' />
+                <!-- /ko -->
+            <!-- /ko -->
+
+            <label class="label"
+                   data-bind='attr: {
+                        for: showCheckbox ? ("agreement_bluepayment_" + $parent.regulationID) : ""
+                   }'>
+                <span data-bind="html: inputLabel"></span>
+            </label>
+        </div>
+    </div>
+</div>

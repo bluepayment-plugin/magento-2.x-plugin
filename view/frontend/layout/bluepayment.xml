@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<layout version="0.1.0">
-    <bluepayment_processing_back>
-        <reference name="root">
-            <action method="setTemplate"><template>empty.phtml</template></action>
-            <block type="Magento\Framework\View\Element\Template" name="bluepayment_child" template="back.phtml" />
-        </reference>
-    </bluepayment_processing_back>
-</layout>
