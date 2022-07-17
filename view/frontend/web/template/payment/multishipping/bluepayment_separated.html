@@ -13,49 +13,9 @@
         <!-- ko i18n: 'You will be redirected to the Blue Media secure service payment after submitting the order.' --><!-- /ko -->
     </div>
 
-    <div class="bluepayment-agreements-block" data-bind='foreach: agreements'>
-        <div data-bind='foreach: labelList'>
-            <div data-bind='attr: {
-                        class: "bluepayment-agreement" + (checkboxRequired ? " required" : "")
-                    }'>
-                <!-- ko if: showCheckbox -->
-                <!-- ko if: checkboxRequired -->
-                <input type="checkbox"
-                       required
-                       class="required-entry"
-                       data-bind='event: {change: $parents[1].agreementChanged.bind($parents[1])}, attr: {
-                                           id: "agreement_bluepayment_" + $parent.regulationID,
-                                           name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                           value: $parent.regulationID
-                                       }' />
-                <!-- /ko -->
-
-                <!-- ko ifnot: checkboxRequired -->
-                <input type="checkbox"
-                       data-bind='event: {change: $parents[1].agreementChanged.bind($parents[1])}, attr: {
-                                       id: "agreement_bluepayment_" + $parent.regulationID,
-                                       name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                       value: $parent.regulationID
-                                   }' />
-                <!-- /ko -->
-                <!-- /ko -->
-
-                <!-- ko ifnot: showCheckbox -->
-                <input type="hidden"
-                       data-bind='attr: {
-                                    name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                    value: $parent.regulationID
-                               }'
-                >
-                <!-- /ko -->
-
-                <label class="label"
-                       data-bind='attr: {
-                                for: showCheckbox ? ("agreement_bluepayment_" + $parent.regulationID) : ""
-                           }'>
-                    <span data-bind="html: inputLabel"></span>
-                </label>
-            </div>
-        </div>
+    <div class="bluepayment-agreements-block">
+        <!-- ko foreach: getRegion('bluepayment-agreements') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
     </div>
 </div>

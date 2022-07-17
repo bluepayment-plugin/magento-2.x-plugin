@@ -1,7 +1,6 @@
 <?php
 /** @var \BlueMedia\BluePayment\Block\Form $block */
 $gatewayId = $block->getGatewayId();
-$isAutopay = $gatewayId === \BlueMedia\BluePayment\Model\ConfigProvider::AUTOPAY_GATEWAY_ID;
 ?>
 
 <script>
@@ -20,7 +19,15 @@ $isAutopay = $gatewayId === \BlueMedia\BluePayment\Model\ConfigProvider::AUTOPAY
                     component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment_autopay',
                     name: 'payment_method_bluepayment_<?= $gatewayId; ?>',
                     method: paymentMethodData.method,
-                    item: paymentMethodData
+                    item: paymentMethodData,
+                    children: [{
+                        'name': 'bluepayment-agreements',
+                        'component': 'BlueMedia_BluePayment/js/view/checkout/bluepayment-agreements',
+                        'displayArea': 'bluepayment-agreements',
+                        'config': {
+                            'template': 'BlueMedia_BluePayment/checkout/bluepayment-agreements',
+                        }
+                    }]
                 }
             ]);
 

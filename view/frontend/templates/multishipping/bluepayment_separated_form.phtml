@@ -11,7 +11,7 @@ $gatewayId = $block->getGatewayId();
         $(function () {
             var paymentMethodData = {
                 method: 'bluepayment',
-                gateway_id: <?= $gatewayId; ?>
+                gateway_id: <?= $gatewayId; ?>,
             };
 
             layout([
@@ -19,12 +19,20 @@ $gatewayId = $block->getGatewayId();
                     component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment_separated',
                     name: 'payment_method_bluepayment_<?= $gatewayId; ?>',
                     method: paymentMethodData.method,
-                    item: paymentMethodData
+                    item: paymentMethodData,
+                    children: [{
+                        'name': 'bluepayment-agreements',
+                        'component': 'BlueMedia_BluePayment/js/view/checkout/bluepayment-agreements',
+                        'displayArea': 'bluepayment-agreements',
+                        'config': {
+                            'template': 'BlueMedia_BluePayment/checkout/bluepayment-agreements',
+                        }
+                    }]
                 }
             ]);
 
             $('body').trigger('contentUpdated');
-        })
+        });
     })
 </script>
 <!-- ko template: getTemplate() --><!-- /ko -->
