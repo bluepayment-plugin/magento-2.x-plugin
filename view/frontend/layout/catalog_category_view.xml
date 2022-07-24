@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="columns">
+            <block name="bluemedia.cf.listing" template="BlueMedia_BluePayment::cf/horizontal.phtml" before="main">
+                <arguments>
+                    <argument name="position" xsi:type="string">listing</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

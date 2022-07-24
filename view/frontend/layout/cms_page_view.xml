@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="header.container">
+            <block name="bluemedia.cf.header" template="BlueMedia_BluePayment::cf/horizontal.phtml" before="header.panel.wrapper">
+                <arguments>
+                    <argument name="position" xsi:type="string">top</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+
+        <referenceContainer name="page.top">
+            <block name="bluemedia.cf.navigation" template="BlueMedia_BluePayment::cf/horizontal.phtml" before="header.panel.wrapper">
+                <arguments>
+                    <argument name="position" xsi:type="string">navigation</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>
