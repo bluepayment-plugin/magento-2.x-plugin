@@ -6,7 +6,7 @@ green=$(tput setaf 2)
 red=$(tput setaf 1)
 
 
-COMPOSER_VERSION=$(cat composer.json \
+PACKAGE_VERSION=$(cat composer.json \
   | grep version \
   | head -1 \
   | awk -F: '{ print $2 }' \
