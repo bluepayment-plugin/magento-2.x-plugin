@@ -29,26 +29,12 @@ and open the template in the editor.
     }
 
     .blue-payment {
+        min-height: 130px;
+
         &__blik {
-            hr {
-                margin-bottom: 0;
-            }
-            .blik-logo {
-                max-height: 80px;
-                float: left;
-            }
             .blik-code {
-                float: left;
-                margin-top: 24px;
                 width: 200px;
-            }
-            .blik-error {
-                clear: both;
-                margin-top: 0;
-                top: -20px;
-                left: 80px;
-                display: block;
-                position: relative;
+                margin-left: 15px;
             }
         }
 
@@ -68,12 +54,38 @@ and open the template in the editor.
             }
         }
 
+        .payment-method-title {
+            display: flex;
+            align-items: center;
+
+            input:focus,
+            select:focus,
+            textarea:focus,
+            button:focus {
+                outline: none;
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+            }
+
+            .payment-method-help-text {
+                display: block;
+                font-size: 1.2rem;
+                margin-top: 10px;
+                color: #666666;
+            }
+        }
+
         .payment-method-note {
             font-size: 14px;
         }
 
         .payment-icon {
             max-width: 100px;
+            width: 100px;
+            height: 100px;
         }
 
         .bluepayment-options-list {
@@ -83,15 +95,23 @@ and open the template in the editor.
             border-width: 1px 0 0 1px;
             border-style: solid;
             border-color: transparent;
+            display: flex;
+            flex-wrap: wrap;
 
             .payment-option {
-                float: left;
-                width: 25%;
-                height: 84px;
-                position: relative;
                 border: 1px solid #e6e6e6;
-                margin: -1px 0 0 -1px;
                 box-sizing: border-box;
+                text-align: center;
+                flex: 1 1 auto;
+                flex-grow: 0;
+                padding: 10px;
+                justify-content: center;
+                align-items: center;
+                display: flex;
+                justify-items: center;
+                width: 180px;
+
+                margin: -1px 0 0 -1px;
 
                 &._active {
                     outline: 2px solid #a6a6a6;
@@ -126,10 +146,6 @@ and open the template in the editor.
 
             .payment-logo {
                 max-height: 80px;
-                display: inline-block;
-                vertical-align: middle;
-                position: relative;
-                top: 1px;
             }
 
             input.radio {
@@ -143,12 +159,6 @@ and open the template in the editor.
                     outline: 0;
                     box-shadow: none;
                 }
-            }
-            label {
-                position: absolute;
-                width: calc(~"100% - 60px");
-                margin-left: 30px;
-                padding-left: 30px;
             }
             span {
                 display: block;
@@ -282,6 +292,7 @@ and open the template in the editor.
         .bluepayment-options-list {
             .payment-option {
                 width: 100%;
+
                 label {
                     margin-left: 0;
                     &:before {
@@ -302,3 +313,5 @@ and open the template in the editor.
         }
     }
 }
+
+@import "_consumer-finance";

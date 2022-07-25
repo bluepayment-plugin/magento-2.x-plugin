@@ -3,7 +3,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="payment">
-            <group id="bluepayment" translate="label" type="text" sortOrder="670" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="bluepayment" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Online payment BM</label>
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
@@ -118,6 +118,41 @@
                     <label>Status partial refund</label>
                     <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
                 </field>
+
+                <group id="consumer_finance" translate="label" type="text" sortOrder="699" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Promoting payments</label>
+
+                    <field id="info" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Promoting payments information</label>
+                        <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\ConsumerFinanceInfo</frontend_model>
+                    </field>
+
+                    <field id="top" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>At the top of the page</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field id="navigation" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Under the navigation</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field id="listing" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>On the product list</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field id="product" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>On the product page under the buttons</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field id="cart" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>In the shopping cart under the products</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+
                 <group id="pln" translate="label" type="text" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>PLN configuration</label>
                     <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
