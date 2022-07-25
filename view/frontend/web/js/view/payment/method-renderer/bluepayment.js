@@ -281,8 +281,8 @@ define([
                 }
 
                 if (gateway.is_alior_installments) {
-                    return $t('0% installments and even 48 installments. %1')
-                        .replace('%1', '<a href="https://pomoc.bluemedia.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Check out other installment options') + '</a>');
+                    return $t('0% installments and even 48 installments. %L')
+                        .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
                 }
 
                 return gateway.description;
