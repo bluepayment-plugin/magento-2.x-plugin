@@ -2,8 +2,8 @@
 
 ## Wersja 2.20.0
 - Dodaliśmy obsługę AutoPay
-- Dodanie boxów Consumer Finance.
-- Poprawienie wyglądu wyboru płatności.
+- Dodaliśmy promowanie płatności Consumer Finance.
+- Poprawiliśmy wygląd wyboru płatności.
 
 ## Wersja 2.19.2
 - Wydzieliliśmy wyświetlanie zgód do osobnego widoku knockout.
