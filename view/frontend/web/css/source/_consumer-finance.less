@@ -5,7 +5,7 @@
     background: transparent;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 10px 0;
 
 
     &.horizontal {
@@ -23,12 +23,13 @@
         flex-direction: column;
 
         .cf-item {
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin: 10px 0;
+
             img {
                 display: none;
             }
-
-            justify-content: flex-start;
-            align-items: flex-start;
         }
     }
 
@@ -65,7 +66,7 @@
                 background: #6B113D;
             }
         }
-        &.adj-installments {
+        &.hub {
             .label {
                 background: #00B5DD;
             }
@@ -75,14 +76,10 @@
 
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = 768px) {
     .bluemedia.consumer-finance {
-        &.vertical {
+        &.horizontal {
             flex-direction: column;
 
             .cf-item {
-                img {
-                    display: none;
-                }
-
                 justify-content: flex-start;
                 align-items: flex-start;
                 margin: 10px 10px;

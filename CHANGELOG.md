@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.20.0
+- Dodanie boxów Consumer Finance.
+- Poprawienie wyglądu wyboru płatności.
+
 ## Wersja 2.19.1
 - Bugfix - usunięcie błędnego komponentu w default.xml
 
