@@ -48,7 +48,7 @@ define([
                 autopay = new window.autopay.checkout({
                     merchantId: self.merchantId,
                     theme: 'dark',
-                    language: 'en'
+                    language: self.language
                 });
                 button = autopay.createButton();
 
@@ -57,7 +57,7 @@ define([
                 self.log('Init params', {
                     merchantId: self.merchantId,
                     theme: 'dark',
-                    language: 'en'
+                    language: self.language
                 });
 
                 self.onRemoveFromCartListener();
@@ -151,7 +151,7 @@ define([
 
             this.log('SetTransactionData', {
                 id: cartData.cart_id,
-                amount: cartData.grand_total,
+                amount: cartData.subtotalAmount,
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,
@@ -159,7 +159,7 @@ define([
 
             this.autopay.setTransactionData({
                 id: cartData.cart_id,
-                amount: cartData.grand_total,
+                amount: cartData.subtotalAmount,
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,

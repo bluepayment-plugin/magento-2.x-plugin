@@ -12,7 +12,8 @@ $randStr = random_int(10, 1000);
 <div class="autopay-shortcut autopay-shortcut-<?= $randStr ?>" data-mage-init='{"autopayShortcut":{
     "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>",
     "selector": "autopay-shortcut-<?= $randStr ?>",
-    "merchantId": "<?= $block->getMerchantId() ?>"
+    "merchantId": "<?= $block->getMerchantId() ?>",
+    "language": "<?= $block->getLanguage() ?>"
 }}'>
     <div class="autopay-button"></div>
 </div>

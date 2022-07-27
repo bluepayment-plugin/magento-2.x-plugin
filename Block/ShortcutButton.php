@@ -6,6 +6,7 @@ use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
 use Magento\Framework\View\Element\Template;
 use Magento\Catalog\Block\ShortcutInterface;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Store\Model\ScopeInterface;
 
 class ShortcutButton extends Template implements ShortcutInterface
 {
@@ -54,5 +55,32 @@ class ShortcutButton extends Template implements ShortcutInterface
     public function getMerchantId()
     {
         return $this->autopayConfigProvider->getMerchantId();
+    }
+
+    public function getLanguage()
+    {
+        $locale = $this->_scopeConfig
+            ->getValue(
+                'general/locale/code',
+                ScopeInterface::SCOPE_STORE
+            );
+
+        return $this->getLanguageFromLocale($locale);
+    }
+
+    private function getLanguageFromLocale($locale)
+    {
+        $locales = [
+            'pl_' => 'pl', // polski
+            'en_' => 'en', // angielski
+        ];
+
+        $prefix = substr($locale, 0, 3);
+
+        if (isset($locales[$prefix])) {
+            return $locales[$prefix];
+        }
+
+        return 'eb';
     }
 }
