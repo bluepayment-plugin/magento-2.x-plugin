@@ -26,7 +26,7 @@ class ConfigProvider implements ConfigProviderInterface
     public const AUTOPAY_GATEWAY_ID = 1503;
     public const SMARTNEY_GATEWAY_ID = 700;
     public const ALIOR_INSTALLMENTS_GATEWAY_ID = 1506;
-    public const HUB_GATEWAY_ID = 999999; // @ToDo - jakie GatewayID?
+    public const HUB_GATEWAY_ID = 702;
 
     public const ALWAYS_SEPARATED = [
         self::AUTOPAY_GATEWAY_ID,
