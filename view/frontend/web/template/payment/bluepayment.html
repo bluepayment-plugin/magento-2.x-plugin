@@ -36,6 +36,8 @@
                                 <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                     <img data-bind="attr:{src: logo_url,alt: name}"
                                          class="payment-logo"/>
+
+                                    <span class="payment-name" data-bind="text: name"></span>
                                 </label>
                             </li>
                         </ul>
@@ -171,24 +173,24 @@
                    "/>
 
             <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
-                <!-- ko ifnot: $data.is_blik -->
                 <img src=""
                      data-bind="attr: {src: logo_url,alt: name}"
                      class="payment-icon"/>
-                <!--/ko -->
 
-                <span data-bind="text: name"></span>
+                <p class="method-name">
+                    <span data-bind="text: $parent.getGatewayTitle($data)"></span>
+                    <!-- ko if: $parent.getGatewayDescription($data) -->
+                        <br />
+                        <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
+                    <!-- /ko -->
+
+                    <!-- ko if: ($parent.getGatewayHelp($data) && $parent.isSeparatedChecked($data)) -->
+                        <span data-bind="html: $parent.getGatewayHelp($data)" class="payment-method-help-text"></span>
+                    <!-- /ko -->
+                </p>
             </label>
 
-            <!-- ko if: $data.is_blik -->
-                <hr style="margin-bottom: 0;">
-
-                <!-- BLIK Logo -->
-                <img src=""
-                     data-bind="attr: {src: logo_url,alt: name}"
-                     class="blik-logo"/>
-                <!-- BLIK Logo -->
-
+            <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
                 <input type="tel"
                        name="payment_method_bluepayment_code"
                        class="blik-code"
