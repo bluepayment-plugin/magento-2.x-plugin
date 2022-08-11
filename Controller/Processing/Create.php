@@ -284,12 +284,7 @@ class Create extends Action
                     $token
                 );
 
-                var_dump($params);
-
                 $xml = $this->sendRequest($params);
-
-                var_dump($xml);
-                die;
 
                 if ($xml === false) {
                     $resultJson->setData([

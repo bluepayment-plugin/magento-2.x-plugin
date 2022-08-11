@@ -1,0 +1,21 @@
+<?php
+/** @var $block \BlueMedia\BluePayment\Block\Hub\Js */
+/** @var $escaper \Magento\Framework\Escaper */
+
+?>
+
+<!--<script src="https://bm-hub-test.bsbox.pl/static/assets/scripts/sdk.min.js"></script>-->
+<script src="<?= $block->getViewFileUrl('BlueMedia_BluePayment/js/hub/sdk.js'); ?>">
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "BlueMedia_BluePayment/js/hub/hub": {
+            "merchantId": "1234",
+            "productPriceClass": "",
+            "paymentPriceClass": "",
+            "paymentSelectorClass": ""
+        }
+    }
+}
+</script>

@@ -7,6 +7,8 @@
 
         <referenceContainer name="before.body.end">
             <block class="BlueMedia\BluePayment\Block\Analytics\GaData" name="bm_ga_data" as="bm_ga_data" template="BlueMedia_BluePayment::analytics/ga_data.phtml"/>
+
+            <block class="BlueMedia\BluePayment\Block\Hub\Js" name="bm_hub" as="bm_hub" template="BlueMedia_BluePayment::hub/js.phtml"/>
         </referenceContainer>
     </body>
 </page>
