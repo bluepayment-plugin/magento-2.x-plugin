@@ -4,6 +4,8 @@
 - We added Autopay support.
 - We added the promotion of Consumer Finance payments.
 - We improved the appearance of the payment selection.
+- We have added the **initialize** method to the **BluePayment\Model\Method\BluePayment**, which sets the default order status, according to the "Payment waiting status" setting in the module configuration (only for orders placed using the BlueMedia payment method).
+- We have added support for Magento 2.4.4 and PHP 8.1.
 
 ## Version 2.19.2
 - We've separated the consent display into a separate knockout view.
