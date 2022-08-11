@@ -13,6 +13,8 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Config;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -51,6 +53,9 @@ class ConfigProvider implements ConfigProviderInterface
 
     /** @var StoreManagerInterface */
     private $storeManager;
+
+    /** @var Config */
+    private $orderConfig;
 
     /** @var array */
     private $defaultSortOrder = [
@@ -128,7 +133,8 @@ class ConfigProvider implements ConfigProviderInterface
         CustomerSession $customerSession,
         CheckoutSession $checkoutSession,
         CardCollectionFactory $cardCollectionFactory,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        Config $orderConfig
     ) {
         $this->gatewayCollection = $gatewayCollection;
         $this->block = $block;
@@ -138,6 +144,7 @@ class ConfigProvider implements ConfigProviderInterface
         $this->checkoutSession = $checkoutSession;
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->storeManager = $storeManager;
+        $this->orderConfig = $orderConfig;
     }
 
     /**
@@ -415,5 +422,40 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/blik_zero',
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    public function getUnchangableStatuses(): array
+    {
+        return explode(
+            ',',
+            $this->scopeConfig->getValue(
+                'payment/bluepayment/unchangeable_statuses',
+                ScopeInterface::SCOPE_STORE
+            ) ?: ''
+        );
+    }
+
+    public function getStatusWaitingPayment(): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_waiting_payment',
+            ScopeInterface::SCOPE_STORE
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+    }
+
+    public function getStatusErrorPayment(): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_error_payment',
+            ScopeInterface::SCOPE_STORE
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+    }
+
+    public function getStatusSuccessPayment(): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_accept_payment',
+            ScopeInterface::SCOPE_STORE
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 }
