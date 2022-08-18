@@ -147,6 +147,7 @@ class Create extends Action
             $gatewayId = (int) $this->getRequest()->getParam('gateway_id', 0);
             $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int) $this->getRequest()->getParam('card_index', 0);
+            $hubToken = $this->getRequest()->getParam('hub_token', '');
 
             $resultJson = $this->resultJsonFactory->create();
 
@@ -377,7 +378,10 @@ class Create extends Action
             $params = $this->bluepayment->getFormRedirectFields(
                 $order,
                 $gatewayId,
-                $agreementsIds
+                $agreementsIds,
+                false,
+                '',
+                $hubToken
             );
             $xml = $this->sendRequest($params);
 

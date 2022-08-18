@@ -9,7 +9,6 @@ define([
 ], function () {
     'use strict';
 
-
     let whenAvailable = function(name, callback) {
         var interval = 10;
         window.setTimeout(function() {
@@ -25,15 +24,12 @@ define([
      * @param {Object} config
      */
     return function (config) {
-        // let hubDialog = document.createElement('div');
-        // hubDialog.id = 'bmhub_OpenCalculatorDialog';
-        // document.body.appendChild(hubDialog);
         whenAvailable('SDKConfigurationBmHub', function(SDKConfigurationBmHub) {
             SDKConfigurationBmHub.setConfiguration(
-                1234,
-                'price',
-                'total-price-in-checkout',
-                'payment-selector-hub'
+                config.merchantId,
+                config.productPriceClass,
+                config.paymentPriceClass,
+                config.paymentSelectorClass,
             );
         });
     }

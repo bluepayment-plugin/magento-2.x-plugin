@@ -98,6 +98,7 @@ class Payment extends AbstractMethod
         'AuthorizationCode',
         'ScreenType',
         'PaymentToken',
+        'ApplicationTrackingID',
     ];
 
     /**
@@ -380,7 +381,7 @@ class Payment extends AbstractMethod
      * @param  string  $authorizationCode
      * @param  string  $paymentToken
      * @param  int  $cardIndex
-     * @param  string  $backUrl
+     * @param  string|null  $backUrl
      *
      * @return string[]
      */
@@ -469,6 +470,10 @@ class Payment extends AbstractMethod
                 $params['DefaultRegulationAcceptanceID'] = $agreementId;
                 $params['DefaultRegulationAcceptanceTime'] = date('Y-m-d H:i:s');
             }
+        }
+
+        if (ConfigProvider::HUB_GATEWAY_ID == $gatewayId) {
+            $params['ApplicationTrackingID'] = $paymentToken;
         }
 
         $hashArray = array_values(self::sortParams($params));

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 	xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
     <policies>
         <policy id="img-src">
             <values>
+                <value id="img_bm_accept" type="host">platnosci-accept.bm.pl</value>
                 <value id="img_bm" type="host">platnosci.bm.pl</value>
                 <value id="img_gpay" type="host">www.gstatic.com</value>
             </values>

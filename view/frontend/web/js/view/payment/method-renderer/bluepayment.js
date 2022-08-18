@@ -130,6 +130,10 @@ define([
                     this.initGPay();
                 }
 
+                if (typeof sdk !== 'undefined') {
+                    this.initHub();
+                }
+
                 // Refresh selected gateway
                 checkoutData.setIndividualGatewayFlag('');
                 this.setBlueMediaGatewayMethod({});
@@ -242,6 +246,9 @@ define([
             isGPaySelected: function () {
                 return this.selectedPaymentObject.is_gpay === true;
             },
+            isHubSelected: function () {
+                return this.selectedPaymentObject.is_hub === true;
+            },
             isAutopaySelected: function () {
                 return this.selectedPaymentObject.is_autopay === true;
             },
@@ -343,6 +350,11 @@ define([
                     return false;
                 }
 
+                // Hub Validation
+                if (this.isHubSelected() && !this.validateHubPayment()) {
+                    return false;
+                }
+
                 // Selected payment method validation
                 if (this.renderSubOptions !== false && !this.activeMethod()) {
                     this.validationFailed(true);
@@ -428,6 +440,10 @@ define([
 
                 if (this.isAutopaySelected()) {
                     href += '&card_index=' + checkoutData.getCardIndex();
+                }
+
+                if (this.isHubSelected()) {
+                    href += '&hub_token=' + checkoutData.getHubToken();
                 }
 
                 window.location.href = href;
@@ -743,6 +759,32 @@ define([
                 });
 
                 return agreementsIds.join(',');
-            }
+            },
+
+            /** HUB */
+            initHub: function () {
+                console.log('initHub');
+
+                // SDK is defined globally.
+                setTimeout(function () {
+                    document.body.addEventListener('getSdkToken', function(e) {
+                        if (e && e.detail && e.detail.token) {
+                            checkoutData.setHubToken(e.detail.token);
+                        }
+                    });
+
+                    sdk.initializeCalculator();
+                    sdk.getVariables();
+                    sdk.initialize();
+                }, 4000);
+            },
+            validateHubPayment: function () {
+                if (!checkoutData.getHubToken()) {
+                    sdk.openModal();
+                    return false;
+                }
+
+                return true;
+            },
         });
     });
