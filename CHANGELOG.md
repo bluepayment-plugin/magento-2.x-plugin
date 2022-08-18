@@ -6,6 +6,11 @@
 - Dodaliśmy promowanie płatności Consumer Finance.
 - Poprawiliśmy wygląd wyboru płatności.
 
+## Wersja 2.19.2
+- Wydzieliliśmy wyświetlanie zgód do osobnego widoku knockout.
+- Dodaliśmy host `platnosci-accept.bm.pl` do CSP.
+- Poprawiliśmy błąd podczas tworzenia płatności Google Pay.
+
 ## Wersja 2.19.1
 - Bugfix — usunęliśmy błędny komponent w default.xml.
 

@@ -1,12 +1,3 @@
-/**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
-/*jshint browser:true*/
-/*global alert*/
-/**
- * Checkout adapter for customer data storage
- */
 define([
     'jquery',
     'Magento_Checkout/js/checkout-data',
@@ -27,6 +18,7 @@ define([
     return $.extend(checkoutData, {
         setBlueMediaPaymentMethod: function (data) {
             var obj = getData();
+
             obj.blueMediaSelectedPaymentMethod = data;
             saveData(obj);
         },
@@ -35,6 +27,7 @@ define([
         },
         setIndividualGatewayFlag: function (data) {
             var obj = getData();
+
             obj.individual_gateway = data;
             saveData(obj);
         },
@@ -43,6 +36,7 @@ define([
         },
         setCardIndex: function (index) {
             var obj = getData();
+
             obj.card_index = index;
             saveData(obj);
         },

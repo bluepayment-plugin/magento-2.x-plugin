@@ -1,10 +1,3 @@
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-/*browser:true*/
-/*global define*/
-
 define([
     'jquery',
     'ko',
@@ -13,7 +6,8 @@ define([
     'Magento_Checkout/js/action/set-payment-information',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Checkout/js/action/select-payment-method',
-    'mage/url',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-selected-gateway',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-agreements'
 ], function (
     $,
     ko,
@@ -22,23 +16,21 @@ define([
     setPaymentInformationAction,
     additionalValidators,
     selectPaymentMethodAction,
-    url,
+    selectedGateway,
+    agreements
 ) {
     'use strict';
 
-    let widget;
+    var widget;
 
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/multishipping/bluepayment',
             gatewayId: ko.observable(null),
-            submitButtonSelector: '[id="parent-payment-continue"]',
-            reviewButtonHtml: '',
         },
         imports: {
             onActiveChange: 'active'
         },
-        agreements: ko.observable([]),
 
         initialize: function () {
             widget = this;
@@ -46,7 +38,10 @@ define([
         },
 
         initObservable: function () {
-            this.reviewButtonHtml = $(this.submitButtonSelector).html();
+            // agreements.selected.subscribe(function () {
+            //     this.agreementChanged();
+            // }.bind(this));
+
             return this._super();
         },
 
@@ -71,45 +66,13 @@ define([
                 'method': this.item.method,
                 'additional_data': {
                     'gateway_id': this.gatewayId(),
-                    'agreements_ids': this.getCheckedAgreementsIds(),
+                    'agreements_ids': agreements.getCheckedAgreementsIds(),
                 }
             };
         },
 
-        getAgreements: function () {
-            var urlResponse = url.build('bluepayment/processing/agreements');
-            var self = this;
-
-            $.ajax({
-                showLoader: true,
-                url: urlResponse,
-                type: 'GET',
-                data: {
-                    'gateway_id': this.gatewayId()
-                },
-                dataType: "json"
-            }).done(function (response) {
-                if (!response.hasOwnProperty('error')) {
-                    self.agreements(response);
-                    setPaymentInformationAction(self.messageContainer, self.getData());
-                }
-            });
-        },
-
         agreementChanged: function () {
             setPaymentInformationAction(this.messageContainer, this.getData());
-        },
-
-        getCheckedAgreementsIds: function () {
-            var agreementData = $('.payment-method._active[data-name=' + this.name + '] .bluepayment-agreements-block input')
-                .serializeArray();
-            var agreementsIds = [];
-
-            agreementData.forEach(function (item) {
-                agreementsIds.push(item.value);
-            });
-
-            return agreementsIds.join(',');
         },
 
         /**
@@ -135,7 +98,6 @@ define([
         selectPaymentMethod: function () {
             this.item.individual_gateway = null;
             selectPaymentMethodAction(this.getData());
-
             setPaymentInformationAction(this.messageContainer, this.getData());
 
             return true;
@@ -153,11 +115,9 @@ define([
          * @override
          */
         setBlueMediaGatewayMethod: function (value) {
-            console.log(this.getData());
             this.gatewayId(value.gateway_id);
             setPaymentInformationAction(this.messageContainer, this.getData());
-
-            this.getAgreements();
+            selectedGateway(value);
 
             return true;
         },

@@ -14,7 +14,7 @@ define([
      * @param {Object} config
      */
     return function (config) {
-        let getProductData = async function (productId) {
+        var getProductData = async function (productId) {
             return await $.ajax({
                 url: url.build('/bluepayment/analytics/getproductdetails'),
                 type: 'POST',
@@ -25,15 +25,15 @@ define([
         }
 
         $(document).on('ajax:addToCart', async function (event, data) {
-            let productId = data.productIds[0],
+            var productId = data.productIds[0],
                 sku = data.sku,
                 formData = new FormData(data.form[0]),
                 qty = formData.get('qty') || 1;
 
-            let response = await getProductData(productId);
+            var response = await getProductData(productId);
 
             if (response) {
-                let data = {
+                var data = {
                     id: response.id,
                     name: response.name,
                     category: response.category,
@@ -46,12 +46,12 @@ define([
         });
 
         $(document).on('ajax:removeFromCart', async function (event, data) {
-            let productId = data.productIds[0];
+            var productId = data.productIds[0];
 
-            let response = await getProductData(productId);
+            var response = await getProductData(productId);
 
             if (response) {
-                let data = {
+                var data = {
                     id: response.id,
                     name: response.name,
                     category: response.category,

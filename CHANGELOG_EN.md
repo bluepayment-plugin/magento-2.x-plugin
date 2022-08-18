@@ -6,13 +6,18 @@
 - We added the promotion of Consumer Finance payments.
 - We improved the appearance of the payment selection.
 
+## Version 2.19.2
+- We've separated the consent display into a separate knockout view.
+- We've added the host `platnosci-accept.bm.pl` to CSP.
+- We've corrected an error when creating Google Pay payments.
+
 ## Version 2.19.1
 - Bugfix - we've removed invalid component in default.xml
 
 ## Version 2.19.0
-- We added extended Google Analytics 4.
-- We improved calculation of the order amount when selecting a different currency.
-- We added dispatching events `bluemedia_payment_failure`, `bluemedia_payment_pending` and `bluemedia_payment_success` after receiving new payment status.
+- We've added extended Google Analytics 4.
+- We've improved calculation of the order amount when selecting a different currency.
+- We've added dispatching events `bluemedia_payment_failure`, `bluemedia_payment_pending` and `bluemedia_payment_success` after receiving new payment status.
 
 ## Version 2.18.0
 - We have updated the payment channel synchronization support to v2.
