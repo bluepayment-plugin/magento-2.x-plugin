@@ -117,6 +117,20 @@
                 <label translate="true">Gateway ID</label>
             </settings>
         </field>
+        <field name="min_amount" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Minimum payment amount</label>
+            </settings>
+        </field>
+        <field name="max_amount" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Maximum payment amount</label>
+            </settings>
+        </field>
         <field name="bank_name" formElement="input">
             <settings>
                 <elementTmpl>ui/form/element/text</elementTmpl>

@@ -31,6 +31,14 @@
                 <blik_zero>1</blik_zero>
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
                 <privateInfoKeys>bluepayment_gateway</privateInfoKeys>
+
+                <consumer_finance>
+                    <top>1</top>
+                    <navigation>0</navigation>
+                    <listing>1</listing>
+                    <product>1</product>
+                    <cart>1</cart>
+                </consumer_finance>
             </bluepayment>
         </payment>
     </default>

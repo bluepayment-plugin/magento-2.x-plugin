@@ -262,6 +262,44 @@ define([
                 return false;
             },
 
+            getGatewayTitle: function (gateway) {
+                if (gateway.is_smartney) {
+                    return $t('Pay later');
+                }
+
+                if (gateway.is_alior_installments) {
+                    return $t('Spread the cost over installments');
+                }
+
+                return gateway.name;
+            },
+
+            getGatewayDescription: function (gateway) {
+                if (gateway.is_smartney) {
+                    return $t('Buy now and pay within 30 days. %1')
+                        .replace('%1', '<a href="https://pomoc.bluemedia.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
+                }
+
+                if (gateway.is_alior_installments) {
+                    return $t('0% installments and even 48 installments. %L')
+                        .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+                }
+
+                return gateway.description;
+            },
+
+            getGatewayHelp: function (gateway) {
+                if (gateway.is_smartney) {
+                    return $t("You will be redirected to Smartney's partner website. After your application and positive verification, Smartney will pay for your purchases for you.");
+                }
+
+                if (gateway.is_alior_installments) {
+                    return $t("You will be redirected to the bank's website. After your application and positive verification, the bank will send you a loan agreement by email. You can accept it online. Average time of the whole transaction - 15 minutes.");
+                }
+
+                return null;
+            },
+
             /**
              * @return {Boolean}
              */
