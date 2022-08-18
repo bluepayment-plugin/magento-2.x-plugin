@@ -1,11 +1,13 @@
 # Co nowego w BluePayment?
 
 ## Wersja 2.20.0
+- Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
+- Zapewniliśmy wsparcie dla Magneto 2.4.4 oraz PHP 8.1.
 - Dodaliśmy promowanie płatności Consumer Finance.
 - Poprawiliśmy wygląd wyboru płatności.
 
 ## Wersja 2.19.1
-- Bugfix - usunięcie błędnego komponentu w default.xml
+- Bugfix — usunęliśmy błędny komponent w default.xml.
 
 ## Wersja 2.19.0
 - Dodaliśmy rozszerzoną analitykę Google Analytics 4.

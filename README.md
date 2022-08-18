@@ -13,7 +13,7 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.3.
+- Wersja Magento: 2.3.0 – 2.4.4.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ### [Co nowego w BluePayment?](CHANGELOG.md)

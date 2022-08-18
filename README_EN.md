@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.3.
+- Magento version: 2.3.0 - 2.4.4.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in BluePayment?](CHANGELOG_EN.md)

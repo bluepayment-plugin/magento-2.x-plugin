@@ -177,7 +177,7 @@ class Refunds extends Data
             $errorText = $loadResult['description'];
 
             if (strpos($errorText, " - ") !== false) {
-                [$errorCode, $errorText] = explode(" - ", $loadResult['description']);
+                [$errorCode, $errorText] = explode(" - ", $loadResult['description'] ?: '');
             }
 
             $result = [
