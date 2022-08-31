@@ -1,0 +1,36 @@
+<?php
+/**
+ * @var \BlueMedia\BluePayment\Block\ConsumerFinance $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<?php if ($block->isEnabled()): ?>
+    <div class="bluemedia consumer-finance vertical position-<?= $block->getPosition() ?>">
+        <?php if ($block->isSmartneyEnabled()): ?>
+            <div class="cf-item later">
+                <img src="<?= $this->getViewFileUrl('BlueMedia_BluePayment::images/consumer-finance/item1.svg'); ?>" alt="ZAPŁAĆ PÓŹNIEJ">
+
+                <span class="label"><?= __('PAY LATER') ?></span>
+                <span class="text"><?= __('Buy now and pay within 30 days') ?></span>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($block->isInstallmentsAvailable()): ?>
+            <div class="cf-item installments">
+                <img src="<?= $this->getViewFileUrl('BlueMedia_BluePayment::images/consumer-finance/item2.svg'); ?>" alt="RATY">
+
+                <span class="label"><?= __('INSTALLMENTS') ?></span>
+                <span class="text"><?= __('Up to 48 installments') ?></span>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($block->isHubAvailable()): ?>
+            <div class="cf-item hub">
+                <img src="<?= $this->getViewFileUrl('BlueMedia_BluePayment::images/consumer-finance/item3.svg'); ?>" alt="DOPASOWANE RATY">
+
+                <span class="label"><?= __('TAILORED INSTALLMENTS') ?></span>
+                <span class="text"><?= __('Buy on tailored installments') ?></span>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>

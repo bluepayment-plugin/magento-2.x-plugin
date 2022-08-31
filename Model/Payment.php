@@ -38,16 +38,12 @@ use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Config;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\Order\Status;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
-use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -163,9 +159,10 @@ class Payment extends AbstractMethod
      *
      * @var bool
      */
-    protected $_isInitializeNeeded = false;
+    protected $_isInitializeNeeded = true;
 
     protected $_canOrder = true;
+
     protected $_canAuthorize = false;
     protected $_canCapture = false;
 
@@ -199,9 +196,6 @@ class Payment extends AbstractMethod
     /** @var OrderSender */
     private $sender;
 
-    /** @var CollectionFactory */
-    private $statusCollectionFactory;
-
     /** @var TransactionFactory */
     private $transactionFactory;
 
@@ -210,9 +204,6 @@ class Payment extends AbstractMethod
 
     /** @var OrderRepositoryInterface */
     private $orderRepository;
-
-    /** @var Config */
-    private $orderConfig;
 
     /** @var GatewayFactory */
     private $gatewayFactory;
@@ -232,10 +223,12 @@ class Payment extends AbstractMethod
     /** @var Webapi */
     private $webapi;
 
+    /** @var GetStateForStatus */
+    private $getStateForStatus;
+
     /**
      * Payment constructor.
      *
-     * @param  CollectionFactory  $statusCollectionFactory
      * @param  OrderSender  $orderSender
      * @param  Data  $helper
      * @param  UrlInterface  $url
@@ -256,19 +249,17 @@ class Payment extends AbstractMethod
      * @param  Curl  $curl
      * @param  BMLogger  $bmLogger
      * @param  Collection  $collection
-     * @param  StoreManagerInterface  $storeManager
      * @param  OrderRepositoryInterface  $orderRepository
-     * @param  Config  $orderConfig
      * @param  GatewayFactory  $gatewayFactory
      * @param  Refunds  $refunds
      * @param  ConfigProvider  $configProvider
      * @param  Webapi  $webapi
+     * @param  GetStateForStatus  $getStateForStatus
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
      */
     public function __construct(
-        CollectionFactory $statusCollectionFactory,
         OrderSender $orderSender,
         Data $helper,
         UrlInterface $url,
@@ -289,18 +280,16 @@ class Payment extends AbstractMethod
         Curl $curl,
         BMLogger $bmLogger,
         Collection $collection,
-        StoreManagerInterface $storeManager,
         OrderRepositoryInterface $orderRepository,
-        Config $orderConfig,
         GatewayFactory $gatewayFactory,
         Refunds $refunds,
         ConfigProvider $configProvider,
         Webapi $webapi,
+        GetStateForStatus $getStateForStatus,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->statusCollectionFactory = $statusCollectionFactory;
         $this->sender = $orderSender;
         $this->url = $url;
         $this->helper = $helper;
@@ -315,11 +304,11 @@ class Payment extends AbstractMethod
         $this->transactionFactory = $transactionFactory;
         $this->transactionRepository = $transactionRepository;
         $this->orderRepository = $orderRepository;
-        $this->orderConfig = $orderConfig;
         $this->gatewayFactory = $gatewayFactory;
         $this->refunds = $refunds;
         $this->configProvider = $configProvider;
         $this->webapi = $webapi;
+        $this->getStateForStatus = $getStateForStatus;
 
         parent::__construct(
             $context,
@@ -380,7 +369,7 @@ class Payment extends AbstractMethod
      * @param  string  $authorizationCode
      * @param  string  $paymentToken
      * @param  int  $cardIndex
-     * @param  string  $backUrl
+     * @param  ?string  $backUrl
      *
      * @return string[]
      */
@@ -577,7 +566,6 @@ class Payment extends AbstractMethod
     {
         $orderId = $data->transaction->orderID;
 
-        /** @var Order $order */
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
         $customerId = $order->getCustomerId();
 
@@ -726,50 +714,26 @@ class Payment extends AbstractMethod
 
         $this->saveTransactionResponse($payment);
 
-        $unchangeableStatuses = explode(',', $this->_scopeConfig->getValue(
-            'payment/bluepayment/unchangeable_statuses',
-            ScopeInterface::SCOPE_STORE
-        ));
-
-        $statusAcceptPayment = $this->_scopeConfig->getValue(
-            'payment/bluepayment/status_accept_payment',
-            ScopeInterface::SCOPE_STORE
-        );
-        if ($statusAcceptPayment == '') {
-            $statusAcceptPayment = $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
-        }
+        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses();
+        $statusSuccess = $this->configProvider->getStatusSuccessPayment();
 
         switch ($paymentStatus) {
             case self::PAYMENT_STATUS_SUCCESS:
+                $status = $this->configProvider->getStatusSuccessPayment();
                 $state = Order::STATE_PROCESSING;
-                $statusKey = 'status_accept_payment';
                 break;
             case self::PAYMENT_STATUS_FAILURE:
+                $status = $this->configProvider->getStatusErrorPayment();
                 $state = Order::STATE_CANCELED;
-                $statusKey = 'status_error_payment';
                 break;
             case self::PAYMENT_STATUS_PENDING:
             default:
+                $status = $this->configProvider->getStatusWaitingPayment();
                 $state = Order::STATE_PENDING_PAYMENT;
-                $statusKey = 'status_waiting_payment';
                 break;
         }
 
-        $status = $this->_scopeConfig->getValue(
-            'payment/bluepayment/' . $statusKey,
-            ScopeInterface::SCOPE_STORE
-        );
-
-        if ($status != '') {
-            foreach ($this->statusCollectionFactory->create()->joinStates() as $s) {
-                /** @var Status $s */
-                if ($s->getStatus() == $status) {
-                    $state = $s->getState();
-                }
-            }
-        } else {
-            $status = $this->orderConfig->getStateDefaultStatus($state);
-        }
+        $state = $this->getStateForStatus->execute($status, $state);
 
         $updateOrders = true;
         if ($paymentStatus === self::PAYMENT_STATUS_FAILURE) {
@@ -805,7 +769,7 @@ class Payment extends AbstractMethod
                     $changeable = false;
                 }
                 foreach ($order->getAllStatusHistory() as $historyStatus) {
-                    if ($historyStatus->getStatus() == $statusAcceptPayment && $order->getTotalDue() == 0) {
+                    if ($historyStatus->getStatus() == $statusSuccess && $order->getTotalDue() == 0) {
                         $changeable = false;
                     }
                 }
@@ -1071,6 +1035,17 @@ class Payment extends AbstractMethod
         return $params;
     }
 
+    public function initialize($paymentAction, $stateObject)
+    {
+        $status = $this->configProvider->getStatusWaitingPayment();
+        $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
+
+        $stateObject->setState($status);
+        $stateObject->setStatus($state);
+
+        return $this;
+    }
+
     public function order(InfoInterface $payment, $amount)
     {
         /** @var Order $order */
@@ -1092,7 +1067,7 @@ class Payment extends AbstractMethod
                 ? $payment->getAdditionalInformation('gateway_id')
                 : 0;
             $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
-                ? explode(',', $payment->getAdditionalInformation('agreements_ids'))
+                ? explode(',', $payment->getAdditionalInformation('agreements_ids') ?? '')
                 : [];
 
             $this->bmLooger->info('PAYMENT:' . __LINE__, [
@@ -1239,8 +1214,10 @@ class Payment extends AbstractMethod
     /**
      * Is active
      *
-     * @param int|null $storeId
+     * @param  int|null  $storeId
+     *
      * @return bool
+     * @throws LocalizedException
      * @deprecated 100.2.0
      */
     public function isActive($storeId = null)
@@ -1284,31 +1261,9 @@ class Payment extends AbstractMethod
         } else {
             $payment->setAdditionalInformation('bluepayment_redirect_url', (string) $redirectUrl);
 
-            $unchangeableStatuses = explode(
-                ',',
-                $this->_scopeConfig->getValue(
-                    'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_STORE
-                )
-            );
-            $statusWaitingPayment = $this->_scopeConfig->getValue(
-                'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_STORE
-            );
-
-            if (!empty($statusWaitingPayment)) {
-                $statusCollection = $this->collection;
-                $orderStatusWaitingState = Order::STATE_NEW;
-                foreach ($statusCollection->joinStates() as $status) {
-                    /** @var Status $status */
-                    if ($status->getStatus() == $statusWaitingPayment) {
-                        $orderStatusWaitingState = $status->getState();
-                    }
-                }
-            } else {
-                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
-            }
+            $unchangeableStatuses = $this->configProvider->getUnchangableStatuses();
+            $status = $this->configProvider->getStatusWaitingPayment();
+            $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
 
             if (!in_array($order->getStatus(), $unchangeableStatuses)) {
                 $amount = $order->getGrandTotal();
@@ -1319,9 +1274,9 @@ class Payment extends AbstractMethod
                     .' | Status: '.$orderStatus
                     .' | URL: '.$redirectUrl;
 
-                $order->setState($orderStatusWaitingState)
-                    ->setStatus($statusWaitingPayment)
-                    ->addStatusToHistory($statusWaitingPayment, $orderComment, false)
+                $order->setState($state)
+                    ->setStatus($state)
+                    ->addStatusToHistory($status, $orderComment, false)
                     ->save();
             }
 

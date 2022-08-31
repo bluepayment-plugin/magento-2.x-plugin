@@ -17,7 +17,10 @@
             "gateway_logo_path": true,
             "status_date": true,
             "is_separated_method": true,
-            "force_disable": true
+            "force_disable": true,
+            "min_amount": true,
+            "max_amount": true,
+            "min_validity_time": true
         },
         "constraint": {
             "PRIMARY": true,

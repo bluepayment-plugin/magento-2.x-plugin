@@ -36,6 +36,8 @@
                                 <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                     <img data-bind="attr:{src: logo_url,alt: name}"
                                          class="payment-logo"/>
+
+                                    <span class="payment-name" data-bind="text: name"></span>
                                 </label>
                             </li>
                         </ul>
@@ -76,50 +78,10 @@
                 <!-- ko template: getTemplate() --><!-- /ko -->
                 <!--/ko-->
             </div>
-            <div class="bluepayment-agreements-block" data-bind='foreach: agreements'>
-                <div data-bind='foreach: labelList'>
-                    <div data-bind='attr: {
-                        class: "bluepayment-agreement" + (checkboxRequired ? " required" : "")
-                    }'>
-                        <!-- ko if: showCheckbox -->
-                            <!-- ko if: checkboxRequired -->
-                                <input type="checkbox"
-                                       required
-                                       class="required-entry"
-                                       data-bind='attr: {
-                                           id: "agreement_bluepayment_" + $parent.regulationID,
-                                           name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                           value: $parent.regulationID
-                                       }' />
-                            <!-- /ko -->
-
-                            <!-- ko ifnot: checkboxRequired -->
-                                <input type="checkbox"
-                                       data-bind='attr: {
-                                           id: "agreement_bluepayment_" + $parent.regulationID,
-                                           name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                           value: $parent.regulationID
-                                       }' />
-                            <!-- /ko -->
-                        <!-- /ko -->
-
-                        <!-- ko ifnot: showCheckbox -->
-                        <input type="hidden"
-                               data-bind='attr: {
-                                    name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                    value: $parent.regulationID
-                               }'
-                        >
-                        <!-- /ko -->
-
-                        <label class="label"
-                               data-bind='attr: {
-                                    for: showCheckbox ? ("agreement_bluepayment_" + $parent.regulationID) : ""
-                               }'>
-                            <span data-bind="html: inputLabel"></span>
-                        </label>
-                    </div>
-                </div>
+            <div class="bluepayment-agreements-block">
+                <!-- ko foreach: $parent.getRegion('bluepayment-agreements') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
             </div>
             <div class="actions-toolbar">
                 <div class="primary">
@@ -148,47 +110,48 @@
 
 <!-- ko if: renderSeparatedOptions.length > 0-->
 <div class="separated-payments-wrapper" data-bind="foreach: renderSeparatedOptions">
-    <div
-         data-bind="
-           attr:{
-             class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card')
-           },
-           css:{'_active': $parent.isSeparatedChecked($data)}
-        ">
-        <div class="payment-method-title field choice">
-            <input type="radio"
-                   name="payment_method_bluepayment_gateway"
-                   class="radio"
-                   data-bind="
-                     attr:{
-                       id:  $parent.getCode() + $data.gateway_id,
-                       value: $data.gateway_id,
-                       class: 'radio ' + ($data.is_blik ? 'payment_method_bluepayment_blik' : '')
-                     },
-                     checked: $parent.isSeparatedChecked($data),
-                     click: $parent.selectPaymentMethodCard.bind($parent),
-                     visible: $parent.isRadioButtonVisible()
-                   "/>
+    <!-- ko if: (!$data.is_apple_pay || $parent.canUseApplePay()) -->
+        <div
+             data-bind="
+               attr:{
+                 class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card')
+               },
+               css:{'_active': $parent.isSeparatedChecked($data)}
+            ">
+            <div class="payment-method-title field choice">
+                <input type="radio"
+                       name="payment_method_bluepayment_gateway"
+                       class="radio"
+                       data-bind="
+                         attr:{
+                           id:  $parent.getCode() + $data.gateway_id,
+                           value: $data.gateway_id,
+                           class: 'radio ' + ($data.is_blik ? 'payment_method_bluepayment_blik' : '')
+                         },
+                         checked: $parent.isSeparatedChecked($data),
+                         click: $parent.selectPaymentMethodCard.bind($parent),
+                         visible: $parent.isRadioButtonVisible()
+                       "/>
 
-            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
-                <!-- ko ifnot: $data.is_blik -->
-                <img src=""
-                     data-bind="attr: {src: logo_url,alt: name}"
-                     class="payment-icon"/>
-                <!--/ko -->
+                <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
+                    <img src=""
+                         data-bind="attr: {src: logo_url,alt: name}"
+                         class="payment-icon"/>
 
-                <span data-bind="text: name"></span>
-            </label>
+                    <p class="method-name">
+                        <span data-bind="text: $parent.getGatewayTitle($data)"></span>
+                        <!-- ko if: $parent.getGatewayDescription($data) -->
+                        <br />
+                        <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
+                        <!-- /ko -->
 
-            <!-- ko if: $data.is_blik -->
-                <hr style="margin-bottom: 0;">
+                        <!-- ko if: ($parent.getGatewayHelp($data) && $parent.isSeparatedChecked($data)) -->
+                        <span data-bind="html: $parent.getGatewayHelp($data)" class="payment-method-help-text"></span>
+                        <!-- /ko -->
+                    </p>
+                </label>
 
-                <!-- BLIK Logo -->
-                <img src=""
-                     data-bind="attr: {src: logo_url,alt: name}"
-                     class="blik-logo"/>
-                <!-- BLIK Logo -->
-
+            <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
                 <input type="tel"
                        name="payment_method_bluepayment_code"
                        class="blik-code"
@@ -200,136 +163,97 @@
                        placeholder="Wprowadź kod BLIK"
                        afterRender="$parent.blikCodeAfterRender" />
 
-                <div style="clear: both;"></div>
-            <!--/ko-->
-        </div>
-        <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
-            <!-- ko foreach: $parent.getRegion('messages') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
-            <!--/ko-->
-
-            <!-- ko if: $data.is_apple_pay -->
-            <fieldset class="fieldset">
-                <div class="payment-method-note">
-                    <div>
-                        Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
-                        autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
-                        o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
-
-                        Więcej informacji o płatności
-                        <a href="https://support.apple.com/pl-pl/HT201239#safari">
-                            Apple Pay w przeglądarce.
-                        </a>
-                    </div>
-                </div>
-            </fieldset>
-            <!--/ko-->
-
-            <!-- ko if: $data.is_autopay -->
-            <fieldset class="fieldset">
-                <div class="payment-method-note">
-                    <div>
-                        <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
-                            <li data-bind="attr:{class: 'card-option'}">
-                                <input required
-                                       data-bind="
-                                            attr:{id: 'bluepayment_card_' + index, value: index },
-                                            click: $parents[1].selectAutopayCardIndex.bind($parents[1])
-                                       "
-                                       name="payment_method_bluepayment_card_index"
-                                       class="radio"
-                                       type="radio" />
-
-                                <label data-bind="attr:{for: 'bluepayment_card_' + index }">
-                                    <img data-bind="attr:{src: logo}" class="payment-logo"/>
-
-                                    <span class="details">
-                                        <span class="title" data-bind="text: number"></span>
-                                    </span>
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </fieldset>
-
-            <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
-                <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>
-                <label for="autopay-agreement">
-                    <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
-                </label>
-            </div>
-            <!--/ko-->
-
-            <div class="payment-method-billing-address">
-                <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
-                <!-- ko template: getTemplate() --><!-- /ko -->
+                    <div style="clear: both;"></div>
                 <!--/ko-->
             </div>
-            <div class="checkout-agreements-block">
-                <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+            <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
+                <!-- ko foreach: $parent.getRegion('messages') -->
                 <!-- ko template: getTemplate() --><!-- /ko -->
                 <!--/ko-->
-            </div>
-            <div class="bluepayment-agreements-block" data-bind='foreach: $parent.agreements'>
-                <div data-bind='foreach: labelList'>
-                    <div data-bind='attr: {
-                        class: "bluepayment-agreement" + (checkboxRequired ? " required" : "")
-                    }'>
-                        <!-- ko if: showCheckbox -->
-                            <!-- ko if: checkboxRequired -->
-                            <input type="checkbox"
-                                   required
-                                   class="required-entry"
-                                   data-bind='attr: {
-                                           id: "agreement_bluepayment_" + $parent.regulationID,
-                                           name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                           value: $parent.regulationID
-                                       }' />
-                            <!-- /ko -->
 
-                            <!-- ko ifnot: checkboxRequired -->
-                            <input type="checkbox"
-                                   data-bind='attr: {
-                                       id: "agreement_bluepayment_" + $parent.regulationID,
-                                       name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                       value: $parent.regulationID
-                                   }' />
-                            <!-- /ko -->
-                        <!-- /ko -->
+                <!-- ko if: $data.is_apple_pay -->
+                <fieldset class="fieldset">
+                    <div class="payment-method-note">
+                        <div>
+                            Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
+                            autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
+                            o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
 
-                        <!-- ko ifnot: showCheckbox -->
-                        <input type="hidden"
-                               data-bind='attr: {
-                                    name: "bluepayment_regulations[" + $parent.regulationID + "]",
-                                    value: $parent.regulationID
-                               }'
-                        >
-                        <!-- /ko -->
-
-                        <label class="label"
-                               data-bind='attr: {
-                                for: showCheckbox ? ("agreement_bluepayment_" + $parent.regulationID) : ""
-                           }'>
-                            <span data-bind="html: inputLabel"></span>
-                        </label>
+                            Więcej informacji o płatności
+                            <a href="https://support.apple.com/pl-pl/HT201239#safari">
+                                Apple Pay w przeglądarce.
+                            </a>
+                        </div>
                     </div>
+                </fieldset>
+                <!--/ko-->
+
+                <!-- ko if: $data.is_autopay -->
+                <fieldset class="fieldset">
+                    <div class="payment-method-note">
+                        <div>
+                            <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
+                                <li data-bind="attr:{class: 'card-option'}">
+                                    <input required
+                                           data-bind="
+                                                attr:{id: 'bluepayment_card_' + index, value: index },
+                                                click: $parents[1].selectAutopayCardIndex.bind($parents[1])
+                                           "
+                                           name="payment_method_bluepayment_card_index"
+                                           class="radio"
+                                           type="radio" />
+
+                                    <label data-bind="attr:{for: 'bluepayment_card_' + index }">
+                                        <img data-bind="attr:{src: logo}" class="payment-logo"/>
+
+                                        <span class="details">
+                                            <span class="title" data-bind="text: number"></span>
+                                        </span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
+                    <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>
+                    <label for="autopay-agreement">
+                        <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
+                    </label>
                 </div>
-            </div>
-            <div class="actions-toolbar">
-                <div class="primary">
-                    <button class="action primary checkout"
-                            type="submit"
-                            data-bind="
-                            click: $parent.placeOrder.bind($parent),
-                            attr:{
-                            'data-payment-method-name': $parent.index + '_'+ $data.bank
-                            }">
-                        <span data-bind="i18n: 'Place Order'"></span>
-                    </button>
+                <!--/ko-->
+
+                <div class="payment-method-billing-address">
+                    <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
+                    <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!--/ko-->
+                </div>
+                <div class="checkout-agreements-block">
+                    <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
+                    <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!--/ko-->
+                </div>
+                <div class="bluepayment-agreements-block">
+                    <!-- ko foreach: $parents[1].getRegion('bluepayment-agreements') -->
+                    <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!--/ko-->
+                </div>
+                <div class="actions-toolbar">
+                    <div class="primary">
+                        <button class="action primary checkout"
+                                type="submit"
+                                data-bind="
+                                click: $parent.placeOrder.bind($parent),
+                                attr:{
+                                'data-payment-method-name': $parent.index + '_'+ $data.bank
+                                }">
+                            <span data-bind="i18n: 'Place Order'"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <!--/ko-->
 </div>
 <!--/ko-->

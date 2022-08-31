@@ -1,0 +1,89 @@
+.bluemedia.consumer-finance {
+    font-family: 'Lato', sans-serif;
+    width: 100%;
+    flex-shrink: 0;
+    background: transparent;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 0;
+
+
+    &.horizontal {
+        display: flex;
+        flex-direction: row;
+
+        .cf-item {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    }
+    &.vertical {
+        display: flex;
+        flex-direction: column;
+
+        .cf-item {
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin: 10px 0;
+
+            img {
+                display: none;
+            }
+        }
+    }
+
+    .cf-item {
+        flex: 1;
+        display: flex;
+
+        .label {
+            display: block;
+
+            font-style: normal;
+            font-weight: 700;
+            font-size: 12px;
+            text-align: center;
+            color: #FFFFFF;
+            margin-right: 7px;
+            padding: 0 5px;
+        }
+
+        .text {
+            font-style: normal;
+            font-weight: 500;
+            font-size: 12px;
+            color: #000000;
+        }
+
+        &.later {
+            .label {
+                background: #FDB83F;
+            }
+        }
+        &.installments {
+            .label {
+                background: #6B113D;
+            }
+        }
+        &.hub {
+            .label {
+                background: #00B5DD;
+            }
+        }
+    }
+}
+
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = 768px) {
+    .bluemedia.consumer-finance {
+        &.horizontal {
+            flex-direction: column;
+
+            .cf-item {
+                justify-content: flex-start;
+                align-items: flex-start;
+                margin: 10px 10px;
+            }
+        }
+    }
+}

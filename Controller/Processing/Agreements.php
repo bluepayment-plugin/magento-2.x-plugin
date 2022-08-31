@@ -69,6 +69,7 @@ class Agreements implements HttpGetActionInterface
     {
         $resultJson = $this->resultJsonFactory->create();
 
+        /** @var string|null $gatewayId */
         $gatewayId = $this->request->getParam(self::PARAM_GATEWAY_ID);
         $currency = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
         $locale = $this->localeResolver->getLocale();
@@ -81,7 +82,7 @@ class Agreements implements HttpGetActionInterface
         }
 
         $response = $this->webapi->agreements(
-            $gatewayId,
+            (int) $gatewayId,
             $currency,
             $locale
         );
