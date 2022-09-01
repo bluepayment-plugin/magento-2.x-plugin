@@ -41,6 +41,17 @@
                                                                 </item>
                                                             </item>
                                                         </item>
+                                                        <item name="payments-list" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="bluepayment-agreements" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">BlueMedia_BluePayment/js/view/checkout/bluepayment-agreements</item>
+                                                                    <item name="displayArea" xsi:type="string">bluepayment-agreements</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="template" xsi:type="string">BlueMedia_BluePayment/checkout/bluepayment-agreements</item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
                                                     </item>
                                                 </item>
                                             </item>

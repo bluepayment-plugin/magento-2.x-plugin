@@ -216,7 +216,7 @@ class PlaceOrder implements PlaceOrderInterface
             }
         } else {
             $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
-                ? array_unique(explode(',', $payment->getAdditionalInformation('agreements_ids')))
+                ? array_unique(explode(',', $payment->getAdditionalInformation('agreements_ids') ?: ''))
                 : [];
 
             $agreementId = reset($agreementsIds);

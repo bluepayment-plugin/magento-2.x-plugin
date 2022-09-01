@@ -12,7 +12,15 @@
                     component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment',
                     name: 'payment_method_bluepayment',
                     method: paymentMethodData.method,
-                    item: paymentMethodData
+                    item: paymentMethodData,
+                    children: [{
+                        'name': 'bluepayment-agreements',
+                        'component': 'BlueMedia_BluePayment/js/view/checkout/bluepayment-agreements',
+                        'displayArea': 'bluepayment-agreements',
+                        'config': {
+                            'template': 'BlueMedia_BluePayment/checkout/bluepayment-agreements',
+                        }
+                    }]
                 }
             ]);
 

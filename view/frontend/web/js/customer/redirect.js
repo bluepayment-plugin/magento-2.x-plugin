@@ -5,7 +5,7 @@ define([
     'use strict';
 
     return function (config) {
-        let seconds = parseInt(config['seconds']);
+        var seconds = parseInt(config['seconds']);
 
         if (seconds < 1) {
             seconds = 5;
