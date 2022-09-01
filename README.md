@@ -283,7 +283,7 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 ## Rozszerzona Analityka – Google Analytics 4 e-commerce
 Opcja dostępna od wersji 2.19.0.
 
-**Dzięki temu rozwiąznaiu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
+**Dzięki temu rozwiązaniu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
 Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowań użytkowników.
 
 Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
