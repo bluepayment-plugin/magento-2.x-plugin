@@ -211,8 +211,13 @@ define([
 
             return paymentService.getAvailablePaymentMethods().length !== 1;
         }),
-        canUseApplePay: function() {
-            return window.ApplePaySession && ApplePaySession.canMakePayments();
+        canUseApplePay: function () {
+            try {
+                return window.ApplePaySession && window.ApplePaySession.canMakePayments();
+            } catch (e) {
+                console.log('ApplePay', e);
+                return false;
+            }
         },
         isSeparatedChecked: function (context) {
             return ko.pureComputed(function () {

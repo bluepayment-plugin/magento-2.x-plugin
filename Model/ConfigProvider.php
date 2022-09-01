@@ -489,12 +489,4 @@ class ConfigProvider implements ConfigProviderInterface
 
         return $gateways->getColumnValues(GatewayInterface::GATEWAY_ID);
     }
-
-    public function getStatusWaitingPayment(): ?string
-    {
-        return $this->scopeConfig->getValue(
-            'payment/bluepayment/status_waiting_payment',
-            ScopeInterface::SCOPE_STORE
-        );
-    }
 }
