@@ -377,6 +377,7 @@ input[type="range"].sdk-calculator__range::-ms-fill-lower {
     position: absolute;
     background-color: #fff;
     width: 980px;
+    height: max-content;
     max-width: calc(100% - 30px);
     max-height: calc(100% - 30px);
     margin: auto;
@@ -384,7 +385,6 @@ input[type="range"].sdk-calculator__range::-ms-fill-lower {
     left: 0;
     bottom: 0;
     right: 0;
-    height: max-content;
 }
 .sdk-calculator__tooltip {
     position: relative;
@@ -420,9 +420,7 @@ input[type="range"].sdk-calculator__range::-ms-fill-lower {
     display:block;
 
 }
-.sdk-modal--calculator .sdk-modal__dialog > div {
-    padding: 40px 90px;
-}
+
 .sdk-modal--calculator .sdk-modal__icon {
     position: absolute;
     top: 15px;
@@ -432,8 +430,8 @@ input[type="range"].sdk-calculator__range::-ms-fill-lower {
 }
 .sdk-modal--calculator .sdk-modal__content {
     min-height: 70px;
-    max-height: calc(100vh - 140px);
-    overflow-y: visible;
+    max-height: calc(100vh - 30px);
+    overflow: auto;
 }
 
 .sdk-modal--calculator .margin-b-30 {
@@ -504,14 +502,20 @@ input[type="range"].sdk-calculator__range::-ms-fill-lower {
 .sdk-calculator__opacity {
     opacity: 0.4;
 }
-@media (max-width: 992px) {
-    .sdk-modal--calculator .sdk-modal__dialog > div {
-        padding: 40px 15px;
-    }
 
+.sdk-modal--calculator .sdk-modal__content {
+    padding: 40px 90px;
+}
+
+/* @media (max-width: 1366px) {
     .sdk-modal--calculator .sdk-modal__content {
-        max-height: calc(100vh - 70px);
         overflow-x: hidden;
+    }
+} */
+
+@media (max-width: 992px) {
+    .sdk-modal--calculator .sdk-modal__content {
+        padding: 40px 15px;
     }
 }
 
