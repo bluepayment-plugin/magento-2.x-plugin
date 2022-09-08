@@ -169,14 +169,6 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    public function isActive(): bool
-    {
-        return (bool) $this->scopeConfig->getValue(
-            'payment/bluepayment/active',
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
     /**
      * {@inheritdoc}
      */
