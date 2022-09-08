@@ -211,7 +211,7 @@ define([
 
             return paymentService.getAvailablePaymentMethods().length !== 1;
         }),
-        canUseApplePay: function () {
+        canUseApplePay: function() {
             try {
                 return window.ApplePaySession && window.ApplePaySession.canMakePayments();
             } catch (e) {

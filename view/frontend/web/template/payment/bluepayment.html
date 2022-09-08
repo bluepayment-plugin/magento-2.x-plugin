@@ -153,15 +153,15 @@
 
                 <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
                     <input type="tel"
-                           name="payment_method_bluepayment_code"
-                           class="blik-code"
-                           min="000000"
-                           max="999999"
-                           inputmode="numeric"
-                           pattern="[0-9]*"
-                           data-validate="{required:true, 'pattern':'000000'}"
-                           placeholder="Wprowadź kod BLIK"
-                           afterRender="$parent.blikCodeAfterRender" />
+                       name="payment_method_bluepayment_code"
+                       class="blik-code"
+                       min="000000"
+                       max="999999"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       data-validate="{required:true, 'pattern':'000000'}"
+                       placeholder="Wprowadź kod BLIK"
+                       afterRender="$parent.blikCodeAfterRender" />
 
                     <div style="clear: both;"></div>
                 <!--/ko-->
