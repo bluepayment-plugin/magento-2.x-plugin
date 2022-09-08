@@ -393,6 +393,22 @@ class ConfigProvider implements ConfigProviderInterface
         return $gateways->load();
     }
 
+    public function getServiceId(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getSharedKey(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
     public function isGatewaySelectionEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
@@ -450,22 +466,6 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/status_accept_payment',
             ScopeInterface::SCOPE_STORE
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
-    }
-
-    public function getServiceId(string $currency = 'PLN')
-    {
-        return $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
-    public function getSharedKey(string $currency = 'PLN')
-    {
-        return $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_STORE
-        );
     }
 
     public function isConsumerFinanceEnabled($position): bool

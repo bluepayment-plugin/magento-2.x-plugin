@@ -1,7 +1,11 @@
 # Co nowego w BluePayment?
 
-## Wersja 2.20.0
+## Wersja [IN PROGRESS]
 - Dodaliśmy obsługę AutoPay
+
+## Wersja 2.20.0
+- Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
+- Zapewniliśmy wsparcie dla Magneto 2.4.4 oraz PHP 8.1.
 - Dodaliśmy promowanie płatności Consumer Finance.
 - Poprawiliśmy wygląd wyboru płatności.
 - Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).

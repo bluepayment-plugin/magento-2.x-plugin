@@ -271,6 +271,16 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function placeOrder($cartId, $amount)
     {
+        $quote = $this->cartRepository->get($cartId);
+
+        $customer = $quote->getCustomer();
+        $customerId = $customer ? $customer->getId() : null;
+
+        if (!$customerId) {
+            $quote->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
+            $this->cartRepository->save($quote);
+        }
+
         $paymentMethod = $this->paymentFactory->create();
         $paymentMethod->setMethod('autopay');
 
