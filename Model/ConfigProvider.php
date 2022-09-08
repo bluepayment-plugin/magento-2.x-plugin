@@ -282,7 +282,8 @@ class ConfigProvider implements ConfigProviderInterface
             'is_autopay' => $gatewayId == self::AUTOPAY_GATEWAY_ID,
             'is_apple_pay' => $gatewayId == self::APPLE_PAY_GATEWAY_ID,
             'is_smartney' => $gatewayId == self::SMARTNEY_GATEWAY_ID,
-            'is_alior_installments' => $gatewayId == self::ALIOR_INSTALLMENTS_GATEWAY_ID
+            'is_alior_installments' => $gatewayId == self::ALIOR_INSTALLMENTS_GATEWAY_ID,
+            'is_hub' => $gatewayId == self::HUB_GATEWAY_ID,
         ];
     }
 

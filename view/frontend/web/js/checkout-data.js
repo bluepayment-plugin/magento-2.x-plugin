@@ -18,30 +18,35 @@ define([
     return $.extend(checkoutData, {
         setBlueMediaPaymentMethod: function (data) {
             var obj = getData();
-
-            obj.blueMediaSelectedPaymentMethod = data;
+            obj.bmSelectedPaymentMethod = data;
             saveData(obj);
         },
         getBlueMediaPaymentMethod: function () {
-            return getData().blueMediaSelectedPaymentMethod;
+            return getData().bmSelectedPaymentMethod;
         },
         setIndividualGatewayFlag: function (data) {
             var obj = getData();
-
-            obj.individual_gateway = data;
+            obj.bmIndividualGatewayFlag = data;
             saveData(obj);
         },
         getIndividualGatewayFlag: function () {
-            return getData().individual_gateway;
+            return getData().bmIndividualGatewayFlag;
         },
         setCardIndex: function (index) {
             var obj = getData();
-
-            obj.card_index = index;
+            obj.bmCardIndex = index;
             saveData(obj);
         },
         getCardIndex: function () {
-            return getData().card_index;
+            return getData().bmCardIndex;
+        },
+        setHubToken: function (token) {
+            var obj = getData();
+            obj.bmHubToken = token;
+            saveData(obj);
+        },
+        getHubToken: function () {
+            return getData().bmHubToken;
         }
     });
 });

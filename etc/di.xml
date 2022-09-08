@@ -131,18 +131,6 @@
         </arguments>
     </virtualType>
 
-    <type name="BlueMedia\BluePayment\Block\ShortcutButton">
-        <arguments>
-            <argument name="data" xsi:type="array">
-                <item name="template" xsi:type="string">BlueMedia_BluePayment::shortcut.phtml</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <type name="Magento\Checkout\CustomerData\Cart">
-        <plugin name="autopay_cart_data_plugin" type="BlueMedia\BluePayment\Plugin\CartDataPlugin"/>
-    </type>
-
     <preference for="BlueMedia\BluePayment\Api\QuoteManagementInterface"
                 type="BlueMedia\BluePayment\Model\QuoteManagement"/>
     <preference for="BlueMedia\BluePayment\Api\Data\ShippingMethodInterface"
@@ -151,4 +139,25 @@
                 type="BlueMedia\BluePayment\Model\Data\ShippingMethodAdditional"/>
     <preference for="BlueMedia\BluePayment\Api\Data\ConfigurationInterface"
                 type="BlueMedia\BluePayment\Model\Data\Configuration"/>
+
+    <type name="Magento\Checkout\CustomerData\Cart">
+        <plugin name="autopay_cart_data_plugin" type="BlueMedia\BluePayment\Plugin\CartDataPlugin"/>
+    </type>
+
+    <!-- Shortcuts -->
+    <type name="BlueMedia\BluePayment\Block\ShortcutButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="template" xsi:type="string">BlueMedia_BluePayment::shortcut.phtml</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="BlueMedia\BluePayment\Block\Hub\ShortcutButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="template" xsi:type="string">BlueMedia_BluePayment::hub/shortcut.phtml</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Shortcuts -->
 </config>

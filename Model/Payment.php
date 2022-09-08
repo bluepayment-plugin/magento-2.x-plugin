@@ -95,6 +95,7 @@ class Payment extends AbstractMethod
         'AuthorizationCode',
         'ScreenType',
         'PaymentToken',
+        'ApplicationTrackingID',
     ];
 
     /**
@@ -227,6 +228,9 @@ class Payment extends AbstractMethod
     /** @var GetStateForStatus */
     private $getStateForStatus;
 
+    /** @var GenerateOrderBasket */
+    private $generateOrderBasket;
+
     /**
      * Payment constructor.
      *
@@ -256,6 +260,7 @@ class Payment extends AbstractMethod
      * @param  ConfigProvider  $configProvider
      * @param  Webapi  $webapi
      * @param  GetStateForStatus  $getStateForStatus
+     * @param  GenerateOrderBasket  $generateOrderBasket
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -287,6 +292,7 @@ class Payment extends AbstractMethod
         ConfigProvider $configProvider,
         Webapi $webapi,
         GetStateForStatus $getStateForStatus,
+        GenerateOrderBasket $generateOrderBasket,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -310,6 +316,7 @@ class Payment extends AbstractMethod
         $this->configProvider = $configProvider;
         $this->webapi = $webapi;
         $this->getStateForStatus = $getStateForStatus;
+        $this->generateOrderBasket = $generateOrderBasket;
 
         parent::__construct(
             $context,
@@ -459,6 +466,11 @@ class Payment extends AbstractMethod
                 $params['DefaultRegulationAcceptanceID'] = $agreementId;
                 $params['DefaultRegulationAcceptanceTime'] = date('Y-m-d H:i:s');
             }
+        }
+
+        if (ConfigProvider::HUB_GATEWAY_ID == $gatewayId) {
+            $params['ApplicationTrackingID'] = $paymentToken;
+            $params['Products'] = $this->generateOrderBasket->execute($order);
         }
 
         $hashArray = array_values(self::sortParams($params));

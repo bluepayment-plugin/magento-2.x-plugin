@@ -114,7 +114,7 @@
         <div
              data-bind="
                attr:{
-                 class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card')
+                 class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card') + ($data.is_hub ? ' blue-payment__hub' : '')
                },
                css:{'_active': $parent.isSeparatedChecked($data)}
             ">
@@ -133,26 +133,26 @@
                          visible: $parent.isRadioButtonVisible()
                        "/>
 
-            <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
-                <img src=""
-                     data-bind="attr: {src: logo_url,alt: name}"
-                     class="payment-icon"/>
+                <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
+                    <img src=""
+                         data-bind="attr: {src: logo_url,alt: name}"
+                         class="payment-icon"/>
 
-                <p class="method-name">
-                    <span data-bind="text: $parent.getGatewayTitle($data)"></span>
-                    <!-- ko if: $parent.getGatewayDescription($data) -->
-                        <br />
-                        <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
-                    <!-- /ko -->
+                    <p class="method-name">
+                        <span data-bind="text: $parent.getGatewayTitle($data)"></span>
+                        <!-- ko if: $parent.getGatewayDescription($data) -->
+                            <br />
+                            <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
+                        <!-- /ko -->
 
-                    <!-- ko if: ($parent.getGatewayHelp($data) && $parent.isSeparatedChecked($data)) -->
-                        <span data-bind="html: $parent.getGatewayHelp($data)" class="payment-method-help-text"></span>
-                    <!-- /ko -->
-                </p>
-            </label>
+                        <!-- ko if: ($parent.getGatewayHelp($data) && $parent.isSeparatedChecked($data)) -->
+                            <span data-bind="html: $parent.getGatewayHelp($data)" class="payment-method-help-text"></span>
+                        <!-- /ko -->
+                    </p>
+                </label>
 
-            <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
-                <input type="tel"
+                <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
+                    <input type="tel"
                        name="payment_method_bluepayment_code"
                        class="blik-code"
                        min="000000"
@@ -164,6 +164,10 @@
                        afterRender="$parent.blikCodeAfterRender" />
 
                     <div style="clear: both;"></div>
+                <!--/ko-->
+
+                <!-- ko if: ($data.is_hub) -->
+                    <div id="bmhub_OpenCalculatorDialog"></div>
                 <!--/ko-->
             </div>
             <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
@@ -215,6 +219,7 @@
                         </div>
                     </div>
                 </fieldset>
+                <!--/ko-->
 
                 <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
                     <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>

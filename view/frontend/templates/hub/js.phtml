@@ -1,0 +1,20 @@
+<?php
+/** @var $block \BlueMedia\BluePayment\Block\Hub\Js */
+/** @var $escaper \Magento\Framework\Escaper */
+?>
+
+<script src="https://raty-accept.bm.pl/sdk/sdk.js"></script>
+<!--<script src="<?= $block->getViewFileUrl('BlueMedia_BluePayment/js/hub/sdk.js'); ?>"></script>-->
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "BlueMedia_BluePayment/js/hub/hub": {
+            "merchantId": "1234",
+            "productPriceClass": ".price-final_price .price",
+            "paymentPriceClass": ".checkout-index-index .grand.totals .price",
+            "paymentSelectorClass": ".payment-method.blue-payment__hub"
+        }
+    }
+}
+</script>

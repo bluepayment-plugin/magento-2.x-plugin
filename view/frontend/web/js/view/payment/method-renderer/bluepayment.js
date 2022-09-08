@@ -135,6 +135,10 @@ define([
                 this.initGPay();
             }
 
+            if (typeof sdk !== 'undefined') {
+                this.initHub();
+            }
+
             // Refresh selected gateway
             checkoutData.setIndividualGatewayFlag('');
             this.setBlueMediaGatewayMethod({});
@@ -208,7 +212,12 @@ define([
             return paymentService.getAvailablePaymentMethods().length !== 1;
         }),
         canUseApplePay: function() {
-            return window.ApplePaySession && ApplePaySession.canMakePayments();
+            try {
+                return window.ApplePaySession && window.ApplePaySession.canMakePayments();
+            } catch (e) {
+                console.log('ApplePay', e);
+                return false;
+            }
         },
         isSeparatedChecked: function (context) {
             return ko.pureComputed(function () {
@@ -244,6 +253,9 @@ define([
         },
         isGPaySelected: function () {
             return selectedGateway().is_gpay === true;
+        },
+        isHubSelected: function () {
+            return selectedGateway().is_hub === true;
         },
         isAutopaySelected: function () {
             return selectedGateway().is_autopay === true;
@@ -348,6 +360,11 @@ define([
                 return false;
             }
 
+            // Hub Validation
+            if (this.isHubSelected() && !this.validateHubPayment()) {
+                return false;
+            }
+
             // Selected payment method validation
             if (this.renderSubOptions !== false && !this.activeMethod()) {
                 this.validationFailed(true);
@@ -433,6 +450,10 @@ define([
 
             if (this.isAutopaySelected()) {
                 href += '&card_index=' + checkoutData.getCardIndex();
+            }
+
+            if (this.isHubSelected()) {
+                href += '&hub_token=' + checkoutData.getHubToken();
             }
 
             window.location.href = href;
@@ -717,6 +738,32 @@ define([
             }).done(function (response) {
                 self.handleGPayStatus(response.Status, response);
             });
+        },
+
+        /** HUB */
+        initHub: function () {
+            console.log('initHub');
+
+            // SDK is defined globally.
+            setTimeout(function () {
+                document.body.addEventListener('getSdkToken', function(e) {
+                    if (e && e.detail && e.detail.token) {
+                        checkoutData.setHubToken(e.detail.token);
+                    }
+                });
+
+                sdk.initializeCalculator();
+                sdk.getVariables();
+                sdk.initialize();
+            }, 4000);
+        },
+        validateHubPayment: function () {
+            if (!checkoutData.getHubToken()) {
+                sdk.openModal();
+                return false;
+            }
+
+            return true;
         },
     });
 });
