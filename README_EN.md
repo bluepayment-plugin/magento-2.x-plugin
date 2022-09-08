@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.3.
+- Magento version: 2.3.0 - 2.4.4.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in BluePayment?](CHANGELOG_EN.md)
@@ -296,6 +296,41 @@ Provided event data:
 - `order` - `\Magento\Sales\Model\Order` instance
 - `payment` - `\Magento\Sales\Model\OrderPayment` instance
 - `transaction_id` - `string` transaction identifier in BlueMedia system
+
+
+## Promoting installments payments
+
+### Why promote?
+- More sales
+- Fewer abandoned shopping carts
+- More customers
+
+Customers are more likely to decide to buy products, even at a higher price, if they can pay later or spread the repayment in installments.
+
+The option is available only if **Purchase Now, Pay Later** (Smartney), **Alior Installments** or **Buy on tailored installments** payments are available for the service.    
+The option is triggered automatically only for new module installations - in case of updates, go to manual configuration.
+
+### Configuration
+1. Go to [Module configuration](#configuration).
+2. In tab **Promoting payments** set up in which places promoting payments should be visible.
+   ![cf1.png](docs/cf1.png "Screenshot")
+
+### Example visualization
+**At the top of the page**  
+![cf2.png](docs/cf2.png "Screenshot")
+
+**Under the navigation**  
+![cf3.png](docs/cf3.png "Screenshot")
+
+**On the product list**   
+![cf4.png](docs/cf4.png "Screenshot")
+
+**On the product page under the buttons**  
+![cf5.png](docs/cf5.png "Screenshot")
+
+**In the shopping cart under the products**  
+![cf6.png](docs/cf6.png "Screenshot")
+
 
 ## Integration with GraphQL and Magento PWA
 GraphQL module is available at:

@@ -14,6 +14,8 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Config;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -63,6 +65,9 @@ class ConfigProvider implements ConfigProviderInterface
 
     /** @var StoreManagerInterface */
     private $storeManager;
+
+    /** @var Config */
+    private $orderConfig;
 
     /** @var array */
     private $defaultSortOrder = [
@@ -142,7 +147,8 @@ class ConfigProvider implements ConfigProviderInterface
         CustomerSession $customerSession,
         CheckoutSession $checkoutSession,
         CardCollectionFactory $cardCollectionFactory,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        Config $orderConfig
     ) {
         $this->gatewayCollectionFactory = $gatewayCollectionFactory;
         $this->block = $block;
@@ -152,6 +158,15 @@ class ConfigProvider implements ConfigProviderInterface
         $this->checkoutSession = $checkoutSession;
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->storeManager = $storeManager;
+        $this->orderConfig = $orderConfig;
+    }
+
+    public function isActive(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/active',
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     public function isActive(): bool
@@ -386,6 +401,22 @@ class ConfigProvider implements ConfigProviderInterface
         return $gateways->load();
     }
 
+    public function getServiceId(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getSharedKey(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
     public function isGatewaySelectionEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
@@ -410,20 +441,39 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    public function getServiceId(string $currency = 'PLN')
+    public function getUnchangableStatuses(): array
     {
-        return $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
+        return explode(
+            ',',
+            $this->scopeConfig->getValue(
+                'payment/bluepayment/unchangeable_statuses',
+                ScopeInterface::SCOPE_STORE
+            ) ?: ''
         );
     }
 
-    public function getSharedKey(string $currency = 'PLN')
+    public function getStatusWaitingPayment(): ?string
     {
         return $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            'payment/bluepayment/status_waiting_payment',
             ScopeInterface::SCOPE_STORE
-        );
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+    }
+
+    public function getStatusErrorPayment(): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_error_payment',
+            ScopeInterface::SCOPE_STORE
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
+    }
+
+    public function getStatusSuccessPayment(): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_accept_payment',
+            ScopeInterface::SCOPE_STORE
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 
     public function isConsumerFinanceEnabled($position): bool
