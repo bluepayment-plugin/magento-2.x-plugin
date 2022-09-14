@@ -149,21 +149,16 @@ define([
         setAutopayData: function () {
             var cartData = customerData.get('cart')();
 
-            this.log('SetTransactionData', {
+            var data = {
                 id: cartData.cart_id,
-                amount: cartData.subtotalAmount,
+                amount: parseFloat(cartData['grand_total']),
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,
-            });
+            };
 
-            this.autopay.setTransactionData({
-                id: cartData.cart_id,
-                amount: cartData.subtotalAmount,
-                currency: cartData.currency,
-                label: cartData.cart_id,
-                productList: cartData.items,
-            });
+            this.log('SetTransactionData', data);
+            this.autopay.setTransactionData(data);
         },
 
         clearCart: function (reject) {

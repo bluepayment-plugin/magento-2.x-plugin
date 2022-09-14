@@ -94,7 +94,7 @@ interface QuoteManagementInterface
      * @param int $cartId
      * @param float $amount
      *
-     * @return int Order ID
+     * @return string Order ID
      */
     public function placeOrder($cartId, $amount);
 }
