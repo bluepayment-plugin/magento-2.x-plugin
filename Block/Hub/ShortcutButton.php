@@ -11,8 +11,10 @@ class ShortcutButton extends Template implements ShortcutInterface
     const ALIAS_ELEMENT_INDEX = 'alias';
     private $isMiniCart = false;
 
-    public function __construct(Context $context, array $data = [])
-    {
+    public function __construct(
+        Context $context,
+        array $data = []
+    ) {
         parent::__construct($context, $data);
     }
 

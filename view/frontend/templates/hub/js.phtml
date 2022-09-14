@@ -3,14 +3,18 @@
 /** @var $escaper \Magento\Framework\Escaper */
 ?>
 
-<script src="https://raty-accept.bm.pl/sdk/sdk.js"></script>
-<!--<script src="<?= $block->getViewFileUrl('BlueMedia_BluePayment/js/hub/sdk.js'); ?>"></script>-->
+<?php if ($block->isInstallmentHubAvailable()): ?>
+<?php if ($block->isTestMode()): ?>
+    <script src="https://raty-accept.bm.pl/sdk/sdk.js"></script>
+<?php else: ?>
+    <script src="https://raty.bm.pl/sdk/sdk.js"></script>
+<?php endif; ?>
 
 <script type="text/x-magento-init">
 {
     "*": {
         "BlueMedia_BluePayment/js/hub/hub": {
-            "merchantId": "1234",
+            "merchantId": "<?= $block->getServiceId() ?>",
             "productPriceClass": ".price-final_price .price",
             "paymentPriceClass": ".checkout-index-index .grand.totals .price",
             "paymentSelectorClass": ".payment-method.blue-payment__hub"
@@ -18,3 +22,4 @@
     }
 }
 </script>
+<?php endif; ?>
