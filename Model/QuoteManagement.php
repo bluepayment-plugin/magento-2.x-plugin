@@ -11,6 +11,7 @@ use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address\CustomerAddressDataProvider;
 use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Quote\Api\CartManagementInterface;
@@ -59,6 +60,9 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var ConfigProvider */
     private $configProvider;
 
+    /** @var SearchCriteriaBuilder */
+    private $searchCriteriaBuilder;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
@@ -71,7 +75,8 @@ class QuoteManagement implements QuoteManagementInterface
         PaymentInterfaceFactory $paymentFactory,
         OrderRepositoryInterface $orderRepository,
         ConfigurationInterfaceFactory $configurationFactory,
-        ConfigProvider $configProvider
+        ConfigProvider $configProvider,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -85,6 +90,7 @@ class QuoteManagement implements QuoteManagementInterface
         $this->orderRepository = $orderRepository;
         $this->configurationFactory = $configurationFactory;
         $this->configProvider = $configProvider;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     public function getConfiguration()
@@ -271,6 +277,11 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function placeOrder($cartId, $amount)
     {
+        // If we try to place order which has been stored already - just return order id
+        if ($orderId = $this->findOrderByCartId($cartId)) {
+            return $orderId;
+        }
+
         $quote = $this->cartRepository->get($cartId);
 
         $customer = $quote->getCustomer();
@@ -293,6 +304,27 @@ class QuoteManagement implements QuoteManagementInterface
         $this->orderRepository->save($order);
 
         return $order->getIncrementId();
+    }
+
+    /**
+     * @param $cartId
+     *
+     * @return string|false
+     */
+    private function findOrderByCartId($cartId)
+    {
+        $orders = $this->orderRepository->getList(
+            $this->searchCriteriaBuilder
+                ->addFilter('quote_id', $cartId)
+                ->create()
+        );
+
+        if ($orders->getTotalCount() > 0) {
+            $order = current($orders->getItems());
+            return $order->getIncrementId();
+        }
+
+        return false;
     }
 
     private function getCart($cartId)

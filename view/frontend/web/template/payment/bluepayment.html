@@ -172,61 +172,60 @@
             </div>
             <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
                 <!-- ko foreach: $parent.getRegion('messages') -->
-                <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!-- ko template: getTemplate() --><!-- /ko -->
                 <!--/ko-->
 
                 <!-- ko if: $data.is_apple_pay -->
-                <fieldset class="fieldset">
-                    <div class="payment-method-note">
-                        <div>
-                            Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
-                            autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
-                            o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
+                    <fieldset class="fieldset">
+                        <div class="payment-method-note">
+                            <div>
+                                Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
+                                autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
+                                o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
 
-                            Więcej informacji o płatności
-                            <a href="https://support.apple.com/pl-pl/HT201239#safari">
-                                Apple Pay w przeglądarce.
-                            </a>
+                                Więcej informacji o płatności
+                                <a href="https://support.apple.com/pl-pl/HT201239#safari">
+                                    Apple Pay w przeglądarce.
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
                 <!--/ko-->
 
                 <!-- ko if: $data.is_autopay -->
-                <fieldset class="fieldset">
-                    <div class="payment-method-note">
-                        <div>
-                            <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
-                                <li data-bind="attr:{class: 'card-option'}">
-                                    <input required
-                                           data-bind="
-                                                attr:{id: 'bluepayment_card_' + index, value: index },
-                                                click: $parents[1].selectAutopayCardIndex.bind($parents[1])
-                                           "
-                                           name="payment_method_bluepayment_card_index"
-                                           class="radio"
-                                           type="radio" />
+                    <fieldset class="fieldset">
+                        <div class="payment-method-note">
+                            <div>
+                                <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
+                                    <li data-bind="attr:{class: 'card-option'}">
+                                        <input required
+                                               data-bind="
+                                                    attr:{id: 'bluepayment_card_' + index, value: index },
+                                                    click: $parents[1].selectAutopayCardIndex.bind($parents[1])
+                                               "
+                                               name="payment_method_bluepayment_card_index"
+                                               class="radio"
+                                               type="radio" />
 
-                                    <label data-bind="attr:{for: 'bluepayment_card_' + index }">
-                                        <img data-bind="attr:{src: logo}" class="payment-logo"/>
+                                        <label data-bind="attr:{for: 'bluepayment_card_' + index }">
+                                            <img data-bind="attr:{src: logo}" class="payment-logo"/>
 
-                                        <span class="details">
-                                            <span class="title" data-bind="text: number"></span>
-                                        </span>
-                                    </label>
-                                </li>
-                            </ul>
+                                            <span class="details">
+                                                <span class="title" data-bind="text: number"></span>
+                                            </span>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                </fieldset>
-                <!--/ko-->
+                    </fieldset>
 
-                <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
-                    <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>
-                    <label for="autopay-agreement">
-                        <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
-                    </label>
-                </div>
+                    <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
+                        <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>
+                        <label for="autopay-agreement">
+                            <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
+                        </label>
+                    </div>
                 <!--/ko-->
 
                 <div class="payment-method-billing-address">
