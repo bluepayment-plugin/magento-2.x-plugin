@@ -45,6 +45,12 @@ define([
                 container = $('.' + this.selector + ' .autopay-button');
 
             this.whenAvailable('autopay', function() {
+                self.log('Init params', {
+                    merchantId: self.merchantId,
+                    theme: 'dark',
+                    language: self.language
+                });
+
                 autopay = new window.autopay.checkout({
                     merchantId: self.merchantId,
                     theme: 'dark',
@@ -53,12 +59,6 @@ define([
                 button = autopay.createButton();
 
                 self.autopay = autopay;
-
-                self.log('Init params', {
-                    merchantId: self.merchantId,
-                    theme: 'dark',
-                    language: self.language
-                });
 
                 self.onRemoveFromCartListener();
 

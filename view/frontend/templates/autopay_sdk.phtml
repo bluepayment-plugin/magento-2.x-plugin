@@ -4,9 +4,10 @@
 
 $serviceId = $block->getServiceId();
 $isTestMode = $block->isTestMode();
+$isActive = $block->isActive();
 ?>
 
-<?php if ($serviceId): ?>
+<?php if ($isActive && $serviceId): ?>
     <?php if ($isTestMode): ?>
         <script async src="https://oapi-accept.autopay.pl/checkout/www/sdk/<?= $serviceId; ?>"></script>
     <?php else: ?>

@@ -1,19 +1,20 @@
 <?php
 /** @var \BlueMedia\BluePayment\Block\ShortcutButton $block */
 
-$isInCatalogProduct = false;
-if ($block->getIsInCatalogProduct()) {
-    $isInCatalogProduct = $block->getIsInCatalogProduct();
-}
+if ($block->isActive() && $block->getMerchantId()):
+    $isInCatalogProduct = false;
+    if ($block->getIsInCatalogProduct()) {
+        $isInCatalogProduct = $block->getIsInCatalogProduct();
+    }
 
-$randStr = random_int(10, 1000);
-
+    $randStr = random_int(10, 1000);
 ?>
-<div class="autopay-shortcut autopay-shortcut-<?= $randStr ?>" data-mage-init='{"autopayShortcut":{
-    "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>",
-    "selector": "autopay-shortcut-<?= $randStr ?>",
-    "merchantId": "<?= $block->getMerchantId() ?>",
-    "language": "<?= $block->getLanguage() ?>"
-}}'>
-    <div class="autopay-button"></div>
-</div>
+    <div class="autopay-shortcut autopay-shortcut-<?= $randStr ?>" data-mage-init='{"autopayShortcut":{
+        "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>",
+        "selector": "autopay-shortcut-<?= $randStr ?>",
+        "merchantId": "<?= $block->getMerchantId() ?>",
+        "language": "<?= $block->getLanguage() ?>"
+    }}'>
+        <div class="autopay-button"></div>
+    </div>
+<?php endif; ?>
