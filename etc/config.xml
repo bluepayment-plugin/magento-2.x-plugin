@@ -41,7 +41,7 @@
                 </consumer_finance>
             </bluepayment>
             <autopay>
-                <active>1</active>
+                <active>0</active>
                 <model>AutopayFacade</model>
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>

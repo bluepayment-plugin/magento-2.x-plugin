@@ -25,15 +25,9 @@
         </div>
         <div class="actions-toolbar">
             <div class="primary">
-                <button class="action primary checkout"
-                        type="submit"
-                        data-bind="
-                        click: placeOrder,
-                        attr: {title: $t('Place Order')},
-                        enable: isButtonEnabled()"
-                        disabled>
-                    <span data-bind="i18n: 'Place Order'"></span>
-                </button>
+                <div class="autopay-shortcut" data-bind="afterRender: afterRender">
+                    <div class="autopay-button"></div>
+                </div>
             </div>
         </div>
     </div>

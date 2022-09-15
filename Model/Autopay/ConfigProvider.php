@@ -21,9 +21,17 @@ class ConfigProvider implements ConfigProviderInterface
         return [];
     }
 
-    public function isTestMode()
+    public function isActive(): bool
     {
-        return (boolean) $this->scopeConfig->getValue(
+        return (bool) $this->scopeConfig->getValue(
+            'payment/autopay/active',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function isTestMode(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
             'payment/autopay/test_mode',
             ScopeInterface::SCOPE_STORE
         );
@@ -59,5 +67,32 @@ class ConfigProvider implements ConfigProviderInterface
             'checkout/cart/delete_quote_after',
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    public function getLanguage(): string
+    {
+        $locale = $this->scopeConfig
+            ->getValue(
+                'general/locale/code',
+                ScopeInterface::SCOPE_STORE
+            );
+
+        return $this->getLanguageFromLocale($locale);
+    }
+
+    private function getLanguageFromLocale($locale): string
+    {
+        $locales = [
+            'pl_' => 'pl', // polski
+            'en_' => 'en', // angielski
+        ];
+
+        $prefix = substr($locale, 0, 3);
+
+        if (isset($locales[$prefix])) {
+            return $locales[$prefix];
+        }
+
+        return 'en';
     }
 }
