@@ -15,8 +15,8 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends \Magento\Payment\Helper\Data
 {
-    const FAILED_CONNECTION_RETRY_COUNT = 5;
-    const MESSAGE_ID_STRING_LENGTH = 32;
+    public const FAILED_CONNECTION_RETRY_COUNT = 5;
+    public const MESSAGE_ID_STRING_LENGTH = 32;
 
     /** @var Logger */
     public $logger;

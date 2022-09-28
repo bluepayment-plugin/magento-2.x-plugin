@@ -234,6 +234,15 @@
                         <label>Shared key</label>
                     </field>
                 </group>
+                <group id="sek" translate="label" type="text" sortOrder="790" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SEK configuration</label>
+                    <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Service partner ID</label>
+                    </field>
+                    <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Shared key</label>
+                    </field>
+                </group>
             </group>
         </section>
 
