@@ -197,7 +197,7 @@ class PlaceOrder implements PlaceOrderInterface
         ];
 
         /* Płatność automatyczna kartowa */
-        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+        if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
             $cardIndex = $payment->getAdditionalInformation('gateway_index');
 
             /** @var Card $card */

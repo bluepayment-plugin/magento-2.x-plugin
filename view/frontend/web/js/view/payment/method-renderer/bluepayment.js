@@ -81,6 +81,17 @@ define([
         hubPriceClass: ".checkout-index-index .grand.totals .price",
         hubPaymentClass: ".payment-method.blue-payment__hub",
 
+        gatewayIds: {
+            blik: 509,
+            smartney: 700,
+            hub: 702,
+            card: 1500,
+            one_click: 1503,
+            gpay: 1512,
+            apple_pay: 1513,
+            alior_installments: 1506,
+        },
+
         /**
          * Subscribe to grand totals
          */
@@ -280,11 +291,17 @@ define([
         },
 
         getGatewayTitle: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            if (gatewayId === this.gatewayIds.card) {
+                return $t('Card Payment');
+            }
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t('Pay later');
             }
 
-            if (gateway.is_alior_installments) {
+            if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t('Spread the cost over installments');
             }
 
@@ -292,12 +309,24 @@ define([
         },
 
         getGatewayDescription: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            console.log(gatewayId);
+
+            if (gatewayId === this.gatewayIds.card) {
+                if (gateway.is_iframe) {
+                    return $t('Pay with your credit or debit card.');
+                } else {
+                    return $t('You will be redirected to our partner Blue Media\'s website, where you will enter your card details.');
+                }
+            }
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t('Buy now and pay within 30 days. %1')
                     .replace('%1', '<a href="https://pomoc.bluemedia.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
             }
 
-            if (gateway.is_alior_installments) {
+            if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t('0% installments and even 48 installments. %L')
                     .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
             }

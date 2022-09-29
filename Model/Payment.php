@@ -53,7 +53,7 @@ class Payment extends AbstractMethod
 {
     public const METHOD_CODE = 'bluepayment';
     public const METHOD_CODE_AUTOPAY = 'autopay';
-    public const IFRAME_GATEWAY_ID = 'IFRAME';
+    public const IFRAME_SCREEN_TYPE = 'IFRAME';
     public const DEFAULT_TRANSACTION_LIFE_HOURS = false;
 
     /**
@@ -442,8 +442,8 @@ class Payment extends AbstractMethod
 
         if ($automatic === true) {
             switch ($gatewayId) {
-                case ConfigProvider::IFRAME_GATEWAY_ID:
-                    $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+                case ConfigProvider::CARD_GATEWAY_ID:
+                    $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
                     break;
                 case ConfigProvider::BLIK_GATEWAY_ID == $gatewayId:
                     $params['AuthorizationCode'] = $authorizationCode;
@@ -456,7 +456,7 @@ class Payment extends AbstractMethod
         }
 
         /* Płatność automatyczna kartowa */
-        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+        if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
             $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
         } else {
             $agreementId = reset($agreementsIds);
@@ -1043,7 +1043,7 @@ class Payment extends AbstractMethod
         }
 
         if ($automatic === true) {
-            $params['ScreenType'] = self::IFRAME_GATEWAY_ID;
+            $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
         }
         return $params;
     }
