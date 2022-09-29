@@ -63,7 +63,7 @@ class Form extends \Magento\Payment\Block\Form
 
     public function isAutopay()
     {
-        return $this->isSeparated() && $this->getGatewayId() === ConfigProvider::AUTOPAY_GATEWAY_ID;
+        return $this->isSeparated() && $this->getGatewayId() === ConfigProvider::ONECLICK_GATEWAY_ID;
     }
 
     public function isSeparated()
