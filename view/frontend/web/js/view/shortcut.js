@@ -173,7 +173,7 @@ define([
                 label: cartData.cart_id,
                 productList: cartData.items,
             };
-:wq
+
             this.log('SetTransactionData', data);
             this.autopay.setTransactionData(data);
 
