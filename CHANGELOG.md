@@ -1,5 +1,12 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.21.0
+- Dodaliśmy walutę SEK.
+- Dodaliśmy tekst z informacją dla metody płatności BM.
+- Zmieniliśmy wygląd ekranu wyboru płatności.
+- Dodaliśmy teksty pomocnicze w konfiguracji modułu oraz konfiguracji kanałów.
+- Od teraz także "Płatność kartą" oraz "PayPo" są zawsze wyświetlane jako osobne metody płatności.
+
 ## Wersja 2.20.0
 - Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
 - Zapewniliśmy wsparcie dla Magneto 2.4.4 oraz PHP 8.1.
