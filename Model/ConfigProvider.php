@@ -21,22 +21,31 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    public const IFRAME_GATEWAY_ID = 1500;
     public const BLIK_GATEWAY_ID = 509;
+    public const SMARTNEY_GATEWAY_ID = 700;
+    public const HUB_GATEWAY_ID = 702;
+    public const PAYPO_GATEWAY_ID = 705;
+    public const CARD_GATEWAY_ID = 1500;
+    public const ONECLICK_GATEWAY_ID = 1503;
     public const GPAY_GATEWAY_ID = 1512;
     public const APPLE_PAY_GATEWAY_ID = 1513;
-    public const AUTOPAY_GATEWAY_ID = 1503;
-    public const SMARTNEY_GATEWAY_ID = 700;
     public const ALIOR_INSTALLMENTS_GATEWAY_ID = 1506;
-    public const HUB_GATEWAY_ID = 702;
 
     public const ALWAYS_SEPARATED = [
-        self::AUTOPAY_GATEWAY_ID,
+        self::CARD_GATEWAY_ID,
+        self::ONECLICK_GATEWAY_ID,
         self::GPAY_GATEWAY_ID,
         self::APPLE_PAY_GATEWAY_ID,
         self::SMARTNEY_GATEWAY_ID,
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
+        self::PAYPO_GATEWAY_ID,
+    ];
+
+    public const STATIC_GATEWAY_NAME = [
+        self::CARD_GATEWAY_ID,
+        self::SMARTNEY_GATEWAY_ID,
+        self::ALIOR_INSTALLMENTS_GATEWAY_ID,
     ];
 
     /** @var GatewayCollectionFactory */
@@ -206,7 +215,7 @@ class ConfigProvider implements ConfigProviderInterface
 
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
-                if ($gateway->getGatewayId() != self::AUTOPAY_GATEWAY_ID
+                if ($gateway->getGatewayId() != self::ONECLICK_GATEWAY_ID
                     || $this->customerSession->isLoggedIn() // AutoPay only for logger users
                 ) {
                     if ($gateway->isSeparatedMethod()) {
@@ -276,10 +285,10 @@ class ConfigProvider implements ConfigProviderInterface
             'logo_url' => $logoUrl,
             'is_separated_method' => $gateway->isSeparatedMethod(),
 
-            'is_iframe' => ($gatewayId == self::IFRAME_GATEWAY_ID || $gatewayId == self::AUTOPAY_GATEWAY_ID) && $this->iframePayment(),
+            'is_iframe' => ($gatewayId == self::CARD_GATEWAY_ID || $gatewayId == self::ONECLICK_GATEWAY_ID) && $this->iframePayment(),
             'is_blik' => ($gatewayId == self::BLIK_GATEWAY_ID) && $this->blikZero(),
             'is_gpay' => $gatewayId == self::GPAY_GATEWAY_ID,
-            'is_autopay' => $gatewayId == self::AUTOPAY_GATEWAY_ID,
+            'is_autopay' => $gatewayId == self::ONECLICK_GATEWAY_ID,
             'is_apple_pay' => $gatewayId == self::APPLE_PAY_GATEWAY_ID,
             'is_smartney' => $gatewayId == self::SMARTNEY_GATEWAY_ID,
             'is_alior_installments' => $gatewayId == self::ALIOR_INSTALLMENTS_GATEWAY_ID
