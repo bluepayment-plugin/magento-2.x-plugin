@@ -2,16 +2,18 @@
 
 namespace BlueMedia\BluePayment\Gateway\Request;
 
+use LogicException;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
-/**
- * Class AuthorizationRequest
- * @package PayU\PaymentGateway\Gateway\Request
- */
-class CaptureRequestBuilder extends AbstractRequest implements BuilderInterface
+class InitializeRequestBuilder extends AbstractRequest implements BuilderInterface
 {
     /**
-     * {@inheritdoc}
+     * Build payment data
+     *
+     * @param array $buildSubject
+     *
+     * @return array
+     * @throws LogicException
      */
     public function build(array $buildSubject)
     {

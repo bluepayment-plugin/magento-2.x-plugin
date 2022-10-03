@@ -1,20 +1,32 @@
 <?php
-/** @var \BlueMedia\BluePayment\Block\ShortcutButton $block */
+/**
+ * @var \BlueMedia\BluePayment\Block\ShortcutButton $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
 
 if ($block->isActive() && $block->getMerchantId()):
-    $isInCatalogProduct = false;
-    if ($block->getIsInCatalogProduct()) {
-        $isInCatalogProduct = $block->getIsInCatalogProduct();
-    }
+    $isInCatalogProduct = $block->isInCatalogProduct() ? true : false;
+    $randStr = $block->getRandomId();
 
-    $randStr = random_int(10, 1000);
+    $config = [
+        'autopayShortcut' => [
+            'isInCatalogProduct' => $block->isInCatalogProduct(),
+            'selector' => $randStr,
+            'merchantId' => $block->getMerchantId(),
+            'language' => $block->getLanguage(),
+            'minimumOrderConfiguration' => [
+                'active' => $block->isMinimumOrderActive(),
+                'amount' => $block->getMinimumOrderAmount(),
+                'includingDiscount' => $block->isMinimumOrderIncludingDiscount(),
+                'includingTax' => $block->isMinimumOrderIncludingTax(),
+                'text' => $block->getMinimumOrderText(),
+            ]
+        ]
+    ];
 ?>
-    <div class="autopay-shortcut autopay-shortcut-<?= $randStr ?>" data-mage-init='{"autopayShortcut":{
-        "isInCatalogProduct": "<?= /* @noEscape */ (bool)$block->getIsInCatalogProduct() ?>",
-        "selector": "autopay-shortcut-<?= $randStr ?>",
-        "merchantId": "<?= $block->getMerchantId() ?>",
-        "language": "<?= $block->getLanguage() ?>"
-    }}'>
+    <div
+        class="autopay-shortcut autopay-shortcut-<?= $randStr ?>"
+        data-mage-init='<?= /* @noEscape */ \Magento\Framework\Serialize\JsonConverter::convert($config) ?>'>
         <div class="autopay-button"></div>
     </div>
 <?php endif; ?>
