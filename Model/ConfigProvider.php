@@ -24,6 +24,7 @@ class ConfigProvider implements ConfigProviderInterface
     public const BLIK_GATEWAY_ID = 509;
     public const SMARTNEY_GATEWAY_ID = 700;
     public const HUB_GATEWAY_ID = 702;
+    public const PAYPO_GATEWAY_ID = 705;
     public const CARD_GATEWAY_ID = 1500;
     public const ONECLICK_GATEWAY_ID = 1503;
     public const GPAY_GATEWAY_ID = 1512;
@@ -38,6 +39,7 @@ class ConfigProvider implements ConfigProviderInterface
         self::SMARTNEY_GATEWAY_ID,
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
+        self::PAYPO_GATEWAY_ID,
     ];
 
     public const STATIC_GATEWAY_NAME = [

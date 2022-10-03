@@ -83,6 +83,7 @@ define([
             blik: 509,
             smartney: 700,
             hub: 702,
+            paypo: 705,
             card: 1500,
             one_click: 1503,
             gpay: 1512,
@@ -291,13 +292,15 @@ define([
                 return $t('Spread the cost over installments');
             }
 
+            if (gatewayId === this.gatewayIds.paypo) {
+                // @ToDo
+            }
+
             return gateway.name;
         },
 
         getGatewayDescription: function (gateway) {
             let gatewayId = Number(gateway.gateway_id);
-
-            console.log(gatewayId);
 
             if (gatewayId === this.gatewayIds.card) {
                 if (gateway.is_iframe) {
@@ -315,6 +318,10 @@ define([
             if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t('0% installments and even 48 installments. %L')
                     .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+            }
+
+            if (gatewayId === this.gatewayIds.paypo) {
+                // @ToDo
             }
 
             return gateway.description;
