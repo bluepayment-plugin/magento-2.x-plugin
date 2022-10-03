@@ -3,8 +3,15 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="payment">
-            <group id="bluepayment" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Online payment BM</label>
+            <group id="bluepayment" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Blue Media Online Payment</label>
+                <fieldset_css>complex bluepayment-section</fieldset_css>
+                <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Fieldset</frontend_model>
+
+                <field id="info" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\Introduction</frontend_model>
+                </field>
+
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
