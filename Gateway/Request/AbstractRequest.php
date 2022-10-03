@@ -2,21 +2,18 @@
 
 namespace BlueMedia\BluePayment\Gateway\Request;
 
+use LogicException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Payment\Gateway\Data\OrderAdapterInterface;
 
-/**
- * Class AbstractRequest
- * @package PayU\PaymentGateway\Gateway\Request
- */
 abstract class AbstractRequest
 {
     /**
      * Payment key in subject
      */
-    const BUILD_SUBJECT_PAYMENT = 'payment';
+    public const BUILD_SUBJECT_PAYMENT = 'payment';
 
     /**
      * @var Payment
@@ -39,7 +36,7 @@ abstract class AbstractRequest
      * @param array $buildSubject
      *
      * @return void
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function build(array $buildSubject)
     {
@@ -51,7 +48,7 @@ abstract class AbstractRequest
         $this->payment = $this->buildPayment->getPayment();
         $this->order = $this->buildPayment->getOrder();
         if (!$this->payment instanceof OrderPaymentInterface) {
-            throw new \LogicException('Order payment should be provided.');
+            throw new LogicException('Order payment should be provided.');
         }
     }
 }

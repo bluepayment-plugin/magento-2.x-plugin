@@ -81,52 +81,32 @@
     <virtualType name="AutopayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">AutopayAuthorizeCommand</item>
-                <item name="capture" xsi:type="string">AutopayCaptureCommand</item>
+                <item name="initialize" xsi:type="string">AutopayInitializeCommand</item>
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="AutopayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <virtualType name="AutopayInitializeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
-            <argument name="requestBuilder" xsi:type="object">AutopayAuthorizationRequestBuilder</argument>
+            <argument name="requestBuilder" xsi:type="object">AutopayInitializeRequestBuilder</argument>
             <argument name="transferFactory" xsi:type="object">BlueMedia\BluePayment\Gateway\Http\TransferFactory</argument>
             <argument name="client" xsi:type="object">BlueMedia\BluePayment\Gateway\Http\Client\AutopayClient</argument>
-            <argument name="handler" xsi:type="object">AutopayAuthorizationHandler</argument>
             <argument name="validator" xsi:type="object">BlueMedia\BluePayment\Gateway\Validator\ResponseValidator</argument>
+            <argument name="handler" xsi:type="object">AutopayInitializeHandler</argument>
         </arguments>
     </virtualType>
-    <virtualType name="AutopayAuthorizationRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite">
+    <virtualType name="AutopayInitializeRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
             <argument name="builders" xsi:type="array">
-                <item name="transaction" xsi:type="string">BlueMedia\BluePayment\Gateway\Request\AuthorizationRequestBuilder</item>
+                <item name="transaction" xsi:type="string">
+                    BlueMedia\BluePayment\Gateway\Request\InitializeRequestBuilder
+                </item>
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="AutopayAuthorizationHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+    <virtualType name="AutopayInitializeHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
         <arguments>
             <argument name="handlers" xsi:type="array">
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="AutopayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">AutopayCaptureRequestBuilder</argument>
-            <argument name="transferFactory" xsi:type="object">BlueMedia\BluePayment\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">BlueMedia\BluePayment\Gateway\Http\Client\AutopayClient</argument>
-            <argument name="handler" xsi:type="object">AutopayCaptureHandler</argument>
-            <argument name="validator" xsi:type="object">BlueMedia\BluePayment\Gateway\Validator\ResponseValidator</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="AutopayCaptureRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite">
-        <arguments>
-            <argument name="builders" xsi:type="array">
-                <item name="transaction" xsi:type="string">BlueMedia\BluePayment\Gateway\Request\CaptureRequestBuilder</item>
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="AutopayCaptureHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
-        <arguments>
-            <argument name="handlers" xsi:type="array">
+                <item name="initialize_status" xsi:type="string">BlueMedia\BluePayment\Gateway\Response\InitializeStatusHandler</item>
             </argument>
         </arguments>
     </virtualType>
