@@ -273,7 +273,7 @@ class Gateways extends Data
                 }
 
                 if (// Always separated
-                    in_array($gateway['gatewayID'], ConfigProvider::ALWAYS_SEPARATED) // BLIK 0
+                    in_array($gateway['gatewayID'], ConfigProvider::ALWAYS_SEPARATED)
                     || ($gateway['gatewayID'] == ConfigProvider::BLIK_GATEWAY_ID && $this->blikZero($store))) {
                     $gatewayModel->setIsSeparatedMethod(true);
                 }
