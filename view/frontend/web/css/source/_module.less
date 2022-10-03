@@ -30,6 +30,7 @@ and open the template in the editor.
 
     .blue-payment {
         min-height: 130px;
+        padding-bottom: 0;
 
         &__blik {
             .blik-code {
@@ -52,6 +53,11 @@ and open the template in the editor.
                     border-top: 1px solid #cccccc !important;
                 }
             }
+        }
+
+        .payment-method-info {
+            margin-top: -15px;
+            margin-bottom: 15px;
         }
 
         .payment-method-title {
@@ -99,28 +105,32 @@ and open the template in the editor.
             flex-wrap: wrap;
 
             .payment-option {
-                border: 1px solid #e6e6e6;
+                border: 2px solid #edeced;
                 box-sizing: border-box;
                 text-align: center;
                 flex: 1 1 auto;
                 flex-grow: 0;
-                padding: 10px;
                 justify-content: center;
                 align-items: center;
                 display: flex;
                 justify-items: center;
                 width: 180px;
 
-                margin: -1px 0 0 -1px;
-
-                &._active {
-                    outline: 2px solid #a6a6a6;
-                    outline-offset: -2px;
-                    z-index: 1;
-                }
+                padding: 5px 10px;
+                margin: 5px;
+                border-radius: 15px;
 
                 &:hover {
-                    outline: 1px solid #ddd; outline-offset:0;
+                    border: 2px solid #c6c6c6;
+                }
+
+                &._active {
+                    border: 2px solid #00B5DD;
+                    z-index: 1;
+
+                    &:hover {
+                        border: 2px solid #00B5DD;
+                    }
                 }
 
                 .radio {
@@ -248,6 +258,8 @@ and open the template in the editor.
             .method-name {
                 display: inline-block;
                 margin: 0;
+                font-size: 1.6rem;
+                font-weight: 600;
 
                 .payment-method-description {
                     font-size: 1.2rem;
@@ -263,6 +275,9 @@ and open the template in the editor.
         .bluepayment-agreement {
             display: flex;
             margin-top: 5px;
+
+            color: #6b6b6b;
+            font-size: 1.2rem;
 
             &.required {
                 label {
