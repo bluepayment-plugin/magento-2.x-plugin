@@ -3,8 +3,7 @@ define([
     'uiComponent',
     'Magento_Customer/js/customer-data',
     'mage/url',
-    'Magento_Ui/js/modal/alert',
-    'domReady!'
+    'Magento_Ui/js/modal/alert'
 ], function ($, Component, customerData, url, alert) {
     'use strict';
 
@@ -26,6 +25,10 @@ define([
             return this;
         },
 
+        isCatalogProduct: function() {
+            return Boolean(this.isInCatalogProduct);
+        },
+
         whenAvailable: function(name, callback) {
             var interval = 10;
             window.setTimeout(function() {
@@ -36,7 +39,6 @@ define([
                 }
             }.bind(this), interval);
         },
-
 
         initAutopay: function () {
             var self = this,
@@ -88,8 +90,7 @@ define([
                                             self.log('customer-data-reloaded event');
 
                                             // After customerData reloaded
-                                            self.setAutopayData();
-                                            resolve();
+                                            self.setAutopayData(resolve, reject);
                                         });
                                     }
                                 });
@@ -100,14 +101,12 @@ define([
                                 self.log('Product already added to cart');
 
                                 // If already added - just set data and resolve promise.
-                                self.setAutopayData();
-                                resolve();
+                                self.setAutopayData(resolve, reject);
                             }
                         } else {
                             self.log('Not catalog product');
 
-                            self.setAutopayData();
-                            resolve();
+                            self.setAutopayData(resolve, reject);
                         }
                     });
                 }
@@ -142,12 +141,30 @@ define([
             }
         },
 
-        isCatalogProduct: function() {
-            return Boolean(this.isInCatalogProduct);
-        },
-
-        setAutopayData: function () {
+        setAutopayData: function (resolve, reject) {
             var cartData = customerData.get('cart')();
+            var minimumOrderConfig = this.minimumOrderConfiguration;
+
+            // Validate minimum order amount
+            if (minimumOrderConfig.active) {
+                var tax = minimumOrderConfig.includingTax ? cartData.tax_amount : 0;
+                var amountToCompare = cartData.includingDiscount
+                    ? cartData.base_subtotal_with_discount
+                    : cartData.base_subtotal;
+
+                if (amountToCompare + tax < minimumOrderConfig.amount) {
+                    var text = (minimumOrderConfig.text)
+                        ? minimumOrderConfig.text
+                        : 'Minimalna wartość zamówienia to ' + minimumOrderConfig.amount;
+
+                    alert({
+                        content: text
+                    });
+
+                    reject();
+                    return;
+                }
+            }
 
             var data = {
                 id: cartData.cart_id,
@@ -159,6 +176,8 @@ define([
 
             this.log('SetTransactionData', data);
             this.autopay.setTransactionData(data);
+
+            resolve();
         },
 
         clearCart: function (reject) {
