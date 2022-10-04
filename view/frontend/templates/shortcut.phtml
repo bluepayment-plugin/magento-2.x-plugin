@@ -11,7 +11,7 @@ if ($block->isActive() && $block->getMerchantId()):
     $config = [
         'autopayShortcut' => [
             'isInCatalogProduct' => $block->isInCatalogProduct(),
-            'selector' => $randStr,
+            'selector' => "autopay-shortcut-" . $randStrg,
             'merchantId' => $block->getMerchantId(),
             'language' => $block->getLanguage(),
             'minimumOrderConfiguration' => [
