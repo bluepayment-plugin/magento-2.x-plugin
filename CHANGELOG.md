@@ -11,6 +11,7 @@
 - Dodaliśmy teksty pomocnicze w konfiguracji modułu oraz konfiguracji kanałów.
 - Dodaliśmy nowy kanał płatności - PayPo.
 - Od teraz także "Płatność kartą" oraz "PayPo" są zawsze wyświetlane jako osobne metody płatności.
+- Poprawiliśmy obsługę wielu serwisów BM w ramach różnych kontekstów Magento.
 
 ## Wersja 2.20.0
 - Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
