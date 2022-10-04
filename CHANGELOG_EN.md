@@ -5,6 +5,7 @@
 - We added text with information for BM payment method.
 - We changed the appearance of the payment selection screen.
 - We added help texts in module configuration and channel configuration.
+- We have added new payment channel "PayPo".
 - From now on, also "Card payment" and "PayPo" gateways are always displayed as separate payment methods.
 
 ## Version 2.20.0

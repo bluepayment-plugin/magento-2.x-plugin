@@ -13,7 +13,7 @@
                 <!-- BM Logo -->
 
                 <p class="method-name">
-                    <span data-bind="text: getTitle()"></span>
+                    <span data-bind="text: getTitle()" class="payment-method-name"></span>
                     <!-- ko if: getDescription() -->
                     <br />
                     <span data-bind="text: getDescription()" class="payment-method-description"></span>
@@ -145,7 +145,7 @@
                          class="payment-icon"/>
 
                     <p class="method-name">
-                        <span data-bind="text: $parent.getGatewayTitle($data)"></span>
+                        <span data-bind="text: $parent.getGatewayTitle($data)" class="payment-method-name"></span>
                         <!-- ko if: $parent.getGatewayDescription($data) -->
                         <br />
                         <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>

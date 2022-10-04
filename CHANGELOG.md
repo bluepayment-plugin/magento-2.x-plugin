@@ -5,6 +5,7 @@
 - Dodaliśmy tekst z informacją dla metody płatności BM.
 - Zmieniliśmy wygląd ekranu wyboru płatności.
 - Dodaliśmy teksty pomocnicze w konfiguracji modułu oraz konfiguracji kanałów.
+- Dodaliśmy nowy kanał płatności - PayPo.
 - Od teraz także "Płatność kartą" oraz "PayPo" są zawsze wyświetlane jako osobne metody płatności.
 
 ## Wersja 2.20.0
