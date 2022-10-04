@@ -227,11 +227,12 @@ define([
         }),
         canUseApplePay: function() {
             try {
-                return window.ApplePaySession && window.ApplePaySession.canMakePayments();
+                return window.ApplePaySession && ApplePaySession.canMakePayments();
             } catch (e) {
-                console.log('ApplePay', e);
-                return false;
+                console.log('Cannot use ApplePay', e);
             }
+
+            return false;
         },
         isSeparatedChecked: function (context) {
             return ko.pureComputed(function () {
@@ -306,10 +307,6 @@ define([
                 return $t('Spread the cost over installments');
             }
 
-            if (gatewayId === this.gatewayIds.paypo) {
-                // @ToDo
-            }
-
             return gateway.name;
         },
 
@@ -330,24 +327,31 @@ define([
             }
 
             if (gatewayId === this.gatewayIds.alior_installments) {
-                return $t('0% installments and even 48 installments. %L')
-                    .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+                return $t('0% installments and even 48 installments. %1')
+                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
             }
 
             if (gatewayId === this.gatewayIds.paypo) {
-                // @ToDo
+                return $t('Shop using deferred payment option or a convenient installment plan. %1')
+                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
             }
 
             return gateway.description;
         },
 
         getGatewayHelp: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t("You will be redirected to Smartney's partner website. After your application and positive verification, Smartney will pay for your purchases for you.");
             }
 
-            if (gateway.is_alior_installments) {
+            if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t("You will be redirected to the bank's website. After your application and positive verification, the bank will send you a loan agreement by email. You can accept it online. Average time of the whole transaction - 15 minutes.");
+            }
+
+            if (gatewayId === this.gatewayIds.paypo) {
+                return $t("You will be redirected to PayPo's partner website.");
             }
 
             return null;

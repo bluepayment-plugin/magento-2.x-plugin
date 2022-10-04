@@ -84,6 +84,7 @@ class ConfigProvider implements ConfigProviderInterface
         509, // BLIK
         700, // Smartney
         1506, // Alior Raty
+        705, // PayPo
 
         1503, // Kartowa płatność automatyczna
         1500, // Płatność kartą
@@ -287,8 +288,6 @@ class ConfigProvider implements ConfigProviderInterface
             'is_gpay' => $gatewayId == self::GPAY_GATEWAY_ID,
             'is_autopay' => $gatewayId == self::ONECLICK_GATEWAY_ID,
             'is_apple_pay' => $gatewayId == self::APPLE_PAY_GATEWAY_ID,
-            'is_smartney' => $gatewayId == self::SMARTNEY_GATEWAY_ID,
-            'is_alior_installments' => $gatewayId == self::ALIOR_INSTALLMENTS_GATEWAY_ID,
             'is_hub' => $gatewayId == self::HUB_GATEWAY_ID,
         ];
     }
