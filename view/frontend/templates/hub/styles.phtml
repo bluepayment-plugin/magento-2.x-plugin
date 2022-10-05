@@ -1,0 +1,12 @@
+<?php
+/** @var $block \BlueMedia\BluePayment\Block\Hub\Js */
+/** @var $escaper \Magento\Framework\Escaper */
+?>
+
+<?php if ($block->isInstallmentHubAvailable()): ?>
+    <?php if ($block->isTestMode()): ?>
+        <link rel="stylesheet" type="text/css" href="https://raty-accept.bm.pl/sdk/sdk.css" />
+    <?php else: ?>
+        <link rel="stylesheet" type="text/css" href="https://raty.bm.pl/sdk/sdk.css" />
+    <?php endif; ?>
+<?php endif; ?>

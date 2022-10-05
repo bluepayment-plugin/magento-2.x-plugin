@@ -31,6 +31,8 @@
                 <value id="style_bm_cards_accept" type="host">cards-accept.bm.pl</value>
                 <value id="style_bm_cards_prod" type="host">cards.bm.pl</value>
                 <value id="style_google_apis" type="host">*.googleapis.com</value>
+                <value id="style_bm_hub_test" type="host">raty-accept.bm.pl</value>
+                <value id="style_bm_hub_prod" type="host">raty.bm.pl</value>
             </values>
         </policy>
         <policy id="frame-src">

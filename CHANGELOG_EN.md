@@ -1,6 +1,7 @@
 # What's new in BluePayment?
 
-## Version IN PROGRESS
+## Version [IN progress]
+- We've added Installment Hub to payment.
 - We added Autopay support.
 - We've added hub support.
 
