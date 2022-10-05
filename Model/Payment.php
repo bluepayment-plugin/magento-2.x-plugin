@@ -43,8 +43,10 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -228,6 +230,9 @@ class Payment extends AbstractMethod
     /** @var GetStateForStatus */
     private $getStateForStatus;
 
+    /** @var GetStoreByServiceId */
+    private $getStoreByServiceId;
+
     /**
      * Payment constructor.
      *
@@ -257,6 +262,7 @@ class Payment extends AbstractMethod
      * @param  ConfigProvider  $configProvider
      * @param  Webapi  $webapi
      * @param  GetStateForStatus  $getStateForStatus
+     * @param  GetStoreByServiceId  $getStoreByServiceId
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -288,6 +294,7 @@ class Payment extends AbstractMethod
         ConfigProvider $configProvider,
         Webapi $webapi,
         GetStateForStatus $getStateForStatus,
+        GetStoreByServiceId $getStoreByServiceId,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -311,6 +318,7 @@ class Payment extends AbstractMethod
         $this->configProvider = $configProvider;
         $this->webapi = $webapi;
         $this->getStateForStatus = $getStateForStatus;
+        $this->getStoreByServiceId = $getStoreByServiceId;
 
         parent::__construct(
             $context,
@@ -515,15 +523,27 @@ class Payment extends AbstractMethod
      * Ustawia odpowiedni status transakcji/płatności zgodnie z uzyskaną informacją
      * z akcji 'statusAction'
      *
-     * @param SimpleXMLElement $response
+     * @param  SimpleXMLElement  $response
      *
      * @return string|null
+     * @throws DOMException
      */
     public function processStatusPayment(SimpleXMLElement $response)
     {
-        if ($this->validAllTransaction($response)) {
-            $transaction_xml = $response->transactions->transaction;
-            return $this->updateStatusTransactionAndOrder($transaction_xml, (string) $response->serviceID);
+        $serviceId = (string) $response->serviceID;
+        [$store, $currency] = $this->getStoreByServiceId->execute($serviceId);
+
+        if (! $store) {
+            $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
+                'serviceID' => $serviceId
+            ]);
+
+            return false;
+        }
+
+        if ($this->validAllTransaction($response, $store, $currency)) {
+            $transaction = $response->transactions->transaction;
+            return $this->updateStatusTransactionAndOrder($transaction, $serviceId, $store);
         }
 
         return null;
@@ -532,39 +552,54 @@ class Payment extends AbstractMethod
     /**
      * Procesuje zapis/usunięcie automatycznej płatności
      *
-     * @param SimpleXMLElement $response
+     * @param  SimpleXMLElement  $response
      *
      * @return string|null
      */
-    public function processRecurring($response)
+    public function processRecurring(SimpleXMLElement $response)
     {
-        $currency = $response->transaction->currency;
+        $serviceId = (string) $response->serviceID;
+        [$store, $currency] = $this->getStoreByServiceId->execute($serviceId);
+
+        if (! $store) {
+            $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
+                'serviceID' => $serviceId
+            ]);
+
+            return false;
+        }
 
         try {
-            if ($this->validAllTransaction($response, $currency)) {
+            if ($this->validAllTransaction($response, $store, $currency)) {
                 switch ($response->getName()) {
                     case 'recurringActivation':
-                        return $this->saveCardData($response);
+                        return $this->saveCardData($response, $store);
                     case 'recurringDeactivation':
-                        return $this->deleteCardData($response);
+                        return $this->deleteCardData($response, $store);
                     default:
                         break;
                 }
             }
         } catch (Exception $e) {
-            return null;
+            $this->bmLooger->err('PAYMENT: ' . __LINE__, [
+                'exception' => $e->getMessage()
+            ]);
+
+            return false;
         }
 
-        return null;
+        return false;
     }
 
     /**
-     * @param SimpleXMLElement $data
+     * @param  SimpleXMLElement  $data
+     * @param  StoreInterface  $store
      *
      * @return string
      * @throws AlreadyExistsException
+     * @throws DOMException
      */
-    private function saveCardData($data)
+    private function saveCardData(SimpleXMLElement $data, StoreInterface $store): string
     {
         $orderId = $data->transaction->orderID;
 
@@ -596,16 +631,17 @@ class Payment extends AbstractMethod
             $status = self::TRANSACTION_CONFIRMED;
         }
 
-        return $this->recurringResponse($clientHash, $status);
+        return $this->recurringResponse($clientHash, $status, $store);
     }
 
     /**
-     * @param SimpleXMLElement $data
+     * @param  SimpleXMLElement  $data
+     * @param  StoreInterface  $store
      *
      * @return string
-     * @throws Exception
+     * @throws DOMException
      */
-    private function deleteCardData($data): string
+    private function deleteCardData(SimpleXMLElement $data, StoreInterface $store): string
     {
         $clientHash = (string)$data->recurringData->clientHash;
 
@@ -619,18 +655,19 @@ class Payment extends AbstractMethod
             $this->cardResource->delete($card);
         }
 
-        return $this->recurringResponse($clientHash, self::TRANSACTION_CONFIRMED);
+        return $this->recurringResponse($clientHash, self::TRANSACTION_CONFIRMED, $store);
     }
 
     /**
      * Waliduje zgodność otrzymanego XML'a
      *
-     * @param SimpleXMLElement $response
+     * @param  SimpleXMLElement  $response
+     * @param  StoreInterface  $store
      * @param  string|null  $currency
      *
      * @return bool
      */
-    public function validAllTransaction(SimpleXMLElement $response, $currency = null)
+    public function validAllTransaction(SimpleXMLElement $response, StoreInterface $store, $currency = null)
     {
         if ($currency === null) {
             if (property_exists($response, 'transactions')) {
@@ -642,9 +679,10 @@ class Payment extends AbstractMethod
 
                 foreach ($currencies as $c) {
                     if ($this->_scopeConfig->getValue(
-                        'payment/bluepayment/' . strtolower($c) . '/service_id',
-                        ScopeInterface::SCOPE_STORE
-                    ) == $response->serviceID) {
+                            'payment/bluepayment/' . strtolower($c) . '/service_id',
+                            ScopeInterface::SCOPE_STORE,
+                            $store
+                        ) == $response->serviceID) {
                         $currency = $c;
                         break;
                     }
@@ -654,47 +692,68 @@ class Payment extends AbstractMethod
 
         $serviceId      = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $sharedKey      = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $hashSeparator  = $this->_scopeConfig->getValue(
             'payment/bluepayment/hash_separator',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $hashAlgorithm  = $this->_scopeConfig->getValue(
             'payment/bluepayment/hash_algorithm',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
 
-        if ($serviceId != $response->serviceID) {
+        $remoteServiceId = (string) $response->serviceID;
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'local_service_id' => $serviceId,
+            'remote_service_id' => $remoteServiceId,
+        ]);
+
+        if ($serviceId != $remoteServiceId) {
             return false;
         }
 
         $this->checkHashArray = [];
-        $hash = (string)$response->hash;
+        $remoteHash = (string)$response->hash;
         $response->hash = '';
 
         $this->checkInList($response);
         $this->checkHashArray[] = $sharedKey;
 
-        return hash($hashAlgorithm, implode($hashSeparator, $this->checkHashArray)) == $hash;
+        $localHash = hash($hashAlgorithm, implode($hashSeparator, $this->checkHashArray));
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'local_hash' => $localHash,
+            'remote_hash' => $localHash,
+            'serviceId' => $serviceId,
+        ]);
+
+        return $localHash == $remoteHash;
     }
 
     /**
      * Aktualizacja statusu zamówienia, transakcji oraz wysyłka maila do klienta
      *
      * @param  SimpleXMLElement  $payment
-     *
      * @param  string  $serviceId
+     * @param  StoreInterface  $store
      *
      * @return string
      * @throws DOMException
      */
-    protected function updateStatusTransactionAndOrder(SimpleXMLElement $payment, string $serviceId = '0'): string
-    {
+    protected function updateStatusTransactionAndOrder(
+        SimpleXMLElement $payment,
+        string $serviceId,
+        StoreInterface $store
+    ): string {
         $paymentStatus = (string) $payment->paymentStatus;
 
         $remoteId = (string) $payment->remoteID;
@@ -716,21 +775,21 @@ class Payment extends AbstractMethod
 
         $this->saveTransactionResponse($payment);
 
-        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses();
-        $statusSuccess = $this->configProvider->getStatusSuccessPayment();
+        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses($store);
+        $statusSuccess = $this->configProvider->getStatusSuccessPayment($store);
 
         switch ($paymentStatus) {
             case self::PAYMENT_STATUS_SUCCESS:
-                $status = $this->configProvider->getStatusSuccessPayment();
+                $status = $this->configProvider->getStatusSuccessPayment($store);
                 $state = Order::STATE_PROCESSING;
                 break;
             case self::PAYMENT_STATUS_FAILURE:
-                $status = $this->configProvider->getStatusErrorPayment();
+                $status = $this->configProvider->getStatusErrorPayment($store);
                 $state = Order::STATE_CANCELED;
                 break;
             case self::PAYMENT_STATUS_PENDING:
             default:
-                $status = $this->configProvider->getStatusWaitingPayment();
+                $status = $this->configProvider->getStatusWaitingPayment($store);
                 $state = Order::STATE_PENDING_PAYMENT;
                 break;
         }
@@ -740,7 +799,7 @@ class Payment extends AbstractMethod
         $updateOrders = true;
         if ($paymentStatus === self::PAYMENT_STATUS_FAILURE) {
             // Double verify current order status, based on response from WebAPI.
-            if ($this->verifyTransactionInWebapi($serviceId, $orderId, $currency)) {
+            if ($this->verifyTransactionInWebapi($serviceId, $orderId, $currency, $store)) {
                 // Order has one success transaction - do not change status to failure
                 $updateOrders = false;
                 $this->bmLooger->info('Change order ignored');
@@ -861,7 +920,8 @@ class Payment extends AbstractMethod
         return $this->returnConfirmation(
             $orderId,
             $currency,
-            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED
+            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED,
+            $store
         );
     }
 
@@ -887,19 +947,26 @@ class Payment extends AbstractMethod
      * @param  string  $orderId
      * @param  string  $currency
      * @param  string  $confirmation
+     * @param  StoreInterface  $store
      *
      * @return string
      * @throws DOMException
      */
-    public function returnConfirmation(string $orderId, string $currency, string $confirmation): string
-    {
+    public function returnConfirmation(
+        string $orderId,
+        string $currency,
+        string $confirmation,
+        StoreInterface $store
+    ): string {
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $sharedKey = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $hashData = [$serviceId, $orderId, $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -936,18 +1003,22 @@ class Payment extends AbstractMethod
     /**
      * @param  string  $clientHash
      * @param  string  $status
+     * @param  StoreInterface  $store
      *
      * @return string
+     * @throws DOMException
      */
-    private function recurringResponse(string $clientHash, string $status): string
+    private function recurringResponse(string $clientHash, string $status, StoreInterface $store): string
     {
         $serviceId        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/service_id',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $sharedKey        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/shared_key',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $hashData = [$serviceId, $clientHash, $status, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -1321,9 +1392,14 @@ class Payment extends AbstractMethod
         return $orders;
     }
 
-    private function verifyTransactionInWebapi(int $serviceId, string $orderId, string $currency): bool
+    private function verifyTransactionInWebapi(
+        int $serviceId,
+        string $orderId,
+        string $currency,
+        StoreInterface $store
+    ): bool
     {
-        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency);
+        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'serviceId' => $serviceId,
