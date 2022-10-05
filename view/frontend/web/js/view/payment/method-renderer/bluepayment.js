@@ -79,6 +79,18 @@ define([
         blikTimeout: null,
         collapsed: ko.observable(true),
 
+        gatewayIds: {
+            blik: 509,
+            smartney: 700,
+            hub: 702,
+            paypo: 705,
+            card: 1500,
+            one_click: 1503,
+            gpay: 1512,
+            apple_pay: 1513,
+            alior_installments: 1506,
+        },
+
         /**
          * Subscribe to grand totals
          */
@@ -208,7 +220,13 @@ define([
             return paymentService.getAvailablePaymentMethods().length !== 1;
         }),
         canUseApplePay: function() {
-            return window.ApplePaySession && ApplePaySession.canMakePayments();
+            try {
+                return window.ApplePaySession && ApplePaySession.canMakePayments();
+            } catch (e) {
+                console.log('Cannot use ApplePay', e);
+            }
+
+            return false;
         },
         isSeparatedChecked: function (context) {
             return ko.pureComputed(function () {
@@ -266,11 +284,17 @@ define([
         },
 
         getGatewayTitle: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            if (gatewayId === this.gatewayIds.card) {
+                return $t('Card Payment');
+            }
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t('Pay later');
             }
 
-            if (gateway.is_alior_installments) {
+            if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t('Spread the cost over installments');
             }
 
@@ -278,26 +302,47 @@ define([
         },
 
         getGatewayDescription: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            if (gatewayId === this.gatewayIds.card) {
+                if (gateway.is_iframe) {
+                    return $t('Pay with your credit or debit card.');
+                } else {
+                    return $t('You will be redirected to our partner Blue Media\'s website, where you will enter your card details.');
+                }
+            }
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t('Buy now and pay within 30 days. %1')
                     .replace('%1', '<a href="https://pomoc.bluemedia.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
             }
 
-            if (gateway.is_alior_installments) {
-                return $t('0% installments and even 48 installments. %L')
-                    .replace('%L', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+            if (gatewayId === this.gatewayIds.alior_installments) {
+                return $t('0% installments and even 48 installments. %1')
+                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+            }
+
+            if (gatewayId === this.gatewayIds.paypo) {
+                return $t('Shop using deferred payment option or a convenient installment plan. %1')
+                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
             }
 
             return gateway.description;
         },
 
         getGatewayHelp: function (gateway) {
-            if (gateway.is_smartney) {
+            let gatewayId = Number(gateway.gateway_id);
+
+            if (gatewayId === this.gatewayIds.smartney) {
                 return $t("You will be redirected to Smartney's partner website. After your application and positive verification, Smartney will pay for your purchases for you.");
             }
 
-            if (gateway.is_alior_installments) {
+            if (gatewayId === this.gatewayIds.alior_installments) {
                 return $t("You will be redirected to the bank's website. After your application and positive verification, the bank will send you a loan agreement by email. You can accept it online. Average time of the whole transaction - 15 minutes.");
+            }
+
+            if (gatewayId === this.gatewayIds.paypo) {
+                return $t("You will be redirected to PayPo's partner website.");
             }
 
             return null;

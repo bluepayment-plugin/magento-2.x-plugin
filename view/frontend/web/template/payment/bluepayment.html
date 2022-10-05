@@ -13,7 +13,7 @@
                 <!-- BM Logo -->
 
                 <p class="method-name">
-                    <span data-bind="text: getTitle()"></span>
+                    <span data-bind="text: getTitle()" class="payment-method-name"></span>
                     <!-- ko if: getDescription() -->
                     <br />
                     <span data-bind="text: getDescription()" class="payment-method-description"></span>
@@ -23,6 +23,8 @@
         </div>
         <!--ko if: getCode() == isChecked()-->
         <div class="payment-method-content">
+            <div class="payment-method-info" data-bind="i18n: 'You will be redirected to the page of the selected bank.'"></div>
+
             <!-- ko foreach: getRegion('messages') -->
             <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
@@ -44,13 +46,17 @@
 
                         <!-- ko if: bluePaymentCollapsible -->
                         <div class="gateway-collapsible">
-                            <a href="#" class="expand" data-bind="{visible: collapsed(), click: function() {this.collapsed(false)}}">
-                                <!-- ko i18n: 'Show all' --><!-- /ko -->
-                            </a>
+                            <a href="#" class="expand" data-bind="{
+                                visible: collapsed(),
+                                click: function() {this.collapsed(false)},
+                                i18n: 'Show all'
+                            }"></a>
 
-                            <a href="#" class="collapse" data-bind="{visible: !collapsed(), click: function() {this.collapsed(true)}}">
-                                <!-- ko i18n: 'Collapse' --><!-- /ko -->
-                            </a>
+                            <a href="#" class="collapse" data-bind="{
+                                visible: !collapsed(),
+                                click: function() {this.collapsed(true)},
+                                i18n: 'Collapse'
+                            }"></a>
                         </div>
                         <!--/ko-->
                     </div>
@@ -59,12 +65,12 @@
             <!--/ko-->
 
             <!-- ko if: (renderSubOptions != false && renderSubOptions.length == 0)-->
-                <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+                <span data-bind="i18n: 'No online payment is available at this time. Feel free to contact us about that.'"></span>
             <!--/ko-->
 
             <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
                 <div class="payment-method-empty-gateway mage-error" generated="yes" data-bind="{visible: validationFailed}">
-                    <p><!-- ko i18n: 'Choose the way you want to pay.' --><!-- /ko --></p>
+                    <p data-bind="i18n: 'Choose the way you want to pay.'"></p>
                 </div>
             <!--/ko-->
 
@@ -139,7 +145,7 @@
                          class="payment-icon"/>
 
                     <p class="method-name">
-                        <span data-bind="text: $parent.getGatewayTitle($data)"></span>
+                        <span data-bind="text: $parent.getGatewayTitle($data)" class="payment-method-name"></span>
                         <!-- ko if: $parent.getGatewayDescription($data) -->
                         <br />
                         <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
