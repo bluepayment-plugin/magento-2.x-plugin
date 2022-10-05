@@ -15,6 +15,7 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
@@ -182,14 +183,14 @@ class Webapi extends Data
         return $result;
     }
 
-    public function transactionStatus(int $serviceId, string $orderId, string $currency)
+    public function transactionStatus(int $serviceId, string $orderId, string $currency, StoreInterface $store)
     {
         return $this->callXMLApi(
             [
                 'ServiceID' => $serviceId,
                 'OrderID' => $orderId,
             ],
-            $this->getConfigValue('shared_key', $currency),
+            $this->getConfigValue('shared_key', $currency, $store),
             $this->getTransactionStatusUrl()
         );
     }
@@ -197,15 +198,17 @@ class Webapi extends Data
     /**
      * @param  string  $name
      * @param  string|null  $currency
+     * @param  StoreInterface|null  $store
      *
      * @return mixed
      */
-    private function getConfigValue(string $name, string $currency = null)
+    private function getConfigValue(string $name, string $currency = null, ?StoreInterface $store = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $store
             );
         }
 
