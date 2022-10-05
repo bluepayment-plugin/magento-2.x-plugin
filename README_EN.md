@@ -30,7 +30,7 @@ composer require bluepayment-plugin/module-bluepayment
 2. Activate the module
 
 ### Via the zip package
-1. Download the latest version of the module from this [site](http://s.bm.pl/wtyczki).
+1. Download the latest version of the module from this [site](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Upload the .zip file to your Magento root directory.
 3. While in the Magento root directory, run the command:
 ```bash
@@ -353,7 +353,7 @@ bin/magento cache:flush
 ```
 
 ### Via the zip package
-1. Download the latest version of the plugin http://s.bm.pl/wtyczki.
+1. Download the latest version of the plugin from this [site](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Upload the zip file to your Magento root directory.
 3. While in the Magento root directory, run the following commands:
 ```bash
