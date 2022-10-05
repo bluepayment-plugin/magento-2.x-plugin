@@ -677,10 +677,10 @@ class Payment extends AbstractMethod
 
                 foreach ($currencies as $c) {
                     if ($this->_scopeConfig->getValue(
-                        'payment/bluepayment/' . strtolower($c) . '/service_id',
-                        ScopeInterface::SCOPE_STORE,
-                        $store
-                    ) == $response->serviceID) {
+                            'payment/bluepayment/' . strtolower($c) . '/service_id',
+                            ScopeInterface::SCOPE_STORE,
+                            $store
+                        ) == $response->serviceID) {
                         $currency = $c;
                         break;
                     }
@@ -797,7 +797,7 @@ class Payment extends AbstractMethod
         $updateOrders = true;
         if ($paymentStatus === self::PAYMENT_STATUS_FAILURE) {
             // Double verify current order status, based on response from WebAPI.
-            if ($this->verifyTransactionInWebapi($serviceId, $orderId, $currency)) {
+            if ($this->verifyTransactionInWebapi($serviceId, $orderId, $currency, $store)) {
                 // Order has one success transaction - do not change status to failure
                 $updateOrders = false;
                 $this->bmLooger->info('Change order ignored');
@@ -918,7 +918,8 @@ class Payment extends AbstractMethod
         return $this->returnConfirmation(
             $orderId,
             $currency,
-            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED
+            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED,
+            $store
         );
     }
 
@@ -944,19 +945,26 @@ class Payment extends AbstractMethod
      * @param  string  $orderId
      * @param  string  $currency
      * @param  string  $confirmation
+     * @param  StoreInterface  $store
      *
      * @return string
      * @throws DOMException
      */
-    public function returnConfirmation(string $orderId, string $currency, string $confirmation): string
-    {
+    public function returnConfirmation(
+        string $orderId,
+        string $currency,
+        string $confirmation,
+        StoreInterface $store
+    ): string {
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $sharedKey = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $store
         );
         $hashData = [$serviceId, $orderId, $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -1003,12 +1011,12 @@ class Payment extends AbstractMethod
         $serviceId        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/service_id',
             ScopeInterface::SCOPE_STORE,
-            $store->getId()
+            $store
         );
         $sharedKey        = $this->_scopeConfig->getValue(
             'payment/bluepayment/pln/shared_key',
             ScopeInterface::SCOPE_STORE,
-            $store->getId()
+            $store
         );
         $hashData = [$serviceId, $clientHash, $status, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);
@@ -1376,9 +1384,14 @@ class Payment extends AbstractMethod
         return $orders;
     }
 
-    private function verifyTransactionInWebapi(int $serviceId, string $orderId, string $currency): bool
+    private function verifyTransactionInWebapi(
+        int $serviceId,
+        string $orderId,
+        string $currency,
+        StoreInterface $store
+    ): bool
     {
-        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency);
+        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'serviceId' => $serviceId,

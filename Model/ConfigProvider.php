@@ -436,7 +436,7 @@ class ConfigProvider implements ConfigProviderInterface
             $this->scopeConfig->getValue(
                 'payment/bluepayment/unchangeable_statuses',
                 ScopeInterface::SCOPE_STORE,
-                $store ? $store->getId() : null
+                $store
             ) ?: ''
         );
     }
@@ -446,7 +446,7 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_waiting_payment',
             ScopeInterface::SCOPE_STORE,
-            $store ? $store->getId() : null
+            $store
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
@@ -455,7 +455,7 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_error_payment',
             ScopeInterface::SCOPE_STORE,
-            $store ? $store->getId() : null
+            $store
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
@@ -464,7 +464,7 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
             ScopeInterface::SCOPE_STORE,
-            $store ? $store->getId() : null
+            $store
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 
