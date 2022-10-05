@@ -1,34 +1,92 @@
-.consumer-finance {
-    margin-bottom: 20px;
+@header-color: #000;
+@blue: #00B5DD;
 
+.bluepayment-section {
     h2 {
-        color: #000;
+        color: @header-color;
     }
 
-    ul {
-        display: flex;
-        list-style: none;
+    .heading {
+        padding-left: 20rem;
+        background: url('@{baseDir}BlueMedia_BluePayment/images/logo.svg') no-repeat 0 50% ~'/' 18rem auto;
+        min-height: 8rem;
+    }
 
-        li {
+    .button-container {
+        float: right;
+    }
+
+    .introduction {
+        padding: 0 25px;
+
+        &--row {
+            display: flex;
+            margin: 10px 0;
+        }
+
+        &--col {
             flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
+        }
 
-            img {
-                margin-right: 7px;
+        &--num {
+            border: 1px solid @blue;
+            border-radius: 100px;
+            min-width: 40px;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 1.6rem;
+        }
+
+        &--content {
+            padding: 0 5px;
+
+            &__padding {
+                padding: 0 15px;
             }
         }
 
-        a {
-            display: inline;
-            color: #00B5DD;
-            font-size: 14px;
-            margin: 0;
-            padding: 0;
+        &--learn-more {
+            margin: 0 0 20px;
+        }
 
-            &::before {
-                content: none;
+        &--check {
+            background: url('@{baseDir}BlueMedia_BluePayment/images/check.svg') no-repeat;
+            height: 12px;
+            width: 19px;
+        }
+    }
+
+    .consumer-finance {
+        margin-bottom: 20px;
+
+        ul {
+            display: flex;
+            list-style: none;
+
+            li {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                img {
+                    margin-right: 7px;
+                }
+            }
+
+            a {
+                display: inline;
+                color: @blue;
+                font-size: 14px;
+                margin: 0;
+                padding: 0;
+
+                &::before {
+                    content: none;
+                }
             }
         }
     }

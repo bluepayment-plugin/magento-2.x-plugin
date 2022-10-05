@@ -3,6 +3,15 @@
 ## Version [IN progress]
 - We've added Installment Hub to payment. 
 
+## Version 2.21.0
+- We have added the SEK currency.
+- We added text with information for BM payment method.
+- We changed the appearance of the payment selection screen.
+- We added help texts in module configuration and channel configuration.
+- We have added new payment channel "PayPo".
+- From now on, also "Card payment" and "PayPo" gateways are always displayed as separate payment methods.
+- We have improved support for many BM services within different Magento contexts.
+
 ## Version 2.20.0
 - We have added the **initialize** method to the **BluePayment\Model\Method\BluePayment**, which sets the default order status, according to the "Payment waiting status" setting in the module configuration (only for orders placed using the BlueMedia payment method).
 - We have added support for Magento 2.4.4 and PHP 8.1.

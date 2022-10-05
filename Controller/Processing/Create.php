@@ -201,7 +201,7 @@ class Create extends Action
                 }
             }
 
-            if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
+            if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,
@@ -312,7 +312,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+            if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
                 $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,

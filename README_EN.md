@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.4.
+- Magento version: 2.3.0 - 2.4.5.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in BluePayment?](CHANGELOG_EN.md)
@@ -108,19 +108,21 @@ The module allows you to automatically refresh the payment channel every 5 minut
     3. (informative) **ID**
     4. (informative) **Bank Name**
     5. (informative) **Name**
-    6. **Description** – displayed to the customer below the payment channel name
-    7. **Sort Order** – the sort order in the list of channels, where:
+    6. (informative) **Maximum payment amount**
+    7. (informative) **Minimum payment amount**
+    8. **Description** – displayed to the customer below the payment channel name
+    9. **Sort Order** – the sort order in the list of channels, where:
         - 1 – first position in the list,
         - 2 – second position in the list,
         - ...
         - 0 – the position in the list.
-    8. **Type**.
-    9. **Is separated method** – displays the channel as a separate payment method
-    10. **Logo URL**
-    11. **Use Own Logo** for payment channel 
-    12. **Logo Path** – address to your own logo (visible when **Use Own Logo** is checked)
-    13. (informative) **Status Date** – date and time the payment channel data was last updated
-    14. **Force Disable** – enables deactivation of the selected payment channel (regardless of **Status**)
+    10. **Type**.
+    11. **Is separated method** – displays the channel as a separate payment method
+    12. (informative) **Gateway Logo**
+    13. **Use Own Logo** for payment channel 
+    14. **Logo Path** – address to your own logo (visible when **Use Own Logo** is checked)
+    15. (informative) **Status Date** – date and time the payment channel data was last updated
+    16. **Force Disable** – enables deactivation of the selected payment channel (regardless of **Status**)
 
 ### Expandable channel list
 
