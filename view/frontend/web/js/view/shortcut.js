@@ -161,6 +161,7 @@ define([
                         content: text
                     });
 
+                    this.productAddedToCart = false;
                     reject();
                     return;
                 }
