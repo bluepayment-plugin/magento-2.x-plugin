@@ -9,7 +9,8 @@ define([
 
     return Component.extend({
         defaults: {
-            formInvalid: false
+            formInvalid: false,
+            productAddedToCart: false
         },
 
         autopay: false,
@@ -68,35 +69,43 @@ define([
 
                     return new Promise((resolve, reject) => {
                         if (self.isCatalogProduct()) {
-                            $(document).one('autopay:cart-cleared', () => {
-                                self.log('Cart cleared event');
+                            if (!self.productAddedToCart) {
+                                $(document).one('autopay:cart-cleared', () => {
+                                    self.log('Cart cleared event');
 
-                                // After clear Cart
-                                self.addToCart();
-                            });
+                                    // After clear Cart
+                                    self.addToCart();
+                                });
 
-                            $(document).one('ajax:addToCart', () => {
-                                // After add to cart
-                                self.log('addToCart event');
+                                $(document).one('ajax:addToCart', () => {
+                                    // After add to cart
+                                    self.log('addToCart event');
 
-                                customerData.reload(['cart'], true);
+                                    customerData.reload(['cart'], true);
 
-                                if (! self.productAddedToCart) {
-                                    reject('Product not added to cart');
-                                } else {
-                                    $(document).one('customer-data-reloaded', () => {
-                                        self.log('customer-data-reloaded event');
+                                    if (! self.productAddedToCart) {
+                                        reject('Product not added to cart');
+                                    } else {
+                                        $(document).one('customer-data-reloaded', () => {
+                                            self.log('customer-data-reloaded event');
 
-                                        // After customerData reloaded
-                                        self.setAutopayData(resolve, reject);
-                                    });
-                                }
-                            });
+                                            // After customerData reloaded
+                                            self.setAutopayData(resolve, reject);
+                                        });
+                                    }
+                                });
 
-                            // Clear whole cart
-                            self.clearCart(reject);
+                                // Clear whole cart
+                                self.clearCart(reject);
+                            } else {
+                                self.log('Product already added to cart');
+
+                                // If already added - just set data and resolve promise.
+                                self.setAutopayData(resolve, reject);
+                            }
                         } else {
                             self.log('Not catalog product');
+
                             self.setAutopayData(resolve, reject);
                         }
                     });
@@ -152,6 +161,7 @@ define([
                         content: text
                     });
 
+                    this.productAddedToCart = false;
                     reject();
                     return;
                 }
