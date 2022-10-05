@@ -824,7 +824,7 @@ define([
                 'token': checkoutData.getHubToken(),
             })
             if (!checkoutData.getHubToken()) {
-                sdk.openModal();
+                $('#sdk-openCalculatorDialog').click();
                 return false;
             }
 

@@ -3,6 +3,7 @@
         <referenceBlock name="head.additional">
             <referenceBlock name="google_analytics" remove="true" />
             <block class="BlueMedia\BluePayment\Block\Analytics\Ga" name="bm_ga" as="bm_ga" template="BlueMedia_BluePayment::analytics/ga.phtml"/>
+            <block class="BlueMedia\BluePayment\Block\Hub\Js" name="bm_hub_style" as="bm_hub_style" template="BlueMedia_BluePayment::hub/styles.phtml"/>
         </referenceBlock>
 
         <referenceContainer name="before.body.end">
