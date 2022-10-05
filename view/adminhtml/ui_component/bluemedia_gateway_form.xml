@@ -145,6 +145,12 @@
                 <validation>
                     <rule name="required-entry" xsi:type="boolean">true</rule>
                 </validation>
+                <tooltip>
+                    <description translate="true">Installments and payment card channels have static gateway name.</description>
+                </tooltip>
+                <imports>
+                    <link name="disabled">${ $.provider }:data.static_name</link>
+                </imports>
             </settings>
         </field>
         <field name="gateway_description" formElement="input">
@@ -170,6 +176,12 @@
             <settings>
                 <dataType>boolean</dataType>
                 <label translate="true">Is separated method</label>
+                <tooltip>
+                    <description translate="true">Display the channel as a separate payment method. Payment card, Google Pay, Apple Pay, BLIK and installments channels must always be separated.</description>
+                </tooltip>
+                <imports>
+                    <link name="disabled">${ $.provider }:data.always_separated</link>
+                </imports>
             </settings>
             <formElements>
                 <checkbox>
@@ -185,7 +197,7 @@
         </field>
         <field name="gateway_logo_url" formElement="input">
             <settings>
-                <elementTmpl>ui/form/element/text</elementTmpl>
+                <elementTmpl>BlueMedia_BluePayment/form/logo</elementTmpl>
                 <dataType>text</dataType>
                 <label translate="true">Gateway Logo</label>
             </settings>
