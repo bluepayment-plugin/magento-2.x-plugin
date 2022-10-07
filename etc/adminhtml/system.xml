@@ -168,6 +168,10 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
                     </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
+                    </field>
                 </group>
                 <group id="eur" translate="label" type="text" sortOrder="710" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>EUR configuration</label>
@@ -176,6 +180,10 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
+                    </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
                     </field>
                 </group>
                 <group id="gbp" translate="label" type="text" sortOrder="720" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -186,6 +194,10 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
                     </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
+                    </field>
                 </group>
                 <group id="usd" translate="label" type="text" sortOrder="730" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>USD configuration</label>
@@ -194,6 +206,10 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
+                    </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
                     </field>
                 </group>
                 <group id="czk" translate="label" type="text" sortOrder="740" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -204,6 +220,10 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
                     </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
+                    </field>
                 </group>
                 <group id="ron" translate="label" type="text" sortOrder="750" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>RON configuration</label>
@@ -212,6 +232,10 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
+                    </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
                     </field>
                 </group>
                 <group id="huf" translate="label" type="text" sortOrder="760" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -222,6 +246,10 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
                     </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
+                    </field>
                 </group>
                 <group id="bgn" translate="label" type="text" sortOrder="770" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>BGN configuration</label>
@@ -230,6 +258,10 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
+                    </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
                     </field>
                 </group>
                 <group id="uah" translate="label" type="text" sortOrder="780" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -240,6 +272,10 @@
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
                     </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
+                    </field>
                 </group>
                 <group id="sek" translate="label" type="text" sortOrder="790" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SEK configuration</label>
@@ -248,6 +284,10 @@
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Shared key</label>
+                    </field>
+                    <field id="merchant_domain" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Merchant Domain</label>
+                        <comment>If empty, store base url will be used</comment>
                     </field>
                 </group>
             </group>

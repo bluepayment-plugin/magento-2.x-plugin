@@ -97,12 +97,16 @@ class Webapi extends Data
         /** @var Store $store */
         $store = $this->storeManager->getStore();
 
-        $url = $store->getBaseUrl();
-        $merchantDomain = $this->zendUri->parse($url)->getHost();
         $currency = $store->getCurrentCurrency()->getCode();
 
         $serviceId = $this->getConfigValue('service_id', $currency);
         $sharedKey = $this->getConfigValue('shared_key', $currency);
+
+        $merchantDomain = $this->getConfigValue('merchant_domain', $currency);
+        if (empty($merchantDomain)) {
+            $url = $store->getBaseUrl();
+            $merchantDomain = $this->zendUri->parse($url)->getHost();
+        }
 
         $data = [
             'ServiceID' => $serviceId,
