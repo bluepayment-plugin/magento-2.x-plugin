@@ -51,4 +51,14 @@
     <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface" type="BlueMedia\BluePayment\Model\Transaction"/>
     <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
     <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface" type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+
+    <!-- Shortcuts -->
+    <type name="BlueMedia\BluePayment\Block\Hub\ShortcutButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="template" xsi:type="string">BlueMedia_BluePayment::hub/shortcut.phtml</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Shortcuts -->
 </config>

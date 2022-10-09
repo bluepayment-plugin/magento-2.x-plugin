@@ -235,10 +235,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentTestMode' => $this->scopeConfig->getValue(
-                    'payment/bluepayment/test_mode',
-                    ScopeInterface::SCOPE_STORE
-                ),
+                'bluePaymentTestMode' => $this->isTestMode(),
                 'bluePaymentCards' => $this->prepareCards(),
                 'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue(
                     'payment/bluepayment/autopay_agreement',
@@ -292,6 +289,7 @@ class ConfigProvider implements ConfigProviderInterface
             'is_gpay' => $gatewayId == self::GPAY_GATEWAY_ID,
             'is_autopay' => $gatewayId == self::ONECLICK_GATEWAY_ID,
             'is_apple_pay' => $gatewayId == self::APPLE_PAY_GATEWAY_ID,
+            'is_hub' => $gatewayId == self::HUB_GATEWAY_ID,
         ];
     }
 
@@ -382,10 +380,7 @@ class ConfigProvider implements ConfigProviderInterface
     {
         $storeId = $this->storeManager->getStore()->getId();
 
-        $serviceId = $this->scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
-        );
+        $serviceId = $this->getServiceId($currency);
 
         $gateways = $this->gatewayCollectionFactory->create()
             ->addFieldToFilter(GatewayInterface::STORE_ID, ['eq' => $storeId])
@@ -405,6 +400,30 @@ class ConfigProvider implements ConfigProviderInterface
         return $gateways->load();
     }
 
+    public function getServiceId(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getSharedKey(string $currency = 'PLN')
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function isTestMode(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/test_mode',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
     public function isGatewaySelectionEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
@@ -413,7 +432,7 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function iframePayment(): bool
+    public function iframePayment(): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
@@ -421,7 +440,7 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function blikZero(): bool
+    public function blikZero(): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/blik_zero',
@@ -500,5 +519,29 @@ class ConfigProvider implements ConfigProviderInterface
             ]]);
 
         return $gateways->getColumnValues(GatewayInterface::GATEWAY_ID);
+    }
+
+    public function isInstallmentHubAvailable(): bool
+    {
+        $storeId = $this->storeManager->getStore()->getId();
+        $currency = $this->getCurrentCurrencyCode();
+
+        $serviceId = $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        $gateways = $this->gatewayCollectionFactory->create()
+            ->addFieldToSelect(GatewayInterface::GATEWAY_ID)
+            ->addFieldToFilter(GatewayInterface::STORE_ID, ['eq' => $storeId])
+            ->addFieldToFilter(GatewayInterface::SERVICE_ID, ['eq' => $serviceId])
+            ->addFieldToFilter(GatewayInterface::CURRENCY, ['eq' => $currency])
+            ->addFieldToFilter(GatewayInterface::STATUS, ['eq' => 1])
+            ->addFieldToFilter(GatewayInterface::IS_FORCE_DISABLED, ['eq' => 0])
+            ->addFieldToFilter(GatewayInterface::GATEWAY_ID, ['in' => [
+                self::HUB_GATEWAY_ID,
+            ]]);
+
+        return $gateways->count() > 0;
     }
 }

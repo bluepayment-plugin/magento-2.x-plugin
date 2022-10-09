@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja [IN progress]
+- Dodaliśmy hub ratalny.
+
 ## Wersja 2.21.1
 - Poprawiliśmy wsparcie dla Magento 2.3.*.
 

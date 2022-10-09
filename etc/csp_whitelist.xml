@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 	xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
     <policies>
         <policy id="img-src">
             <values>
+                <value id="img_bm_accept" type="host">platnosci-accept.bm.pl</value>
                 <value id="img_bm" type="host">platnosci.bm.pl</value>
                 <value id="img_bm_accept" type="host">platnosci-accept.bm.pl</value>
                 <value id="img_gpay" type="host">www.gstatic.com</value>
+                <value id="img_bm_hub_test" type="host">raty-accept.bm.pl</value>
+                <value id="img_bm_hub_prod" type="host">r.bmty.pl</value>
             </values>
         </policy>
         <policy id="script-src">
             <values>
                 <value id="script_bm_cards_accept" type="host">cards-accept.bm.pl</value>
                 <value id="script_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="script_bm_hub_test" type="host">raty-accept.bm.pl</value>
+                <value id="script_bm_hub_prod" type="host">raty.bm.pl</value>
                 <value id="script_gpay" type="host">pay.google.com</value>
                 <value id="script_ga" type="host">*.google-analytics.com</value>
                 <value id="script_gtm" type="host">*.googletagmanager.com</value>
@@ -24,6 +29,8 @@
                 <value id="style_bm_cards_accept" type="host">cards-accept.bm.pl</value>
                 <value id="style_bm_cards_prod" type="host">cards.bm.pl</value>
                 <value id="style_google_apis" type="host">*.googleapis.com</value>
+                <value id="style_bm_hub_test" type="host">raty-accept.bm.pl</value>
+                <value id="style_bm_hub_prod" type="host">raty.bm.pl</value>
             </values>
         </policy>
         <policy id="frame-src">
@@ -38,6 +45,13 @@
         <policy id="connect-src">
             <values>
                 <value id="connect_ga" type="host">*.google-analytics.com</value>
+                <value id="connect_bm_hub_test" type="host">raty-accept.bm.pl</value>
+                <value id="connect_bm_hub_prod" type="host">raty.bm.pl</value>
+            </values>
+        </policy>
+        <policy id="font-src">
+            <values>
+                <value id="google_fonts" type="host">fonts.gstatic.com</value>
             </values>
         </policy>
     </policies>

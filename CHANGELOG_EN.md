@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version [IN progress]
+- We've added Installment Hub to payment. 
+
 ## Version 2.21.1
 - We have improved support for Magento 2.3.*.
 

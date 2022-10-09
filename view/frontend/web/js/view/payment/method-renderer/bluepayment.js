@@ -78,6 +78,8 @@ define([
             }, $('<div />').html($t('Confirm the payment in your bank\'s app.'))),
         blikTimeout: null,
         collapsed: ko.observable(true),
+        hubPriceClass: ".checkout-index-index .grand.totals .price",
+        hubPaymentClass: ".payment-method.blue-payment__hub",
 
         gatewayIds: {
             blik: 509,
@@ -145,6 +147,10 @@ define([
 
             if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                 this.initGPay();
+            }
+
+            if (typeof sdk !== 'undefined') {
+                this.initHub();
             }
 
             // Refresh selected gateway
@@ -262,6 +268,9 @@ define([
         },
         isGPaySelected: function () {
             return selectedGateway().is_gpay === true;
+        },
+        isHubSelected: function () {
+            return selectedGateway().is_hub === true;
         },
         isAutopaySelected: function () {
             return selectedGateway().is_autopay === true;
@@ -393,6 +402,11 @@ define([
                 return false;
             }
 
+            // Hub Validation
+            if (this.isHubSelected() && !this.validateHubPayment()) {
+                return false;
+            }
+
             // Selected payment method validation
             if (this.renderSubOptions !== false && !this.activeMethod()) {
                 this.validationFailed(true);
@@ -478,6 +492,10 @@ define([
 
             if (this.isAutopaySelected()) {
                 href += '&card_index=' + checkoutData.getCardIndex();
+            }
+
+            if (this.isHubSelected()) {
+                href += '&hub_token=' + checkoutData.getHubToken();
             }
 
             window.location.href = href;
@@ -762,6 +780,55 @@ define([
             }).done(function (response) {
                 self.handleGPayStatus(response.Status, response);
             });
+        },
+
+        /** HUB */
+        initHub: function () {
+            // SDK Token
+            document.body.addEventListener('getSdkToken', function(e) {
+                console.log('[HUB] getSdkToken', e);
+
+                if (e && e.detail && e.detail.token) {
+                    checkoutData.setHubToken(e.detail.token);
+                }
+            });
+
+            if (document.querySelector('.blue-payment__hub')) {
+                console.log('[HUB] Init directly');
+                this.initHubSdk();
+            } else {
+                var self = this;
+
+                console.log('[HUB] Init mutation observer');
+                var observer = new MutationObserver(function() {
+                    var available = !!document.querySelector(self.hubPriceClass)
+                        && !!document.querySelector(self.hubPaymentClass);
+
+                    if (available) {
+                        self.initHubSdk();
+                        observer.disconnect();
+                    }
+                });
+                observer.observe(document.querySelector('body'), {
+                    childList: true, subtree: true,
+                });
+            }
+        },
+        initHubSdk: function () {
+            sdk.initializeCalculator();
+            sdk.getVariables();
+            sdk.initialize();
+        },
+        validateHubPayment: function () {
+            console.log('[HUB] Validation', {
+                'token': checkoutData.getHubToken(),
+            })
+            if (!checkoutData.getHubToken()) {
+                $('#sdk-openCalculatorDialog').click();
+                return false;
+            }
+
+            return true;
         },
     });
 });

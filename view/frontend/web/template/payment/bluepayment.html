@@ -120,7 +120,7 @@
         <div
              data-bind="
                attr:{
-                 class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card')
+                 class: 'payment-method blue-payment ' + ($data.is_blik ? 'blue-payment__blik' : 'blue-payment__card') + ($data.is_hub ? ' blue-payment__hub' : '')
                },
                css:{'_active': $parent.isSeparatedChecked($data)}
             ">
@@ -157,8 +157,8 @@
                     </p>
                 </label>
 
-            <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
-                <input type="tel"
+                <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
+                    <input type="tel"
                        name="payment_method_bluepayment_code"
                        class="blik-code"
                        min="000000"
@@ -170,6 +170,10 @@
                        afterRender="$parent.blikCodeAfterRender" />
 
                     <div style="clear: both;"></div>
+                <!--/ko-->
+
+                <!-- ko if: ($data.is_hub) -->
+                    <div id="bmhub_OpenCalculatorDialog"></div>
                 <!--/ko-->
             </div>
             <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
