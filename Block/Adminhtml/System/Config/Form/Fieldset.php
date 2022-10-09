@@ -7,22 +7,16 @@ use Magento\Backend\Block\Context;
 use Magento\Backend\Model\Auth\Session;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\View\Helper\Js;
-use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
 class Fieldset extends \Magento\Config\Block\System\Config\Form\Fieldset
 {
-    /** @var SecureHtmlRenderer */
-    private $secureRenderer;
-
     public function __construct(
         Context $context,
         Session $authSession,
         Js $jsHelper,
-        SecureHtmlRenderer $secureRenderer,
         array $data = []
     ) {
-        parent::__construct($context, $authSession, $jsHelper, $data, $secureRenderer);
-        $this->secureRenderer = $secureRenderer;
+        parent::__construct($context, $authSession, $jsHelper, $data);
     }
 
     /**
@@ -50,19 +44,16 @@ class Fieldset extends \Magento\Config\Block\System\Config\Form\Fieldset
         $htmlId = $element->getHtmlId();
         $html .= '<div class="button-container"><button type="button"' .
             ' class="button action-configure' .
-            '" id="' . $htmlId . '-head" >' .
-            '<span class="state-closed">' . __(
+            '" id="' .
+            $htmlId .
+            '-head" onclick="Fieldset.toggleCollapse(\'' .$htmlId ."', '" .
+            $this->getUrl(
+                'adminhtml/*/state'
+            ) . '\'); return false;"><span class="state-closed">' . __(
                 'Configure'
             ) . '</span><span class="state-opened">' . __(
                 'Close'
             ) . '</span></button>';
-
-        $html .= /* @noEscape */ $this->secureRenderer->renderEventListenerAsTag(
-            'onclick',
-            "Fieldset.toggleCollapse('" . $htmlId . "', '" . $this->getUrl('adminhtml/*/state') .
-            "'); event.preventDefault();",
-            'button#' . $htmlId . '-head'
-        );
 
         $html .= '</div>';
         $html .= '<div class="heading"><strong>' . $element->getLegend() . '</strong>';

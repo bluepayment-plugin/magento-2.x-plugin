@@ -306,9 +306,9 @@ define([
 
             if (gatewayId === this.gatewayIds.card) {
                 if (gateway.is_iframe) {
-                    return $t('Pay with your credit or debit card.');
+                    return $t("Pay with your credit or debit card.");
                 } else {
-                    return $t('You will be redirected to our partner Blue Media\'s website, where you will enter your card details.');
+                    return $t("You will be redirected to our partner Blue Media's website, where you will enter your card details.");
                 }
             }
 
