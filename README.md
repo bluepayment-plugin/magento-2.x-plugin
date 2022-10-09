@@ -388,7 +388,7 @@ bin/magento cache:flush
 ```
 
 ### Przez paczkę .zip
-1. Pobierz najnowszą wersję wtyczki http://s.bm.pl/wtyczki.
+1. Pobierz najnowszą wersję wtyczki z tej [strony](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Wgraj plik .zip do katalogu głównego Magento
 3. Będąc w katalogu głównym Magento, wykonaj następujące komendy:
 ```bash
