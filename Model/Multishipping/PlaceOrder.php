@@ -197,7 +197,7 @@ class PlaceOrder implements PlaceOrderInterface
         ];
 
         /* Płatność automatyczna kartowa */
-        if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+        if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
             $cardIndex = $payment->getAdditionalInformation('gateway_index');
 
             /** @var Card $card */
@@ -216,7 +216,7 @@ class PlaceOrder implements PlaceOrderInterface
             }
         } else {
             $agreementsIds  = $payment->hasAdditionalInformation('agreements_ids')
-                ? array_unique(explode(',', $payment->getAdditionalInformation('agreements_ids')))
+                ? array_unique(explode(',', $payment->getAdditionalInformation('agreements_ids') ?: ''))
                 : [];
 
             $agreementId = reset($agreementsIds);
@@ -240,7 +240,7 @@ class PlaceOrder implements PlaceOrderInterface
 
         $urlGateway = $this->scopeConfig->getValue(
             'payment/bluepayment/' . ($testMode ? 'test' : 'prod') . '_address_url',
-            ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE
         );
 
         $this->logger->info('PlaceOrder:' . __LINE__, ['params' => $params]);

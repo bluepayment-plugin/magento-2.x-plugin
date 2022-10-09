@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\GetStateForStatus;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
@@ -17,6 +18,7 @@ use Magento\Framework\App\Response\Http;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
@@ -62,6 +64,15 @@ class Create extends Action
     /** @var Payment */
     public $bluepayment;
 
+    /** @var GetStateForStatus */
+    public $getStateForStatus;
+
+    /** @var ConfigProvider */
+    public $configProvider;
+
+    /** @var OrderRepositoryInterface */
+    private $orderRepository;
+
     /**
      * Create constructor.
      *
@@ -76,6 +87,9 @@ class Create extends Action
      * @param  JsonFactory  $resultJsonFactory
      * @param  Collection  $collection
      * @param  CollectionFactory  $gatewayFactory
+     * @param  GetStateForStatus  $getStateForStatus
+     * @param  ConfigProvider  $configProvider
+     * @param  OrderRepositoryInterface  $orderRepository
      */
     public function __construct(
         Context $context,
@@ -88,7 +102,10 @@ class Create extends Action
         Data $helper,
         JsonFactory $resultJsonFactory,
         Collection $collection,
-        CollectionFactory $gatewayFactory
+        CollectionFactory $gatewayFactory,
+        GetStateForStatus $getStateForStatus,
+        ConfigProvider $configProvider,
+        OrderRepositoryInterface $orderRepository
     ) {
         $this->scopeConfig       = $scopeConfig;
         $this->logger            = $logger;
@@ -99,6 +116,9 @@ class Create extends Action
         $this->resultJsonFactory = $resultJsonFactory;
         $this->collection        = $collection;
         $this->gatewayFactory    = $gatewayFactory;
+        $this->getStateForStatus = $getStateForStatus;
+        $this->configProvider    = $configProvider;
+        $this->orderRepository = $orderRepository;
 
         $this->bluepayment = $paymentFactory->create();
 
@@ -123,7 +143,6 @@ class Create extends Action
                 'sessionLastRealOrderSessionId' => $sessionLastRealOrderSessionId
             ]);
 
-            /** @var Order $order */
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
@@ -137,7 +156,7 @@ class Create extends Action
             );
             $orderId        = $order->getRealOrderId();
             $agreementsIds  = $order->getPayment()->hasAdditionalInformation('agreements_ids')
-                ? array_unique(explode(',', $order->getPayment()->getAdditionalInformation('agreements_ids')))
+                ? array_unique(explode(',', $order->getPayment()->getAdditionalInformation('agreements_ids') ?: ''))
                 : [];
 
             if (!$order->getId()) {
@@ -150,37 +169,16 @@ class Create extends Action
 
             $resultJson = $this->resultJsonFactory->create();
 
-            $unchangeableStatuses = explode(
-                ',',
-                $this->scopeConfig->getValue(
-                    'payment/bluepayment/unchangeable_statuses',
-                    ScopeInterface::SCOPE_STORE
-                )
-            );
-            $statusWaitingPayment = $this->scopeConfig->getValue(
-                'payment/bluepayment/status_waiting_payment',
-                ScopeInterface::SCOPE_STORE
-            );
-
-            if (!empty($statusWaitingPayment)) {
-                $statusCollection  = $this->collection;
-                $orderStatusWaitingState = Order::STATE_NEW;
-                foreach ($statusCollection->joinStates() as $status) {
-                    /** @var \Magento\Sales\Model\Order\Status $status */
-                    if ($status->getStatus() == $statusWaitingPayment) {
-                        $orderStatusWaitingState = $status->getState();
-                    }
-                }
-            } else {
-                $orderStatusWaitingState = Order::STATE_PENDING_PAYMENT;
-                $statusWaitingPayment = Order::STATE_PENDING_PAYMENT;
-            }
+            $unchangeableStatuses = $this->configProvider->getUnchangableStatuses();
+            $status = $this->configProvider->getStatusWaitingPayment();
+            $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
 
             if (!in_array($order->getStatus(), $unchangeableStatuses)) {
-                $this->logger->info('CREATE:' . __LINE__, ['orderStatusWaitingState' => $orderStatusWaitingState]);
-                $this->logger->info('CREATE:' . __LINE__, ['statusWaitingPayment' => $statusWaitingPayment]);
+                $this->logger->info('CREATE:' . __LINE__, ['state' => $state]);
+                $this->logger->info('CREATE:' . __LINE__, ['status' => $status]);
 
-                $order->setState($orderStatusWaitingState)->setStatus($statusWaitingPayment);
+                $order->setState($state)
+                    ->setStatus($status);
             }
 
             // Set Payment Channel to Order
@@ -191,7 +189,7 @@ class Create extends Action
 
             $order->setBlueGatewayId($gatewayId);
             $order->setPaymentChannel($gateway->getData('gateway_name'));
-            $order->save();
+            $this->orderRepository->save($order);
 
             if ($order->getCanSendNewEmailFlag()) {
                 $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
@@ -202,7 +200,7 @@ class Create extends Action
                 }
             }
 
-            if (ConfigProvider::IFRAME_GATEWAY_ID == $gatewayId && $automatic === true) {
+            if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,
@@ -284,12 +282,7 @@ class Create extends Action
                     $token
                 );
 
-                var_dump($params);
-
                 $xml = $this->sendRequest($params);
-
-                var_dump($xml);
-                die;
 
                 if ($xml === false) {
                     $resultJson->setData([
@@ -318,7 +311,7 @@ class Create extends Action
                 return $resultJson;
             }
 
-            if (ConfigProvider::AUTOPAY_GATEWAY_ID == $gatewayId) {
+            if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
                 $params = $this->bluepayment->getFormRedirectFields(
                     $order,
                     $gatewayId,

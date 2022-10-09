@@ -1,16 +1,35 @@
 # What's new in BluePayment?
 
-## Wersja 2.20.0
+## Version 2.21.1
+- We have improved support for Magento 2.3.*.
+
+## Version 2.21.0
+- We have added the SEK currency.
+- We added text with information for BM payment method.
+- We changed the appearance of the payment selection screen.
+- We added help texts in module configuration and channel configuration.
+- We have added new payment channel "PayPo".
+- From now on, also "Card payment" and "PayPo" gateways are always displayed as separate payment methods.
+- We have improved support for many BM services within different Magento contexts.
+
+## Version 2.20.0
+- We have added the **initialize** method to the **BluePayment\Model\Method\BluePayment**, which sets the default order status, according to the "Payment waiting status" setting in the module configuration (only for orders placed using the BlueMedia payment method).
+- We have added support for Magento 2.4.4 and PHP 8.1.
 - We added the promotion of Consumer Finance payments.
 - We improved the appearance of the payment selection.
 
+## Version 2.19.2
+- We've separated the consent display into a separate knockout view.
+- We've added the host `platnosci-accept.bm.pl` to CSP.
+- We've corrected an error when creating Google Pay payments.
+
 ## Version 2.19.1
-- Bugfix - remove invalid component in default.xml
+- Bugfix - we've removed invalid component in default.xml
 
 ## Version 2.19.0
-- We added extended Google Analytics 4.
-- We improved calculation of the order amount when selecting a different currency.
-- We added dispatching events `bluemedia_payment_failure`, `bluemedia_payment_pending` and `bluemedia_payment_success` after receiving new payment status.
+- We've added extended Google Analytics 4.
+- We've improved calculation of the order amount when selecting a different currency.
+- We've added dispatching events `bluemedia_payment_failure`, `bluemedia_payment_pending` and `bluemedia_payment_success` after receiving new payment status.
 
 ## Version 2.18.0
 - We have updated the payment channel synchronization support to v2.

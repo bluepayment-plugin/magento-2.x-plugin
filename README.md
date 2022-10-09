@@ -13,7 +13,7 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.3.
+- Wersja Magento: 2.3.0 – 2.4.5.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ### [Co nowego w BluePayment?](CHANGELOG.md)
@@ -38,7 +38,6 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
 
 
 ## Aktywacja modułu
-
 
 ### Aktywacja za pomocą linii poleceń
 1. Będąc w katalogu głównym Magento, wykonaj następujące polecenia:
@@ -91,7 +90,6 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
 3. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
 #### Odświeżenie listy kanałów płatności
-
 1. Przejdź do Listy kanałów płatności
 2. Kliknij komendę **Synchronizuj kanały płatności (Synchronize Gateways)**, którą znajdziesz po prawej stronie ekranu.
 
@@ -106,22 +104,23 @@ Moduł umożliwia automatyczne odświeżanie kanału płatności co 5 minut. Że
     3. (informacyjnie) **ID**
     4. (informacyjnie) **Nazwa banku (Bank Name)**
     5. (informacyjnie) **Nazwa (Name)**
-    6. **Opis (Description)** – wyświetlany klientowi pod nazwą kanału płatności
-    7. **Kolejność (Sort Order)** – kolejność sortowania na liście kanałów, gdzie:
+    6. (informacyjnie) **Maksymalna kwota płatności (Maximum payment amount)**
+    7. (informacyjnie) **Minimalna kwota płatności (Minimum payment amount)**
+    8. **Opis (Description)** – wyświetlany klientowi pod nazwą kanału płatności
+    9. **Kolejność (Sort Order)** – kolejność sortowania na liście kanałów, gdzie:
         - 1 – pierwsza pozycja na liście,
         - 2 – druga pozycja na liście,
         - ...
         - 0 – ostatnia pozycja na liście.
-    8. **Rodzaj (Type)**.
-    9. **Traktuj jako oddzielną metodę płatności (Is separated method)** – powoduje wyświetlanie danego kanału jako osobnej metody płatności
-    10. **URL do logo (Logo URL)**
-    11. **Użyj własnego logo (Use Own Logo)** dla kanału płatności 
-    12. **Ścieżka do logo (Logo Path)** – adres do własnego logo (widoczne przy zaznaczeniu opcji **Użyj własnego logo (Use Own Logo)**)
-    13. (informacyjnie) **Data ostatniego odświeżenia (Status Date)** – data i czas ostatniej aktualizacji danych dotyczących kanału płatności
-    14. **Wymuś wyłączenie (Force Disable)** – umożliwia dezaktywację wybranego kanału płatności (bez względu na **Status kanału (Status)**)
+    10. **Rodzaj (Type)**.
+    11. **Traktuj jako oddzielną metodę płatności (Is separated method)** – powoduje wyświetlanie danego kanału jako osobnej metody płatności. _BLIK, Karty płatnicze oraz kanały ratalne są zawsze wyświetlane jako osobne metody płatności._
+    12. **Gateway Logo**
+    13. **Użyj własnego logo (Use Own Logo)** dla kanału płatności 
+    14. **Ścieżka do logo (Logo Path)** – adres do własnego logo (widoczne przy zaznaczeniu opcji **Użyj własnego logo (Use Own Logo)**)
+    15. (informacyjnie) **Data ostatniego odświeżenia (Status Date)** – data i czas ostatniej aktualizacji danych dotyczących kanału płatności
+    16. **Wymuś wyłączenie (Force Disable)** – umożliwia dezaktywację wybranego kanału płatności (bez względu na **Status kanału (Status)**)
 
 ### Rozwijalna lista kanałów
-
 Opcja dostępna od wersji 2.9.0 - **domyślnie włączona**.
 
 ![configuration1.png](docs/configuration1.png "Screenshot")
@@ -140,7 +139,6 @@ Odśwież pamięć podręczną po każdej edycji konfiguracji. Żeby to zrobić:
    
    ![configuration2.png](docs/configuration2.png "Screenshot")
 
-
 ## Płatność w iFrame
 Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia ze sklepu i opuszczania procesu zakupowego. Implementacja tej formy płatności, ze względu na wymogi związane z bezpieczeństwem procesowania transakcji, wymaga dwóch dodatkowych dokumentów: SAQ A oraz audyt strony.
 
@@ -152,6 +150,7 @@ Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia z
 3. Przejdź do edycji kanału o ID *1500* i nazwie banku *Karty*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
 5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
+
 
 ## BLIK 0
 BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję należy wpisać bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -165,6 +164,7 @@ BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję n
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
 5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
+
 ## Google Pay
 Opcja umożliwia dokonanie płatności z użyciem Google Pay bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
 
@@ -172,6 +172,7 @@ Opcja umożliwia dokonanie płatności z użyciem Google Pay bezpośrednio na st
 
 ### Aktywacja Google Pay
 Google Pay jest **domyślnie aktywowana i zawsze wyświetlana** jako osobna metoda płatności.
+
 
 ## Płatności automatyczne
 
@@ -182,13 +183,11 @@ Płatność automatyczna dostępna jest tylko dla zalogowanych klientów Twojego
 ![automatic1.png](docs/automatic1.png)
 
 ### Aktywacja płatności automatycznych
-
 1. Przejdź do **konfiguracji modułu**.
 2. Wypełnij **Autopay Agreement** odpowiednim regulaminem – do akceptacji przez klienta.
 3. Przejdź do edycji kanału o ID *1503* i rodzaju *Płatność automatyczna*.
 4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
 5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
-
 
 ### Zarządzanie kartami
 Karta płatnicza zostanie zapamiętana i powiązana z kontem klienta podczas pierwszej poprawnie wykonanej transakcji z wykorzystaniem płatności automatycznej i zaakceptowaniu regulaminu usługi.
@@ -286,7 +285,7 @@ Informacje o wybranym kanale płatności zapisane są w bazie danych:
 ## Rozszerzona Analityka – Google Analytics 4 e-commerce
 Opcja dostępna od wersji 2.19.0.
 
-**Dzięki temu rozwiąznaiu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
+**Dzięki temu rozwiązaniu, możesz dokładniej analizować ścieżkę zakupową Twoich klientów.**  
 Po dokonaniu poniższej konfiguracji, **Google Analytics** zacznie zbierać szczegółowe dane na temat zachowań użytkowników.
 
 Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
@@ -337,8 +336,43 @@ W ramach eventu, przekazywane są dane:
 - `payment` – instancja `\Magento\Sales\Model\OrderPayment`
 - `transaction_id` – identyfikator transakcji w systemie BlueMedia (`string`)
 
-## Obsługa GraphQL oraz integracja z Magento PWA
 
+## Promowanie płatności odroczonych / na raty
+
+### Dlaczego warto promować?
+- Większa sprzedaż 
+- Mniej porzuconych koszyków
+- Więcej klientów
+
+Klienci chętniej zdecydują się na zakup produktów, nawet w wyższej cenie, jeśli będą mogli zapłacić później lub rozłożyć spłatę na raty.
+
+
+Opcja dostępna tylko w przypadku, gdy dla danego serwisu są dostępne płatności **Kup teraz, zapłać później** (Smartney), **Alior Raty** lub **Kup na dopasowane raty**.    
+Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w przypadku aktualizacji, należy przejść do ręcznej konfiguracji.
+
+### Konfiguracja
+1. Przejdź do [Konfiguracji modułu](#konfiguracja).
+2. W zakładce **Promowanie płatności (Promoting payments)** określ, w których miejscach promowane płatności mają być wyświetlane.
+   ![cf1.png](docs/cf1.png "Screenshot")
+
+### Przykładowa wizualizacja
+**Na górze strony (At the top of the page)**  
+![cf2.png](docs/cf2.png "Screenshot")
+
+**Pod nawigacją (Under the navigation)**  
+![cf3.png](docs/cf3.png "Screenshot")
+
+**Na liście produktów (On the product list)**   
+![cf4.png](docs/cf4.png "Screenshot")
+
+**Na stronie produktu pod przyciskami (On the product page under the buttons)**  
+![cf5.png](docs/cf5.png "Screenshot")
+
+**W koszyku pod produktami (In the shopping cart under the products)**  
+![cf6.png](docs/cf6.png "Screenshot")
+
+
+## Obsługa GraphQL oraz integracja z Magento PWA
 Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.bluemedia.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.bluemedia.pl/online/wtyczki/magento-2/graphql).
 
 
@@ -354,7 +388,7 @@ bin/magento cache:flush
 ```
 
 ### Przez paczkę .zip
-1. Pobierz najnowszą wersję wtyczki http://s.bm.pl/wtyczki.
+1. Pobierz najnowszą wersję wtyczki z tej [strony](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Wgraj plik .zip do katalogu głównego Magento
 3. Będąc w katalogu głównym Magento, wykonaj następujące komendy:
 ```bash

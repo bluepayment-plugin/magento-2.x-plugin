@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.3.
+- Magento version: 2.3.0 - 2.4.5.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in BluePayment?](CHANGELOG_EN.md)
@@ -30,7 +30,7 @@ composer require bluepayment-plugin/module-bluepayment
 2. Activate the module
 
 ### Via the zip package
-1. Download the latest version of the module from this [site](http://s.bm.pl/wtyczki).
+1. Download the latest version of the module from this [site](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Upload the .zip file to your Magento root directory.
 3. While in the Magento root directory, run the command:
 ```bash
@@ -108,19 +108,21 @@ The module allows you to automatically refresh the payment channel every 5 minut
     3. (informative) **ID**
     4. (informative) **Bank Name**
     5. (informative) **Name**
-    6. **Description** – displayed to the customer below the payment channel name
-    7. **Sort Order** – the sort order in the list of channels, where:
+    6. (informative) **Maximum payment amount**
+    7. (informative) **Minimum payment amount**
+    8. **Description** – displayed to the customer below the payment channel name
+    9. **Sort Order** – the sort order in the list of channels, where:
         - 1 – first position in the list,
         - 2 – second position in the list,
         - ...
         - 0 – the position in the list.
-    8. **Type**.
-    9. **Is separated method** – displays the channel as a separate payment method
-    10. **Logo URL**
-    11. **Use Own Logo** for payment channel 
-    12. **Logo Path** – address to your own logo (visible when **Use Own Logo** is checked)
-    13. (informative) **Status Date** – date and time the payment channel data was last updated
-    14. **Force Disable** – enables deactivation of the selected payment channel (regardless of **Status**)
+    10. **Type**.
+    11. **Is separated method** – displays the channel as a separate payment method
+    12. (informative) **Gateway Logo**
+    13. **Use Own Logo** for payment channel 
+    14. **Logo Path** – address to your own logo (visible when **Use Own Logo** is checked)
+    15. (informative) **Status Date** – date and time the payment channel data was last updated
+    16. **Force Disable** – enables deactivation of the selected payment channel (regardless of **Status**)
 
 ### Expandable channel list
 
@@ -297,6 +299,41 @@ Provided event data:
 - `payment` - `\Magento\Sales\Model\OrderPayment` instance
 - `transaction_id` - `string` transaction identifier in BlueMedia system
 
+
+## Promoting installments payments
+
+### Why promote?
+- More sales
+- Fewer abandoned shopping carts
+- More customers
+
+Customers are more likely to decide to buy products, even at a higher price, if they can pay later or spread the repayment in installments.
+
+The option is available only if **Purchase Now, Pay Later** (Smartney), **Alior Installments** or **Buy on tailored installments** payments are available for the service.    
+The option is triggered automatically only for new module installations - in case of updates, go to manual configuration.
+
+### Configuration
+1. Go to [Module configuration](#configuration).
+2. In tab **Promoting payments** set up in which places promoting payments should be visible.
+   ![cf1.png](docs/cf1.png "Screenshot")
+
+### Example visualization
+**At the top of the page**  
+![cf2.png](docs/cf2.png "Screenshot")
+
+**Under the navigation**  
+![cf3.png](docs/cf3.png "Screenshot")
+
+**On the product list**   
+![cf4.png](docs/cf4.png "Screenshot")
+
+**On the product page under the buttons**  
+![cf5.png](docs/cf5.png "Screenshot")
+
+**In the shopping cart under the products**  
+![cf6.png](docs/cf6.png "Screenshot")
+
+
 ## Integration with GraphQL and Magento PWA
 GraphQL module is available at:
 https://github.com/bluepayment-plugin/module-bluepayment-graphql
@@ -316,7 +353,7 @@ bin/magento cache:flush
 ```
 
 ### Via the zip package
-1. Download the latest version of the plugin http://s.bm.pl/wtyczki.
+1. Download the latest version of the plugin from this [site](https://github.com/bluepayment-plugin/magento-2.x-plugin/archive/refs/heads/master.zip).
 2. Upload the zip file to your Magento root directory.
 3. While in the Magento root directory, run the following commands:
 ```bash

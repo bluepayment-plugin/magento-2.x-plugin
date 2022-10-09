@@ -1,11 +1,30 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.21.1
+- Poprawiliśmy wsparcie dla Magento 2.3.*.
+
+## Wersja 2.21.0
+- Dodaliśmy walutę SEK.
+- Dodaliśmy tekst z informacją dla metody płatności BM.
+- Zmieniliśmy wygląd ekranu wyboru płatności.
+- Dodaliśmy teksty pomocnicze w konfiguracji modułu oraz konfiguracji kanałów.
+- Dodaliśmy nowy kanał płatności - PayPo.
+- Od teraz także "Płatność kartą" oraz "PayPo" są zawsze wyświetlane jako osobne metody płatności.
+- Poprawiliśmy obsługę wielu serwisów BM w ramach różnych kontekstów Magento.
+
 ## Wersja 2.20.0
+- Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
+- Zapewniliśmy wsparcie dla Magneto 2.4.4 oraz PHP 8.1.
 - Dodaliśmy promowanie płatności Consumer Finance.
 - Poprawiliśmy wygląd wyboru płatności.
 
+## Wersja 2.19.2
+- Wydzieliliśmy wyświetlanie zgód do osobnego widoku knockout.
+- Dodaliśmy host `platnosci-accept.bm.pl` do CSP.
+- Poprawiliśmy błąd podczas tworzenia płatności Google Pay.
+
 ## Wersja 2.19.1
-- Bugfix - usunięcie błędnego komponentu w default.xml
+- Bugfix — usunęliśmy błędny komponent w default.xml.
 
 ## Wersja 2.19.0
 - Dodaliśmy rozszerzoną analitykę Google Analytics 4.
