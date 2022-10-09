@@ -240,7 +240,7 @@ class PlaceOrder implements PlaceOrderInterface
 
         $urlGateway = $this->scopeConfig->getValue(
             'payment/bluepayment/' . ($testMode ? 'test' : 'prod') . '_address_url',
-            ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE
         );
 
         $this->logger->info('PlaceOrder:' . __LINE__, ['params' => $params]);

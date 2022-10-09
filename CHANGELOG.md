@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.21.1
+- Poprawiliśmy wsparcie dla Magento 2.3.*.
+
 ## Wersja 2.21.0
 - Dodaliśmy walutę SEK.
 - Dodaliśmy tekst z informacją dla metody płatności BM.
