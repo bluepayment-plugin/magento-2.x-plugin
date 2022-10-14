@@ -1,10 +1,3 @@
-<!--
-/**
- * Copyright © 2015 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
--->
-
 <!-- ko if: $parent.getCode -->
 <div class="billing-address-same-as-shipping-block field choice" data-bind="visible: canUseShippingAddress()">
     <input type="checkbox" name="billing-address-same-as-shipping" data-bind="checked: isAddressSameAsShipping, click: useShippingAddress, attr: {id: 'billing-address-same-as-shipping-' + $parent.getCode()}"/>

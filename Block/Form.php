@@ -3,6 +3,7 @@
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Framework\View\Element\Template\Context;
@@ -11,25 +12,6 @@ class Form extends \Magento\Payment\Block\Form
 {
     /** @var string */
     protected $_template = 'BlueMedia_BluePayment::form.phtml';
-
-    /** @var CollectionFactory */
-    private $collectionFactory;
-
-    /**
-     * Form constructor.
-     *
-     * @param Context $context
-     * @param CollectionFactory $collectionFactory
-     * @param array $data
-     */
-    public function __construct(
-        Context $context,
-        CollectionFactory $collectionFactory,
-        array $data = []
-    ) {
-        parent::__construct($context, $data);
-        $this->collectionFactory = $collectionFactory;
-    }
 
     /**
      * Get relevant path to template
@@ -61,18 +43,18 @@ class Form extends \Magento\Payment\Block\Form
         return $logo_src != '' ? $logo_src : false;
     }
 
-    public function isAutopay()
+    public function isAutopay(): bool
     {
         return $this->isSeparated() && $this->getGatewayId() === ConfigProvider::ONECLICK_GATEWAY_ID;
     }
 
-    public function isSeparated()
+    public function isSeparated(): bool
     {
-        return (false !== strpos($this->getMethodCode(), 'bluepayment_'));
+        return (false !== strpos($this->getMethodCode(), Payment::SEPARATED_PREFIX_CODE));
     }
 
-    public function getGatewayId()
+    public function getGatewayId(): int
     {
-        return (int) str_replace('bluepayment_', '', $this->getMethodCode());
+        return (int) str_replace(Payment::SEPARATED_PREFIX_CODE, '', $this->getMethodCode());
     }
 }
