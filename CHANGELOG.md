@@ -1,5 +1,14 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.21.2
+- Poprawiliśmy integrację z BluePaymentGraphQl.
+- Poprawiliśmy błąd z blokiem ConsumerFinance.
+- Poprawiliśmy błędy związane z dostawą na wiele adresów (multishipping).
+- Poprawiliśmy błąd związany z ustawieniem statusu oraz state dla zamówień.
+- Usunęliśmy metodę **initialize** (dodaną w wersji 2.20.0).
+- Przenieśliśmy logikę ustawiania domyślnego status zamówienia (z wersji 2.20.0) do zewnętrznego observera.
+- Poprawiliśmy działanie multishipping.
+
 ## Wersja 2.21.1
 - Poprawiliśmy wsparcie dla Magento 2.3.*.
 

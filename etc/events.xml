@@ -23,4 +23,7 @@
     <event name="bluemedia_payment_success">
         <observer name="analytics_checkout_submit" instance="BlueMedia\BluePayment\Observer\PaymentSuccessObserver"/>
     </event>
+    <event name="sales_order_payment_place_end">
+        <observer name="bluepayment_place_end" instance="BlueMedia\BluePayment\Observer\PlaceOrderObserver"/>
+    </event>
 </config>
