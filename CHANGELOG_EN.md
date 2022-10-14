@@ -3,6 +3,10 @@
 ## Version IN PROGRESS
 - We added Autopay support.
 
+## Version 2.21.2
+- We have fixed integration with BluePaymentGraphQl.
+- We have fixed problem with ConsumerFinance block.
+
 ## Version 2.21.1
 - We have improved support for Magento 2.3.*.
 

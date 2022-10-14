@@ -66,7 +66,7 @@ class OverviewPost extends Checkout implements HttpPostActionInterface
         $this->agreementsValidator = $agreementValidator;
         $this->session = $session;
 
-        if (class_exists(\Magento\Checkout\Api\PaymentProcessingRateLimiterInterface::class)) {
+        if (interface_exists(\Magento\Checkout\Api\PaymentProcessingRateLimiterInterface::class)) {
             // Support for Magento 2.3.*
 
             $this->paymentRateLimiter = ObjectManager::getInstance()
@@ -90,7 +90,10 @@ class OverviewPost extends Checkout implements HttpPostActionInterface
     public function execute()
     {
         try {
-            $this->paymentRateLimiter->limit();
+            if ($this->paymentRateLimiter) {
+                $this->paymentRateLimiter->limit();
+            }
+
             if (!$this->_validateMinimumAmount()) {
                 return;
             }

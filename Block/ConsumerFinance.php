@@ -64,6 +64,6 @@ class ConsumerFinance extends Template
             $this->enabledGateways = $this->configProvider->getConsumerFinanceGatewaysEnabledIds();
         }
 
-        return in_array($this->enabledGateways, $gatewayId);
+        return in_array($gatewayId, $this->enabledGateways, false);
     }
 }

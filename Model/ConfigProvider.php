@@ -141,7 +141,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * ConfigProvider constructor.
      *
-     * @param $gatewayCollectionFactory $gatewayCollectionFactory
+     * @param GatewayCollectionFactory $gatewayCollectionFactory $gatewayCollectionFactory
      * @param Form $block
      * @param PriceCurrencyInterface $priceCurrency
      * @param ScopeConfigInterface $scopeConfig
@@ -149,6 +149,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param CheckoutSession $checkoutSession
      * @param CardCollectionFactory $cardCollectionFactory
      * @param StoreManagerInterface $storeManager
+     * @param Config $orderConfig
      */
     public function __construct(
         GatewayCollectionFactory $gatewayCollectionFactory,
@@ -172,10 +173,28 @@ class ConfigProvider implements ConfigProviderInterface
         $this->orderConfig = $orderConfig;
     }
 
+    /**
+     * Is BlueMedia payment method active
+     *
+     * @return bool
+     */
     public function isActive(): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/active',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     *
+     *
+     * @return bool
+     */
+    public function isTestMode(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/test_mode',
             ScopeInterface::SCOPE_STORE
         );
     }
@@ -213,7 +232,7 @@ class ConfigProvider implements ConfigProviderInterface
 
             $amount = $this->checkoutSession->getQuote()->getGrandTotal();
 
-            $gateways = $this->getActiveGateways($amount, $currency);
+            $gateways = $this->getActiveGateways($currency, $amount);
 
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
@@ -235,10 +254,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'bluePaymentOptions' => $result,
                 'bluePaymentSeparated' => $resultSeparated,
                 'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentTestMode' => $this->scopeConfig->getValue(
-                    'payment/bluepayment/test_mode',
-                    ScopeInterface::SCOPE_STORE
-                ),
+                'bluePaymentTestMode' => $this->isTestMode(),
                 'bluePaymentCards' => $this->prepareCards(),
                 'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue(
                     'payment/bluepayment/autopay_agreement',
@@ -255,6 +271,27 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get only separated methods
+     *
+     * @return Gateway[]
+     * @throws NoSuchEntityException
+     */
+    public function getSeparatedGateways(): array
+    {
+        /** @var Gateway[] $separated */
+        $separated = $this
+            ->getActiveGateways(
+                $this->getCurrentCurrencyCode(),
+                null,
+                true
+            )
+            ->getItems();
+        $this->sortGateways($separated);
+
+        return $separated;
+    }
+
+    /**
      * @return string
      */
     public function getCurrentCurrencyCode(): string
@@ -263,8 +300,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param  Gateway  $gateway
-     *
+     * @param Gateway $gateway
      * @return array
      */
     private function prepareGatewayStructure(GatewayInterface $gateway): array
@@ -296,7 +332,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param  array  $array
+     * @param array|GatewayCollection $array
      *
      * @return array
      */
@@ -304,13 +340,19 @@ class ConfigProvider implements ConfigProviderInterface
     {
         $sortOrder = $this->defaultSortOrder;
 
-        usort($array, function ($a, $b) use ($sortOrder) {
-            $aPos = (int)$a['sort_order'];
-            $bPos = (int)$b['sort_order'];
+        usort($array, static function ($a, $b) use ($sortOrder) {
+            /** @var array|Gateway $a */
+            /** @var array|Gateway $b */
 
-            if ($aPos == $bPos) {
-                $aPos = array_search($a["gateway_id"], $sortOrder);
-                $bPos = array_search($b["gateway_id"], $sortOrder);
+            $aPos = is_array($a) ? (int)$a['sort_order'] : (int)$a->getSortOrder();
+            $bPos = is_array($b) ? (int)$b['sort_order'] : (int)$b->getSortOrder();
+
+            $aGatewayId = is_array($a) ? (int)$a['gateway_id'] : (int)$a->getGatewayId();
+            $bGatewayId = is_array($b) ? (int)$b['gateway_id'] : (int)$b->getGatewayId();
+
+            if ($aPos === $bPos) {
+                $aPos = array_search($aGatewayId, $sortOrder, true);
+                $bPos = array_search($bGatewayId, $sortOrder, true);
 
                 if ($aPos === false) {
                     // New gateway
@@ -322,9 +364,9 @@ class ConfigProvider implements ConfigProviderInterface
                     return 0;
                 }
 
-            } elseif ($aPos == 0) {
+            } elseif ($aPos === 0) {
                 return 1;
-            } elseif ($bPos == 0) {
+            } elseif ($bPos === 0) {
                 return 0;
             }
 
@@ -372,14 +414,19 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param  float  $amount
-     * @param  string  $currency
+     * Get active gateways
      *
-     * @return GatewayCollection
+     * @param string $currency
+     * @param float|null $amount
+     * @param bool $onlySeparated
+     * @return GatewayCollection|Gateway[]
      * @throws NoSuchEntityException
      */
-    public function getActiveGateways(float $amount, string $currency): GatewayCollection
-    {
+    public function getActiveGateways(
+        string $currency,
+        ?float $amount = null,
+        bool $onlySeparated = false
+    ): GatewayCollection {
         $storeId = $this->storeManager->getStore()->getId();
 
         $serviceId = $this->getServiceId($currency);
@@ -389,15 +436,23 @@ class ConfigProvider implements ConfigProviderInterface
             ->addFieldToFilter(GatewayInterface::SERVICE_ID, ['eq' => $serviceId])
             ->addFieldToFilter(GatewayInterface::CURRENCY, ['eq' => $currency])
             ->addFieldToFilter(GatewayInterface::STATUS, ['eq' => 1])
-            ->addFieldToFilter(GatewayInterface::IS_FORCE_DISABLED, ['eq' => 0])
-            ->addFieldToFilter(GatewayInterface::MIN_AMOUNT, [
-                ['lteq' => $amount],
-                ['null' => true]
-            ])
-            ->addFieldToFilter(GatewayInterface::MAX_AMOUNT, [
-                ['gteq' => $amount],
-                ['null' => true]
-            ]);
+            ->addFieldToFilter(GatewayInterface::IS_FORCE_DISABLED, ['eq' => 0]);
+
+        if ($amount !== null) {
+            $gateways
+                ->addFieldToFilter(GatewayInterface::MIN_AMOUNT, [
+                    ['lteq' => $amount],
+                    ['null' => true]
+                ])
+                ->addFieldToFilter(GatewayInterface::MAX_AMOUNT, [
+                    ['gteq' => $amount],
+                    ['null' => true]
+                ]);
+        }
+
+        if ($onlySeparated) {
+            $gateways->addFieldToFilter(GatewayInterface::IS_SEPARATED_METHOD, ['eq' => 1]);
+        }
 
         return $gateways->load();
     }
