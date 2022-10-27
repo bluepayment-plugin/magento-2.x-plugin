@@ -146,19 +146,7 @@ class Analytics
      */
     public function getCategoryName($product): string
     {
-        $categoryIds = $product->getCategoryIds();
-        $categoryNames = [];
-        if (!empty($categoryIds)) {
-            foreach ($categoryIds as $categoryId) {
-                $category = $this->categoryRepository->get(
-                    $categoryId,
-                    $product->getStoreId()
-                );
-                $categoryNames[] = $category->getName();
-            }
-        }
-
-        return implode("/", $categoryNames);
+        return $product->getCategory()->getName();
     }
 
     /**
