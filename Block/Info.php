@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\GetTransactionLifetime;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
@@ -21,6 +22,9 @@ use Magento\Store\Model\ScopeInterface;
 
 class Info extends \Magento\Payment\Block\Info
 {
+    /** @var Data */
+    public $helper;
+
     /** @var GatewayFactory */
     private $gatewayFactory;
 
@@ -30,8 +34,8 @@ class Info extends \Magento\Payment\Block\Info
     /** @var UrlInterface */
     private $url;
 
-    /** @var Data */
-    public $helper;
+    /** @var GetTransactionLifetime */
+    private $getTransactionLifetime;
 
     protected $_template = 'BlueMedia_BluePayment::payment/info.phtml';
 
@@ -40,6 +44,7 @@ class Info extends \Magento\Payment\Block\Info
      * @param Session $checkoutSession
      * @param Url $url
      * @param Data $helper
+     * @param GetTransactionLifetime $getTransactionLifetime
      * @param Context $context
      * @param array $data
      */
@@ -48,6 +53,7 @@ class Info extends \Magento\Payment\Block\Info
         Session $checkoutSession,
         Url $url,
         Data $helper,
+        GetTransactionLifetime $getTransactionLifetime,
         Template\Context $context,
         array $data = []
     ) {
@@ -56,6 +62,7 @@ class Info extends \Magento\Payment\Block\Info
         $this->checkoutSession = $checkoutSession;
         $this->url = $url;
         $this->helper = $helper;
+        $this->getTransactionLifetime = $getTransactionLifetime;
     }
 
     /**
@@ -115,18 +122,27 @@ class Info extends \Magento\Payment\Block\Info
     /**
      * Get continuation link
      *
-     * @return mixed|string|void
+     * @return string|boolean
      * @throws LocalizedException
      */
     public function getContinuationLink()
     {
         /** @var Payment $info */
         $payment = $this->getInfo();
+        $order = $payment->getOrder();
         $state = $payment->getAdditionalInformation('bluepayment_state');
 
-        if ($state !== 'SUCCESS') {
-            return $this->generateLink($payment->getOrder());
+        $lifetime = $this->getTransactionLifetime->getForOrder($order);
+
+        if ($lifetime === false) {
+            return false;
         }
+
+        if ($state === 'SUCCESS') {
+            return false;
+        }
+
+        return $this->generateLink($order);
     }
 
     /**
