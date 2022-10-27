@@ -187,7 +187,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     *
+     * Is BlueMedia payment method in test (ACC) mode.
      *
      * @return bool
      */
@@ -195,6 +195,32 @@ class ConfigProvider implements ConfigProviderInterface
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/test_mode',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Returns whether the continuation link should be disabled after transaction expiration.
+     *
+     * @return bool
+     */
+    public function getTransactionLifetime(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/transaction_life_hours',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Returns whether the continuation link should be disabled after transaction expiration.
+     *
+     * @return bool
+     */
+    public function disableContinuationLinkAfterExpiration(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/disable_link_after_expiration',
             ScopeInterface::SCOPE_STORE
         );
     }

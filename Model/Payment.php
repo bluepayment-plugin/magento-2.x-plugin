@@ -14,6 +14,7 @@ use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
+use DateTimeZone;
 use DOMDocument;
 use DOMException;
 use Exception;
@@ -251,6 +252,9 @@ class Payment extends AbstractMethod
     /** @var GetStoreByServiceId */
     private $getStoreByServiceId;
 
+    /** @var GetTransactionLifetime */
+    private $getTransactionLifetime;
+
     /**
      * Payment constructor.
      *
@@ -280,6 +284,7 @@ class Payment extends AbstractMethod
      * @param Webapi $webapi
      * @param GetStateForStatus $getStateForStatus
      * @param GetStoreByServiceId $getStoreByServiceId
+     * @param GetTransactionLifetime $getTransactionLifetime
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
@@ -311,6 +316,7 @@ class Payment extends AbstractMethod
         Webapi $webapi,
         GetStateForStatus $getStateForStatus,
         GetStoreByServiceId $getStoreByServiceId,
+        GetTransactionLifetime $getTransactionLifetime,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -334,6 +340,7 @@ class Payment extends AbstractMethod
         $this->webapi = $webapi;
         $this->getStateForStatus = $getStateForStatus;
         $this->getStoreByServiceId = $getStoreByServiceId;
+        $this->getTransactionLifetime = $getTransactionLifetime;
 
         parent::__construct(
             $context,
@@ -387,16 +394,17 @@ class Payment extends AbstractMethod
     /**
      * Tablica z parametrami do wysłania metodą GET do bramki
      *
-     * @param  Order  $order
-     * @param  int  $gatewayId
-     * @param  array  $agreementsIds
-     * @param  bool  $automatic
-     * @param  string  $authorizationCode
-     * @param  string  $paymentToken
-     * @param  int  $cardIndex
-     * @param  ?string  $backUrl
+     * @param Order $order
+     * @param int $gatewayId
+     * @param array $agreementsIds
+     * @param bool $automatic
+     * @param string $authorizationCode
+     * @param string $paymentToken
+     * @param int $cardIndex
+     * @param  ?string $backUrl
      *
      * @return string[]
+     * @throws LocalizedException
      */
     public function getFormRedirectFields(
         Order $order,
@@ -424,7 +432,7 @@ class Payment extends AbstractMethod
 
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
-        $validityTime = $this->getTransactionLifeHours();
+        $validityTime = $this->getTransactionLifetime($order);
 
         $locale = $this->_scopeConfig
             ->getValue(
@@ -443,7 +451,7 @@ class Payment extends AbstractMethod
         ];
 
         /* Ustawiona ważność linku */
-        if ($validityTime) {
+        if ($validityTime !== null) {
             $params['LinkValidityTime'] = $validityTime;
             $params['ValidityTime'] = $validityTime;
         }
@@ -513,25 +521,24 @@ class Payment extends AbstractMethod
     /**
      * Transaction lifetime
      *
-     * @return mixed
+     * @param Order $order
+     * @return ?string
      * @throws LocalizedException
      */
-    private function getTransactionLifeHours()
+    private function getTransactionLifetime(Order $order): ?string
     {
-        $hours = (int) $this->getConfigData('transaction_life_hours');
+        $lifetime = $this->getTransactionLifetime->getForOrder($order);
 
-        if ($hours && $hours >= 1 && $hours <= 720) {
-            date_default_timezone_set('Europe/Warsaw');
-            $time = strtotime("+" . $hours . " hour");
-
-            if ($time) {
-                return date('Y-m-d H:i:s', $time);
-            }
-
-            return date('Y-m-d H:i:s', time() + $hours*3600);
+        if ($lifetime === true) {
+            return null;
         }
 
-        return self::DEFAULT_TRANSACTION_LIFE_HOURS;
+        if ($lifetime === false) {
+            throw new LocalizedException(__('Transaction is expired. Place order again.'));
+        }
+
+        $lifetime->setTimezone(new DateTimeZone('Europe/Warsaw'));
+        return $lifetime->format('Y-m-d H:i:s');
     }
 
     /**
@@ -1365,11 +1372,14 @@ class Payment extends AbstractMethod
     }
 
     /**
+     * Create link to payment for order.
+     *
      * @param Order $order
      * @param array $params
+     * @return false|SimpleXMLElement
      * @throws Exception
      */
-    public function createPaymentLink($order, $params)
+    public function createPaymentLink(Order $order, array $params)
     {
         $payment = $order->getPayment();
 
@@ -1389,7 +1399,7 @@ class Payment extends AbstractMethod
             $status = $this->configProvider->getStatusWaitingPayment();
             $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
 
-            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+            if (!in_array($order->getStatus(), $unchangeableStatuses, false)) {
                 $amount = $order->getGrandTotal();
                 $formattedAmount = number_format(round($amount, 2), 2, '.', '');
 
