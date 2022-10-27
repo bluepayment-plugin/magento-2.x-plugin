@@ -44,6 +44,11 @@
                 <field id="transaction_life_hours" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Transaction Life Hours</label>
                 </field>
+                <field id="disable_link_after_expiration" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Disable payment continuation link when transaction expires</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Link available in order confirmation e-mail and in order detail in customer account will be expired after reaching Transaction Life Hours set above.]]></comment>
+                </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="121" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Sort Order</label>
                 </field>

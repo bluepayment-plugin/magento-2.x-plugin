@@ -147,15 +147,18 @@ class Analytics
     public function getCategoryName($product): string
     {
         $categoryIds = $product->getCategoryIds();
-        $categoryName = '';
+        $categoryNames = [];
         if (!empty($categoryIds)) {
             foreach ($categoryIds as $categoryId) {
-                $category = $this->categoryRepository->get($categoryId);
-                $categoryName .= '/'.$category->getName();
+                $category = $this->categoryRepository->get(
+                    $categoryId,
+                    $product->getStoreId()
+                );
+                $categoryNames[] = $category->getName();
             }
         }
 
-        return trim($categoryName, '/');
+        return implode("/", $categoryNames);
     }
 
     /**

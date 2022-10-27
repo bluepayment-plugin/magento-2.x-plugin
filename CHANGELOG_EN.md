@@ -1,5 +1,10 @@
 # What's new in BluePayment?
 
+## Version 2.21.3
+- We added the option "Disable the payment continuation link with the expiration of the transaction".
+- We improved the performance of GA4 analytics - when it is disabled, product information is no longer retrieved.
+- We improved the retrieval of product category information in GA4 analytics.
+
 ## Version 2.21.2
 - We have fixed integration with BluePaymentGraphQl.
 - We have fixed problem with ConsumerFinance block.
