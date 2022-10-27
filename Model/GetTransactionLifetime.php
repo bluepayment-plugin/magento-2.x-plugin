@@ -57,8 +57,12 @@ class GetTransactionLifetime
         $dateTime->modify('+' . $lifeTime . ' hours');
         $now = new DateTime();
 
-        if ($dateTime < $now && $this->configProvider->disableContinuationLinkAfterExpiration()) {
-            return false;
+        if ($dateTime < $now) {
+            if ($this->configProvider->disableContinuationLinkAfterExpiration()) {
+                return false;
+            }
+
+            return true;
         }
 
         return $dateTime;
