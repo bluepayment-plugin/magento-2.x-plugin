@@ -500,14 +500,6 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    public function isTestMode(): bool
-    {
-        return (bool) $this->scopeConfig->getValue(
-            'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
     public function isGatewaySelectionEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
