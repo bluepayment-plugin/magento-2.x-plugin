@@ -26,14 +26,6 @@ define([
             template: 'BlueMedia_BluePayment/payment/multishipping/bluepayment_separated'
         },
 
-        initObservable: function () {
-            agreements.selected.subscribe(function () {
-                this.agreementChanged();
-            }.bind(this));
-
-            return this._super();
-        },
-
         /**
          * Get payment method data
          */
@@ -62,10 +54,6 @@ define([
                 ).done(this.done.bind(this))
                     .fail(this.fail.bind(this));
             }
-        },
-
-        agreementChanged: function () {
-            setPaymentInformationAction(this.messageContainer, this.getData());
         },
 
         selectPaymentMethod: function () {

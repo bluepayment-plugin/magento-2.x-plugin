@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Helper\Analytics\Data as AnalyticsHelper;
@@ -8,7 +10,6 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\Data;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
-use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -47,22 +48,43 @@ class Analytics
         $this->taxHelper = $taxHelper;
     }
 
-    public function isGoogleAnalytics4Available()
+    /**
+     * Check is Google Analytics 4 available.
+     *
+     * @return bool
+     */
+    public function isGoogleAnalytics4Available(): bool
     {
         return $this->analyticsHelper->isGoogleAnalytics4Available();
     }
 
-    public function getAccountIdGa4()
+    /**
+     * Returns Account ID for Google Analytics 4.
+     *
+     * @return string|null
+     */
+    public function getAccountIdGa4(): ?string
     {
         return $this->analyticsHelper->getAccountIdGa4();
     }
 
-    public function getApiSecret()
+    /**
+     * Returns API Secret for Google Analytics 4.
+     *
+     * @return string|null
+     */
+    public function getApiSecret(): ?string
     {
         return $this->analyticsHelper->getApiSecret();
     }
 
-    public function addEvent($event)
+    /**
+     * Add new GA event to queue.
+     *
+     * @param array $event
+     * @return array
+     */
+    public function addEvent(array $event): array
     {
         $data = $this->checkoutSession->getAnalyticsData();
         if (!is_array($data)) {
@@ -76,7 +98,12 @@ class Analytics
         return $data;
     }
 
-    public function getEvents()
+    /**
+     * Get all queued GA events.
+     *
+     * @return array
+     */
+    public function getEvents(): array
     {
         $data = $this->checkoutSession->getAnalyticsData();
 
@@ -87,7 +114,12 @@ class Analytics
         return $data;
     }
 
-    public function clearEvents()
+    /**
+     * Remove all queued GA events.
+     *
+     * @return void
+     */
+    public function clearEvents(): void
     {
         $this->checkoutSession->setAnalyticsData([]);
     }
@@ -106,36 +138,43 @@ class Analytics
     }
 
     /**
-     * @param  Product|ProductInterface  $product
+     * Get category name for product.
      *
+     * @param Product|ProductInterface $product
      * @return string
      * @throws NoSuchEntityException
      */
-    public function getCategoryName($product)
+    public function getCategoryName($product): string
     {
         $categoryIds = $product->getCategoryIds();
-        $categoryName = '';
+        $categoryNames = [];
         if (!empty($categoryIds)) {
             foreach ($categoryIds as $categoryId) {
-                $category = $this->categoryRepository->get($categoryId);
-                $categoryName .= '/'.$category->getName();
+                $category = $this->categoryRepository->get(
+                    $categoryId,
+                    $product->getStoreId()
+                );
+                $categoryNames[] = $category->getName();
             }
         }
 
-        return trim($categoryName, '/');
+        return implode("/", $categoryNames);
     }
 
     /**
-     * @param  float  $product
+     * Convert price to base currency.
      *
+     * @param float $price
      * @return float
      */
-    public function convertPrice($price)
+    public function convertPrice(float $price): float
     {
         return $this->priceCurrency->convert($price);
     }
 
     /**
+     * Get quote from session.
+     *
      * @return CartInterface|Quote
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -145,8 +184,19 @@ class Analytics
         return $this->checkoutSession->getQuote();
     }
 
-    public function parseProductCollection(Collection $collection)
+    /**
+     * Parse product collection and add view_item_list GA event to queue.
+     *
+     * @param Collection $collection
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    public function parseProductCollection(Collection $collection): void
     {
+        if (! $this->isGoogleAnalytics4Available()) {
+            return;
+        }
+
         $position = 0;
 
         $items = [];

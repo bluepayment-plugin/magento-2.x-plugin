@@ -173,6 +173,10 @@ class PlaceOrder implements PlaceOrderInterface
         $xml = new \SimpleXMLElement('<productList/>');
 
         foreach ($productsList as $item) {
+            if ($item['subAmount'] === null) {
+                continue;
+            }
+
             $subAmount = number_format(round($item['subAmount'], 2), 2, '.', '');
 
             $product = $xml->addChild('product');
@@ -196,7 +200,7 @@ class PlaceOrder implements PlaceOrderInterface
             'GatewayID' => $gatewayId
         ];
 
-        /* Płatność automatyczna kartowa */
+        /* Płatność one-click kartowa */
         if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
             $cardIndex = $payment->getAdditionalInformation('gateway_index');
 
@@ -240,7 +244,7 @@ class PlaceOrder implements PlaceOrderInterface
 
         $urlGateway = $this->scopeConfig->getValue(
             'payment/bluepayment/' . ($testMode ? 'test' : 'prod') . '_address_url',
-            ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE
         );
 
         $this->logger->info('PlaceOrder:' . __LINE__, ['params' => $params]);

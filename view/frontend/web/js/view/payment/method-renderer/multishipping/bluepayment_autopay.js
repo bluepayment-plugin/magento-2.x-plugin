@@ -31,14 +31,6 @@ define([
         validationFailed: ko.observable(false),
         validationAgreementFailed: ko.observable(false),
 
-        initObservable: function () {
-            agreements.selected.subscribe(function () {
-                this.agreementChanged();
-            }.bind(this));
-
-            return this._super();
-        },
-
         /**
          * Trigger order placing
          */
@@ -115,10 +107,6 @@ define([
             setPaymentInformationAction(this.messageContainer, this.getData());
 
             return true;
-        },
-
-        agreementChanged: function () {
-            setPaymentInformationAction(this.messageContainer, this.getData());
         },
     });
 });

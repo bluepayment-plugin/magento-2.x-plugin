@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Block\Analytics;
 
 use BlueMedia\BluePayment\Model\Analytics;
 use Magento\Catalog\Model\Layer\Resolver;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Catalog\Helper\Data as CatalogHelper;
@@ -38,6 +42,11 @@ class GaData extends Template
         $this->analytics = $analytics;
     }
 
+    /**
+     * Get all available GA events to send.
+     *
+     * @return array
+     */
     public function getAnalyticsData(): array
     {
         if (! $this->analytics->isGoogleAnalytics4Available()) {
@@ -61,11 +70,21 @@ class GaData extends Template
         return $this->getDefault();
     }
 
-    public function getJsonSerializer()
+    /**
+     * Get JSON Serializer instance.
+     *
+     * @return Json
+     */
+    public function getJsonSerializer(): Json
     {
         return $this->jsonSerializer;
     }
 
+    /**
+     * Return events for default page.
+     *
+     * @return array
+     */
     private function getDefault(): array
     {
         if (! $this->analytics->isGoogleAnalytics4Available()) {
@@ -86,6 +105,11 @@ class GaData extends Template
         return $events;
     }
 
+    /**
+     * Get item name for list.
+     *
+     * @return string
+     */
     private function getItemListName(): string
     {
         $category = $this->layerResolver->get()->getCurrentCategory();
@@ -97,7 +121,13 @@ class GaData extends Template
         return '';
     }
 
-    private function loadProductViewData()
+    /**
+     * Add information about product page to GA event queue.
+     *
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    private function loadProductViewData(): void
     {
         $product = $this->catalogHelper->getProduct();
 
@@ -121,7 +151,15 @@ class GaData extends Template
         }
     }
 
-    private function loadCheckoutData($checkout = false)
+    /**
+     * Add information about checkout progress to GA events queue.
+     *
+     * @param bool $checkout
+     * @return void
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    private function loadCheckoutData(bool $checkout = false): void
     {
         $quote = $this->analytics->getQuote();
 
@@ -137,7 +175,7 @@ class GaData extends Template
                 'name'      => $item->getName(),
                 'category'  => $this->analytics->getCategoryName($item->getProduct()),
                 'quantity'  => $item->getQtyOrdered() ?: $item->getQty(),
-                'price'     => $this->analytics->convertPrice($item->getBasePrice())
+                'price'     => $this->analytics->convertPrice((float) $item->getBasePrice())
             ];
         }
 

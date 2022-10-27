@@ -4,6 +4,23 @@
 - Dodaliśmy obsługę AutoPay
 - Dodaliśmy obsługę Huba ratalnego.
 
+## Wersja 2.21.3
+- Dodaliśmy opcji "Wyłącz link kontynuacji płatności wraz z wygaśnięciem transakcji".
+- Poprawiliśmy działanie analityki GA4 - gdy jest wyłączona, nie są już pobierane informacje o produktach.
+- Poprawiliśmy pobieranie informacji o kategorii produktu w analityce GA4.
+
+## Wersja 2.21.2
+- Poprawiliśmy integrację z BluePaymentGraphQl.
+- Poprawiliśmy błąd z blokiem ConsumerFinance.
+- Poprawiliśmy błędy związane z dostawą na wiele adresów (multishipping).
+- Poprawiliśmy błąd związany z ustawieniem statusu oraz state dla zamówień.
+- Usunęliśmy metodę **initialize** (dodaną w wersji 2.20.0).
+- Przenieśliśmy logikę ustawiania domyślnego status zamówienia (z wersji 2.20.0) do zewnętrznego observera.
+- Poprawiliśmy działanie multishipping.
+
+## Wersja 2.21.1
+- Poprawiliśmy wsparcie dla Magento 2.3.*.
+
 ## Wersja 2.21.0
 - Dodaliśmy walutę SEK.
 - Dodaliśmy tekst z informacją dla metody płatności BM.

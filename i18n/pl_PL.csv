@@ -196,3 +196,8 @@ You have to select payment card.,"Musisz wybrać kartę płatniczą."
 "Shop using deferred payment option or a convenient installment plan. %1","Skorzystaj z zakupów z odroczonym terminem spłaty lub dogodnym systemem ratalnym. %1"
 "Find out the details","Poznaj szczegóły"
 "You will be redirected to PayPo's partner website.","Przekierujemy Cię na stronę partnera PayPo."
+"Disable payment continuation link when transaction expires","Wyłącz link kontynuacji płatności wraz z wygaśnięciem transakcji"
+"Link available in order confirmation e-mail and in order detail in customer account will be expired after reaching Transaction Life Hours set above.","Link dostępny w e-mailu potwierdzającym zamówienie oraz w szczegółach zamówienia na koncie klienta zostanie wyłączony po osiągnięciu określonego powyżej czasu ważności płatności."
+"Invalid hash for order","Nieprawidłowy hash dla zamówienia"
+"Transaction is expired. Place order again.","Transakcja wygasła. Złóż zamówienie ponownie."
+"An error occurred while generating the transaction.","Wystąpił błąd podczas generowania transakcji.",

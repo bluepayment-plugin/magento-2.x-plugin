@@ -38,9 +38,10 @@ define([
         },
 
         initObservable: function () {
-            // agreements.selected.subscribe(function () {
-            //     this.agreementChanged();
-            // }.bind(this));
+            // Observable is needed only once
+            agreements.selected.subscribe(function () {
+                this.agreementChanged();
+            }.bind(this));
 
             return this._super();
         },

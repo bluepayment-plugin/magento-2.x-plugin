@@ -14,6 +14,7 @@ use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
+use DateTimeZone;
 use DOMDocument;
 use DOMException;
 use Exception;
@@ -41,11 +42,9 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
-use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -57,6 +56,8 @@ class Payment extends AbstractMethod
     public const METHOD_CODE_AUTOPAY = 'autopay';
     public const IFRAME_SCREEN_TYPE = 'IFRAME';
     public const DEFAULT_TRANSACTION_LIFE_HOURS = false;
+
+    public const SEPARATED_PREFIX_CODE = 'bluepayment_';
 
     /**
      * Stałe statusów płatności
@@ -163,12 +164,33 @@ class Payment extends AbstractMethod
      *
      * @var bool
      */
-    protected $_isInitializeNeeded = true;
+    protected $_isInitializeNeeded = false;
 
+    /**
+     * @var bool
+     */
     protected $_canOrder = true;
 
     protected $_canAuthorize = false;
     protected $_canCapture = false;
+
+    /**
+     * Is separated method?
+     *
+     * Currently used only for GraphQL integration.
+     *
+     * @var bool
+     */
+    private $isSeparated = false;
+
+    /**
+     * Related gateway (channel) model.
+     *
+     * Currently used only for GraphQL integration.
+     *
+     * @var null|Gateway
+     */
+    private $gatewayModel = null;
 
     /** @var OrderFactory */
     private $orderFactory;
@@ -187,9 +209,6 @@ class Payment extends AbstractMethod
 
     /** @var BMLogger */
     private $bmLooger;
-
-    /** @var Collection */
-    private $collection;
 
     /** @var Data */
     private $helper;
@@ -236,37 +255,40 @@ class Payment extends AbstractMethod
     /** @var GenerateOrderBasket */
     private $generateOrderBasket;
 
+    /** @var GetTransactionLifetime */
+    private $getTransactionLifetime;
+
     /**
      * Payment constructor.
      *
-     * @param  OrderSender  $orderSender
-     * @param  Data  $helper
-     * @param  UrlInterface  $url
-     * @param  OrderFactory  $orderFactory
-     * @param  Context  $context
-     * @param  Registry  $registry
-     * @param  ExtensionAttributesFactory  $extensionFactory
-     * @param  AttributeValueFactory  $customAttributeFactory
-     * @param  PaymentData  $paymentData
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  Logger  $logger
-     * @param  TransactionFactory  $transactionFactory
-     * @param  TransactionRepositoryInterface  $transactionRepository
-     * @param  CardFactory  $cardFactory
-     * @param  CardCollectionFactory  $cardCollectionFactory
-     * @param  CardResource  $cardResource
-     * @param  OrderCollectionFactory  $orderCollectionFactory
-     * @param  Curl  $curl
-     * @param  BMLogger  $bmLogger
-     * @param  Collection  $collection
-     * @param  OrderRepositoryInterface  $orderRepository
-     * @param  GatewayFactory  $gatewayFactory
-     * @param  Refunds  $refunds
-     * @param  ConfigProvider  $configProvider
-     * @param  Webapi  $webapi
-     * @param  GetStateForStatus  $getStateForStatus
-     * @param  GetStoreByServiceId  $getStoreByServiceId
-     * @param  GenerateOrderBasket  $generateOrderBasket
+     * @param OrderSender $orderSender
+     * @param Data $helper
+     * @param UrlInterface $url
+     * @param OrderFactory $orderFactory
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param PaymentData $paymentData
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Logger $logger
+     * @param TransactionFactory $transactionFactory
+     * @param TransactionRepositoryInterface $transactionRepository
+     * @param CardFactory $cardFactory
+     * @param CardCollectionFactory $cardCollectionFactory
+     * @param CardResource $cardResource
+     * @param OrderCollectionFactory $orderCollectionFactory
+     * @param Curl $curl
+     * @param BMLogger $bmLogger
+     * @param OrderRepositoryInterface $orderRepository
+     * @param GatewayFactory $gatewayFactory
+     * @param Refunds $refunds
+     * @param ConfigProvider $configProvider
+     * @param Webapi $webapi
+     * @param GetStateForStatus $getStateForStatus
+     * @param GetStoreByServiceId $getStoreByServiceId
+     * @param GetTransactionLifetime $getTransactionLifetime
+     * @param GenerateOrderBasket  $generateOrderBasket
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -291,7 +313,6 @@ class Payment extends AbstractMethod
         OrderCollectionFactory $orderCollectionFactory,
         Curl $curl,
         BMLogger $bmLogger,
-        Collection $collection,
         OrderRepositoryInterface $orderRepository,
         GatewayFactory $gatewayFactory,
         Refunds $refunds,
@@ -299,6 +320,7 @@ class Payment extends AbstractMethod
         Webapi $webapi,
         GetStateForStatus $getStateForStatus,
         GetStoreByServiceId $getStoreByServiceId,
+        GetTransactionLifetime $getTransactionLifetime,
         GenerateOrderBasket $generateOrderBasket,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
@@ -313,7 +335,6 @@ class Payment extends AbstractMethod
         $this->cardResource = $cardResource;
         $this->curl = $curl;
         $this->bmLooger = $bmLogger;
-        $this->collection = $collection;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->transactionFactory = $transactionFactory;
         $this->transactionRepository = $transactionRepository;
@@ -324,6 +345,7 @@ class Payment extends AbstractMethod
         $this->webapi = $webapi;
         $this->getStateForStatus = $getStateForStatus;
         $this->getStoreByServiceId = $getStoreByServiceId;
+        $this->getTransactionLifetime = $getTransactionLifetime;
         $this->generateOrderBasket = $generateOrderBasket;
 
         parent::__construct(
@@ -378,16 +400,17 @@ class Payment extends AbstractMethod
     /**
      * Tablica z parametrami do wysłania metodą GET do bramki
      *
-     * @param  Order  $order
-     * @param  int  $gatewayId
-     * @param  array  $agreementsIds
-     * @param  bool  $automatic
-     * @param  string  $authorizationCode
-     * @param  string  $paymentToken
-     * @param  int  $cardIndex
-     * @param  ?string  $backUrl
+     * @param Order $order
+     * @param int $gatewayId
+     * @param array $agreementsIds
+     * @param bool $automatic
+     * @param string $authorizationCode
+     * @param string $paymentToken
+     * @param int $cardIndex
+     * @param  ?string $backUrl
      *
      * @return string[]
+     * @throws LocalizedException
      */
     public function getFormRedirectFields(
         Order $order,
@@ -415,7 +438,7 @@ class Payment extends AbstractMethod
 
         $customerId = $order->getCustomerId();
         $customerEmail = $order->getCustomerEmail();
-        $validityTime = $this->getTransactionLifeHours();
+        $validityTime = $this->getTransactionLifetime($order);
 
         $locale = $this->_scopeConfig
             ->getValue(
@@ -434,7 +457,7 @@ class Payment extends AbstractMethod
         ];
 
         /* Ustawiona ważność linku */
-        if ($validityTime) {
+        if ($validityTime !== null) {
             $params['LinkValidityTime'] = $validityTime;
             $params['ValidityTime'] = $validityTime;
         }
@@ -491,7 +514,6 @@ class Payment extends AbstractMethod
 
     /**
      * @param array $params
-     *
      * @return array
      */
     public static function sortParams(array $params): array
@@ -510,29 +532,28 @@ class Payment extends AbstractMethod
     /**
      * Transaction lifetime
      *
-     * @return mixed
+     * @param Order $order
+     * @return ?string
+     * @throws LocalizedException
      */
-    private function getTransactionLifeHours()
+    private function getTransactionLifetime(Order $order): ?string
     {
-        $hours = (int) $this->getConfigData('transaction_life_hours');
+        $lifetime = $this->getTransactionLifetime->getForOrder($order);
 
-        if ($hours && $hours >= 1 && $hours <= 720) {
-            date_default_timezone_set('Europe/Warsaw');
-            $time = strtotime("+" . $hours . " hour");
-
-            if ($time) {
-                return date('Y-m-d H:i:s', $time);
-            }
-
-            return date('Y-m-d H:i:s', time() + $hours*3600);
+        if ($lifetime === true) {
+            return null;
         }
 
-        return self::DEFAULT_TRANSACTION_LIFE_HOURS;
+        if ($lifetime === false) {
+            throw new LocalizedException(__('Transaction is expired. Place order again.'));
+        }
+
+        $lifetime->setTimezone(new DateTimeZone('Europe/Warsaw'));
+        return $lifetime->format('Y-m-d H:i:s');
     }
 
     /**
-     * Ustawia odpowiedni status transakcji/płatności zgodnie z uzyskaną informacją
-     * z akcji 'statusAction'
+     * Ustawia odpowiedni status transakcji/płatności zgodnie z uzyskaną informacją z akcji 'statusAction'
      *
      * @param  SimpleXMLElement  $response
      *
@@ -603,9 +624,8 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * @param  SimpleXMLElement  $data
-     * @param  StoreInterface  $store
-     *
+     * @param SimpleXMLElement $data
+     * @param StoreInterface $store
      * @return string
      * @throws AlreadyExistsException
      * @throws DOMException
@@ -646,8 +666,8 @@ class Payment extends AbstractMethod
     }
 
     /**
-     * @param  SimpleXMLElement  $data
-     * @param  StoreInterface  $store
+     * @param SimpleXMLElement $data
+     * @param StoreInterface $store
      *
      * @return string
      * @throws DOMException
@@ -672,9 +692,9 @@ class Payment extends AbstractMethod
     /**
      * Waliduje zgodność otrzymanego XML'a
      *
-     * @param  SimpleXMLElement  $response
-     * @param  StoreInterface  $store
-     * @param  string|null  $currency
+     * @param SimpleXMLElement $response
+     * @param StoreInterface $store
+     * @param string|null $currency
      *
      * @return bool
      */
@@ -1119,17 +1139,6 @@ class Payment extends AbstractMethod
         return $params;
     }
 
-    public function initialize($paymentAction, $stateObject)
-    {
-        $status = $this->configProvider->getStatusWaitingPayment();
-        $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
-
-        $stateObject->setState($status);
-        $stateObject->setStatus($state);
-
-        return $this;
-    }
-
     public function order(InfoInterface $payment, $amount)
     {
         /** @var Order $order */
@@ -1248,7 +1257,7 @@ class Payment extends AbstractMethod
         return simplexml_load_string($response);
     }
 
-    public function setCode($code)
+    public function setCode(string $code): self
     {
         $this->_code = $code;
         return $this;
@@ -1266,7 +1275,7 @@ class Payment extends AbstractMethod
      */
     public function getConfigData($field, $storeId = null)
     {
-        if (false === strpos($this->_code, 'bluepayment_')) {
+        if (false === strpos($this->_code, self::SEPARATED_PREFIX_CODE)) {
             return parent::getConfigData($field);
         }
 
@@ -1275,17 +1284,8 @@ class Payment extends AbstractMethod
         }
 
         if ($field === 'sort_order') {
-            if (false !== strpos($this->_code, 'bluepayment_')) {
-                $separated = $this->configProvider->getPaymentConfig()['bluePaymentSeparated'];
-                if ($separated) {
-                    $gatewayId = (int) str_replace('bluepayment_', '', $this->_code);
-
-                    foreach ($separated as $gateway) {
-                        if ($gateway['gateway_id'] == $gatewayId) {
-                            return $gateway['sort_order'];
-                        }
-                    }
-                }
+            if ($this->getGatewayModel()) {
+                return $this->getGatewayModel()->getSortOrder();
             }
 
             return parent::getConfigData('sort_order');
@@ -1298,38 +1298,99 @@ class Payment extends AbstractMethod
     /**
      * Is active
      *
-     * @param  int|null  $storeId
-     *
+     * @param int|null $storeId
      * @return bool
      * @throws LocalizedException
      * @deprecated 100.2.0
      */
-    public function isActive($storeId = null)
+    public function isActive($storeId = null): bool
     {
         return (bool)(int)$this->getConfigData('active', $storeId);
     }
 
-    public function getTitle()
+    /**
+     * Get payment method title
+     *
+     * @return string
+     * @throws LocalizedException
+     */
+    public function getTitle(): string
     {
-        if (false !== strpos($this->getCode(), 'bluepayment_')) {
+        if (false !== strpos($this->getCode(), self::SEPARATED_PREFIX_CODE)) {
             return $this->title;
         }
 
         return parent::getTitle();
     }
 
-    public function setTitle($title)
+    /**
+     * Set payment method title
+     *
+     * @param string $title
+     * @return void
+     */
+    public function setTitle(string $title): self
     {
         $this->title = $title;
+        return $this;
     }
 
     /**
-     * @param  Order  $order
-     * @param  array  $params
+     * Set is payment method separated.
      *
+     * @param bool $isSeparated
+     * @return void
+     */
+    public function setIsSeparated(bool $isSeparated = true): self
+    {
+        $this->isSeparated = $isSeparated;
+        return $this;
+    }
+
+    /**
+     * Returns whether payment method is separated channel.
+     *
+     * @return bool
+     */
+    public function getIsSeparated(): bool
+    {
+        return $this->isSeparated;
+    }
+
+    /**
+     * Set Gateway (channel) model to payment method.
+     *
+     * @param Gateway $gatewayModel
+     * @return $this
+     */
+    public function setGatewayModel(Gateway $gatewayModel): self
+    {
+        $this->gatewayModel = $gatewayModel;
+        $this->title = $gatewayModel->getName();
+        $this->isSeparated = $gatewayModel->isSeparatedMethod();
+
+        return $this;
+    }
+
+    /**
+     * Returns Gateway (channel) model.
+     *
+     * @return Gateway|null
+     */
+    public function getGatewayModel()
+    {
+        return $this->gatewayModel;
+    }
+
+    /**
+     * Create link to payment for order.
+     *
+     * @param Order $order
+     * @param array $params
+     * @return false|SimpleXMLElement
      * @throws Exception
      */
-    public function createPaymentLink($order, $params)
+    public function createPaymentLink(Order $order, array $params)
     {
         $payment = $order->getPayment();
 
@@ -1349,7 +1410,7 @@ class Payment extends AbstractMethod
             $status = $this->configProvider->getStatusWaitingPayment();
             $state = $this->getStateForStatus->execute($status, Order::STATE_PENDING_PAYMENT);
 
-            if (!in_array($order->getStatus(), $unchangeableStatuses)) {
+            if (!in_array($order->getStatus(), $unchangeableStatuses, false)) {
                 $amount = $order->getGrandTotal();
                 $formattedAmount = number_format(round($amount, 2), 2, '.', '');
 
@@ -1359,7 +1420,7 @@ class Payment extends AbstractMethod
                     .' | URL: '.$redirectUrl;
 
                 $order->setState($state)
-                    ->setStatus($state)
+                    ->setStatus($status)
                     ->addStatusToHistory($status, $orderComment, false)
                     ->save();
             }
