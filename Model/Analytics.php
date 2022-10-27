@@ -141,12 +141,29 @@ class Analytics
      * Get category name for product.
      *
      * @param Product|ProductInterface $product
-     * @return string
+     * @return ?string
      * @throws NoSuchEntityException
      */
-    public function getCategoryName($product): string
+    public function getCategoryName($product): ?string
     {
-        return $product->getCategory()->getName();
+        $category = $product->getCategory();
+
+        if ($category) {
+            $parents = $category->getParentCategories();
+            if ($parents) {
+                $categoryNames = [];
+
+                foreach ($category->getParentCategories() as $parentCategory) {
+                    $categoryNames[] = $parentCategory->getName();
+                }
+
+                return implode('/', $categoryNames);
+            }
+
+            return $category->getName();
+        }
+
+        return null;
     }
 
     /**
