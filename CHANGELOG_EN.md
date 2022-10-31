@@ -3,7 +3,6 @@
 ## Version [IN progress]
 - We've added Installment Hub to payment.
 - We added Autopay support.
-- We've added hub support.
 
 ## Version 2.21.3
 - We added the option "Disable the payment continuation link with the expiration of the transaction".

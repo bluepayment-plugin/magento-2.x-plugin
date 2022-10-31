@@ -74,7 +74,7 @@ define([
                                     self.log('Cart cleared event');
 
                                     // After clear Cart
-                                    self.addToCart();
+                                    self.addToCart(reject);
                                 });
 
                                 $(document).one('ajax:addToCart', () => {
@@ -112,15 +112,10 @@ define([
                 }
 
                 container.append(button);
-
-                // Prevent default action on APC button click - because we're manually executing addToCart function
-                button.querySelector('.apc-btn').addEventListener('click', (event) => {
-                    event.preventDefault();
-                });
             });
         },
 
-        addToCart: function () {
+        addToCart: function (reject) {
             const $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
             $form.trigger('submit');
 
@@ -128,15 +123,16 @@ define([
                 this.formInvalid = !$form.validation('isValid');
 
                 if (! this.formInvalid) {
-                    this.log('Form is valid');
-
                     this.productAddedToCart = true;
+
+                    this.log('Form is valid');
                 } else {
+                    reject('Form is invalid');
+
                     this.log('Form is invalid');
                 }
             } else {
                 this.log('Form validation is not available');
-
                 this.productAddedToCart = true;
             }
         },
@@ -145,8 +141,10 @@ define([
             var cartData = customerData.get('cart')();
             var minimumOrderConfig = this.minimumOrderConfiguration;
 
+            this.log('Minimum order config', minimumOrderConfig);
+
             // Validate minimum order amount
-            if (minimumOrderConfig.active) {
+            if (minimumOrderConfig && minimumOrderConfig.active) {
                 var tax = minimumOrderConfig.includingTax ? cartData.tax_amount : 0;
                 var amountToCompare = cartData.includingDiscount
                     ? cartData.base_subtotal_with_discount

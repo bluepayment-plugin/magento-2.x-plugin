@@ -12,6 +12,7 @@ use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address\CustomerAddressDataProvider;
 use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Quote\Api\CartManagementInterface;
@@ -32,9 +33,6 @@ class QuoteManagement implements QuoteManagementInterface
 
     /** @var TotalsCollector */
     private $totalsCollector;
-
-    /** @var CustomerAddressDataProvider */
-    private $customerAddressData;
 
     /** @var DataObjectProcessor */
     private $dataObjectProcessor;
@@ -67,7 +65,6 @@ class QuoteManagement implements QuoteManagementInterface
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
         TotalsCollector $totalsCollector,
-        CustomerAddressDataProvider $customerAddressData,
         DataObjectProcessor $dataObjectProcessor,
         CartExtensionFactory $cartExtensionFactory,
         AddressRepositoryInterface $addressRepository,
@@ -81,7 +78,6 @@ class QuoteManagement implements QuoteManagementInterface
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
         $this->totalsCollector = $totalsCollector;
-        $this->customerAddressData = $customerAddressData;
         $this->dataObjectProcessor = $dataObjectProcessor;
         $this->cartExtensionFactory = $cartExtensionFactory;
         $this->addressRepository = $addressRepository;
@@ -113,7 +109,18 @@ class QuoteManagement implements QuoteManagementInterface
         $customer = $cart->getCustomerIsGuest() ? null : $cart->getCustomer();
 
         if ($customer) {
-            return $this->customerAddressData->getAddressDataByCustomer($customer);
+            $customerAddressData = ObjectManager::getInstance()
+                ->get(\Magento\Checkout\Api\PaymentProcessingRateLimiterInterface::class);
+
+            if ($customerAddressData) {
+                return $customerAddressData->getAddressDataByCustomer($customer);
+            }
+
+            $configProvider = ObjectManager::getInstance()
+                ->get(\Magento\Checkout\Model\DefaultConfigProvider::class);
+            $config = $configProvider->getConfig();
+
+            return $config['customerData']['addresses'];
         }
 
         return [];
