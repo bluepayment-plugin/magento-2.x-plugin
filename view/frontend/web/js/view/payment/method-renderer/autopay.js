@@ -12,13 +12,6 @@ define([
         },
 
         afterRender: function () {
-            console.log('Init APC component', {
-                isInCatalogProduct: false,
-                selector: "autopay-shortcut",
-                merchantId: this.merchantId,
-                language: this.language
-            });
-
             let autopayComponent = autopay.bind(null, {
                 isInCatalogProduct: false,
                 selector: "autopay-shortcut",
