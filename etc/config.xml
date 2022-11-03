@@ -25,6 +25,7 @@
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <transaction_life_hours />
+                <disable_link_after_expiration>0</disable_link_after_expiration>
                 <autopay_agreement>Wyrażam zgodę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Blue Media S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>

@@ -1,6 +1,5 @@
 <?php
 /** @var $block \BlueMedia\BluePayment\Block\Analytics\Ga */
-/** @var $escaper \Magento\Framework\Escaper */
 
 $accountId = $block->getAccountId();
 $accountIdGa4 = $block->getAccountIdGa4();
@@ -25,7 +24,7 @@ $accountIdGa4 = $block->getAccountIdGa4();
 
 <?php if ($accountIdGa4): ?>
     <script async
-            src="https://www.googletagmanager.com/gtag/js?id=<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>">
+            src="https://www.googletagmanager.com/gtag/js?id=<?= $block->escapeHtmlAttr($accountIdGa4) ?>">
     </script>
 
     <script>
@@ -45,7 +44,7 @@ $accountIdGa4 = $block->getAccountIdGa4();
 
         gtag(
             'config',
-            '<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>'
+            '<?= $block->escapeHtmlAttr($accountIdGa4) ?>'
         );
     </script>
 
@@ -53,7 +52,7 @@ $accountIdGa4 = $block->getAccountIdGa4();
     {
         "*": {
             "BlueMedia_BluePayment/js/analytics/ga4-client-id": {
-                "client_id": "<?= $escaper->escapeHtmlAttr($accountIdGa4) ?>"
+                "client_id": "<?= $block->escapeHtmlAttr($accountIdGa4) ?>"
             },
             "BlueMedia_BluePayment/js/analytics/cart": {}
         }
