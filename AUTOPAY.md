@@ -1,7 +1,7 @@
 # Autopay Checkout for Magneto 2
 
 ## Technical requirements
-- Plugin works with Magento version 2.3.4 - 2.4.4.
+- Plugin works with Magento version 2.3.4 - 2.4.5.
 - It's adding new payment method - with code `autopay`. If you have integrations with CRM, ERP or other software which fetching orders and statuses from Magento - **make sure it will be accepting new payment method code**. 
 
 Plugin is based on default Magento_Luma theme, but it should work on any other theme if you meet the following requirements:

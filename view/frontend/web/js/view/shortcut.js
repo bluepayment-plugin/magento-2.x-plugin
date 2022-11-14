@@ -40,78 +40,81 @@ define([
             }.bind(this), interval);
         },
 
-        initAutopay: function () {
-            var self = this,
-                autopay,
-                button,
+        initAutopay: function (withButton = true) {
+            var button,
                 container = $('.' + this.selector + ' .autopay-button');
 
-            this.whenAvailable('autopay', function() {
-                self.log('Init params', {
-                    merchantId: self.merchantId,
-                    theme: 'dark',
-                    language: self.language
-                });
-
-                autopay = new window.autopay.checkout({
-                    merchantId: self.merchantId,
-                    theme: 'dark',
-                    language: self.language
-                });
-                button = autopay.createButton();
-
-                self.autopay = autopay;
-
-                self.onRemoveFromCartListener();
-
-                autopay.onBeforeCheckout = () => {
-                    self.log('onBeforeCheckout executed');
-
-                    return new Promise((resolve, reject) => {
-                        if (self.isCatalogProduct()) {
-                            if (!self.productAddedToCart) {
-                                $(document).one('autopay:cart-cleared', () => {
-                                    self.log('Cart cleared event');
-
-                                    // After clear Cart
-                                    self.addToCart(reject);
-                                });
-
-                                $(document).one('ajax:addToCart', () => {
-                                    // After add to cart
-                                    self.log('addToCart event');
-
-                                    customerData.reload(['cart'], true);
-
-                                    if (! self.productAddedToCart) {
-                                        reject('Product not added to cart');
-                                    } else {
-                                        $(document).one('customer-data-reloaded', () => {
-                                            self.log('customer-data-reloaded event');
-
-                                            // After customerData reloaded
-                                            self.setAutopayData(resolve, reject);
-                                        });
-                                    }
-                                });
-
-                                // Clear whole cart
-                                self.clearCart(reject);
-                            } else {
-                                self.log('Product already added to cart');
-
-                                // If already added - just set data and resolve promise.
-                                self.setAutopayData(resolve, reject);
-                            }
-                        } else {
-                            self.log('Not catalog product');
-
-                            self.setAutopayData(resolve, reject);
-                        }
+            return new Promise((resolve, reject) => {
+                this.whenAvailable('autopay', () => {
+                    this.log('Init params', {
+                        merchantId: this.merchantId,
+                        theme: 'dark',
+                        language: this.language
                     });
-                }
 
-                container.append(button);
+                    this.autopay = new window.autopay.checkout({
+                        merchantId: this.merchantId,
+                        theme: 'dark',
+                        language: this.language
+                    });
+
+                    this.autopay.onBeforeCheckout = this.onBeforeCheckout.bind(this);
+
+                    if (withButton) {
+                        button = this.autopay.createButton();
+                        container.append(button);
+                    }
+
+                    this.onRemoveFromCartListener();
+                    resolve();
+                });
+            });
+        },
+
+        onBeforeCheckout: function () {
+            this.log('onBeforeCheckout executed');
+
+            return new Promise((resolve, reject) => {
+                if (this.isCatalogProduct()) {
+                    if (!this.productAddedToCart) {
+                        $(document).one('autopay:cart-cleared', () => {
+                            this.log('Cart cleared event');
+
+                            // After clear Cart
+                            this.addToCart(reject);
+                        });
+
+                        $(document).one('ajax:addToCart', () => {
+                            // After add to cart
+                            this.log('addToCart event');
+
+                            customerData.reload(['cart'], true);
+
+                            if (!this.productAddedToCart) {
+                                reject('Product not added to cart');
+                            } else {
+                                $(document).one('customer-data-reloaded', () => {
+                                    this.log('customer-data-reloaded event');
+
+                                    // After customerData reloaded
+                                    this.setAutopayData(resolve, reject);
+                                });
+                            }
+                        });
+
+                        // Clear whole cart
+                        this.clearCart(reject);
+                    } else {
+                        this.log('Product already added to cart');
+
+                        // If already added - just set data and resolve promise.
+                        this.setAutopayData(resolve, reject);
+                    }
+                } else {
+                    this.log('Not catalog product');
+
+                    this.setAutopayData(resolve, reject);
+                }
             });
         },
 
@@ -182,7 +185,7 @@ define([
         clearCart: function (reject) {
             const self = this;
 
-            self.log('Clear cart started');
+            this.log('Clear cart started');
 
             $.ajax({
                 url: url.build('checkout/cart/updatePost'),
@@ -200,12 +203,12 @@ define([
                 }
             })
                 .done((response) => {
-                    self.log('Cart cleared');
+                    this.log('Cart cleared');
 
                     $(document).trigger('autopay:cart-cleared');
                 })
                 .fail((response) => {
-                    self.log('Cart clear failed', response);
+                    this.log('Cart clear failed', response);
 
                     reject('Unable to clear cart...');
                 });
@@ -215,8 +218,8 @@ define([
             const self = this;
 
             $(document).on('ajax:removeFromCart', function (event, data) {
-                self.log('Remove from cart event');
-                self.productAddedToCart = false;
+                this.log('Remove from cart event');
+                this.productAddedToCart = false;
             });
         },
 

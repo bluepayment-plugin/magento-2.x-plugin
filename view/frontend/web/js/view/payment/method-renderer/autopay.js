@@ -10,16 +10,14 @@ define([
             code: 'autopay',
             template: 'BlueMedia_BluePayment/payment/autopay',
         },
+        apcShortcut: null,
 
         afterRender: function () {
-            let autopayComponent = autopay.bind(null, {
-                isInCatalogProduct: false,
-                selector: "autopay-shortcut",
-                merchantId: this.getMerchantId(),
-                language: this.getLanguage()
-            }, $('.autopay-shortcut'));
+            let autopayComponent = autopay.bind(null, this.getApcComponentProps(), $('.autopay-shortcut'));
 
-            setTimeout(autopayComponent);
+            setTimeout(() => {
+                this.apcShortcut = autopayComponent();
+            });
         },
 
         getConfig: function () {
@@ -41,5 +39,36 @@ define([
         isButtonEnabled: function () {
             return this.getCode() === this.isChecked() && this.isPlaceOrderActionAllowed();
         },
+
+        validate: function () {
+            if (!this.apcShortcut) {
+                this.apcShortcut = autopay(this.getApcComponentProps());
+
+                this.apcShortcut.initAutopay(false)
+                    .then(this.manuallyInit.bind(this));
+            } else {
+                this.manuallyInit();
+            }
+        },
+
+        manuallyInit: function () {
+            if (this.apcShortcut && this.apcShortcut.autopay) {
+                /** @var {Promise} response */
+                const response = this.apcShortcut.autopay.onBeforeCheckout();
+
+                response.then((result) => {
+                    this.apcShortcut.autopay.runCheckout();
+                });
+            }
+        },
+
+        getApcComponentProps: function () {
+            return {
+                isInCatalogProduct: false,
+                selector: "autopay-shortcut",
+                merchantId: this.getMerchantId(),
+                language: this.getLanguage()
+            };
+        }
     });
 });

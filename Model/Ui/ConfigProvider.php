@@ -12,9 +12,6 @@ class ConfigProvider implements ConfigProviderInterface
     public const CODE = 'autopay';
     public const LOGO_SRC = 'BlueMedia_BluePayment::images/autopay_logo.png';
 
-    /** @var Config */
-    private $config;
-
     /** @var AutopayConfigProvider */
     private $autopayConfig;
 
@@ -22,16 +19,13 @@ class ConfigProvider implements ConfigProviderInterface
     private $assetRepository;
 
     /**
-     * @param  Config  $config
-     * @param  AutopayConfigProvider  $autopayConfig
-     * @param  AssetRepository  $assetRepository
+     * @param AutopayConfigProvider $autopayConfig
+     * @param AssetRepository $assetRepository
      */
     public function __construct(
-        Config $config,
         AutopayConfigProvider $autopayConfig,
         AssetRepository $assetRepository
     ) {
-        $this->config = $config;
         $this->autopayConfig = $autopayConfig;
         $this->assetRepository = $assetRepository;
     }
@@ -39,12 +33,12 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @inheritDoc
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return [
             'payment' => [
                 self::CODE => [
-                    'isActive' => $this->config->isActive(),
+                    'isActive' => false, // For now - don't show APC in checkout
                     'merchantId' => $this->autopayConfig->getMerchantId(),
                     'language' => $this->autopayConfig->getLanguage(),
                     'logoSrc' => $this->assetRepository->getUrl(self::LOGO_SRC),
