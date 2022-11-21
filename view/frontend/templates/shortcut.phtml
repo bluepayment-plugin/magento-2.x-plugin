@@ -20,12 +20,15 @@ if ($block->isActive() && $block->getMerchantId()):
                 'includingDiscount' => $block->isMinimumOrderIncludingDiscount(),
                 'includingTax' => $block->isMinimumOrderIncludingTax(),
                 'text' => $block->getMinimumOrderText(),
-            ]
+            ],
+            'style' => $block->getButtonStyleConfiguration(),
         ]
     ];
+
+    $margins = $block->getButtonMargins();
 ?>
     <div
-        class="autopay-shortcut autopay-shortcut-<?= $randStr ?>"
+        class="autopay-shortcut autopay-shortcut-<?= $randStr ?> apc-top-<?= $margins['top'] ?> apc-bottom-<?= $margins['bottom'] ?>"
         data-mage-init='<?= /* @noEscape */ \Magento\Framework\Serialize\JsonConverter::convert($config) ?>'>
         <div class="autopay-button"></div>
     </div>

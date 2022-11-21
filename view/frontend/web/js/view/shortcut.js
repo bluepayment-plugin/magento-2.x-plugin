@@ -46,22 +46,25 @@ define([
 
             return new Promise((resolve, reject) => {
                 this.whenAvailable('autopay', () => {
-                    this.log('Init params', {
+                    const initParams = {
                         merchantId: this.merchantId,
-                        theme: 'dark',
                         language: this.language
-                    });
+                    };
 
-                    this.autopay = new window.autopay.checkout({
-                        merchantId: this.merchantId,
-                        theme: 'dark',
-                        language: this.language
-                    });
+                    this.log('Init params', initParams);
 
+                    this.autopay = new window.autopay.checkout(initParams);
                     this.autopay.onBeforeCheckout = this.onBeforeCheckout.bind(this);
-
                     if (withButton) {
-                        button = this.autopay.createButton();
+                        const buttonParams = {
+                            theme: this.style.theme === 'light' ? 'light' : 'dark',
+                            fullWidth: this.style.width === 'full' ? true : false,
+                            rounded: this.style.rounded === 'rounded' ? true : false
+                        }
+
+                        this.log('Button params', buttonParams);
+
+                        button = this.autopay.createButton(buttonParams);
                         container.append(button);
                     }
 

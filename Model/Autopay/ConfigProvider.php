@@ -192,6 +192,71 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get AutoPay button theme - dark or light.
+     *
+     * @return string
+     */
+    public function getButtonTheme(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/theme',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get AutoPay button width - standard (153px) or full (100%).
+     *
+     * @return string
+     */
+    public function getButtonWidth(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/width',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get AutoPay button rounded style - rounded or square.
+     *
+     * @return string
+     */
+    public function getButtonRounded(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/rounded',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get top margin for AutoPay button.
+     *
+     * @return string
+     */
+    public function getButtonMarginTop(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/margin_top',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get bottom margin for AutoPay button (margin-0, margin-10, margin-15, margin-20).
+     *
+     * @return string
+     */
+    public function getButtonMarginBottom(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/margin_bottom',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
      * Map ISO code language to autopay correct language (currently only pl and en).
      *
      * @param  string  $locale

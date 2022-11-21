@@ -148,6 +148,40 @@ class ShortcutButton extends Template implements ShortcutInterface
     }
 
     /**
+     * Get autopay button style.
+     *
+     * @return array{
+     *    'theme': string,
+     *    'width: string,
+     *    'rounded': string,
+     * }
+     */
+    public function getButtonStyleConfiguration(): array
+    {
+        return [
+            'theme' => $this->autopayConfigProvider->getButtonTheme(),
+            'width' => $this->autopayConfigProvider->getButtonWidth(),
+            'rounded' => $this->autopayConfigProvider->getButtonRounded(),
+        ];
+    }
+
+    /**
+     * Get AutoPay Checkout button margins.
+     *
+     * @return array{
+     *    'top': string,
+     *    'bottom: string,
+     * }
+     */
+    public function getButtonMargins(): array
+    {
+        return [
+            'top' => $this->autopayConfigProvider->getButtonMarginTop(),
+            'bottom' => $this->autopayConfigProvider->getButtonMarginBottom(),
+        ];
+    }
+
+    /**
      * Get random ID for block.
      *
      * @return string

@@ -57,6 +57,14 @@
                 <sort_order>1</sort_order>
                 <title>Autopay</title>
                 <order_status>pending_payment</order_status>
+
+                <button>
+                    <theme>dark</theme>
+                    <width>full</width>
+                    <rounded>square</rounded>
+                    <margin_top>0</margin_top>
+                    <margin_bottom>0</margin_bottom>
+                </button>
             </autopay>
         </payment>
     </default>
