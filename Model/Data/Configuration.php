@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model\Data;
 
 use BlueMedia\BluePayment\Api\Data\ConfigurationInterface;
@@ -10,7 +12,7 @@ class Configuration extends DataObject implements ConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function getQuoteLifetime()
+    public function getQuoteLifetime(): int
     {
         return (int) $this->getData(self::QUOTE_LIFETIME);
     }
@@ -18,7 +20,7 @@ class Configuration extends DataObject implements ConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setQuoteLifetime($quoteLifetime)
+    public function setQuoteLifetime(int $quoteLifetime): ConfigurationInterface
     {
         return $this->setData(self::QUOTE_LIFETIME, $quoteLifetime);
     }

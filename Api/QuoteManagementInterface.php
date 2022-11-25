@@ -2,6 +2,8 @@
 
 namespace BlueMedia\BluePayment\Api;
 
+use BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface;
+
 /**
  * Interface for quote management for AutoPay
  * @api
@@ -94,7 +96,7 @@ interface QuoteManagementInterface
      * @param int $cartId
      * @param float $amount
      *
-     * @return string Order ID
+     * @return \BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface
      */
-    public function placeOrder($cartId, $amount);
+    public function placeOrder(int $cartId, float $amount): PlaceOrderResponseInterface;
 }

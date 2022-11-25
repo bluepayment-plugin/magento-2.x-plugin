@@ -4,27 +4,42 @@ namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\ConfigurationInterface;
 use BlueMedia\BluePayment\Api\Data\ConfigurationInterfaceFactory;
+use BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
 use BlueMedia\BluePayment\Api\QuoteManagementInterface;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
+use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseDataFactory;
+use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseFactory;
 use Magento\Customer\Api\AddressRepositoryInterface;
-use Magento\Customer\Model\Address\CustomerAddressDataProvider;
+
 use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartExtensionFactory;
+use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\PaymentInterfaceFactory;
 use Magento\Quote\Model\Quote\TotalsCollector;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 class QuoteManagement implements QuoteManagementInterface
 {
+    public const STATUS_SUCCESS = 'SUCCESS';
+    public const STATUS_INVALID = 'INVALID';
+
+    public const ERROR_WRONG_ORDER_AMOUNT = 'WRONG_ORDER_AMOUNT';
+
+    public $errorMessages = [
+        self::ERROR_WRONG_ORDER_AMOUNT => 'The order amount is different from the shopping cart amount.',
+    ];
+
     /** @var CartRepositoryInterface */
     private $cartRepository;
 
@@ -61,6 +76,12 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
 
+    /** @var PlaceOrderResponseFactory */
+    private $placeOrderResponseFactory;
+
+    /** @var PlaceOrderResponseDataFactory */
+    private $placeOrderResponseDataFactory;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
@@ -73,7 +94,9 @@ class QuoteManagement implements QuoteManagementInterface
         OrderRepositoryInterface $orderRepository,
         ConfigurationInterfaceFactory $configurationFactory,
         ConfigProvider $configProvider,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        PlaceOrderResponseFactory $placeOrderResponseFactory,
+        PlaceOrderResponseDataFactory $placeOrderResponseDataFactory
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -87,6 +110,8 @@ class QuoteManagement implements QuoteManagementInterface
         $this->configurationFactory = $configurationFactory;
         $this->configProvider = $configProvider;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->placeOrderResponseFactory = $placeOrderResponseFactory;
+        $this->placeOrderResponseDataFactory = $placeOrderResponseDataFactory;
     }
 
     public function getConfiguration()
@@ -152,7 +177,7 @@ class QuoteManagement implements QuoteManagementInterface
         $cart = $this->getCart($cartId);
 
         if ($cart->getCustomerIsGuest()) {
-            throw new InputException('Guest cart can not have shipping address setted by id');
+            throw new InputException(__('Guest cart can not have shipping address set by id'));
         }
 
         $shippingAddress = $cart->getShippingAddress();
@@ -160,7 +185,7 @@ class QuoteManagement implements QuoteManagementInterface
         $address = $this->addressRepository->getById($addressId);
 
         if ($address->getCustomerId() !== $cart->getCustomer()->getId()) {
-            throw new InputException('Address is not owned by customer');
+            throw new InputException(__('Address is not owned by customer'));
         }
 
         $shippingAddress->addData($this->extractAddressData($address));
@@ -197,13 +222,13 @@ class QuoteManagement implements QuoteManagementInterface
         $cart = $this->getCart($cartId);
 
         if ($cart->getCustomerIsGuest()) {
-            throw new InputException('Guest cart can not have shipping address setted by id');
+            throw new InputException(__('Guest cart can not have shipping address setted by id'));
         }
 
         $address = $this->addressRepository->getById($addressId);
 
         if ($address->getCustomerId() !== $cart->getCustomer()->getId()) {
-            throw new InputException('Address is not owned by customer');
+            throw new InputException(__('Address is not owned by customer'));
         }
 
         $billingAddres = $cart->getBillingAddress();
@@ -282,14 +307,18 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function placeOrder($cartId, $amount)
+    public function placeOrder(int $cartId, float $amount): PlaceOrderResponseInterface
     {
         // If we try to place order which has been stored already - just return order id
-        if ($orderId = $this->findOrderByCartId($cartId)) {
-            return $orderId;
+        if ($order = $this->findOrderByCartId($cartId)) {
+            return $this->createSuccessResponse($order);
         }
 
-        $quote = $this->cartRepository->get($cartId);
+        $quote = $this->getCart($cartId);
+
+        if (!$this->validateCartAmount($quote, $amount)) {
+            return $this->createErrorResponse(self::ERROR_WRONG_ORDER_AMOUNT);
+        }
 
         $customer = $quote->getCustomer();
         $customerId = $customer ? $customer->getId() : null;
@@ -302,21 +331,47 @@ class QuoteManagement implements QuoteManagementInterface
         $paymentMethod = $this->paymentFactory->create();
         $paymentMethod->setMethod('autopay');
 
-        $orderId = $this->cartManagement->placeOrder($cartId, $paymentMethod);
-        $order = $this->orderRepository->get($orderId);
+        $order = $this->cartManagement->placeOrder($cartId, $paymentMethod);
+        $order = $this->orderRepository->get($order);
 
         $orderComment = '[Autopay] Amount: ' . $amount;
 
         $order->addCommentToStatusHistory($orderComment);
         $this->orderRepository->save($order);
 
-        return $order->getIncrementId();
+        return $this->createSuccessResponse($order);
+    }
+
+    private function createErrorResponse(string $code): PlaceOrderResponseInterface
+    {
+        $message = $this->errorMessages[$code] ?? 'Unknown error';
+
+        $response = $this->placeOrderResponseFactory->create();
+
+        $response->setStatus(self::STATUS_INVALID);
+        $response->setErrorCode($code);
+        $response->setErrorMessage($message);
+
+        return $response;
+    }
+
+    private function createSuccessResponse(OrderInterface $order): PlaceOrderResponseInterface
+    {
+        $response = $this->placeOrderResponseFactory->create();
+        $responseData = $this->placeOrderResponseDataFactory->create();
+
+        $responseData->setRemoteOrderId($order->getIncrementId());
+
+        $response->setStatus(self::STATUS_SUCCESS);
+        $response->setOrderData($responseData);
+
+        return $response;
     }
 
     /**
      * @param $cartId
      *
-     * @return string|false
+     * @return OrderInterface|false
      */
     private function findOrderByCartId($cartId)
     {
@@ -327,14 +382,18 @@ class QuoteManagement implements QuoteManagementInterface
         );
 
         if ($orders->getTotalCount() > 0) {
-            $order = current($orders->getItems());
-            return $order->getIncrementId();
+            return current($orders->getItems());
         }
 
         return false;
     }
 
-    private function getCart($cartId)
+    /**
+     * @param $cartId
+     * @return CartInterface
+     * @throws NoSuchEntityException
+     */
+    private function getCart($cartId): CartInterface
     {
         return $this->cartRepository->get($cartId);
     }
@@ -356,5 +415,17 @@ class QuoteManagement implements QuoteManagementInterface
         unset($addressData[ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY]);
 
         return $addressData;
+    }
+
+    /**
+     * Validate amount of cart
+     *
+     * @param CartInterface $cart
+     * @param float $amount
+     * @return bool
+     */
+    private function validateCartAmount(CartInterface $cart, float $amount): bool
+    {
+        return (float) $cart->getGrandTotal() === $amount;
     }
 }

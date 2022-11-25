@@ -45,12 +45,18 @@
     </virtualType>
     <!-- /Extend Order grid with payment_channel -->
 
-    <preference for="BlueMedia\BluePayment\Api\GatewayRepositoryInterface" type="BlueMedia\BluePayment\Model\GatewayRepository"/>
-    <preference for="BlueMedia\BluePayment\Api\Data\GatewayInterface" type="BlueMedia\BluePayment\Model\Gateway"/>
-    <preference for="BlueMedia\BluePayment\Api\TransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\TransactionRepository"/>
-    <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface" type="BlueMedia\BluePayment\Model\Transaction"/>
-    <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
-    <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface" type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+    <preference for="BlueMedia\BluePayment\Api\QuoteManagementInterface"
+                type="BlueMedia\BluePayment\Model\QuoteManagement"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\ShippingMethodInterface"
+                type="BlueMedia\BluePayment\Model\Data\ShippingMethod"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface"
+                type="BlueMedia\BluePayment\Model\Data\ShippingMethodAdditional"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\ConfigurationInterface"
+                type="BlueMedia\BluePayment\Model\Data\Configuration"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface"
+                type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponse"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseDataInterface"
+                type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
 
     <virtualType name="AutopayFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>

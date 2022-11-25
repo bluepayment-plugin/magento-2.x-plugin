@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Api\Data;
 
 /**
@@ -12,11 +14,11 @@ interface ConfigurationInterface
     /**
      * @return int
      */
-    public function getQuoteLifetime();
+    public function getQuoteLifetime(): int;
 
     /**
      * @param int $quoteLifetime Lifetime of quote in days.
      * @return ConfigurationInterface
      */
-    public function setQuoteLifetime($quoteLifetime);
+    public function setQuoteLifetime(int $quoteLifetime): ConfigurationInterface;
 }
