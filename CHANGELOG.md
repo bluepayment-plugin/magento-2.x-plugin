@@ -3,6 +3,11 @@
 ## Wersja [IN progress]
 - Dodaliśmy hub ratalny.
 
+## Wersja 2.21.3
+- Dodaliśmy opcji "Wyłącz link kontynuacji płatności wraz z wygaśnięciem transakcji".
+- Poprawiliśmy działanie analityki GA4 - gdy jest wyłączona, nie są już pobierane informacje o produktach.
+- Poprawiliśmy pobieranie informacji o kategorii produktu w analityce GA4.
+
 ## Wersja 2.21.2
 - Poprawiliśmy integrację z BluePaymentGraphQl.
 - Poprawiliśmy błąd z blokiem ConsumerFinance.

@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\GetTransactionLifetime;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
@@ -62,6 +63,9 @@ class ContinuePayment extends Action
     /** @var CollectionFactory */
     public $gatewayFactory;
 
+    /** @var GetTransactionLifetime */
+    public $getTransactionLifetime;
+
     /**
      * Create constructor.
      *
@@ -76,6 +80,8 @@ class ContinuePayment extends Action
      * @param JsonFactory $resultJsonFactory
      * @param Collection $collection
      * @param Curl $curl
+     * @param CollectionFactory $gatewayFactory
+     * @param GetTransactionLifetime $getTransactionLifetime
      */
     public function __construct(
         Context $context,
@@ -89,7 +95,8 @@ class ContinuePayment extends Action
         JsonFactory $resultJsonFactory,
         Collection $collection,
         Curl $curl,
-        CollectionFactory $gatewayFactory
+        CollectionFactory $gatewayFactory,
+        GetTransactionLifetime $getTransactionLifetime
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -102,12 +109,13 @@ class ContinuePayment extends Action
         $this->collection        = $collection;
         $this->curl              = $curl;
         $this->gatewayFactory    = $gatewayFactory;
+        $this->getTransactionLifetime = $getTransactionLifetime;
 
         parent::__construct($context);
     }
 
     /**
-     * Rozpoczęcie procesu płatności
+     * Kontynuacja płatności
      *
      * @return ResponseInterface
      */
@@ -149,26 +157,31 @@ class ContinuePayment extends Action
             ]);
 
             if ($hash !== $hashLocal) {
+                $this->messageManager->addErrorMessage(__('Invalid hash for order.'));
                 return $this->_redirect('/');
             }
 
-            $existingUrl = $orderPayment->getAdditionalInformation('bluepayment_redirect_url');
+            $lifetime = $this->getTransactionLifetime->getForOrder($order);
+
+            if ($lifetime === false) {
+                $this->messageManager->addErrorMessage(__('Transaction is expired. Place order again.'));
+                return $this->_redirect('/');
+            }
+
+            $existingUrl = (string) $orderPayment->getAdditionalInformation('bluepayment_redirect_url');
             if ($existingUrl) {
                 // Already generated
                 return $this->_redirect($existingUrl);
             }
 
             $backUrl = $payment->getAdditionalInformation('back_url');
-
             $this->logger->info('CONTINUE: ' . __LINE__, [
                 'orderId' => $orderId,
                 'backUrl' => $backUrl,
             ]);
-
             $params = $payment->getFormRedirectFields($order);
 
             $this->logger->info('CONTINUE: ' . __LINE__, $params);
-
             $returnUrl = $payment->createPaymentLink($order, $params);
 
             return $this->_redirect($returnUrl);
@@ -176,6 +189,7 @@ class ContinuePayment extends Action
             $this->logger->critical($e);
         }
 
+        $this->messageManager->addErrorMessage(__('An error occurred while generating the transaction.'));
         return $this->_redirect('/');
     }
 }

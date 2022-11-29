@@ -1,17 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\GetTransactionLifetime;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Url;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 use Magento\Store\Model\ScopeInterface;
 
 class Info extends \Magento\Payment\Block\Info
 {
+    /** @var Data */
+    public $helper;
+
     /** @var GatewayFactory */
     private $gatewayFactory;
 
@@ -21,23 +34,26 @@ class Info extends \Magento\Payment\Block\Info
     /** @var UrlInterface */
     private $url;
 
-    /** @var Data */
-    public $helper;
+    /** @var GetTransactionLifetime */
+    private $getTransactionLifetime;
 
     protected $_template = 'BlueMedia_BluePayment::payment/info.phtml';
 
     /**
-     * @param  GatewayFactory  $gatewayFactory
-     * @param  Session  $checkoutSession
-     * @param  Url  $url
-     * @param  Template\Context  $context
-     * @param  array  $data
+     * @param GatewayFactory $gatewayFactory
+     * @param Session $checkoutSession
+     * @param Url $url
+     * @param Data $helper
+     * @param GetTransactionLifetime $getTransactionLifetime
+     * @param Context $context
+     * @param array $data
      */
     public function __construct(
         GatewayFactory $gatewayFactory,
         Session $checkoutSession,
         Url $url,
         Data $helper,
+        GetTransactionLifetime $getTransactionLifetime,
         Template\Context $context,
         array $data = []
     ) {
@@ -46,8 +62,15 @@ class Info extends \Magento\Payment\Block\Info
         $this->checkoutSession = $checkoutSession;
         $this->url = $url;
         $this->helper = $helper;
+        $this->getTransactionLifetime = $getTransactionLifetime;
     }
 
+    /**
+     * Get used gateway name from quote.
+     *
+     * @return array|mixed|null
+     * @throws LocalizedException
+     */
     public function getGatewayNameFromQuote()
     {
         $gatewayId = $this->getInfo()->getAdditionalInformation('gateway_id') ?? false;
@@ -70,43 +93,65 @@ class Info extends \Magento\Payment\Block\Info
         return $gateway->getData('gateway_name');
     }
 
+    /**
+     * Get Quote instance from checkout session.
+     *
+     * @return CartInterface|Quote
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getQuote()
     {
         return $this->checkoutSession->getQuote();
     }
 
-    public function getGatewayNameFromOrder()
+    /**
+     * Get used channel (gateway) name.
+     *
+     * @return string|null
+     * @throws LocalizedException
+     */
+    public function getGatewayNameFromOrder(): ?string
     {
-        /** @var \Magento\Sales\Model\Order\Payment $info */
+        /** @var Payment $info */
         $payment = $this->getInfo();
 
-        /** @var \Magento\Sales\Model\Order $order */
-        $order = $payment->getOrder();
-
-        return $order->getPaymentChannel();
-    }
-
-    public function getContinuationLink()
-    {
-        /** @var \Magento\Sales\Model\Order\Payment $info */
-        $payment = $this->getInfo();
-        $state = $payment->getAdditionalInformation('bluepayment_state');
-
-        if ($state != 'SUCCESS') {
-            if ($payment->hasAdditionalInformation('bluepayment_redirect_url')) {
-                return $payment->getAdditionalInformation('bluepayment_redirect_url');
-            }
-
-            return $this->generateLink($payment->getOrder());
-        }
+        return $payment->getOrder()->getPaymentChannel();
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
+     * Get continuation link
      *
+     * @return string|boolean
+     * @throws LocalizedException
+     */
+    public function getContinuationLink()
+    {
+        /** @var Payment $info */
+        $payment = $this->getInfo();
+        $order = $payment->getOrder();
+        $state = $payment->getAdditionalInformation('bluepayment_state');
+
+        $lifetime = $this->getTransactionLifetime->getForOrder($order);
+
+        if ($lifetime === false) {
+            return false;
+        }
+
+        if ($state === 'SUCCESS') {
+            return false;
+        }
+
+        return $this->generateLink($order);
+    }
+
+    /**
+     * Generate link to continuation
+     *
+     * @param Order $order
      * @return string
      */
-    private function generateLink($order)
+    private function generateLink(Order $order): string
     {
         $this->url->setScope($order->getStore());
 
