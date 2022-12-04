@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Block;
 
+use BlueMedia\BluePayment\Api\ShouldShowAutopayInterface;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
 use Exception;
 use Magento\Framework\View\Element\Template;
@@ -18,21 +19,27 @@ class ShortcutButton extends Template implements ShortcutInterface
     /** @var ConfigProvider */
     private $autopayConfigProvider;
 
+    /** @var ShouldShowAutopayInterface */
+    private $shouldShowAutopay;
+
     /**
      * Button constructor.
      *
-     * @param  Context          $context
-     * @param  ConfigProvider   $configProvider
-     * @param  array            $data
+     * @param Context $context
+     * @param ConfigProvider $configProvider
+     * @param ShouldShowAutopayInterface $shouldShowAutopay
+     * @param array $data
      */
     public function __construct(
         Context $context,
         ConfigProvider $configProvider,
+        ShouldShowAutopayInterface $shouldShowAutopay,
         array $data = []
     ) {
         parent::__construct($context, $data);
 
         $this->autopayConfigProvider = $configProvider;
+        $this->shouldShowAutopay = $shouldShowAutopay;
     }
 
     /**
@@ -74,7 +81,7 @@ class ShortcutButton extends Template implements ShortcutInterface
      */
     public function isActive(): bool
     {
-        return $this->autopayConfigProvider->isActive();
+        return $this->shouldShowAutopay->execute();
     }
 
     /**

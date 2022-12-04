@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace BlueMedia\BluePayment\Model\Autopay;
@@ -9,6 +10,10 @@ use Magento\Store\Model\ScopeInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
+    public const STATUS_DISABLED = 0;
+    public const STATUS_ENABLED = 1;
+    public const STATUS_HIDDEN = 2;
+
     /** @var ScopeConfigInterface */
     private $scopeConfig;
 
@@ -39,10 +44,23 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isActive(): bool
     {
-        return $this->scopeConfig->isSetFlag(
+        return (int) $this->scopeConfig->getValue(
             'payment/autopay/active',
             ScopeInterface::SCOPE_STORE
-        );
+        ) === self::STATUS_ENABLED;
+    }
+
+    /**
+     * Check whether APC is hidden
+     *
+     * @return bool
+     */
+    public function isHidden(): bool
+    {
+        return (int) $this->scopeConfig->getValue(
+                'payment/autopay/active',
+                ScopeInterface::SCOPE_STORE
+            ) === self::STATUS_HIDDEN;
     }
 
     /**

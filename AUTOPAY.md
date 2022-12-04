@@ -54,3 +54,21 @@ Only in this configuration, mobile application will give customers possibility t
 In simple words - customization requires to wrap `getShippingMethod` and `setShippingMethod` of `BlueMedia\BluePayment\Model\QuoteManagement` model by using [Plugins (Interceptors)](https://developer.adobe.com/commerce/php/development/components/plugins/).
 1. For `getShippingMethod` you have to map your custom `carrierCode` to `inpostlocker` and `methodCode` to `standard`
 2. For `setShippingMethod` you should make reverse-mapping of aforementioned.
+
+## Hidden mode
+AutoPay Checkout can be used in hidden mode.
+It means that customer will not see any button or link to APC without added GET parameter `?test_autopay` to URL.
+It's working also with Full Page Cache - due to different GET parameters.
+
+This mode is useful when you want to test APC on your production environment, but you don't want to show it to your customers.
+
+### Change request key
+By default, key to enable button in hidden mode is `test_autopay`.
+You can change it by adding to `di.xml`:
+```xml
+<type name="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay">
+    <arguments>
+        <argument name="requestKey" xsi:type="string">test_autopay</argument>
+    </arguments>
+</type>
+```

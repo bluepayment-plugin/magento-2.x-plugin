@@ -141,4 +141,16 @@
                 type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponse"/>
     <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseDataInterface"
                 type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
+
+    <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseDataInterface"
+                type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
+
+    <preference for="BlueMedia\BluePayment\Api\ShouldShowAutopayInterface"
+                type="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay"/>
+
+    <type name="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay">
+        <arguments>
+            <argument name="requestKey" xsi:type="string">test_autopay</argument>
+        </arguments>
+    </type>
 </config>
