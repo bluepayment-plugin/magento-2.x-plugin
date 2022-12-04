@@ -142,9 +142,6 @@
     <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseDataInterface"
                 type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
 
-    <preference for="BlueMedia\BluePayment\Api\Data\PlaceOrderResponseDataInterface"
-                type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
-
     <preference for="BlueMedia\BluePayment\Api\ShouldShowAutopayInterface"
                 type="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay"/>
 
