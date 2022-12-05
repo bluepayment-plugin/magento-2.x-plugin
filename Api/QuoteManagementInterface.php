@@ -5,7 +5,7 @@ namespace BlueMedia\BluePayment\Api;
 use BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface;
 
 /**
- * Interface for quote management for AutoPay
+ * Interface for quote management for Autopay
  * @api
  */
 interface QuoteManagementInterface

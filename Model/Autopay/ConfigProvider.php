@@ -18,7 +18,7 @@ class ConfigProvider implements ConfigProviderInterface
     private $scopeConfig;
 
     /**
-     * AutoPay Checkout ConfigProvider constructor
+     * Autopay Checkout ConfigProvider constructor
      *
      * @param  ScopeConfigInterface  $scopeConfig
      */
@@ -90,7 +90,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get AutoPay Secret Key
+     * Get Autopay Secret Key
      *
      * @return mixed
      */
@@ -103,7 +103,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get AutoPay Merchant ID
+     * Get Autopay Merchant ID
      *
      * @return mixed
      */
@@ -210,7 +210,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get AutoPay button theme - dark or light.
+     * Get Autopay button theme - dark or light.
      *
      * @return string
      */
@@ -223,7 +223,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get AutoPay button width - standard (153px) or full (100%).
+     * Get Autopay button width - standard (153px) or full (100%).
      *
      * @return string
      */
@@ -236,7 +236,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get AutoPay button rounded style - rounded or square.
+     * Get Autopay button rounded style - rounded or square.
      *
      * @return string
      */
@@ -249,7 +249,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get top margin for AutoPay button.
+     * Get top margin for Autopay button.
      *
      * @return string
      */
@@ -262,7 +262,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get bottom margin for AutoPay button (margin-0, margin-10, margin-15, margin-20).
+     * Get bottom margin for Autopay button (margin-0, margin-10, margin-15, margin-20).
      *
      * @return string
      */

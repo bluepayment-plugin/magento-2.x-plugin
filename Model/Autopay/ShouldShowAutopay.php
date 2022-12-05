@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace BlueMedia\BluePayment\Model\Autopay;
 
 use BlueMedia\BluePayment\Api\ShouldShowAutopayInterface;
-use BlueMedia\BluePayment\Model\Autopay;
 use Magento\Framework\App\RequestInterface;
 
 /**
- * Check if AutoPay should be shown in catalog/cart page.
+ * Check if Autopay should be shown in catalog/cart page.
  */
 class ShouldShowAutopay implements ShouldShowAutopayInterface
 {
@@ -42,7 +41,7 @@ class ShouldShowAutopay implements ShouldShowAutopayInterface
     }
 
     /**
-     * Check if AutoPay should be shown in catalog/cart page.
+     * Check if Autopay should be shown in catalog/cart page.
      *
      * @return bool
      */

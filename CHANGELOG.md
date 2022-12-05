@@ -1,7 +1,7 @@
 # Co nowego w BluePayment?
 
 ## Wersja [IN PROGRESS]
-- Dodaliśmy obsługę AutoPay
+- Dodaliśmy obsługę Autopay
 
 ## Wersja 2.21.3
 - Dodaliśmy opcji "Wyłącz link kontynuacji płatności wraz z wygaśnięciem transakcji".

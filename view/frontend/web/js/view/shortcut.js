@@ -227,7 +227,7 @@ define([
         },
 
         log: function (message, object = null) {
-            message = '[AutoPay]' + this.formatConsoleDate(new Date()) + message;
+            message = '[Autopay]' + this.formatConsoleDate(new Date()) + message;
 
             console.log(message, object);
         },

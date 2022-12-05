@@ -263,7 +263,7 @@ class ConfigProvider implements ConfigProviderInterface
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
                 if ($gateway->getGatewayId() != self::ONECLICK_GATEWAY_ID
-                    || $this->customerSession->isLoggedIn() // AutoPay only for logger users
+                    || $this->customerSession->isLoggedIn() // One click payment only for logger users
                 ) {
                     if ($gateway->isSeparatedMethod()) {
                         $resultSeparated[] = $this->prepareGatewayStructure($gateway);

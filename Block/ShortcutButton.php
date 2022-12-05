@@ -85,7 +85,7 @@ class ShortcutButton extends Template implements ShortcutInterface
     }
 
     /**
-     * Get AutoPay Merchant ID
+     * Get Autopay Merchant ID
      *
      * @return mixed
      */
@@ -173,7 +173,7 @@ class ShortcutButton extends Template implements ShortcutInterface
     }
 
     /**
-     * Get AutoPay Checkout button margins.
+     * Get Autopay Checkout button margins.
      *
      * @return array{
      *    'top': string,
