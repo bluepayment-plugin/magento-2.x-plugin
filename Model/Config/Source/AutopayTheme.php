@@ -17,7 +17,9 @@ class AutopayTheme implements OptionSourceInterface
     {
         return [
             ['value' => 'dark', 'label' => __('Dark theme (black)')],
-            ['value' => 'light', 'label' => __('Light theme (orange)')]
+            ['value' => 'light', 'label' => __('Light theme (white)')],
+            ['value' => 'orange', 'label' => __('Orange theme')],
+            ['value' => 'gradient', 'label' => __('Gradient')],
         ];
     }
 }

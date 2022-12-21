@@ -56,8 +56,13 @@ define([
                     this.autopay = new window.autopay.checkout(initParams);
                     this.autopay.onBeforeCheckout = this.onBeforeCheckout.bind(this);
                     if (withButton) {
+                        let theme = this.style.theme;
+                        if (['dark', 'light', 'orange', 'gradient'].indexOf(theme) === -1) {
+                            theme = 'dark';
+                        }
+
                         const buttonParams = {
-                            theme: this.style.theme === 'light' ? 'light' : 'dark',
+                            theme: theme,
                             fullWidth: this.style.width === 'full' ? true : false,
                             rounded: this.style.rounded === 'rounded' ? true : false
                         }
