@@ -63,12 +63,26 @@ and open the template in the editor.
         .payment-method-title {
             display: flex;
             align-items: center;
+            width: 100%;
 
             input:focus,
             select:focus,
             textarea:focus,
             button:focus {
                 outline: none;
+            }
+
+            .method-name {
+                display: inline-block;
+                margin: 0;
+
+                .method-name-title {
+                    white-space: nowrap;
+                }
+
+                .payment-method-description {
+                    font-size: 1.2rem;
+                }
             }
 
             label {
@@ -335,3 +349,4 @@ and open the template in the editor.
 }
 
 @import "_consumer-finance";
+@import "_frame";
