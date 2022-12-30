@@ -1,12 +1,5 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/*
-    Created on : 2016-12-07, 16:07:23
-    Author     : krzysztof
-*/
+@blue: #00B5DD;
+
 & when (@media-common = true) {
     .blik-modal {
         .modal-inner-wrap {
@@ -48,32 +41,28 @@ and open the template in the editor.
             }
         }
 
+        &._active {
+            .payment-method-title {
+                border: 2px solid @blue !important;
+
+                margin: 0 -10px 10px -10px;
+
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        &__separated {
+            &:first-child {
+                border-top: 1px solid #cccccc !important;
+            }
+        }
+
         &__blik {
             .blik-code {
                 width: 200px;
                 margin-left: 15px;
             }
-        }
-
-        &__card {
-            .payment-method-title {
-                .separated-payments-wrapper:not(:first-child) & {
-                    border-top: 1px solid #cccccc !important;
-                }
-            }
-        }
-
-        &__blik {
-            .payment-method-title {
-                .separated-payments-wrapper:not(:first-child) & {
-                    border-top: 1px solid #cccccc !important;
-                }
-            }
-        }
-
-        .payment-method-info {
-            margin-top: -15px;
-            margin-bottom: 15px;
         }
 
         .payment-method-title {
@@ -155,11 +144,11 @@ and open the template in the editor.
                 }
 
                 &._active {
-                    border: 2px solid #00B5DD;
+                    border: 2px solid @blue;
                     z-index: 1;
 
                     &:hover {
-                        border: 2px solid #00B5DD;
+                        border: 2px solid @blue;
                     }
                 }
 
@@ -257,6 +246,22 @@ and open the template in the editor.
             }
         }
 
+        .payment-method-title {
+            .method-name {
+                display: inline-block;
+                margin: 0;
+
+                .payment-method-name {
+                    font-size: 1.6rem;
+                    font-weight: 600;
+                }
+
+                .payment-method-description {
+                    font-size: 1.2rem;
+                }
+            }
+        }
+
         &.multishipping {
             min-height: auto;
 
@@ -283,22 +288,6 @@ and open the template in the editor.
                 min-height: 15px;
                 padding-left: 17px;
                 color: #DF280A;
-            }
-        }
-
-        .payment-method-title {
-            .method-name {
-                display: inline-block;
-                margin: 0;
-
-                .payment-method-name {
-                    font-size: 1.6rem;
-                    font-weight: 600;
-                }
-
-                .payment-method-description {
-                    font-size: 1.2rem;
-                }
             }
         }
     }
