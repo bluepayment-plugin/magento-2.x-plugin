@@ -1,0 +1,51 @@
+@frame-line-color: #006ec7;
+
+.bm-frame {
+    &-start {
+        position: relative;
+        overflow: hidden;
+        padding-top: 22px;
+        padding-bottom: 8px;
+
+        &::before, &::after {
+            height: 2px;
+            background-color: @frame-line-color;
+            content: "";
+            position: absolute;
+            top: 40px;
+        }
+
+        &::before {
+            width: 30px;
+            margin-right: 14px;
+        }
+
+        &::after {
+            width: 100%;
+            right: -110px;
+        }
+
+        img {
+            margin-left: 35px;
+        }
+    }
+
+    &-end {
+        position: relative;
+        height: 2px;
+        width: 100%;
+        background-color: @frame-line-color;
+    }
+
+
+    &__logo {
+        width: 75px;
+    }
+
+    &__safe-brands {
+        width: 220px;
+        top: 48px;
+        right: 0;
+        position: absolute;
+    }
+}

@@ -1,3 +1,15 @@
+<div class="bm-frame-start">
+    <img
+        class="bm-frame__logo"
+        data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/logo.svg') }"
+        width="52"
+    >
+    <img class="bm-frame__safe-brands"
+         data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/safe-brands.png') }"
+         width="220"
+    >
+</div>
+
 <!--ko if: renderSubOptions === false || renderSubOptions.length > 0 -->
     <div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
         <div class="payment-method-title field choice">
@@ -263,3 +275,5 @@
     <!--/ko-->
 </div>
 <!--/ko-->
+
+<div class="bm-frame-end"></div>
