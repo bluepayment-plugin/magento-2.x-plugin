@@ -18,11 +18,21 @@
                    class="radio"
                    data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
             <label data-bind="attr: {'for': getCode()}" class="label">
-                <!-- BM Logo -->
-                <img src=""
-                     data-bind="attr: {alt: $t('Acceptance Mark'), src: logoUrl}"
-                     class="payment-icon"/>
-                <!-- BM Logo -->
+                <!-- ko if: renderSubOptions !== false && renderSubOptions.length > 0 -->
+                    <div class="blue-payment__slideshow">
+                        <span data-bind="foreach: renderSubOptions">
+                            <img data-bind="attr:{src: logo_url,alt: name}" class="blue-payment__slideshow-slide" />
+                        </span>
+                    </div>
+                <!--/ko-->
+
+                <!-- ko if: renderSubOptions === false -->
+                    <!-- BM Logo -->
+                    <img src=""
+                         data-bind="attr: {alt: $t('Acceptance Mark'), src: logoUrl}"
+                         class="payment-icon"/>
+                    <!-- BM Logo -->
+                <!--/ko-->
 
                 <p class="method-name">
                     <span data-bind="text: getTitle()" class="payment-method-name"></span>

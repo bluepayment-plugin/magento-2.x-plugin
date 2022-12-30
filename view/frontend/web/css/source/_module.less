@@ -32,6 +32,22 @@ and open the template in the editor.
         min-height: 130px;
         padding-bottom: 0;
 
+        &__slideshow {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-right: 5px;
+        }
+        &__slideshow-slide {
+            opacity: 0;
+            position: absolute;
+            transition: opacity .17s linear .1s;
+
+            &.active {
+                opacity: 1;
+            }
+        }
+
         &__blik {
             .blik-code {
                 width: 200px;

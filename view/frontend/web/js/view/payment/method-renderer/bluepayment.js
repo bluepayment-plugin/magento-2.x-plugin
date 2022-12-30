@@ -91,6 +91,9 @@ define([
             alior_installments: 1506,
         },
 
+        slides: [],
+        slideIndex: 0,
+
         /**
          * Subscribe to grand totals
          */
@@ -135,17 +138,11 @@ define([
                 window.location.href = redirectUrl;
             };
 
-            PayBmCheckout.transactionDeclined = function (status) {
-                // window.location.href = redirectUrl;
-            };
-
-            PayBmCheckout.transactionError = function (status) {
-                // window.location.href = redirectUrl;
-            };
-
             if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                 this.initGPay();
             }
+
+            this.initSlideshow();
 
             // Refresh selected gateway
             checkoutData.setIndividualGatewayFlag('');
@@ -763,5 +760,48 @@ define([
                 self.handleGPayStatus(response.Status, response);
             });
         },
+
+        initSlideshow: function () {
+            if (document.querySelector('.blue-payment__slideshow')) {
+                this.slideshowStart();
+            } else {
+                var self = this;
+
+                var observer = new MutationObserver(function () {
+                    var available = !!document.querySelector('.blue-payment__slideshow');
+
+                    if (available) {
+                        self.slideshowStart();
+                        observer.disconnect();
+                    }
+                });
+
+                observer.observe(document.querySelector('body'), {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        },
+        slideshowStart: function () {
+            this.slides = document.querySelectorAll('.blue-payment__slideshow-slide');
+
+            if (this.slides.length > 1) {
+                this.slideshowGoTo(this.slideIndex);
+                setInterval(() => {
+                    this.slideIndex++;
+                    if (this.slideIndex === this.slides.length) {
+                        this.slideIndex = 0;
+                    }
+
+                    this.slideshowGoTo(this.slideIndex);
+                }, 3000);
+            }
+        },
+        slideshowGoTo: function (index) {
+            this.slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            this.slides[index].classList.add('active');
+        }
     });
 });
