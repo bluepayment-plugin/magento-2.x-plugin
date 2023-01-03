@@ -9,6 +9,7 @@ use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
 use BlueMedia\BluePayment\Api\QuoteManagementInterface;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
+use BlueMedia\BluePayment\Model\ConfigProvider as BluePaymentConfigProvider;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseDataFactory;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseFactory;
 use Magento\Customer\Api\AddressRepositoryInterface;
@@ -82,6 +83,9 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var PlaceOrderResponseDataFactory */
     private $placeOrderResponseDataFactory;
 
+    /** @var Metadata */
+    private $metadata;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
@@ -96,7 +100,8 @@ class QuoteManagement implements QuoteManagementInterface
         ConfigProvider $configProvider,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         PlaceOrderResponseFactory $placeOrderResponseFactory,
-        PlaceOrderResponseDataFactory $placeOrderResponseDataFactory
+        PlaceOrderResponseDataFactory $placeOrderResponseDataFactory,
+        Metadata $metadata
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -112,13 +117,20 @@ class QuoteManagement implements QuoteManagementInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->placeOrderResponseFactory = $placeOrderResponseFactory;
         $this->placeOrderResponseDataFactory = $placeOrderResponseDataFactory;
+        $this->metadata = $metadata;
     }
 
-    public function getConfiguration()
+    /**
+     * @inerhitDoc
+     */
+    public function getConfiguration(): ConfigurationInterface
     {
-        /** @var ConfigurationInterface $configuration */
         $configuration = $this->configurationFactory->create();
+
         $configuration->setQuoteLifetime($this->configProvider->getQuoteLifetime());
+        $configuration->setPlatformVersion($this->metadata->getMagentoVersion());
+        $configuration->setPlatformEdition($this->metadata->getMagentoEdition());
+        $configuration->setModuleVersion($this->metadata->getModuleVersion());
 
         return $configuration;
     }
