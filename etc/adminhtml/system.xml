@@ -23,7 +23,12 @@
                 <field id="test_mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Test Mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[It allows you to check the module without paying for the order (no order payments are charged in test mode).]]></comment>
                 </field>
+                <field id="test_mode_info" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\TestMode</frontend_model>
+                </field>
+
                 <field id="status_waiting_payment" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Status waiting payment</label>
                     <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
