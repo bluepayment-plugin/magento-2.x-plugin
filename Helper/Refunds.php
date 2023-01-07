@@ -400,17 +400,21 @@ class Refunds extends Data
             $status = $this->getConfigValue('status_full_refund', $order->getStoreId());
         }
 
+        $historyStatusComment = __(
+            'Refunded %1. Transaction ID: "%2"',
+            $this->formatAmount($amount) . ' ' . $transaction->getCurrency(),
+            $loadResult['remoteOutID']
+        );
+
         if ($status) {
             $order->setStatus($status);
 
-            $historyStatusComment = __(
-                'Refunded %1. Transaction ID: "%2"',
-                $this->formatAmount($amount) . ' ' . $transaction->getCurrency(),
-                $loadResult['remoteOutID']
-            );
-
             $order
                 ->addStatusToHistory($status, $historyStatusComment, true)
+                ->save();
+        } else {
+            $order
+                ->addCommentToStatusHistory($historyStatusComment)
                 ->save();
         }
     }
