@@ -86,9 +86,10 @@ define([
             paypo: 705,
             card: 1500,
             one_click: 1503,
+            alior_installments: 1506,
             gpay: 1512,
             apple_pay: 1513,
-            alior_installments: 1506,
+            visa_mobile: 1523,
         },
 
         slides: [],
@@ -295,6 +296,10 @@ define([
                 return $t('Spread the cost over installments');
             }
 
+            if (gatewayId === this.gatewayIds.visa_mobile) {
+                return $t('Visa Mobile');
+            }
+
             return gateway.name;
         },
 
@@ -320,8 +325,12 @@ define([
             }
 
             if (gatewayId === this.gatewayIds.paypo) {
-                return $t('Shop using deferred payment option or a convenient installment plan. %1')
+                return $t('Pick up your purchases, check them out and pay later &mdash; in 30 days or in convenient installments. %1')
                     .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
+            }
+
+            if (gatewayId === this.gatewayIds.visa_mobile) {
+                return $t('Enter the phone number and confirm the payment in the mobile app.');
             }
 
             return gateway.description;
