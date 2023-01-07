@@ -328,7 +328,7 @@ define([
             }
 
             if (gatewayId === this.gatewayIds.paypo) {
-                return $t('Pick up your purchases, check them out and pay later - in 30 days or in convenient installments. %1')
+                return $t('Pick up your purchases, check them out and pay later &mdash; in 30 days or in convenient installments. %1')
                     .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
             }
 
