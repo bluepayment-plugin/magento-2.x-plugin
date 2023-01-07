@@ -195,3 +195,5 @@ You have to select payment card.,"Musisz wybrać kartę płatniczą."
 "Invalid hash for order","Nieprawidłowy hash dla zamówienia"
 "Transaction is expired. Place order again.","Transakcja wygasła. Złóż zamówienie ponownie."
 "An error occurred while generating the transaction.","Wystąpił błąd podczas generowania transakcji.",
+"Visa Mobile","Visa Mobile"
+"Enter the phone number and confirm the payment in the mobile app.","Podaj numer telefonu i potwierdź płatność w aplikacji."

@@ -28,19 +28,22 @@ class ConfigProvider implements ConfigProviderInterface
     public const PAYPO_GATEWAY_ID = 705;
     public const CARD_GATEWAY_ID = 1500;
     public const ONECLICK_GATEWAY_ID = 1503;
+    public const ALIOR_INSTALLMENTS_GATEWAY_ID = 1506;
     public const GPAY_GATEWAY_ID = 1512;
     public const APPLE_PAY_GATEWAY_ID = 1513;
-    public const ALIOR_INSTALLMENTS_GATEWAY_ID = 1506;
+    public const VISA_MOBILE_GATEWAY_ID = 1523;
 
     public const ALWAYS_SEPARATED = [
-        self::CARD_GATEWAY_ID,
-        self::ONECLICK_GATEWAY_ID,
-        self::GPAY_GATEWAY_ID,
-        self::APPLE_PAY_GATEWAY_ID,
+        self::BLIK_GATEWAY_ID,
         self::SMARTNEY_GATEWAY_ID,
-        self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
         self::PAYPO_GATEWAY_ID,
+        self::CARD_GATEWAY_ID,
+        self::ONECLICK_GATEWAY_ID,
+        self::ALIOR_INSTALLMENTS_GATEWAY_ID,
+        self::GPAY_GATEWAY_ID,
+        self::APPLE_PAY_GATEWAY_ID,
+        self::VISA_MOBILE_GATEWAY_ID,
     ];
 
     public const STATIC_GATEWAY_NAME = [
@@ -91,6 +94,7 @@ class ConfigProvider implements ConfigProviderInterface
         1500, // Płatność kartą
         1512, // Google Pay
         1513, // Apple Pay
+        1523, // Visa Mobile
         1511, // Visa Checkout
 
         106, // Tylko na teście
@@ -202,11 +206,11 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Returns whether the continuation link should be disabled after transaction expiration.
      *
-     * @return bool
+     * @return int
      */
-    public function getTransactionLifetime(): bool
+    public function getTransactionLifetime(): int
     {
-        return $this->scopeConfig->isSetFlag(
+        return (int) $this->scopeConfig->getValue(
             'payment/bluepayment/transaction_life_hours',
             ScopeInterface::SCOPE_STORE
         );
