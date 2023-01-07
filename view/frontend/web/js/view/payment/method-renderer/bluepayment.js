@@ -323,7 +323,7 @@ define([
             }
 
             if (gatewayId === this.gatewayIds.paypo) {
-                return $t('Shop using deferred payment option or a convenient installment plan. %1')
+                return $t('Pick up your purchases, check them out and pay later - in 30 days or in convenient installments. %1')
                     .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
             }
 
