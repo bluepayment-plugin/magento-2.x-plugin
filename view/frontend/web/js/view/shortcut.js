@@ -149,20 +149,20 @@ define([
         },
 
         setAutopayData: function (resolve, reject) {
-            var cartData = customerData.get('cart')();
-            var minimumOrderConfig = this.minimumOrderConfiguration;
+            const cartData = customerData.get('cart')();
+            const minimumOrderConfig = this.minimumOrderConfiguration;
 
             this.log('Minimum order config', minimumOrderConfig);
 
             // Validate minimum order amount
             if (minimumOrderConfig && minimumOrderConfig.active) {
-                var tax = minimumOrderConfig.includingTax ? cartData.tax_amount : 0;
-                var amountToCompare = cartData.includingDiscount
+                const tax = minimumOrderConfig.includingTax ? cartData.tax_amount : 0;
+                const amountToCompare = cartData.includingDiscount
                     ? cartData.base_subtotal_with_discount
                     : cartData.base_subtotal;
 
                 if (amountToCompare + tax < minimumOrderConfig.amount) {
-                    var text = (minimumOrderConfig.text)
+                    const text = (minimumOrderConfig.text)
                         ? minimumOrderConfig.text
                         : 'Minimalna wartość zamówienia to ' + minimumOrderConfig.amount;
 
@@ -176,9 +176,9 @@ define([
                 }
             }
 
-            var data = {
+            const data = {
                 id: cartData.cart_id,
-                amount: parseFloat(cartData['grand_total']),
+                amount: this.calculateTotalWithoutShipping(cartData),
                 currency: cartData.currency,
                 label: cartData.cart_id,
                 productList: cartData.items,
@@ -190,9 +190,18 @@ define([
             resolve();
         },
 
-        clearCart: function (reject) {
-            const self = this;
+        calculateTotalWithoutShipping: function (cartData) {
+            let totalWithoutShipping = parseFloat(cartData.grand_total);
+            let shippingInclTax = parseFloat(cartData.shipping_incl_tax);
 
+            if (shippingInclTax && ! isNaN(shippingInclTax)) {
+                totalWithoutShipping -= shippingInclTax;
+            }
+
+            return totalWithoutShipping.toFixed(2);
+        },
+
+        clearCart: function (reject) {
             this.log('Clear cart started');
 
             $.ajax({
@@ -223,8 +232,6 @@ define([
         },
 
         onRemoveFromCartListener: function () {
-            const self = this;
-
             $(document).on('ajax:removeFromCart', function (event, data) {
                 this.log('Remove from cart event');
                 this.productAddedToCart = false;

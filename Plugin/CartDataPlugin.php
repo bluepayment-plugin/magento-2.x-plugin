@@ -36,6 +36,7 @@ class CartDataPlugin
 
         $result['grand_total'] = (float) $quote->getGrandTotal();
         $result['tax_amount'] = $address->getBaseTaxAmount() + $address->getBaseDiscountTaxCompensationAmount();
+        $result['shipping_incl_tax'] = (float) $address->getShippingInclTax();
 
         $result['base_subtotal_with_discount'] = (float) $address->getBaseSubtotalWithDiscount();
         $result['base_subtotal'] = (float) $address->getBaseSubtotal();

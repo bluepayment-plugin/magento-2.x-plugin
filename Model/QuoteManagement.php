@@ -9,10 +9,10 @@ use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
 use BlueMedia\BluePayment\Api\QuoteManagementInterface;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
-use BlueMedia\BluePayment\Model\ConfigProvider as BluePaymentConfigProvider;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseDataFactory;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseFactory;
 use Magento\Customer\Api\AddressRepositoryInterface;
+use BlueMedia\BluePayment\Logger\Logger as Logger;
 
 use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -86,6 +86,9 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var Metadata */
     private $metadata;
 
+    /** @var Logger */
+    private $logger;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
@@ -101,7 +104,8 @@ class QuoteManagement implements QuoteManagementInterface
         SearchCriteriaBuilder $searchCriteriaBuilder,
         PlaceOrderResponseFactory $placeOrderResponseFactory,
         PlaceOrderResponseDataFactory $placeOrderResponseDataFactory,
-        Metadata $metadata
+        Metadata $metadata,
+        Logger $logger
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -118,6 +122,7 @@ class QuoteManagement implements QuoteManagementInterface
         $this->placeOrderResponseFactory = $placeOrderResponseFactory;
         $this->placeOrderResponseDataFactory = $placeOrderResponseDataFactory;
         $this->metadata = $metadata;
+        $this->logger = $logger;
     }
 
     /**
@@ -165,13 +170,25 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function setShippingAddress($cartId, AddressInterface $address)
     {
+        $this->logger->info('setBillingAddress', [
+            'cartId' => $cartId,
+            'email' => $address->getEmail(),
+        ]);
+
         $cart = $this->getCart($cartId);
 
         $shippingAddress = $cart->getShippingAddress();
+        $this->logger->info('[AutoPay] setShippingAddress - ', [
+            'email' => $shippingAddress->getEmail(),
+        ]);
         $shippingAddress->addData($this->extractAddressData($address));
         $shippingAddress->setCollectShippingRates(true);
 
         $cart->setShippingAddress($shippingAddress);
+
+        $this->logger->info('[AutoPay] setShippingAddress - ', [
+            'email' => $shippingAddress->getEmail(),
+        ]);
 
         $this->totalsCollector->collectAddressTotals($cart, $shippingAddress);
 
@@ -214,6 +231,11 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function setBillingAddress($cartId, AddressInterface $address)
     {
+        $this->logger->info('setBillingAddress', [
+            'cartId' => $cartId,
+            'email' => $address->getEmail(),
+        ]);
+
         $cart = $this->getCart($cartId);
 
         $billingAddres = $cart->getBillingAddress();
@@ -295,6 +317,15 @@ class QuoteManagement implements QuoteManagementInterface
         $methodCode,
         ShippingMethodAdditionalInterface $additional = null
     ) {
+        $this->logger->info('[AutoPay] Set shipping method', [
+            'cartId' => $cartId,
+            'carrier' => $carrierCode,
+            'method' => $methodCode,
+            'additional' => [
+                'lockerId' => $additional ? $additional->getLockerId() : null,
+            ]
+        ]);
+
         $cart = $this->getCart($cartId);
 
         $shippingAddress = $cart->getShippingAddress();
@@ -321,6 +352,11 @@ class QuoteManagement implements QuoteManagementInterface
 
     public function placeOrder(int $cartId, float $amount): PlaceOrderResponseInterface
     {
+        $this->logger->info('[AutoPay] Place Order', [
+            'cartId' => $cartId,
+            'amount' => $amount,
+        ]);
+
         // If we try to place order which has been stored already - just return order id
         if ($order = $this->findOrderByCartId($cartId)) {
             return $this->createSuccessResponse($order);
@@ -421,11 +457,17 @@ class QuoteManagement implements QuoteManagementInterface
         $className = \Magento\Customer\Api\Data\AddressInterface::class;
         if ($address instanceof AddressInterface) {
             $className = AddressInterface::class;
+            $this->logger->info('[AutoPay] Address is instance of Quote AddressInterface');
+        } else {
+            $this->logger->info('[AutoPay] Address is instance of customer AddressInterface');
         }
 
         $addressData = $this->dataObjectProcessor->buildOutputDataArray($address, $className);
         unset($addressData[ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY]);
 
+        $this->logger->info('[AutoPay] extractAddressData', [
+            'address' => $addressData,
+        ]);
         return $addressData;
     }
 
@@ -438,6 +480,12 @@ class QuoteManagement implements QuoteManagementInterface
      */
     private function validateCartAmount(CartInterface $cart, float $amount): bool
     {
+        $this->logger->info('Validate cart amount', [
+            'cart_id' => $cart->getId(),
+            'cart_amount' => (float) $cart->getGrandTotal(),
+            'amount' => $amount,
+        ]);
+
         return (float) $cart->getGrandTotal() === $amount;
     }
 }
