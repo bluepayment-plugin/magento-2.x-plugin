@@ -88,7 +88,7 @@
 "Google Pay merchant ID","ID sprzedawcy Google Pay"
 "BM acceptor ID","ID akceptanta BM"
 "Service partner ID","ID serwisu"
-"Shared key","Klucz współdzielony"
+"Configuration key (hash)","Klucz konfiguracyjny (hash)"
 "PLN configuration","Konfiguracja PLN"
 "EUR configuration","Konfiguracja EUR"
 "GBP configuration","Konfiguracja GBP"
