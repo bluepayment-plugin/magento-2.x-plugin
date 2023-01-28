@@ -1,9 +1,8 @@
 <?php
 /**
  * @var \BlueMedia\BluePayment\Block\Info $block
- * @var \Magento\Framework\Escaper $escaper
  */
-$title = $escaper->escapeHtml($block->getMethod()->getTitle());
+$title = $block->escapeHtml($block->getMethod()->getTitle());
 
 $gatewayId = $block->getInfo()->getAdditionalInformation('gateway_id');
 
