@@ -176,7 +176,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="eur" translate="label" type="text" sortOrder="710" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -185,7 +185,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="gbp" translate="label" type="text" sortOrder="720" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -194,7 +194,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="usd" translate="label" type="text" sortOrder="730" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -203,7 +203,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="czk" translate="label" type="text" sortOrder="740" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -212,7 +212,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="ron" translate="label" type="text" sortOrder="750" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -221,7 +221,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="huf" translate="label" type="text" sortOrder="760" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -230,7 +230,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="bgn" translate="label" type="text" sortOrder="770" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -239,7 +239,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="uah" translate="label" type="text" sortOrder="780" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -248,7 +248,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
                 <group id="sek" translate="label" type="text" sortOrder="790" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -257,7 +257,7 @@
                         <label>Service partner ID</label>
                     </field>
                     <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Shared key</label>
+                        <label>Configuration key (hash)</label>
                     </field>
                 </group>
             </group>
