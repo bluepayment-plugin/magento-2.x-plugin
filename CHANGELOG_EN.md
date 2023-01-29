@@ -1,9 +1,18 @@
 # What's new in BluePayment?
 
+## Version 2.21.4
+- We have added a new payment method **Visa Mobile**.
+- We have added information about the test environment in the administration panel.
+- We have updated the description of **PayPo** method.
+- We have fixed a bug with incorrect use of `array_contains` method instead of `in_array` - [GitHub #8](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/8).
+- We have fixed a bug with missing return comment for order details in case of **--Do not change status--** option.
+- We have standardized the text **Configuration key (hash)** (formerly _Shared key_) in the module configuration.
+- We have added information about the current version of the platform and modules when starting a transaction.
+
 ## Version 2.21.3
-- We added the option "Disable the payment continuation link with the expiration of the transaction".
-- We improved the performance of GA4 analytics - when it is disabled, product information is no longer retrieved.
-- We improved the retrieval of product category information in GA4 analytics.
+- We have added the option "Disable the payment continuation link with the expiration of the transaction".
+- We have improved the performance of GA4 analytics - when it is disabled, product information is no longer retrieved.
+- We have improved the retrieval of product category information in GA4 analytics.
 
 ## Version 2.21.2
 - We have fixed integration with BluePaymentGraphQl.
