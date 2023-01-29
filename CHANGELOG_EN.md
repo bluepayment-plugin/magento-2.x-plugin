@@ -10,6 +10,7 @@
 - We have fixed a bug with incorrect use of `array_contains` method instead of `in_array` - [GitHub #8](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/8).
 - We have fixed a bug with missing return comment for order details in case of **--Do not change status--** option.
 - We have standardized the text **Configuration key (hash)** (formerly _Shared key_) in the module configuration.
+- We have added information about the current version of the platform and modules when starting a transaction.
 
 ## Version 2.21.3
 - We have added the option "Disable the payment continuation link with the expiration of the transaction".

@@ -53,11 +53,11 @@ use SimpleXMLElement;
  */
 class Payment extends AbstractMethod
 {
+    public const PLATFORM_NAME = 'Magento';
+
     public const METHOD_CODE = 'bluepayment';
     public const METHOD_CODE_AUTOPAY = 'autopay';
     public const IFRAME_SCREEN_TYPE = 'IFRAME';
-    public const DEFAULT_TRANSACTION_LIFE_HOURS = false;
-
     public const SEPARATED_PREFIX_CODE = 'bluepayment_';
 
     /**
@@ -99,6 +99,9 @@ class Payment extends AbstractMethod
         'AuthorizationCode',
         'ScreenType',
         'PaymentToken',
+        'PlatformName',
+        'PlatformVersion',
+        'PlatformPluginVersion',
     ];
 
     /**
@@ -255,6 +258,9 @@ class Payment extends AbstractMethod
     /** @var GetTransactionLifetime */
     private $getTransactionLifetime;
 
+    /** @var Metadata */
+    private $metadata;
+
     /**
      * Payment constructor.
      *
@@ -285,6 +291,7 @@ class Payment extends AbstractMethod
      * @param GetStateForStatus $getStateForStatus
      * @param GetStoreByServiceId $getStoreByServiceId
      * @param GetTransactionLifetime $getTransactionLifetime
+     * @param Metadata $metadata
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
@@ -317,6 +324,7 @@ class Payment extends AbstractMethod
         GetStateForStatus $getStateForStatus,
         GetStoreByServiceId $getStoreByServiceId,
         GetTransactionLifetime $getTransactionLifetime,
+        Metadata $metadata,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -341,6 +349,7 @@ class Payment extends AbstractMethod
         $this->getStateForStatus = $getStateForStatus;
         $this->getStoreByServiceId = $getStoreByServiceId;
         $this->getTransactionLifetime = $getTransactionLifetime;
+        $this->metadata = $metadata;
 
         parent::__construct(
             $context,
@@ -401,7 +410,7 @@ class Payment extends AbstractMethod
      * @param string $authorizationCode
      * @param string $paymentToken
      * @param int $cardIndex
-     * @param  ?string $backUrl
+     * @param ?string $backUrl
      *
      * @return string[]
      * @throws LocalizedException
@@ -448,6 +457,9 @@ class Payment extends AbstractMethod
             'Currency' => $currency,
             'CustomerEmail' => $customerEmail,
             'Language' => $language,
+            'PlatformName' => self::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
+            'PlatformVersion' => $this->metadata->getMagentoVersion(),
+            'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
 
         /* Ustawiona ważność linku */

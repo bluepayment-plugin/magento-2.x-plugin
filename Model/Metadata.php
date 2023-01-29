@@ -26,7 +26,7 @@ class Metadata
      */
     public function getMagentoVersion(): string
     {
-        return $this->productMetadata->getVersion();
+        return $this->productMetadata->getVersion() ?? 'n/a';
     }
 
     /**
@@ -36,7 +36,7 @@ class Metadata
      */
     public function getMagentoEdition(): string
     {
-        return $this->productMetadata->getEdition();
+        return $this->productMetadata->getEdition() ?? 'n/a';
     }
 
     /**
