@@ -13,17 +13,28 @@ PACKAGE_VERSION=$(cat composer.json \
   | sed 's/[",]//g' \
   | tr -d '[[:space:]]')
 
-echo "Creating package..."
-echo "Version: ${bold}$PACKAGE_VERSION ${normal}"
+REGEX="const VERSION = \'[0-9.]*\'"
+METADATA_VERSION=$( cat Model/Metadata.php \
+  | grep "${REGEX}" \
+  | grep -Eo '[0-9\.]+' )
 
-rm -rf bm-bluepayment-*.zip
+if [ $METADATA_VERSION == $PACKAGE_VERSION ]; then
+    echo "${bold}Package version: ${green}${METADATA_VERSION}${normal}"
 
-zip -r "bm-bluepayment-$PACKAGE_VERSION.zip" ./ \
-  -x *.idea* \
-  -x *.git* \
-  -x *.DS_Store* \
-  -x *create_package.sh* \
-  -x *.doc*
+    echo "Creating package..."
+    echo "Version: ${bold}$PACKAGE_VERSION ${normal}"
 
-echo "======================================================================================================"
-echo "${green}Package ${bold}bm-bluepayment-$PACKAGE_VERSION.zip${normal}${green} created"
+    rm -rf bm-bluepayment-*.zip
+
+    zip -r "bm-bluepayment-$PACKAGE_VERSION.zip" ./ \
+      -x *.idea* \
+      -x *.git* \
+      -x *.DS_Store* \
+      -x *create_package.sh* \
+      -x *.doc*
+
+    echo "======================================================================================================"
+    echo "${green}Package ${bold}bm-bluepayment-$PACKAGE_VERSION.zip${normal}${green} created"
+else
+    echo "${red}Metadata version ${bold}$METADATA_VERSION${normal}${red} is not equal to package version ${bold}$PACKAGE_VERSION${normal}"
+fi
