@@ -230,16 +230,20 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getConfig(): array
     {
         return [
-            'payment' => $this->getPaymentConfig(),
+            'payment' => [
+                Payment::METHOD_CODE => $this->getPaymentConfig(),
+            ],
         ];
     }
 
     /**
+     * Return payment config for Blue Payment.
+     *
      * @return array
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -248,9 +252,11 @@ class ConfigProvider implements ConfigProviderInterface
     {
         if (! $this->isGatewaySelectionEnabled()) {
             return [
-                'bluePaymentOptions' => false,
-                'bluePaymentSeparated' => false,
-                'bluePaymentLogo' => $this->block->getLogoSrc(),
+                'test_mode' => $this->isTestMode(),
+                'logo' => $this->block->getLogoSrc(),
+                'iframe_enabled' => $this->iframePayment(),
+                'options' => false,
+                'separated' => false,
             ];
         }
 
@@ -281,19 +287,20 @@ class ConfigProvider implements ConfigProviderInterface
             $this->sortGateways($resultSeparated);
 
             $this->activeGateways[$currency] = [
-                'bluePaymentOptions' => $result,
-                'bluePaymentSeparated' => $resultSeparated,
-                'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentTestMode' => $this->isTestMode(),
-                'bluePaymentCards' => $this->prepareCards(),
-                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue(
+                'test_mode' => $this->isTestMode(),
+                'logo' => $this->block->getLogoSrc(),
+                'iframe_enabled' => $this->iframePayment(),
+                'options' => $result,
+                'separated' => $resultSeparated,
+                'cards' => $this->prepareCards(),
+                'autopay_agreement' => $this->scopeConfig->getValue(
                     'payment/bluepayment/autopay_agreement',
                     ScopeInterface::SCOPE_STORE
                 ),
-                'bluePaymentCollapsible' => $this->scopeConfig->getValue(
+                'collapsible' => $this->scopeConfig->getValue(
                     'payment/bluepayment/collapsible',
                     ScopeInterface::SCOPE_STORE
-                )
+                ),
             ];
         }
 
@@ -498,6 +505,11 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
+    /**
+     * Checks whether card iframe payment is enabled
+     *
+     * @return bool
+     */
     protected function iframePayment(): bool
     {
         return (bool) $this->scopeConfig->getValue(

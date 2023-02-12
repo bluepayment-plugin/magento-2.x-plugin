@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace BlueMedia\BluePayment\Plugin;
@@ -61,7 +62,7 @@ class ExtendPaymentMethod
 
             if (isset($result['bluepayment'])) {
                 // Remove if any gateway is not available
-                $options = $config['bluePaymentOptions'];
+                $options = $config['options'];
                 if ($options !== false && count($options) === 0) {
                     unset($result['bluepayment']);
                 }

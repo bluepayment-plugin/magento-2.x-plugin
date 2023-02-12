@@ -1,16 +1,4 @@
-<div class="bm-frame-start">
-    <img
-        class="bm-frame__logo"
-        data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/logo.svg') }"
-        width="52"
-    >
-    <img class="bm-frame__safe-brands"
-         data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/safe-brands.png') }"
-         width="220"
-    >
-</div>
-
-<!--ko if: renderSubOptions === false || renderSubOptions.length > 0 -->
+<!--ko if: gateways === false || gateways.length > 0 -->
     <div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
         <div class="payment-method-title field choice">
             <input type="radio"
@@ -18,15 +6,15 @@
                    class="radio"
                    data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
             <label data-bind="attr: {'for': getCode()}" class="label">
-                <!-- ko if: renderSubOptions !== false && renderSubOptions.length > 0 -->
+                <!-- ko if: gateways !== false && gateways.length > 0 -->
                     <div class="blue-payment__slideshow">
-                        <span data-bind="foreach: renderSubOptions">
+                        <span data-bind="foreach: gateways">
                             <img data-bind="attr:{src: logo_url,alt: name}" class="blue-payment__slideshow-slide" />
                         </span>
                     </div>
                 <!--/ko-->
 
-                <!-- ko if: renderSubOptions === false -->
+                <!-- ko if: gateways === false -->
                     <!-- BM Logo -->
                     <img src=""
                          data-bind="attr: {alt: $t('Acceptance Mark'), src: logoUrl}"
@@ -47,11 +35,11 @@
             <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
 
-            <!-- ko if: renderSubOptions != false && renderSubOptions.length > 0 -->
+            <!-- ko if: gateways != false && gateways.length > 0 -->
             <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
                 <div class="payment-method-note">
                     <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
-                        <ul data-bind="foreach: renderSubOptions, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
+                        <ul data-bind="foreach: gateways, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
                             <li data-bind="click: $parent.selectPaymentOption, attr:{class: 'payment-option opt_'+ gateway_id + ($parent.activeMethod() == gateway_id ? ' _active' : '')}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
                                 <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                     <img data-bind="attr:{src: logo_url,alt: name}"
@@ -82,11 +70,11 @@
             </fieldset>
             <!--/ko-->
 
-            <!-- ko if: (renderSubOptions != false && renderSubOptions.length == 0)-->
+            <!-- ko if: (gateways != false && gateways.length == 0)-->
                 <span data-bind="i18n: 'No online payment is available at this time. Feel free to contact us about that.'"></span>
             <!--/ko-->
 
-            <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
+            <!-- ko if: (gateways != false && gateways.length > 0) -->
                 <div class="payment-method-empty-gateway mage-error" generated="yes" data-bind="{visible: validationFailed}">
                     <p data-bind="i18n: 'Choose the way you want to pay.'"></p>
                 </div>
@@ -129,158 +117,3 @@
         <!--/ko-->
     </div>
 <!--/ko-->
-
-<div id="gpay_button"></div>
-
-<!-- ko if: renderSeparatedOptions.length > 0-->
-<div class="separated-payments-wrapper" data-bind="foreach: renderSeparatedOptions">
-    <!-- ko if: (!$data.is_apple_pay || $parent.canUseApplePay()) -->
-        <div
-             data-bind="
-               css:{
-                 'payment-method blue-payment blue-payment__separated': true,
-                 '_active': $parent.isSeparatedChecked($data),
-                 'blue-payment__blik': $data.is_blik,
-               }
-            ">
-            <div class="payment-method-title field choice">
-                <input type="radio"
-                       name="payment_method_bluepayment_gateway"
-                       class="radio"
-                       data-bind="
-                         attr:{
-                           id:  $parent.getCode() + $data.gateway_id,
-                           value: $data.gateway_id,
-                           class: 'radio ' + ($data.is_blik ? 'payment_method_bluepayment_blik' : '')
-                         },
-                         checked: $parent.isSeparatedChecked($data),
-                         click: $parent.selectPaymentMethodCard.bind($parent),
-                         visible: $parent.isRadioButtonVisible()
-                       "/>
-
-                <label data-bind="attr:{for:  $parent.getCode() + $data.gateway_id }" class="label">
-                    <img src=""
-                         data-bind="attr: {src: logo_url,alt: name}"
-                         class="payment-icon"/>
-
-                    <p class="method-name">
-                        <span data-bind="text: $parent.getGatewayTitle($data)" class="payment-method-name"></span>
-                        <!-- ko if: $parent.getGatewayDescription($data) -->
-                        <br />
-                        <span data-bind="html: $parent.getGatewayDescription($data)" class="payment-method-description"></span>
-                        <!-- /ko -->
-
-                        <!-- ko if: ($parent.getGatewayHelp($data) && $parent.isSeparatedChecked($data)) -->
-                        <span data-bind="html: $parent.getGatewayHelp($data)" class="payment-method-help-text"></span>
-                        <!-- /ko -->
-                    </p>
-                </label>
-
-            <!-- ko if: ($data.is_blik && $parent.isSeparatedChecked($data)) -->
-                <input type="tel"
-                       name="payment_method_bluepayment_code"
-                       class="blik-code"
-                       min="000000"
-                       max="999999"
-                       inputmode="numeric"
-                       pattern="[0-9]*"
-                       data-validate="{required:true, 'pattern':'000000'}"
-                       placeholder="Wprowadź kod BLIK"
-                       afterRender="$parent.blikCodeAfterRender" />
-
-                    <div style="clear: both;"></div>
-                <!--/ko-->
-            </div>
-            <div class="payment-method-content" data-bind="visible: $parent.isSeparatedChecked($data)">
-                <!-- ko foreach: $parent.getRegion('messages') -->
-                <!-- ko template: getTemplate() --><!-- /ko -->
-                <!--/ko-->
-
-                <!-- ko if: $data.is_apple_pay -->
-                <fieldset class="fieldset">
-                    <div class="payment-method-note">
-                        <div>
-                            Jeśli komputer nie jest fabrycznie wyposażony w czytnik TouchID,
-                            autoryzację płatności zrobisz za pomocą iPhone'a lub Apple Watch,
-                            o ile są zalogowane na to samo konto AppleID jak komputer.<br><br>
-
-                            Więcej informacji o płatności
-                            <a href="https://support.apple.com/pl-pl/HT201239#safari">
-                                Apple Pay w przeglądarce.
-                            </a>
-                        </div>
-                    </div>
-                </fieldset>
-                <!--/ko-->
-
-                <!-- ko if: $data.is_autopay -->
-                <fieldset class="fieldset">
-                    <div class="payment-method-note">
-                        <div>
-                            <ul data-bind="foreach: $parent.bluePaymentCards, attr: {class: $parent.getCode() + '-options-list clearfix'}">
-                                <li data-bind="attr:{class: 'card-option'}">
-                                    <input required
-                                           data-bind="
-                                                attr:{id: 'bluepayment_card_' + index, value: index },
-                                                click: $parents[1].selectAutopayCardIndex.bind($parents[1])
-                                           "
-                                           name="payment_method_bluepayment_card_index"
-                                           class="radio"
-                                           type="radio" />
-
-                                    <label data-bind="attr:{for: 'bluepayment_card_' + index }">
-                                        <img data-bind="attr:{src: logo}" class="payment-logo"/>
-
-                                        <span class="details">
-                                            <span class="title" data-bind="text: number"></span>
-                                        </span>
-                                    </label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <div class="autopay-agreement field choice" style="margin-bottom: 15px; display: none;">
-                    <input type="checkbox" name="payment_method_bluepayment_autopay_agreement" value="1" id="autopay-agreement" required>
-                    <label for="autopay-agreement">
-                        <span data-bind="html: $parent.bluePaymentAutopayAgreement"></span>
-                    </label>
-                </div>
-                <!--/ko-->
-
-                <div class="payment-method-billing-address">
-                    <!-- ko foreach: $parents[1].getRegion($parent.getBillingAddressFormName()) -->
-                    <!-- ko template: getTemplate() --><!-- /ko -->
-                    <!--/ko-->
-                </div>
-                <div class="checkout-agreements-block">
-                    <!-- ko foreach: $parents[1].getRegion('before-place-order') -->
-                    <!-- ko template: getTemplate() --><!-- /ko -->
-                    <!--/ko-->
-                </div>
-                <div class="bluepayment-agreements-block">
-                    <!-- ko foreach: $parents[1].getRegion('bluepayment-agreements') -->
-                    <!-- ko template: getTemplate() --><!-- /ko -->
-                    <!--/ko-->
-                </div>
-                <div class="actions-toolbar">
-                    <div class="primary">
-                        <button class="action primary checkout"
-                                type="submit"
-                                data-bind="
-                                click: $parent.placeOrder.bind($parent),
-                                attr:{
-                                'data-payment-method-name': $parent.index + '_'+ $data.bank
-                                }">
-                            <span data-bind="i18n: 'Place Order'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <!--/ko-->
-</div>
-<!--/ko-->
-
-<div class="bm-frame-end"></div>

@@ -34,26 +34,26 @@ define([
 ) {
     'use strict';
 
-    var redirectUrl;
-    var widget;
+    let redirectUrl;
+    let widget;
 
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment',
-            logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+            logoUrl: window.checkoutConfig.payment.bluepayment.logo || 'https://bm.pl/img/www/logos/bmLogo.png',
             grandTotalAmount: 0
         },
 
         ordered: false,
         redirectAfterPlaceOrder: false,
-        renderSubOptions: window.checkoutConfig.payment.bluePaymentOptions,
-        renderSeparatedOptions: window.checkoutConfig.payment.bluePaymentSeparated,
-        bluePaymentTestMode: window.checkoutConfig.payment.bluePaymentTestMode,
-        bluePaymentCards: window.checkoutConfig.payment.bluePaymentCards,
-        bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluePaymentAutopayAgreement,
+        gateways: window.checkoutConfig.payment.bluepayment.options,
+        renderSeparatedOptions: window.checkoutConfig.payment.bluepayment.separated,
+        bluePaymentTestMode: window.checkoutConfig.payment.bluepayment.test_mode,
+        bluePaymentCards: window.checkoutConfig.payment.bluepayment.cards,
+        bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluepayment.autopay_agreement,
         bluePaymentCollapsible:
-            window.checkoutConfig.payment.bluePaymentCollapsible === '1'
-            && window.checkoutConfig.payment.bluePaymentOptions.length > 8,
+            window.checkoutConfig.payment.bluepayment.collapsible === '1'
+            && window.checkoutConfig.payment.bluepayment.options.length > 8,
         selectedAutopayGatewayIndex: null,
         validationFailed: ko.observable(false),
         activeMethod: ko.computed(function () {
@@ -128,7 +128,7 @@ define([
             widget = this;
             this._super();
 
-            var blueMediaPayment = checkoutData.getBlueMediaPaymentMethod();
+            const blueMediaPayment = checkoutData.getBlueMediaPaymentMethod();
             if (blueMediaPayment && quote.paymentMethod()) {
                 if (quote.paymentMethod().method === 'bluepayment') {
                     selectedGateway(blueMediaPayment);
@@ -202,7 +202,7 @@ define([
             checkoutData.setBlueMediaPaymentMethod(value);
         },
         isChecked: ko.computed(function () {
-            var paymentMethod = quote.paymentMethod();
+            const paymentMethod = quote.paymentMethod();
 
             if (paymentMethod) {
                 return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
@@ -211,13 +211,13 @@ define([
         }),
         isRadioButtonVisible: ko.computed(function () {
             // If it has separated methods - always show radio
-            if (window.checkoutConfig.payment.bluePaymentSeparated.length > 0) {
+            if (this.renderSeparatedOptions.length > 0) {
                 return true;
             }
 
             return paymentService.getAvailablePaymentMethods().length !== 1;
         }),
-        canUseApplePay: function() {
+        canUseApplePay: function () {
             try {
                 return window.ApplePaySession && ApplePaySession.canMakePayments();
             } catch (e) {
@@ -266,7 +266,7 @@ define([
         },
 
         getTitle: function () {
-            if (this.renderSubOptions === false) {
+            if (this.gateways === false) {
                 return $t('Quick payment');
             }
 
@@ -274,7 +274,7 @@ define([
         },
 
         getDescription: function () {
-            if (this.renderSubOptions === false) {
+            if (this.gateways === false) {
                 return $t('Internet transfer, BLIK, payment card, Google Pay, Apple Pay');
             }
 
@@ -400,7 +400,7 @@ define([
             }
 
             // Selected payment method validation
-            if (this.renderSubOptions !== false && !this.activeMethod()) {
+            if (this.gateways !== false && !this.activeMethod()) {
                 this.validationFailed(true);
                 $('.payment-method-empty-gateway')[0].scrollIntoView({block: "center"});
                 return false;
