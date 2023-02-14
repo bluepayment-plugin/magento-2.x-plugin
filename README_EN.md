@@ -78,7 +78,7 @@ and the module will be activated.
    3. Set the **Test Mode**
 3. Fill in the details of supported currencies (you will receive them from Blue Media)
    1. **Service partner ID**
-   2. **Configuration key** - you will receive it from BM, you can also read it in the PayBM panel [Acceptance Environment](https://oplacasie-accept.bm.pl/admin), [Production Environment](https://oplacasie.bm.pl/admin) in the service details as **Klucz konfiguracyjny (hash)**
+   2. **Configuration key (hash)** - you will receive it from BM, you can also read it in the PayBM panel [Acceptance Environment](https://oplacasie-accept.bm.pl/admin), [Production Environment](https://oplacasie.bm.pl/admin) in the service details as **Klucz konfiguracyjny (hash)**
       ![configuration3.png](docs/configuration3.png "Screenshot")
 4. [Refresh cache](#refresh-cache)
 
