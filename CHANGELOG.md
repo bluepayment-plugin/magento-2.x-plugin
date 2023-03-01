@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.21.5
+- Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
+
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
 - Dodaliśmy informację o środowisku testowym w panelu administracyjnym.

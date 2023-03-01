@@ -631,21 +631,19 @@ define([
                         data: {'token': token},
                         type: "POST",
                         dataType: "json",
-                        }).done(function (response) {
-                            console.log(response);
-
-                            if (response.params) {
-                                if (response.params.redirectUrl) {
-                                    window.location.href = response.params.redirectUrl;
+                    }).done(function (response) {
+                        if (response.params) {
+                            if (response.params.redirectUrl) {
+                                window.location.href = response.params.redirectUrl;
+                            } else {
+                                if (response.params.paymentStatus) {
+                                    self.handleGPayStatus(response.params.paymentStatus, response.params);
                                 } else {
-                                    if (response.params.paymentStatus) {
-                                        self.handleGPayStatus(response.params.paymentStatus, response.params);
-                                    } else {
-                                        console.error('Payment has no paymentStatus.');
-                                    }
+                                    self.handleGPayStatus(undefined, response.params);
                                 }
                             }
-                        });
+                        }
+                    });
                 });
             })
                 .catch(function (errorMessage) {
