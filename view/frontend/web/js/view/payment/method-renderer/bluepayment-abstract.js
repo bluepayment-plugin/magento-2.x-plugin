@@ -41,6 +41,7 @@ define([
             return {
                 'method': this.item.method,
                 'additional_data': {
+                    'separated': true,
                     'agreements_ids': agreements.getCheckedAgreementsIds()
                 }
             };
@@ -56,60 +57,6 @@ define([
                     selectedGateway(blueMediaPayment);
                 }
             }
-
-            // Refresh selected gateway
-            checkoutData.setIndividualGatewayFlag('');
-            this.setBlueMediaGatewayMethod({});
-        },
-        selectPaymentOption: function (value) {
-            widget.setBlueMediaGatewayMethod(value);
-            return true;
-        },
-        selectPaymentMethod: function () {
-            this.item.individual_gateway = null;
-            checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
-            selectPaymentMethodAction(this.getData());
-            checkoutData.setSelectedPaymentMethod(this.item.method);
-            checkoutData.setIndividualGatewayFlag('');
-            this.setBlueMediaGatewayMethod({});
-            return true;
-        },
-        selectCardPaymentMethod: function () {
-            selectPaymentMethodAction(this.getData());
-            checkoutData.setSelectedPaymentMethod(this.item.method);
-            return true;
-        },
-        selectPaymentMethodCard: function (cardContext) {
-            this.item.individual_gateway = cardContext.gateway_id;
-            checkoutData.setIndividualGatewayFlag(this.item.individual_gateway);
-
-            this.setBlueMediaGatewayMethod(cardContext);
-            this.selectCardPaymentMethod();
-
-            return true;
-        },
-        setBlueMediaGatewayMethod: function (value) {
-            this.validationFailed(false);
-            selectedGateway(value);
-            checkoutData.setBlueMediaPaymentMethod(value);
-        },
-        isSeparatedChecked: function (gateway_id) {
-            return ko.pureComputed(function () {
-                const paymentMethod = quote.paymentMethod();
-                const individualFlag = checkoutData.getIndividualGatewayFlag();
-                if (paymentMethod) {
-                    if (individualFlag && paymentMethod.method === 'bluepayment') {
-                        if (individualFlag.toString() === gateway_id.toString()) {
-                            return individualFlag;
-                        }
-                        return false;
-                    } else {
-                        return false;
-                    }
-                }
-
-                return null;
-            });
         },
 
         /**

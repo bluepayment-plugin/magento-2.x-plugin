@@ -1,10 +1,16 @@
 define([
+    'ko',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-abstract',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-gateways',
+    'BlueMedia_BluePayment/js/checkout-data',
+    'Magento_Checkout/js/model/quote',
     'mage/translate',
 ], function (
+    ko,
     Component,
     bluepaymentGateways,
+    checkoutData,
+    quote,
     $t,
 ) {
     'use strict';
@@ -12,14 +18,49 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-separated',
-            gateway_id: 0,
-            gateway_logo_url: '',
-            gateway_name: '',
-            gateway_description: '',
+            gateway_id: null,
+            gateway_logo_url: null,
+            gateway_name: null,
+            gateway_description: null,
         },
 
-        isChecked: function () {
-            return false;
+        getData: function () {
+            return {
+                'method': this.item.method,
+                'additional_data': {
+                    'separated': true,
+                    'gateway_id': this.gateway_id,
+                }
+            }
+        },
+
+        getCode: function () {
+            return this.item.method + '_' + this.gateway_id;
+        },
+
+        isChecked: ko.computed(function () {
+            const paymentMethod = quote.paymentMethod();
+
+            if (!paymentMethod) {
+                return null;
+            }
+
+            if (!paymentMethod.additional_data || !paymentMethod.additional_data.gateway_id) {
+                return null;
+            }
+
+            console.log(
+                this.getCode(),
+                paymentMethod.method + '_' + paymentMethod.additional_data.gateway_id
+            );
+
+            return paymentMethod.method + '_' + paymentMethod.additional_data.gateway_id;
+        }),
+
+        selectPaymentMethod: function () {
+            console.log('selectPaymentMethod');
+            debugger;
+            this._super();
         },
 
         getGatewayTitle: function () {

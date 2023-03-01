@@ -38,14 +38,14 @@ define([
             }
 
             rendererList.push({
-                type: bluepaymentType + '-' + method.gateway_id,
+                type: bluepaymentType + '_' + method.gateway_id,
                 component: component,
                 typeComparatorCallback: comparator,
                 config: {
                     gateway_id: method.gateway_id,
-                    gateway_logo_url: method.gateway_logo_url,
-                    gateway_name: method.gateway_name,
-                    gateway_description: method.gateway_description
+                    gateway_logo_url: method.logo_url,
+                    gateway_name: method.name,
+                    gateway_description: method.description
                 }
             });
 

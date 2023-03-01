@@ -11,6 +11,7 @@ define([
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-selected-gateway',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-agreements',
     'BlueMedia_BluePayment/js/checkout-data',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
     'Magento_Ui/js/modal/modal',
     'text!BlueMedia_BluePayment/template/blik-popup.html',
     'Magento_Checkout/js/model/payment/additional-validators'
@@ -27,6 +28,7 @@ define([
     selectedGateway,
     agreements,
     checkoutData,
+    config,
     modal,
     blikTpl,
     additionalValidators,
@@ -40,20 +42,20 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment',
-            logoUrl: window.checkoutConfig.payment.bluepayment.logo || 'https://bm.pl/img/www/logos/bmLogo.png',
+            logoUrl: config.logo,
             grandTotalAmount: 0
         },
 
         ordered: false,
         redirectAfterPlaceOrder: false,
-        gateways: window.checkoutConfig.payment.bluepayment.options,
-        renderSeparatedOptions: window.checkoutConfig.payment.bluepayment.separated,
-        bluePaymentTestMode: window.checkoutConfig.payment.bluepayment.test_mode,
-        bluePaymentCards: window.checkoutConfig.payment.bluepayment.cards,
-        bluePaymentAutopayAgreement: window.checkoutConfig.payment.bluepayment.autopay_agreement,
+        gateways: config.options,
+        renderSeparatedOptions: config.separated,
+        bluePaymentTestMode: config.testMode,
+        bluePaymentCards: config.cards,
+        bluePaymentAutopayAgreement: config.autopayAgreement,
         bluePaymentCollapsible:
-            window.checkoutConfig.payment.bluepayment.collapsible === '1'
-            && window.checkoutConfig.payment.bluepayment.options.length > 8,
+            config.collapsible === '1'
+            && config.options.length > 8,
         selectedAutopayGatewayIndex: null,
         validationFailed: ko.observable(false),
         activeMethod: ko.computed(function () {
@@ -119,6 +121,7 @@ define([
             return {
                 'method': this.item.method,
                 'additional_data': {
+                    'separated': false,
                     'agreements_ids': agreements.getCheckedAgreementsIds()
                 }
             };
@@ -204,14 +207,15 @@ define([
         isChecked: ko.computed(function () {
             const paymentMethod = quote.paymentMethod();
 
-            if (paymentMethod) {
-                return checkoutData.getIndividualGatewayFlag() ? false : paymentMethod.method;
+            if (!paymentMethod.additional_data || !paymentMethod.additional_data.separated) {
+                return paymentMethod.method;
             }
+
             return null;
         }),
         isRadioButtonVisible: ko.computed(function () {
             // If it has separated methods - always show radio
-            if (this.renderSeparatedOptions.length > 0) {
+            if (config.separated.length > 0) {
                 return true;
             }
 
