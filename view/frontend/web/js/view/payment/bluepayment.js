@@ -1,11 +1,13 @@
 define([
     'uiComponent',
     'Magento_Checkout/js/model/payment/renderer-list',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-gateways'
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment',
 ], function (
     Component,
     rendererList,
-    bluepaymentGateways
+    bluepaymentConfig,
+    model,
 ) {
     'use strict';
 
@@ -25,20 +27,33 @@ define([
     });
 
     let baseRendered = false;
-    if (window.checkoutConfig.payment.bluepayment.separated) {
-        window.checkoutConfig.payment.bluepayment.separated.forEach(function (method) {
+
+    if (bluepaymentConfig.separated) {
+        bluepaymentConfig.separated.forEach(function (method) {
             let component;
-            switch (method.gateway_id) {
-                // case bluepaymentGateways.ids.blik:
-                //     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-blik';
-                //     break;
+            switch (Number(method.gateway_id)) {
+                case model.gatewaysIds.blik:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-blik';
+                    break;
+                case model.gatewaysIds.card:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-card';
+                    break;
+                case model.gatewaysIds.one_click:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-one-click';
+                    break;
+                case model.gatewaysIds.google_pay:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-google-pay';
+                    break;
+                case model.gatewaysIds.apple_pay:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-apple-pay';
+                    break;
                 default:
                     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated';
                     break;
             }
 
             rendererList.push({
-                type: bluepaymentType + '_' + method.gateway_id,
+                type: bluepaymentType + '-' + method.gateway_id,
                 component: component,
                 typeComparatorCallback: comparator,
                 config: {
@@ -49,7 +64,9 @@ define([
                 }
             });
 
-            if (method.sort_order >= 10 && !baseRendered) {
+            if (method.sort_order >= 0 && !baseRendered) {
+                // @ToDo sorting in admin panel
+
                 rendererList.push({
                     type: bluepaymentType,
                     component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',

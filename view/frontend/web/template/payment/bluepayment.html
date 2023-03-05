@@ -1,4 +1,4 @@
-<!--ko if: gateways === false || gateways.length > 0 -->
+<!-- ko if: gateways === false || gateways.length > 0 -->
 <div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
     <div class="payment-method-title field choice">
         <input
@@ -14,9 +14,9 @@
         <label data-bind="attr: {'for': getCode()}" class="label">
             <!-- ko if: gateways !== false && gateways.length > 0 -->
             <div class="blue-payment__slideshow">
-                        <span data-bind="foreach: gateways">
-                            <img data-bind="attr:{src: logo_url,alt: name}" class="blue-payment__slideshow-slide"/>
-                        </span>
+                <span data-bind="foreach: gateways">
+                    <img src="" alt="" data-bind="attr:{src: logo_url, alt: name}" class="blue-payment__slideshow-slide"/>
+                </span>
             </div>
             <!--/ko-->
 
@@ -31,7 +31,7 @@
             <p class="method-name">
                 <span data-bind="text: getTitle()" class="payment-method-name"></span>
                 <br/>
-                <span data-bind="i18n: 'You will be redirected to the page of the selected bank.'"
+                <span translate="'You will be redirected to the page of the selected bank.'"
                       class="payment-method-description"></span>
             </p>
         </label>
@@ -39,15 +39,15 @@
     <!--ko if: getCode() == isChecked()-->
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
-        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!-- ko template: getTemplate() --><!--/ko-->
         <!--/ko-->
 
         <!-- ko if: gateways != false && gateways.length > 0 -->
         <fieldset class="fieldset" data-bind='attr: {id: "payment_form_" + getCode()}'>
             <div class="payment-method-note">
                 <div data-bind='attr: {id: "p_method_" +  getCode() + "_gateway", class: "p_method_" +  getCode()}'>
-                    <ul data-bind="foreach: gateways, attr: {class: getCode() + '-options-list clearfix'},afterRender: isChecked()">
-                        <li data-bind="click: $parent.selectPaymentOption, attr:{class: 'payment-option opt_'+ gateway_id + ($parent.activeMethod() == gateway_id ? ' _active' : '')}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
+                    <ul data-bind="foreach: gateways, attr: {class: getCode() + '-options-list clearfix'}, afterRender: isChecked()">
+                        <li data-bind="click: $parent.selectPaymentOption, attr:{class: 'payment-option opt_'+ gateway_id + ($parent.selectedGatewayId() == gateway_id ? ' _active' : '')}, visible: (!$parent.bluePaymentCollapsible || !$parent.collapsed() || $index() < 8)">
                             <label data-bind="attr:{for: $parent.getCode() + gateway_id }">
                                 <img data-bind="attr:{src: logo_url,alt: name}"
                                      class="payment-logo"/>
@@ -59,17 +59,17 @@
 
                     <!-- ko if: bluePaymentCollapsible -->
                     <div class="gateway-collapsible">
-                        <a href="#" class="expand" data-bind="{
-                                visible: collapsed(),
-                                click: function() {this.collapsed(false)},
-                                i18n: 'Show all'
-                            }"></a>
+                        <a href="#" class="expand" data-bind="
+                            visible: collapsed(),
+                            click: function() {this.collapsed(false)},
+                            i18n: 'Show all'
+                        "></a>
 
-                        <a href="#" class="collapse" data-bind="{
-                                visible: !collapsed(),
-                                click: function() {this.collapsed(true)},
-                                i18n: 'Collapse'
-                            }"></a>
+                        <a href="#" class="collapse" data-bind="
+                            visible: !collapsed(),
+                            click: function() {this.collapsed(true)},
+                            i18n: 'Collapse'
+                        "></a>
                     </div>
                     <!--/ko-->
                 </div>
@@ -77,29 +77,19 @@
         </fieldset>
         <!--/ko-->
 
-        <!-- ko if: (gateways != false && gateways.length == 0)-->
-        <span data-bind="i18n: 'No online payment is available at this time. Feel free to contact us about that.'"></span>
-        <!--/ko-->
-
-        <!-- ko if: (gateways != false && gateways.length > 0) -->
-        <div class="payment-method-empty-gateway mage-error" generated="yes" data-bind="{visible: validationFailed}">
-            <p data-bind="i18n: 'Choose the way you want to pay.'"></p>
-        </div>
-        <!--/ko-->
-
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- ko template: getTemplate() --><!--/ko-->
             <!--/ko-->
         </div>
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- ko template: getTemplate() --><!--/ko-->
             <!--/ko-->
         </div>
         <div class="bluepayment-agreements-block">
             <!-- ko foreach: $parent.getRegion('bluepayment-agreements') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- ko template: getTemplate() --><!--/ko-->
             <!--/ko-->
         </div>
         <div class="actions-toolbar">
@@ -116,7 +106,7 @@
                             css: {disabled: !isPlaceOrderActionAllowed()}
                             "
                         disabled>
-                    <span data-bind="i18n: 'Place Order'"></span>
+                    <span translate="'Place Order'"></span>
                 </button>
             </div>
         </div>

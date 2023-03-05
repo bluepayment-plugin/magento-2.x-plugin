@@ -10,7 +10,7 @@ define([], function () {
             card: 1500,
             one_click: 1503,
             alior_installments: 1506,
-            gpay: 1512,
+            google_pay: 1512,
             apple_pay: 1513,
             visa_mobile: 1523,
         }

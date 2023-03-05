@@ -30,8 +30,30 @@
                 <!--/ko-->
             </p>
         </label>
+
+        <!-- ko if: (blikZeroEnabled && isChecked() === getCode()) -->
+            <input type="tel"
+                   name="payment_method_bluepayment_code"
+                   class="blik-code"
+                   min="000000"
+                   max="999999"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   placeholder=""
+                   data-validate="{
+                       required: true,
+                       pattern: '000000'
+                   }"
+                   data-bind="
+                       afterRender: blikCodeAfterRender,
+                       attr: {placeholder: $t('Enter BLIK code')}
+                   "
+            />
+        <!--/ko-->
+
+        <div style="clear: both;"></div>
     </div>
-    <div class="payment-method-content" data-bind="visible: isChecked()">
+    <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
             <!-- ko template: getTemplate() --><!--/ko-->
         <!--/ko-->
@@ -56,8 +78,11 @@
                 <button class="action primary checkout"
                         type="submit"
                         data-bind="
-                            click: placeOrder
-                        ">
+                            click: placeOrder,
+                            attr: {title: $t('Place Order')},
+                            enable: (getCode() == isChecked())
+                        "
+                        disabled>
                     <span translate="'Place Order'"></span>
                 </button>
             </div>
