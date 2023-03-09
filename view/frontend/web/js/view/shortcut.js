@@ -10,10 +10,12 @@ define([
     return Component.extend({
         defaults: {
             formInvalid: false,
-            productAddedToCart: false
+            productAddedToCart: false,
         },
 
         autopay: false,
+        allowedThemes: ['dark', 'light', 'orange', 'gradient'],
+        allowedArrangements: ['horizontal', 'horizontal-reversed', 'vertical', 'vertical-reversed'],
 
         /**
          * @return {exports}
@@ -25,13 +27,13 @@ define([
             return this;
         },
 
-        isCatalogProduct: function() {
-            return Boolean(this.isInCatalogProduct);
+        isCatalogProduct: function () {
+            return this.scope === 'product';
         },
 
-        whenAvailable: function(name, callback) {
-            var interval = 10;
-            window.setTimeout(function() {
+        whenAvailable: function (name, callback) {
+            const interval = 10; // ms
+            window.setTimeout(function () {
                 if (window[name]) {
                     callback(window[name]);
                 } else {
@@ -41,7 +43,7 @@ define([
         },
 
         initAutopay: function (withButton = true) {
-            var button,
+            let button,
                 container = $('.' + this.selector + ' .autopay-button');
 
             return new Promise((resolve, reject) => {
@@ -57,14 +59,20 @@ define([
                     this.autopay.onBeforeCheckout = this.onBeforeCheckout.bind(this);
                     if (withButton) {
                         let theme = this.style.theme;
-                        if (['dark', 'light', 'orange', 'gradient'].indexOf(theme) === -1) {
+                        if (this.allowedThemes.indexOf(theme) === -1) {
                             theme = 'dark';
+                        }
+
+                        let arrangement = this.style.arrangement;
+                        if (this.allowedArrangements.indexOf(arrangement) === -1) {
+                            arrangement = 'vertical';
                         }
 
                         const buttonParams = {
                             theme: theme,
-                            fullWidth: this.style.width === 'full' ? true : false,
-                            rounded: this.style.rounded === 'rounded' ? true : false
+                            fullWidth: this.style.width === 'full',
+                            rounded: this.style.rounded === 'rounded',
+                            arrangement: arrangement,
                         }
 
                         this.log('Button params', buttonParams);

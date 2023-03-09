@@ -150,4 +150,31 @@
             <argument name="requestKey" xsi:type="string">test_autopay</argument>
         </arguments>
     </type>
+
+    <!-- Extended option for autopay -->
+    <virtualType name="BlueMedia\BluePayment\Model\Config\Source\AutopayMarginExtended" type="BlueMedia\BluePayment\Model\Config\Source\AutopayExtended">
+        <arguments>
+            <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayMargin</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="BlueMedia\BluePayment\Model\Config\Source\AutopayRoundedExtended" type="BlueMedia\BluePayment\Model\Config\Source\AutopayExtended">
+        <arguments>
+            <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayRounded</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="BlueMedia\BluePayment\Model\Config\Source\AutopayThemeExtended" type="BlueMedia\BluePayment\Model\Config\Source\AutopayExtended">
+        <arguments>
+            <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayTheme</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="BlueMedia\BluePayment\Model\Config\Source\AutopayWidthExtended" type="BlueMedia\BluePayment\Model\Config\Source\AutopayExtended">
+        <arguments>
+            <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayWidth</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="BlueMedia\BluePayment\Model\Config\Source\AutopayArrangementExtended" type="BlueMedia\BluePayment\Model\Config\Source\AutopayExtended">
+        <arguments>
+            <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayArrangement</argument>
+        </arguments>
+    </virtualType>
 </config>

@@ -5,12 +5,12 @@
  */
 
 if ($block->isActive() && $block->getMerchantId()):
-    $isInCatalogProduct = $block->isInCatalogProduct() ? true : false;
     $randStr = $block->getRandomId();
+    $scope = $block->getScope();
 
     $config = [
         'autopayShortcut' => [
-            'isInCatalogProduct' => $block->isInCatalogProduct(),
+            'scope' => $scope,
             'selector' => "autopay-shortcut-" . $randStr,
             'merchantId' => $block->getMerchantId(),
             'language' => $block->getLanguage(),
@@ -21,7 +21,7 @@ if ($block->isActive() && $block->getMerchantId()):
                 'includingTax' => $block->isMinimumOrderIncludingTax(),
                 'text' => $block->getMinimumOrderText(),
             ],
-            'style' => $block->getButtonStyleConfiguration(),
+            'style' => $block->getButtonStyleConfiguration($scope),
         ]
     ];
 

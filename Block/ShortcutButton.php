@@ -13,8 +13,8 @@ class ShortcutButton extends Template implements ShortcutInterface
 {
     private const ALIAS_ELEMENT_INDEX = 'alias';
 
-    /** @var bool */
-    private $isMiniCart = false;
+    /** @var string Scope - product, minicart or cart */
+    private $scope = 'product';
 
     /** @var ConfigProvider */
     private $autopayConfigProvider;
@@ -51,27 +51,26 @@ class ShortcutButton extends Template implements ShortcutInterface
     }
 
     /**
-     * Set is button showed in catalog page.
+     * Set button scope - product, minicart or cart.
      *
-     * @param  bool  $isCatalogProduct
-     *
+     * @param string $scope
      * @return $this
      */
-    public function setIsInCatalogProduct(bool $isCatalogProduct): ShortcutButton
+    public function setScope(string $scope): ShortcutButton
     {
-        $this->isMiniCart = !$isCatalogProduct;
+        $this->scope = $scope;
 
         return $this;
     }
 
     /**
-     * Check whether button is showed in catalog page.
+     * Get button scope - product, minicart or cart.
      *
-     * @return bool
+     * @return string
      */
-    public function isInCatalogProduct(): bool
+    public function getScope(): string
     {
-        return !$this->isMiniCart;
+        return $this->scope;
     }
 
     /**
@@ -157,18 +156,20 @@ class ShortcutButton extends Template implements ShortcutInterface
     /**
      * Get autopay button style.
      *
+     * @param string $scope Scope - product, minicart or cart
      * @return array{
      *    'theme': string,
      *    'width: string,
      *    'rounded': string,
      * }
      */
-    public function getButtonStyleConfiguration(): array
+    public function getButtonStyleConfiguration(string $scope = 'product'): array
     {
         return [
-            'theme' => $this->autopayConfigProvider->getButtonTheme(),
-            'width' => $this->autopayConfigProvider->getButtonWidth(),
-            'rounded' => $this->autopayConfigProvider->getButtonRounded(),
+            'theme' => $this->autopayConfigProvider->getButtonTheme($scope),
+            'width' => $this->autopayConfigProvider->getButtonWidth($scope),
+            'rounded' => $this->autopayConfigProvider->getButtonRounded($scope),
+            'arrangement' => $this->autopayConfigProvider->getButtonArrangement($scope),
         ];
     }
 

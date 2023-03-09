@@ -58,9 +58,9 @@ class ConfigProvider implements ConfigProviderInterface
     public function isHidden(): bool
     {
         return (int) $this->scopeConfig->getValue(
-                'payment/autopay/active',
-                ScopeInterface::SCOPE_STORE
-            ) === self::STATUS_HIDDEN;
+            'payment/autopay/active',
+            ScopeInterface::SCOPE_STORE
+        ) === self::STATUS_HIDDEN;
     }
 
     /**
@@ -212,66 +212,67 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get Autopay button theme - dark or light.
      *
+     * @param string $scope Scope of the config - product, cart, minicart.
      * @return string
      */
-    public function getButtonTheme(): string
+    public function getButtonTheme(string $scope = 'product'): string
     {
-        return (string) $this->scopeConfig->getValue(
-            'payment/autopay/button/theme',
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->getButtonConfigValue('theme', $scope);
     }
 
     /**
      * Get Autopay button width - standard (153px) or full (100%).
      *
+     * @param string $scope Scope of the config - product, cart or minicart.
      * @return string
      */
-    public function getButtonWidth(): string
+    public function getButtonWidth(string $scope = 'product'): string
     {
-        return (string) $this->scopeConfig->getValue(
-            'payment/autopay/button/width',
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->getButtonConfigValue('width', $scope);
     }
 
     /**
      * Get Autopay button rounded style - rounded or square.
      *
+     * @param string $scope Scope of the config - product, cart or minicart.
      * @return string
      */
-    public function getButtonRounded(): string
+    public function getButtonRounded(string $scope = 'product'): string
     {
-        return (string) $this->scopeConfig->getValue(
-            'payment/autopay/button/rounded',
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->getButtonConfigValue('rounded', $scope);
+    }
+
+    /**
+     * Get Autopay button arrangement - horizontal, horizontal-reversed, vertical or vertical-reversed.
+     *
+     * @param string $scope Scope of the config - product, cart or minicart.
+     * @return string
+     */
+    public function getButtonArrangement(string $scope = 'product'): string
+    {
+        return $this->getButtonConfigValue('arrangement', $scope);
     }
 
     /**
      * Get top margin for Autopay button.
      *
+     * @param string $scope Scope of the config - product, cart or minicart.
      * @return string
      */
-    public function getButtonMarginTop(): string
+    public function getButtonMarginTop(string $scope = 'product'): string
     {
-        return (string) $this->scopeConfig->getValue(
-            'payment/autopay/button/margin_top',
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->getButtonConfigValue('margin_top', $scope);
     }
 
     /**
      * Get bottom margin for Autopay button (margin-0, margin-10, margin-15, margin-20).
      *
+     * @param string $scope Scope of the config - product, cart or minicart.
      * @return string
      */
-    public function getButtonMarginBottom(): string
+    public function getButtonMarginBottom(string $scope = 'product'): string
     {
-        return (string) $this->scopeConfig->getValue(
-            'payment/autopay/button/margin_bottom',
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->getButtonConfigValue('margin_bottom', $scope);
     }
 
     /**
@@ -295,5 +296,31 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return 'en';
+    }
+
+    /**
+     * Get config value for Autopay button with selected scope (or default if it's not set).
+     *
+     * @param string $path Path to config value.
+     * @param string $scope Scope of the config - product, cart, minicart.
+     * @return string
+     */
+    private function getButtonConfigValue(string $path, string $scope = 'product'): string
+    {
+        if (in_array($scope, ['minicart', 'cart'])) {
+            $value = $this->scopeConfig->getValue(
+                'payment/autopay/button/' . $scope . '/' . $path,
+                ScopeInterface::SCOPE_STORE
+            );
+
+            if ($value) {
+                return (string) $value;
+            }
+        }
+
+        return (string) $this->scopeConfig->getValue(
+            'payment/autopay/button/' . $path,
+            ScopeInterface::SCOPE_STORE
+        );
     }
 }

@@ -13,7 +13,7 @@ class AutopayTheme implements OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'dark', 'label' => __('Dark theme (black)')],

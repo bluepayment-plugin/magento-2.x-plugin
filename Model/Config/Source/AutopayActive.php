@@ -13,7 +13,7 @@ class AutopayActive implements OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 2, 'label' => __('Hidden')],

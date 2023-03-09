@@ -13,7 +13,7 @@ class AutopayMargin implements OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'margin-0', 'label' => '0 px'],

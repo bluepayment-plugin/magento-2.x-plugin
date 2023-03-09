@@ -13,7 +13,7 @@ class AutopayWidth implements OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'standard', 'label' => __('Standard width')],

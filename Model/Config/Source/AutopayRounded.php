@@ -13,7 +13,7 @@ class AutopayRounded implements OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'rounded', 'label' => __('Rounded button')],
