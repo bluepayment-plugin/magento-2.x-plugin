@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Model\Multishipping;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\Metadata;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -49,8 +50,20 @@ class PlaceOrder implements PlaceOrderInterface
     /** @var Logger */
     public $logger;
 
+    /** @var Metadata */
+    public $metadata;
+
     /**
      * @param OrderManagementInterface $orderManagement
+     * @param CollectionFactory $gatewayFactory
+     * @param ScopeConfigInterface $scopeConfig
+     * @param ConvertArray $convertArray
+     * @param Data $helper
+     * @param Curl $curl
+     * @param Generic $session
+     * @param CardCollectionFactory $cardCollectionFactory
+     * @param Logger $logger
+     * @param Metadata $metadata
      */
     public function __construct(
         OrderManagementInterface $orderManagement,
@@ -61,7 +74,8 @@ class PlaceOrder implements PlaceOrderInterface
         Curl $curl,
         Generic $session,
         CardCollectionFactory $cardCollectionFactory,
-        Logger $logger
+        Logger $logger,
+        Metadata $metadata
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -72,6 +86,7 @@ class PlaceOrder implements PlaceOrderInterface
         $this->session = $session;
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->logger = $logger;
+        $this->metadata = $metadata;
     }
 
     /**
@@ -197,7 +212,10 @@ class PlaceOrder implements PlaceOrderInterface
             'Currency' => $currency,
             'CustomerEmail' => $customerEmail,
             'Products' => base64_encode($xml->asXML()),
-            'GatewayID' => $gatewayId
+            'GatewayID' => $gatewayId,
+            'PlatformName' => Payment::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
+            'PlatformVersion' => $this->metadata->getMagentoVersion(),
+            'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
 
         /* Płatność one-click kartowa */

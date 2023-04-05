@@ -76,7 +76,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
     3. Ustaw **Tryb testowy (Test Mode)**
 3. Uzupełnij dane dotyczące obsługiwanych walut (otrzymasz je od Blue Media)
    1. **ID serwisu (Service partner ID)**
-   2. **Klucz współdzielony (Shared Key)** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Konfiguracja hasha** -> **klucz**
+   2. **Klucz konfiguracyjny (hash) (Configuration key (hash))** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Klucz konfiguracyjny (hash)**
       ![configuration3.png](docs/configuration3.png "Screenshot")
 4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 

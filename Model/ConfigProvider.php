@@ -86,15 +86,16 @@ class ConfigProvider implements ConfigProviderInterface
     private $defaultSortOrder = [
         '', // Avoid pushing first element to the end
         509, // BLIK
+        1503, // Kartowa płatność automatyczna
+        1500, // Płatność kartą
+        1523, // Visa Mobile
+        1512, // Google Pay
+        1513, // Apple Pay
+
         700, // Smartney
         1506, // Alior Raty
         705, // PayPo
 
-        1503, // Kartowa płatność automatyczna
-        1500, // Płatność kartą
-        1512, // Google Pay
-        1513, // Apple Pay
-        1523, // Visa Mobile
         1511, // Visa Checkout
 
         106, // Tylko na teście
