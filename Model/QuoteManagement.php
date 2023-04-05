@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\Data\CartInterface;
 use BlueMedia\BluePayment\Api\Data\ConfigurationInterface;
 use BlueMedia\BluePayment\Api\Data\ConfigurationInterfaceFactory;
 use BlueMedia\BluePayment\Api\Data\PlaceOrderResponseInterface;
@@ -9,22 +12,27 @@ use BlueMedia\BluePayment\Api\Data\ShippingMethodAdditionalInterface;
 use BlueMedia\BluePayment\Api\Data\ShippingMethodInterfaceFactory;
 use BlueMedia\BluePayment\Api\QuoteManagementInterface;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider;
+use BlueMedia\BluePayment\Model\Autopay\GetCartDetails;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseDataFactory;
 use BlueMedia\BluePayment\Model\Data\PlaceOrderResponseFactory;
+use Magento\Checkout\Api\PaymentProcessingRateLimiterInterface;
+use Magento\Checkout\Model\DefaultConfigProvider;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use BlueMedia\BluePayment\Logger\Logger as Logger;
-
+use Magento\Customer\Api\Data\AddressInterface as CustomerAddressInterface;
 use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\AddressInterface;
+use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
 use Magento\Quote\Api\Data\CartExtensionFactory;
-use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Api\Data\CartInterface as MagentoCartInterface;
 use Magento\Quote\Api\Data\PaymentInterfaceFactory;
 use Magento\Quote\Model\Quote\TotalsCollector;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -37,6 +45,9 @@ class QuoteManagement implements QuoteManagementInterface
 
     public const ERROR_WRONG_ORDER_AMOUNT = 'WRONG_ORDER_AMOUNT';
 
+    /**
+     * @var string[] Error messages
+     */
     public $errorMessages = [
         self::ERROR_WRONG_ORDER_AMOUNT => 'The order amount is different from the shopping cart amount.',
     ];
@@ -59,7 +70,7 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var AddressRepositoryInterface */
     private $addressRepository;
 
-    /** @var CartManagementInterface  */
+    /** @var CartManagementInterface */
     private $cartManagement;
 
     /** @var PaymentInterfaceFactory */
@@ -89,23 +100,44 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var Logger */
     private $logger;
 
+    /**
+     * QuoteManagement constructor.
+     *
+     * @param CartRepositoryInterface $cartRepository
+     * @param ShippingMethodInterfaceFactory $shippingMethodFactory
+     * @param TotalsCollector $totalsCollector
+     * @param DataObjectProcessor $dataObjectProcessor
+     * @param CartExtensionFactory $cartExtensionFactory
+     * @param AddressRepositoryInterface $addressRepository
+     * @param CartManagementInterface $cartManagement
+     * @param PaymentInterfaceFactory $paymentFactory
+     * @param OrderRepositoryInterface $orderRepository
+     * @param ConfigurationInterfaceFactory $configurationFactory
+     * @param ConfigProvider $configProvider
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param PlaceOrderResponseFactory $placeOrderResponseFactory
+     * @param PlaceOrderResponseDataFactory $placeOrderResponseDataFactory
+     * @param Metadata $metadata
+     * @param Logger $logger
+     */
     public function __construct(
-        CartRepositoryInterface $cartRepository,
+        CartRepositoryInterface        $cartRepository,
         ShippingMethodInterfaceFactory $shippingMethodFactory,
-        TotalsCollector $totalsCollector,
-        DataObjectProcessor $dataObjectProcessor,
-        CartExtensionFactory $cartExtensionFactory,
-        AddressRepositoryInterface $addressRepository,
-        CartManagementInterface $cartManagement,
-        PaymentInterfaceFactory $paymentFactory,
-        OrderRepositoryInterface $orderRepository,
-        ConfigurationInterfaceFactory $configurationFactory,
-        ConfigProvider $configProvider,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        PlaceOrderResponseFactory $placeOrderResponseFactory,
-        PlaceOrderResponseDataFactory $placeOrderResponseDataFactory,
-        Metadata $metadata,
-        Logger $logger
+        TotalsCollector                $totalsCollector,
+        DataObjectProcessor            $dataObjectProcessor,
+        CartExtensionFactory           $cartExtensionFactory,
+        AddressRepositoryInterface     $addressRepository,
+        CartManagementInterface        $cartManagement,
+        PaymentInterfaceFactory        $paymentFactory,
+        OrderRepositoryInterface       $orderRepository,
+        ConfigurationInterfaceFactory  $configurationFactory,
+        ConfigProvider                 $configProvider,
+        SearchCriteriaBuilder          $searchCriteriaBuilder,
+        PlaceOrderResponseFactory      $placeOrderResponseFactory,
+        PlaceOrderResponseDataFactory  $placeOrderResponseDataFactory,
+        GetCartDetails                 $getCartDetails,
+        Metadata                       $metadata,
+        Logger                         $logger
     ) {
         $this->cartRepository = $cartRepository;
         $this->shippingMethodFactory = $shippingMethodFactory;
@@ -121,18 +153,25 @@ class QuoteManagement implements QuoteManagementInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->placeOrderResponseFactory = $placeOrderResponseFactory;
         $this->placeOrderResponseDataFactory = $placeOrderResponseDataFactory;
+        $this->getCartDetails = $getCartDetails;
         $this->metadata = $metadata;
         $this->logger = $logger;
     }
 
     /**
-     * @inerhitDoc
+     * Get website configuration.
+     *
+     * @return ConfigurationInterface
      */
     public function getConfiguration(): ConfigurationInterface
     {
         $configuration = $this->configurationFactory->create();
 
-        $configuration->setQuoteLifetime($this->configProvider->getQuoteLifetime());
+        $lifetime = $this->configProvider->getQuoteLifetime();
+
+        $configuration->setQuoteLifetime(
+            $lifetime ? (int)$lifetime : null
+        );
         $configuration->setPlatformVersion($this->metadata->getMagentoVersion());
         $configuration->setPlatformEdition($this->metadata->getMagentoEdition());
         $configuration->setModuleVersion($this->metadata->getModuleVersion());
@@ -140,26 +179,56 @@ class QuoteManagement implements QuoteManagementInterface
         return $configuration;
     }
 
-    public function getCartDetails($cartId)
+    /**
+     * Get cart details by id.
+     *
+     * @param int $cartId
+     * @return CartInterface
+     * @throws NoSuchEntityException
+     */
+    public function getCartDetails(int $cartId): CartInterface
     {
-        return $this->getCart($cartId);
+        return $this->getCartDetails->execute(
+            $this->getCart($cartId)
+        );
     }
 
-    public function getAddresses($cartId)
+    /**
+     * Get cart by id
+     *
+     * @param int $cartId
+     * @return MagentoCartInterface
+     * @throws NoSuchEntityException
+     */
+    private function getCart(int $cartId): MagentoCartInterface
+    {
+        return $this->cartRepository->get($cartId);
+    }
+
+    /**
+     * Get available addresses for cart.
+     *
+     * @param int $cartId
+     *
+     * @return mixed
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function getAddresses(int $cartId)
     {
         $cart = $this->getCart($cartId);
         $customer = $cart->getCustomerIsGuest() ? null : $cart->getCustomer();
 
         if ($customer) {
             $customerAddressData = ObjectManager::getInstance()
-                ->get(\Magento\Checkout\Api\PaymentProcessingRateLimiterInterface::class);
+                ->get(PaymentProcessingRateLimiterInterface::class);
 
             if ($customerAddressData) {
                 return $customerAddressData->getAddressDataByCustomer($customer);
             }
 
             $configProvider = ObjectManager::getInstance()
-                ->get(\Magento\Checkout\Model\DefaultConfigProvider::class);
+                ->get(DefaultConfigProvider::class);
             $config = $configProvider->getConfig();
 
             return $config['customerData']['addresses'];
@@ -168,40 +237,17 @@ class QuoteManagement implements QuoteManagementInterface
         return [];
     }
 
-    public function setShippingAddress($cartId, AddressInterface $address)
-    {
-        $this->logger->info('setBillingAddress', [
-            'cartId' => $cartId,
-            'email' => $address->getEmail(),
-        ]);
-
-        $cart = $this->getCart($cartId);
-
-        $shippingAddress = $cart->getShippingAddress();
-        $this->logger->info('[AutoPay] setShippingAddress - ', [
-            'email' => $shippingAddress->getEmail(),
-        ]);
-        $shippingAddress->addData($this->extractAddressData($address));
-        $shippingAddress->setCollectShippingRates(true);
-
-        $cart->setShippingAddress($shippingAddress);
-
-        $this->logger->info('[AutoPay] setShippingAddress - ', [
-            'email' => $shippingAddress->getEmail(),
-        ]);
-
-        $this->totalsCollector->collectAddressTotals($cart, $shippingAddress);
-
-        $this->cartRepository->save($cart);
-
-        return true;
-    }
-
     /**
+     * Set shipping address by ID
+     *
+     * @param int $cartId
+     * @param int $addressId
+     * @return bool
      * @throws InputException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function setShippingAddressById($cartId, $addressId)
+    public function setShippingAddressById(int $cartId, int $addressId): bool
     {
         $cart = $this->getCart($cartId);
 
@@ -229,7 +275,40 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function setBillingAddress($cartId, AddressInterface $address)
+    /**
+     * Get transform address interface into Array
+     *
+     * @param QuoteAddressInterface|CustomerAddressInterface $address
+     * @return array
+     */
+    private function extractAddressData($address): array
+    {
+        $className = CustomerAddressInterface::class;
+        if ($address instanceof QuoteAddressInterface) {
+            $className = QuoteAddressInterface::class;
+            $this->logger->info('[AutoPay] Address is instance of Quote AddressInterface');
+        } else {
+            $this->logger->info('[AutoPay] Address is instance of customer AddressInterface');
+        }
+
+        $addressData = $this->dataObjectProcessor->buildOutputDataArray($address, $className);
+        unset($addressData[ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY]);
+
+        $this->logger->info('[AutoPay] extractAddressData', [
+            'address' => $addressData,
+        ]);
+        return $addressData;
+    }
+
+    /**
+     * Set shipping address
+     *
+     * @param int $cartId
+     * @param QuoteAddressInterface $address
+     * @return true
+     * @throws NoSuchEntityException
+     */
+    public function setShippingAddress(int $cartId, QuoteAddressInterface $address): bool
     {
         $this->logger->info('setBillingAddress', [
             'cartId' => $cartId,
@@ -238,20 +317,37 @@ class QuoteManagement implements QuoteManagementInterface
 
         $cart = $this->getCart($cartId);
 
-        $billingAddres = $cart->getBillingAddress();
-        $billingAddres->addData($this->extractAddressData($address));
+        $shippingAddress = $cart->getShippingAddress();
+        $this->logger->info('[AutoPay] setShippingAddress - ', [
+            'email' => $shippingAddress->getEmail(),
+        ]);
+        $shippingAddress->addData($this->extractAddressData($address));
+        $shippingAddress->setCollectShippingRates(true);
 
-        $cart->setBillingAddress($billingAddres);
+        $cart->setShippingAddress($shippingAddress);
+
+        $this->logger->info('[AutoPay] setShippingAddress - ', [
+            'email' => $shippingAddress->getEmail(),
+        ]);
+
+        $this->totalsCollector->collectAddressTotals($cart, $shippingAddress);
 
         $this->cartRepository->save($cart);
+
         return true;
     }
 
     /**
+     * Set billing address by ID
+     *
+     * @param int $cartId
+     * @param int $addressId
+     * @return bool
      * @throws InputException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function setBillingAddressById($cartId, $addressId)
+    public function setBillingAddressById(int $cartId, int $addressId): bool
     {
         $cart = $this->getCart($cartId);
 
@@ -274,7 +370,43 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
-    public function getShippingMethods($cartId)
+    /**
+     * Set billing address
+     *
+     * @param int $cartId
+     * @param QuoteAddressInterface $address
+     *
+     * @return boolean
+     *
+     * @throws NoSuchEntityException
+     */
+    public function setBillingAddress(int $cartId, QuoteAddressInterface $address): bool
+    {
+        $this->logger->info('setBillingAddress', [
+            'cartId' => $cartId,
+            'email' => $address->getEmail(),
+        ]);
+
+        $cart = $this->getCart($cartId);
+
+        $billingAddres = $cart->getBillingAddress();
+        $billingAddres->addData($this->extractAddressData($address));
+
+        $cart->setBillingAddress($billingAddres);
+
+        $this->cartRepository->save($cart);
+        return true;
+    }
+
+    /**
+     * Get available shipping methods for cart.
+     *
+     * @param int $cartId
+     * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function getShippingMethods(int $cartId): array
     {
         $cart = $this->getCart($cartId);
         $currency = $cart->getStore()->getBaseCurrency();
@@ -311,12 +443,22 @@ class QuoteManagement implements QuoteManagementInterface
         return $methods;
     }
 
+    /**
+     * Set shipping method for cart.
+     *
+     * @param int $cartId
+     * @param string $carrierCode
+     * @param string $methodCode
+     * @param ShippingMethodAdditionalInterface|null $additional
+     * @return boolean
+     * @throws NoSuchEntityException
+     */
     public function setShippingMethod(
-        $cartId,
-        $carrierCode,
-        $methodCode,
+        int                               $cartId,
+        string                            $carrierCode,
+        string                            $methodCode,
         ShippingMethodAdditionalInterface $additional = null
-    ) {
+    ): bool {
         $this->logger->info('[AutoPay] Set shipping method', [
             'cartId' => $cartId,
             'carrier' => $carrierCode,
@@ -350,6 +492,15 @@ class QuoteManagement implements QuoteManagementInterface
         return true;
     }
 
+    /**
+     * Place order.
+     *
+     * @param int $cartId
+     * @param float $amount
+     * @return PlaceOrderResponseInterface
+     * @throws NoSuchEntityException
+     * @throws CouldNotSaveException
+     */
     public function placeOrder(int $cartId, float $amount): PlaceOrderResponseInterface
     {
         $this->logger->info('[AutoPay] Place Order', [
@@ -390,38 +541,14 @@ class QuoteManagement implements QuoteManagementInterface
         return $this->createSuccessResponse($order);
     }
 
-    private function createErrorResponse(string $code): PlaceOrderResponseInterface
-    {
-        $message = $this->errorMessages[$code] ?? 'Unknown error';
-
-        $response = $this->placeOrderResponseFactory->create();
-
-        $response->setStatus(self::STATUS_INVALID);
-        $response->setErrorCode($code);
-        $response->setErrorMessage($message);
-
-        return $response;
-    }
-
-    private function createSuccessResponse(OrderInterface $order): PlaceOrderResponseInterface
-    {
-        $response = $this->placeOrderResponseFactory->create();
-        $responseData = $this->placeOrderResponseDataFactory->create();
-
-        $responseData->setRemoteOrderId($order->getIncrementId());
-
-        $response->setStatus(self::STATUS_SUCCESS);
-        $response->setOrderData($responseData);
-
-        return $response;
-    }
-
     /**
-     * @param $cartId
+     * Get order by cart id or return false.
+     *
+     * @param int $cartId
      *
      * @return OrderInterface|false
      */
-    private function findOrderByCartId($cartId)
+    private function findOrderByCartId(int $cartId)
     {
         $orders = $this->orderRepository->getList(
             $this->searchCriteriaBuilder
@@ -437,55 +564,58 @@ class QuoteManagement implements QuoteManagementInterface
     }
 
     /**
-     * @param $cartId
-     * @return CartInterface
-     * @throws NoSuchEntityException
-     */
-    private function getCart($cartId): CartInterface
-    {
-        return $this->cartRepository->get($cartId);
-    }
-
-    /**
-     * Get transform address interface into Array
+     * Create success response for place order.
      *
-     * @param AddressInterface $address
-     * @return array
+     * @param OrderInterface $order
+     * @return PlaceOrderResponseInterface
      */
-    private function extractAddressData($address)
+    private function createSuccessResponse(OrderInterface $order): PlaceOrderResponseInterface
     {
-        $className = \Magento\Customer\Api\Data\AddressInterface::class;
-        if ($address instanceof AddressInterface) {
-            $className = AddressInterface::class;
-            $this->logger->info('[AutoPay] Address is instance of Quote AddressInterface');
-        } else {
-            $this->logger->info('[AutoPay] Address is instance of customer AddressInterface');
-        }
+        $response = $this->placeOrderResponseFactory->create();
+        $responseData = $this->placeOrderResponseDataFactory->create();
 
-        $addressData = $this->dataObjectProcessor->buildOutputDataArray($address, $className);
-        unset($addressData[ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY]);
+        $responseData->setRemoteOrderId($order->getIncrementId());
 
-        $this->logger->info('[AutoPay] extractAddressData', [
-            'address' => $addressData,
-        ]);
-        return $addressData;
+        $response->setStatus(self::STATUS_SUCCESS);
+        $response->setOrderData($responseData);
+
+        return $response;
     }
 
     /**
      * Validate amount of cart
      *
-     * @param CartInterface $cart
+     * @param MagentoCartInterface $cart
      * @param float $amount
      * @return bool
      */
-    private function validateCartAmount(CartInterface $cart, float $amount): bool
+    private function validateCartAmount(MagentoCartInterface $cart, float $amount): bool
     {
         $this->logger->info('Validate cart amount', [
             'cart_id' => $cart->getId(),
-            'cart_amount' => (float) $cart->getGrandTotal(),
+            'cart_amount' => (float)$cart->getGrandTotal(),
             'amount' => $amount,
         ]);
 
-        return (float) $cart->getGrandTotal() === $amount;
+        return (float)$cart->getGrandTotal() === $amount;
+    }
+
+    /**
+     * Create error response for place order.
+     *
+     * @param string $code
+     * @return PlaceOrderResponseInterface
+     */
+    private function createErrorResponse(string $code): PlaceOrderResponseInterface
+    {
+        $message = $this->errorMessages[$code] ?? 'Unknown error';
+
+        $response = $this->placeOrderResponseFactory->create();
+
+        $response->setStatus(self::STATUS_INVALID);
+        $response->setErrorCode($code);
+        $response->setErrorMessage($message);
+
+        return $response;
     }
 }

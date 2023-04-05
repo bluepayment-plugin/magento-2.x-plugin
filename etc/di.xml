@@ -57,6 +57,12 @@
                 type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
     <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface"
                 type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+    <preference for="BlueMedia\BluePayment\Api\Data\CartInterface"
+                type="BlueMedia\BluePayment\Model\Data\Cart" />
+    <preference for="BlueMedia\BluePayment\Api\Data\CartItemInterface"
+                type="BlueMedia\BluePayment\Model\Data\CartItem" />
+    <preference for="BlueMedia\BluePayment\Api\Data\CartRuleInterface"
+                type="BlueMedia\BluePayment\Model\Data\CartRule"/>
 
     <virtualType name="AutopayFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>

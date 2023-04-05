@@ -1,10 +1,20 @@
 define([
     'jquery',
     'uiComponent',
-    'Magento_Customer/js/customer-data',
     'mage/url',
+    'mage/storage',
+    'Magento_Customer/js/customer-data',
+    'Magento_Customer/js/model/customer',
     'Magento_Ui/js/modal/alert'
-], function ($, Component, customerData, url, alert) {
+], function (
+    $,
+    Component,
+    url,
+    storage,
+    customerData,
+    customer,
+    alert
+) {
     'use strict';
 
     return Component.extend({
@@ -27,10 +37,19 @@ define([
             return this;
         },
 
+        /**
+         * Returns whether shortcut is run from catalog product page.
+         * @returns {boolean}
+         */
         isCatalogProduct: function () {
             return this.scope === 'product';
         },
 
+        /**
+         * Wait until SDK will be available.
+         * @param name
+         * @param callback
+         */
         whenAvailable: function (name, callback) {
             const interval = 10; // ms
             window.setTimeout(function () {
@@ -42,6 +61,11 @@ define([
             }.bind(this), interval);
         },
 
+        /**
+         * Init Autopay button.
+         * @param withButton
+         * @returns {Promise<unknown>}
+         */
         initAutopay: function (withButton = true) {
             let button,
                 container = $('.' + this.selector + ' .autopay-button');
@@ -87,19 +111,26 @@ define([
             });
         },
 
+        /**
+         * Before checkout event (from Autopay SDK).
+         * @returns {Promise<unknown>}
+         */
         onBeforeCheckout: function () {
             this.log('onBeforeCheckout executed');
 
             return new Promise((resolve, reject) => {
                 if (this.isCatalogProduct()) {
                     if (!this.productAddedToCart) {
+                        // Clear whole cart
+                        this.clearCart(reject);
+
+                        // After clear cart
                         $(document).one('autopay:cart-cleared', () => {
                             this.log('Cart cleared event');
-
-                            // After clear Cart
                             this.addToCart(reject);
                         });
 
+                        // After add to cart
                         $(document).one('ajax:addToCart', () => {
                             // After add to cart
                             this.log('addToCart event');
@@ -113,27 +144,28 @@ define([
                                     this.log('customer-data-reloaded event');
 
                                     // After customerData reloaded
-                                    this.setAutopayData(resolve, reject);
+                                    this.setAutopay(resolve, reject);
                                 });
                             }
                         });
-
-                        // Clear whole cart
-                        this.clearCart(reject);
                     } else {
                         this.log('Product already added to cart');
 
                         // If already added - just set data and resolve promise.
-                        this.setAutopayData(resolve, reject);
+                        this.setAutopay(resolve, reject);
                     }
                 } else {
                     this.log('Not catalog product');
 
-                    this.setAutopayData(resolve, reject);
+                    this.setAutopay(resolve, reject);
                 }
             });
         },
 
+        /**
+         * Add product to cart.
+         * @param reject
+         */
         addToCart: function (reject) {
             const $form = $('.' + this.selector + ' .autopay-button').parents('form').first();
             $form.trigger('submit');
@@ -156,6 +188,30 @@ define([
             }
         },
 
+        /**
+         * Set payment method to Autopay and set cart data in Autopay SDK.
+         * @param resolve
+         * @param reject
+         */
+        setAutopay: function (resolve, reject) {
+            this.setPaymentMethod()
+                .then((result) => {
+                    if (result) {
+                        this.setAutopayData(resolve, reject);
+                    } else {
+                        reject('Error during setPaymentMethod', result);
+                    }
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        },
+
+        /**
+         * Send transaction data to Autopay SDK.
+         * @param resolve
+         * @param reject
+         */
         setAutopayData: function (resolve, reject) {
             const cartData = customerData.get('cart')();
             const minimumOrderConfig = this.minimumOrderConfiguration;
@@ -198,7 +254,13 @@ define([
             resolve();
         },
 
+        /**
+         * Calculate total amount without shipping.
+         * @param cartData
+         * @returns {string}
+         */
         calculateTotalWithoutShipping: function (cartData) {
+            console.log(cartData);
             let totalWithoutShipping = parseFloat(cartData.grand_total);
             let shippingInclTax = parseFloat(cartData.shipping_incl_tax);
 
@@ -209,6 +271,10 @@ define([
             return totalWithoutShipping.toFixed(2);
         },
 
+        /**
+         * Remove all products from cart.
+         * @param reject
+         */
         clearCart: function (reject) {
             this.log('Clear cart started');
 
@@ -239,6 +305,9 @@ define([
                 });
         },
 
+        /**
+         * Listen to event when cart is cleared.
+         */
         onRemoveFromCartListener: function () {
             $(document).on('ajax:removeFromCart', function (event, data) {
                 this.log('Remove from cart event');
@@ -246,17 +315,54 @@ define([
             });
         },
 
+        /**
+         * Set AutoPay as payment method.
+         * @returns {Promise<boolean>}
+         */
+        setPaymentMethod: function () {
+            return new Promise((resolve, reject) => {
+                storage.post(
+                    '/bluepayment/autopay/setpaymentmethod',
+                    {},
+                    true,
+                    'application/json',
+                    {}
+                ).done((response) => {
+                    if (response.success === false) {
+                        this.log('Set payment method failed', response);
+                        reject('Set payment method failed');
+                    } else {
+                        this.log('Set payment method success', response);
+                        resolve(true);
+                    }
+                }).fail((response) => {
+                    this.log('Set payment method failed', response);
+                    reject('Set payment method failed');
+                })
+            })
+        },
+
+        /**
+         * Log message to console.
+         * @param message
+         * @param object
+         */
         log: function (message, object = null) {
             message = '[Autopay]' + this.formatConsoleDate(new Date()) + message;
 
             console.log(message, object);
         },
 
+        /**
+         * Pretty print date.
+         * @param date
+         * @returns {string}
+         */
         formatConsoleDate: (date) => {
-            var hour = date.getHours();
-            var minutes = date.getMinutes();
-            var seconds = date.getSeconds();
-            var milliseconds = date.getMilliseconds();
+            const hour = date.getHours();
+            const minutes = date.getMinutes();
+            const seconds = date.getSeconds();
+            const milliseconds = date.getMilliseconds();
 
             return '[' +
                 ((hour < 10) ? '0' + hour: hour) +

@@ -1,26 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Plugin;
 
 use Magento\Checkout\CustomerData\Cart;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Quote\Model\Quote;
 
 class CartDataPlugin
 {
     /** @var Session */
     protected $checkoutSession;
 
+    /**
+     * CartDataPlugin constructor.
+     *
+     * @param Session $checkoutSession
+     */
     public function __construct(Session $checkoutSession)
     {
         $this->checkoutSession = $checkoutSession;
     }
 
     /**
-     * @param  Cart  $subject
-     * @param  array  $result
+     * Extend get section data with data needed for AutoPay.
+     *
+     * @param  Cart $subject
+     * @param  array $result
      *
      * @return array
      * @throws LocalizedException

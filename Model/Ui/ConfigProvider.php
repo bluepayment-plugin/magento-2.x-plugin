@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model\Ui;
 
-use BlueMedia\BluePayment\Gateway\Config;
 use BlueMedia\BluePayment\Model\Autopay\ConfigProvider as AutopayConfigProvider;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Framework\View\Asset\Repository as AssetRepository;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Api\Data;
 
 interface ShippingMethodInterface
