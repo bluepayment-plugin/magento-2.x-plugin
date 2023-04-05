@@ -149,9 +149,9 @@
                 type="BlueMedia\BluePayment\Model\Data\PlaceOrderResponseData"/>
 
     <preference for="BlueMedia\BluePayment\Api\ShouldShowAutopayInterface"
-                type="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay"/>
+                type="BlueMedia\BluePayment\Model\Autopay\ShowAutopay"/>
 
-    <type name="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay">
+    <type name="BlueMedia\BluePayment\Model\Autopay\ShowAutopay">
         <arguments>
             <argument name="requestKey" xsi:type="string">test_autopay</argument>
         </arguments>
@@ -183,4 +183,8 @@
             <argument name="base" xsi:type="object">BlueMedia\BluePayment\Model\Config\Source\AutopayArrangement</argument>
         </arguments>
     </virtualType>
+    <type name="Magento\Framework\App\ActionInterface">
+        <plugin name="add_autopay_cookie"
+                type="BlueMedia\BluePayment\Plugin\AutopayCookie"/>
+    </type>
 </config>

@@ -65,8 +65,10 @@ This mode is useful when you want to test APC on your production environment, bu
 ### Change request key
 By default, key to enable button in hidden mode is `test_autopay`.
 You can change it by adding to `di.xml`:
+
 ```xml
-<type name="BlueMedia\BluePayment\Model\Autopay\ShouldShowAutopay">
+
+<type name="BlueMedia\BluePayment\Model\Autopay\ShowAutopay">
     <arguments>
         <argument name="requestKey" xsi:type="string">test_autopay</argument>
     </arguments>

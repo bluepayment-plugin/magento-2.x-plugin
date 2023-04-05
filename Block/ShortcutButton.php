@@ -80,7 +80,7 @@ class ShortcutButton extends Template implements ShortcutInterface
      */
     public function isActive(): bool
     {
-        return $this->shouldShowAutopay->execute();
+        return $this->shouldShowAutopay->shouldShow();
     }
 
     /**

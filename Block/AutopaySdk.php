@@ -42,7 +42,7 @@ class AutopaySdk extends Template
      */
     public function isActive(): bool
     {
-        return $this->shouldShowAutopay->execute();
+        return $this->shouldShowAutopay->shouldShow();
     }
 
     /**
