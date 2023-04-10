@@ -184,7 +184,7 @@ define([
          */
         afterPlaceOrder: function () {
             const gatewayId = model.selectedGatewayId();
-            let redirectUrl = url.build('bluepayment/processing/create')
+            let redirectUrl = url.build('bluepayment/processing/create');
 
             if (gatewayId) {
                 redirectUrl += '?gateway_id=' + gatewayId;

@@ -23,8 +23,9 @@ define([
          */
         isAvailable: function () {
             try {
-                return window.ApplePaySession && ApplePaySession.canMakePayments();
+                return window.ApplePaySession && window.ApplePaySession.canMakePayments();
             } catch (e) {
+                console.log(e);
             }
 
             return false;

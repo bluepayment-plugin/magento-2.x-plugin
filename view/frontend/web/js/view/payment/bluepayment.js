@@ -30,6 +30,16 @@ define([
 
     if (bluepaymentConfig.separated) {
         bluepaymentConfig.separated.forEach(function (method) {
+            if (method.sort_order >= 0 && !baseRendered) {
+                rendererList.push({
+                    type: bluepaymentType,
+                    component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',
+                    typeComparatorCallback: comparator
+                });
+
+                baseRendered = true;
+            }
+
             let component;
             switch (Number(method.gateway_id)) {
                 case model.gatewaysIds.blik:
@@ -63,18 +73,6 @@ define([
                     gateway_description: method.description
                 }
             });
-
-            if (method.sort_order >= 0 && !baseRendered) {
-                // @ToDo sorting in admin panel
-
-                rendererList.push({
-                    type: bluepaymentType,
-                    component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',
-                    typeComparatorCallback: comparator
-                });
-
-                baseRendered = true;
-            }
         });
     }
 

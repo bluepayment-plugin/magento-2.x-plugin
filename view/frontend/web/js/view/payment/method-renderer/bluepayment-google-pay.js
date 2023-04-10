@@ -5,8 +5,9 @@ define([
     'mage/url',
     'Magento_Checkout/js/model/quote',
     'Magento_Ui/js/modal/modal',
-    'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated',
     'BlueMedia_BluePayment/js/checkout-data',
+    'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
     'text!BlueMedia_BluePayment/template/wait-popup.html',
 ], function (
     $,
@@ -15,8 +16,9 @@ define([
     url,
     quote,
     modal,
-    Component,
     checkoutData,
+    Component,
+    config,
     popupTpl,
 ) {
     'use strict';
@@ -29,22 +31,21 @@ define([
             gateway_name: null,
             gateway_description: null,
         },
-        client: null,
+        client: ko.observable(false),
+        testMode: config.testMode,
         merchantInfo: null,
         acceptorId: null,
-        modal: modal(
-            {
-                title: $t('Waiting for the confirmation of the transaction.'),
-                autoOpen: false,
-                clickableOverlay: false,
-                buttons: [],
-                type: 'popup',
-                popupTpl: popupTpl,
-                keyEventHandlers: {},
-                modalClass: 'blik-modal',
-            },
-            $('<div />').html()
-        ),
+        modal: modal({
+            title: $t('Waiting for the confirmation of the transaction.'),
+            autoOpen: false,
+            clickableOverlay: false,
+            buttons: [],
+            type: 'popup',
+            popupTpl: popupTpl,
+            keyEventHandlers: {},
+            modalClass: 'blik-modal',
+        },
+        $('<div />').html()),
 
 
         /**
@@ -81,7 +82,7 @@ define([
          * @returns {boolean}
          */
         isAvailable: function () {
-            return this.client !== null;
+            return this.client() !== false;
         },
 
         /**
@@ -101,10 +102,11 @@ define([
                     self.merchantInfo = response.merchantInfo;
                     self.acceptorId = response.acceptorId.toString();
 
-                    self.client = new google.payments.api.PaymentsClient({
-                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
+                    let client = new google.payments.api.PaymentsClient({
+                        environment: self.testMode === "1" ? 'TEST' : 'PRODUCTION'
                     });
-                    self.client.isReadyToPay({
+                    self.client(client);
+                    client.isReadyToPay({
                         apiVersion: 2,
                         apiVersionMinor: 0,
                         merchantInfo: this.merchantInfo,
@@ -121,8 +123,8 @@ define([
                             transactionData.transactionInfo.totalPriceStatus = 'NOT_CURRENTLY_KNOWN';
 
                             if (response.result) {
-                                self.client.prefetchPaymentData(transactionData);
-                                self.client.createButton({
+                                client.prefetchPaymentData(transactionData);
+                                client.createButton({
                                     onClick: function () {}
                                 });
                             } else {
@@ -182,7 +184,7 @@ define([
         callGooglePayPayment: function () {
             const self = this;
 
-            self.client.loadPaymentData(self.getGooglePayTransactionData()).then(function (data) {
+            self.client().loadPaymentData(self.getTransactionData()).then(function (data) {
                 self.placeOrderAfterValidation(function () {
                     const token = data.paymentMethodData.tokenizationData.token;
                     const urlResponse = url.build('bluepayment/processing/create')
@@ -201,7 +203,7 @@ define([
                                 window.location.href = response.params.redirectUrl;
                             } else {
                                 if (response.params.paymentStatus) {
-                                    self.handleGooglePayStatus(response.params.paymentStatus, response.params);
+                                    self.handleStatus(response.params.paymentStatus, response.params);
                                 } else {
                                     console.error('Payment has no paymentStatus.');
                                 }

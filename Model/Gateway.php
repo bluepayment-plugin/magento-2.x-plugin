@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\GatewayInterface;
@@ -15,6 +17,8 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
     protected $_cacheTag = 'blue_gateway';
 
     /**
+     * Gateway constructor.
+     *
      * @return void
      */
     protected function _construct()
@@ -23,330 +27,431 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
     }
 
     /**
-     * @return array
+     * Return unique ID(s) for each object in system
+     *
+     * @return string[]
      */
-    public function getIdentities()
+    public function getIdentities(): array
     {
         return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
     /**
+     * Is gateway active (status is active and is not force disabled).
+     *
      * @return bool
      */
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->getStatus()
             && ! $this->isForceDisabled();
     }
 
     /**
+     * Returns whether gateway should be displayed as separated payment method.
+     *
      * @return bool
      */
-    public function isSeparatedMethod()
+    public function isSeparatedMethod(): bool
     {
         if (in_array($this->getGatewayId(), ConfigProvider::ALWAYS_SEPARATED)) {
             return true;
         }
 
-        return $this->getIsSeparatedMethod();
+        return (bool) $this->getData(self::IS_SEPARATED_METHOD);
     }
 
     /**
+     * Get Store ID for gateway.
+     *
      * @return int
      */
-    public function getStoreId()
+    public function getStoreId(): int
     {
         return $this->getData(self::STORE_ID);
     }
 
     /**
+     * Set Store ID for gateway.
+     *
      * @param int $store
      * @return GatewayInterface
      */
-    public function setStoreId($store)
+    public function setStoreId(int $store): GatewayInterface
     {
         return $this->setData(self::STORE_ID, $store);
     }
 
     /**
+     * Get gateway Service ID.
+     *
      * @return int
      */
-    public function getServiceId()
+    public function getServiceId(): int
     {
-        return $this->getData(self::SERVICE_ID);
+        return (int) $this->getData(self::SERVICE_ID);
     }
 
     /**
+     * Set gateway Service ID.
+     *
      * @param int $serviceId
      * @return GatewayInterface
      */
-    public function setServiceId($serviceId)
+    public function setServiceId(int $serviceId): GatewayInterface
     {
         return $this->setData(self::SERVICE_ID, $serviceId);
     }
 
     /**
+     * Get gateway currency.
+     *
      * @return string
      */
-    public function getCurrency()
+    public function getCurrency(): string
     {
         return $this->getData(self::CURRENCY);
     }
 
     /**
+     * Set gateway currency.
+     *
      * @param string $currency
      * @return GatewayInterface
      */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): GatewayInterface
     {
         return $this->setData(self::CURRENCY, $currency);
     }
 
     /**
+     * Get gateway status.
+     *
      * @return bool
      */
-    public function getStatus()
+    public function getStatus(): bool
     {
         return (bool) $this->getData(self::STATUS);
     }
 
     /**
+     * Set gateway status.
+     *
      * @param bool $status
      * @return GatewayInterface
      */
-    public function setStatus($status)
+    public function setStatus(bool $status): GatewayInterface
     {
         return $this->setData(self::STATUS, $status);
     }
 
     /**
+     * Get gateway ID.
+     *
      * @return int
      */
-    public function getGatewayId()
+    public function getGatewayId(): int
     {
-        return $this->getData(self::GATEWAY_ID);
+        return (int) $this->getData(self::GATEWAY_ID);
     }
 
     /**
+     * Set gateway ID.
+     *
      * @param int $gatewayId
      * @return GatewayInterface
      */
-    public function setGatewayId($gatewayId)
+    public function setGatewayId(int $gatewayId): GatewayInterface
     {
         return $this->setData(self::GATEWAY_ID, $gatewayId);
     }
 
     /**
+     * Get gateway bank name.
+     *
      * @return string
      */
-    public function getBankName()
+    public function getBankName(): string
     {
         return $this->getData(self::BANK_NAME);
     }
 
-    public function setBankName($bankName)
+    /**
+     * Set gateway bank name.
+     *
+     * @param string $bankName
+     * @return GatewayInterface
+     */
+    public function setBankName(string $bankName): GatewayInterface
     {
         return $this->setData(self::BANK_NAME, $bankName);
     }
 
     /**
+     * Get gateway name.
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->getData(self::NAME);
     }
 
-    public function setName($name)
+    /**
+     * Set gateway name.
+     *
+     * @param string $name
+     * @return GatewayInterface
+     */
+    public function setName(string $name): GatewayInterface
     {
         return $this->setData(self::NAME, $name);
     }
 
     /**
-     * @return string
+     * Get gateway description.
+     *
+     * @return ?string
      */
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->getData(self::DESCRIPTION);
     }
 
     /**
-     * @param string $description
+     * Set gateway description.
+     *
+     * @param ?string $description
      * @return GatewayInterface
      */
-    public function setDescription($description)
+    public function setDescription(?string $description): GatewayInterface
     {
         return $this->setData(self::DESCRIPTION, $description);
     }
 
     /**
+     * Get gateway sort order.
+     *
      * @return int
      */
-    public function getSortOrder()
+    public function getSortOrder(): int
     {
         return (int) $this->getData(self::SORT_ORDER);
     }
 
-    public function setSortOrder($sortOrder)
+    /**
+     * Set gateway sort order.
+     *
+     * @param int $sortOrder
+     * @return GatewayInterface
+     */
+    public function setSortOrder(int $sortOrder): GatewayInterface
     {
         return $this->setData(self::SORT_ORDER, $sortOrder);
     }
 
     /**
+     * Get gateway type.
+     *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->getData(self::TYPE);
     }
 
-    public function setType($type)
+    /**
+     * Get gateway type.
+     *
+     * @param string $type
+     * @return GatewayInterface
+     */
+    public function setType(string $type): GatewayInterface
     {
         return $this->setData(self::TYPE, $type);
     }
 
     /**
+     * Get gateway logo url.
+     *
      * @return string
      */
-    public function getLogoUrl()
+    public function getLogoUrl(): string
     {
         return $this->getData(self::LOGO_URL);
     }
 
-    public function setLogoUrl($logoUrl)
+    /**
+     * Set gateway logo url.
+     *
+     * @param string $logoUrl
+     * @return GatewayInterface
+     */
+    public function setLogoUrl(string $logoUrl): GatewayInterface
     {
         return $this->setData(self::LOGO_URL, $logoUrl);
     }
 
     /**
+     * Get whether gateway uses custom logo.
+     *
      * @return bool
      */
-    public function getUseOwnLogo()
+    public function shouldUseOwnLogo(): bool
     {
         return (bool) $this->getData(self::USE_OWN_LOGO);
     }
 
     /**
+     * Set whether gateway uses custom logo.
+     *
      * @param bool $useOwnLogo
      * @return GatewayInterface
      */
-    public function setUseOwnLogo($useOwnLogo)
+    public function setUseOwnLogo(bool $useOwnLogo): GatewayInterface
     {
         return $this->setData(self::USE_OWN_LOGO, $useOwnLogo);
     }
 
     /**
+     * Get gateway logo path.
+     *
      * @return string
      */
-    public function getLogoPath()
+    public function getLogoPath(): string
     {
         return $this->getData(self::LOGO_PATH);
     }
 
     /**
+     * Set gateway logo path.
+     *
      * @param string $logoPath
      * @return GatewayInterface
      */
-    public function setLogoPath($logoPath)
+    public function setLogoPath(string $logoPath): GatewayInterface
     {
         return $this->setData(self::LOGO_PATH, $logoPath);
     }
 
     /**
+     * Get gateway status date (last refresh).
+     *
      * @return string
      */
-    public function getStatusDate()
+    public function getStatusDate(): string
     {
         return $this->getData(self::STATUS_DATE);
     }
 
     /**
+     * Set gateway status date (last refresh).
+     *
      * @param string $statusDate
      * @return GatewayInterface
      */
-    public function setStatusDate($statusDate)
+    public function setStatusDate(string $statusDate): GatewayInterface
     {
         return $this->setData(self::STATUS_DATE, $statusDate);
     }
 
     /**
-     * @return bool
-     */
-    public function getIsSeparatedMethod()
-    {
-        return (bool) $this->getData(self::IS_SEPARATED_METHOD);
-    }
-
-    /**
+     * Sets whether gateway should be displayed as separated payment method.
+     *
      * @param bool $isSeparatedMethod
      * @return GatewayInterface
      */
-    public function setIsSeparatedMethod($isSeparatedMethod)
+    public function setIsSeparatedMethod(bool $isSeparatedMethod): GatewayInterface
     {
         return $this->setData(self::IS_SEPARATED_METHOD, $isSeparatedMethod);
     }
 
     /**
+     * Is gateway force disabled.
+     *
      * @return bool
      */
-    public function isForceDisabled()
+    public function isForceDisabled(): bool
     {
         return (bool) $this->getData(self::IS_FORCE_DISABLED);
     }
 
     /**
+     * Set should gateway be force disabled.
+     *
      * @param bool $forceDisable
      * @return GatewayInterface
      */
-    public function setForceDisable($forceDisable)
+    public function setForceDisable(bool $forceDisable): GatewayInterface
     {
         return $this->setData(self::IS_FORCE_DISABLED, $forceDisable);
     }
 
     /**
-     * @inheritDoc
+     * Get gateway minimal amount.
+     *
+     * @return ?float
      */
-    public function getMinAmount()
+    public function getMinAmount(): ?float
     {
-        return $this->getData(self::MIN_AMOUNT);
+        return $this->getData(self::MIN_AMOUNT)
+            ? (float) $this->getData(self::MIN_AMOUNT)
+            : null;
     }
 
     /**
-     * @inheritDoc
+     * Set gateway minimal amount.
+     *
+     * @param ?float $minAmount
+     * @return GatewayInterface
      */
-    public function setMinAmount($minAmount)
+    public function setMinAmount(?float $minAmount): GatewayInterface
     {
         return $this->setData(self::MIN_AMOUNT, $minAmount);
     }
 
     /**
-     * @inheritDoc
+     * Get gateway maximal amount.
+     *
+     * @return ?float
      */
-    public function getMaxAmount()
+    public function getMaxAmount(): ?float
     {
-        return $this->getData(self::MAX_AMOUNT);
+        return $this->getData(self::MAX_AMOUNT)
+            ? (float) $this->getData(self::MAX_AMOUNT)
+            : null;
     }
 
     /**
-     * @inheritDoc
+     * Set gateway maximal amount.
+     *
+     * @param ?float $maxAmount
+     * @return GatewayInterface
      */
-    public function setMaxAmount($maxAmount)
+    public function setMaxAmount(?float $maxAmount): GatewayInterface
     {
         return $this->setData(self::MAX_AMOUNT, $maxAmount);
     }
 
     /**
-     * @inheritDoc
+     * Get gateway minimal validity time.
+     *
+     * @return ?float
      */
-    public function getMinValidityTime()
+    public function getMinValidityTime(): ?float
     {
-        return $this->getData(self::MIN_VALIDITY_TIME);
+        return $this->getData(self::MIN_VALIDITY_TIME)
+            ? (float) $this->getData(self::MIN_VALIDITY_TIME)
+            : null;
     }
 
     /**
-     * @inheritDoc
+     * Set gateway minimal validity time.
+     *
+     * @param ?float $minValidityTime
+     * @return GatewayInterface
      */
-    public function setMinValidityTime($minValidityTime)
+    public function setMinValidityTime(?float $minValidityTime): GatewayInterface
     {
         return $this->setData(self::MIN_VALIDITY_TIME, $minValidityTime);
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\GatewayInterface;
@@ -269,7 +271,7 @@ class ConfigProvider implements ConfigProviderInterface
 
             $amount = $this->checkoutSession->getQuote()->getGrandTotal();
 
-            $gateways = $this->getActiveGateways($currency, $amount);
+            $gateways = $this->getActiveGateways($currency, (float) $amount);
 
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
@@ -349,7 +351,7 @@ class ConfigProvider implements ConfigProviderInterface
     private function prepareGatewayStructure(GatewayInterface $gateway): array
     {
         $logoUrl = $gateway->getLogoUrl();
-        if ($gateway->getUseOwnLogo()) {
+        if ($gateway->shouldUseOwnLogo()) {
             $logoUrl = $gateway->getLogoPath();
         }
 

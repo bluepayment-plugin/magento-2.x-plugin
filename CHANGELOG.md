@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.X
+- Dodaliśmy możliwość ustawienia metody płatności powyżej zbiorczą metodą "Blue Media" (płatność przelewem).
+- Wykonaliśmy refactoring kodu front-end (JS) dla wszystkich kanałów Blue Media.
+
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
 - Dodaliśmy informację o środowisku testowym w panelu administracyjnym.

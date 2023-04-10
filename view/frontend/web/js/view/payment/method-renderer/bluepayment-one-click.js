@@ -3,6 +3,7 @@ define([
     'ko',
     'mage/url',
     'mage/translate',
+    'Magento_Checkout/js/action/redirect-on-success',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-card',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
     'BlueMedia_BluePayment/js/checkout-data',
@@ -11,6 +12,7 @@ define([
     ko,
     url,
     $t,
+    redirectOnSuccessAction,
     Component,
     config,
     checkoutData,
@@ -30,6 +32,7 @@ define([
             oneClickAgreement: config.oneClickAgreement,
         },
         selectedCard: ko.observable(-1),
+        redirectAfterPlaceOrder: !config.iframeEnabled,
 
         /**
          * After place order callback.
@@ -37,8 +40,16 @@ define([
          * @returns {boolean}
          */
         afterPlaceOrder: function () {
-            this.iframeEnabled = (this.selectedCard() == -1);
-            return this._super();
+            if (this.iframeEnabled && this.selectedCard() == -1) {
+                this.callIframePayment();
+                return false;
+            } else {
+                redirectOnSuccessAction.redirectUrl = url.build('bluepayment/processing/create')
+                    + '?gateway_id=' + this.gateway_id
+                    + '&card_index=' + this.selectedCard();
+
+                this.redirectAfterPlaceOrder = true;
+            }
         },
 
         /**

@@ -153,26 +153,10 @@
                 .radio {
                     display: none;
                 }
-            }
 
-            .card-option {
-                float: left;
-                width: 50%;
-                height: 84px;
-                position: relative;
-                border: 1px solid #e6e6e6;
-                margin: -1px 0 0 -1px;
-                box-sizing: border-box;
-
-                &._active {
-                    outline: 2px solid #a6a6a6;
-                    outline-offset: -2px;
-                    z-index: 1;
+                .payment-logo {
+                    max-height: 80px;
                 }
-            }
-
-            .payment-logo {
-                max-height: 80px;
             }
 
             input.radio {
@@ -198,6 +182,55 @@
                 }
                 &.title {
                     font-size: 14px;
+                }
+            }
+        }
+
+        /* One-click payment gateway */
+        .bluepayment_1503-options-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            border-width: 1px 0 0 1px;
+            border-style: solid;
+            border-color: transparent;
+            display: flex;
+            flex-wrap: wrap;
+
+            .card-option {
+                float: left;
+                width: 50%;
+                height: 84px;
+                position: relative;
+                border: 1px solid #e6e6e6;
+                margin: -1px 0 0 -1px;
+                box-sizing: border-box;
+
+                &._active {
+                    outline: 2px solid #a6a6a6;
+                    outline-offset: -2px;
+                    z-index: 1;
+                }
+
+                .radio {
+                    height: 13px;
+                    margin: 0;
+                    position: absolute;
+                    top: calc(50% - 6px);
+                    left: 20px;
+                }
+
+                .payment-logo {
+                    max-height: 80px;
+                    margin-left: 40px;
+                }
+
+                .details {
+                    left: 150px;
+                    top: 50%;
+                    position: absolute;
+                    transform: translateY(-50%);
+                    padding-right: 10px;
                 }
             }
         }
@@ -324,29 +357,18 @@
     }
 }
 
-.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__l) {
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = 768px) {
     .blue-payment {
         .bluepayment-options-list {
+            justify-content: space-between;
+
             .payment-option {
-                width: 100%;
-
-                label {
-                    margin-left: 0;
-                    &:before {
-                        left: 10px;
-                    }
-                }
-                &.hide-option{
-                    display: none;
-                }
+                width: 150px;
             }
-            .mobile-show-more{
-                text-align: center;
-                float: left;
-                width: 100%;
-                padding: 30px 0 0;
+        }
 
-            }
+        .payment-method-title {
+            width: auto;
         }
     }
 }

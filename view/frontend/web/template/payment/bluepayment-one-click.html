@@ -39,12 +39,14 @@
         <fieldset class="fieldset">
             <div class="payment-method-note">
                 <div>
-                    <ul data-bind="foreach: cards, attr: {class: getCode() + '-options-list clearfix'}">
-                        <li data-bind="attr:{class: 'card-option'}">
+                    <div data-bind="foreach: cards, attr: {class: getCode() + '-options-list clearfix'}">
+                        <label class="card-option" data-bind="
+                            for: 'bluepayment_card_' + index,
+                            click: $parent.selectCard.bind($parent)
+                        ">
                             <input required
                                    data-bind="
                                        attr: {id: 'bluepayment_card_' + index, value: index},
-                                       click: $parent.selectCard.bind($parent)
                                    "
                                    name="payment_method_bluepayment_card_index"
                                    class="radio"
@@ -52,14 +54,14 @@
                             />
 
                             <label data-bind="attr:{for: 'bluepayment_card_' + index }">
-                                <img data-bind="attr:{src: logo}" class="payment-logo"/>
+                                <img data-bind="attr:{src: logo, alt: number}" class="payment-logo" alt="" />
 
                                 <span class="details">
                                     <span class="title" data-bind="text: number"></span>
                                 </span>
                             </label>
-                        </li>
-                    </ul>
+                        </label>
+                    </div>
                 </div>
             </div>
         </fieldset>
