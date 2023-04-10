@@ -6,8 +6,7 @@ define([
     'Magento_Checkout/js/action/set-payment-information',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Checkout/js/action/select-payment-method',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-selected-gateway',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-agreements'
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment',
 ], function (
     $,
     ko,
@@ -16,8 +15,7 @@ define([
     setPaymentInformationAction,
     additionalValidators,
     selectPaymentMethodAction,
-    selectedGateway,
-    agreements
+    model,
 ) {
     'use strict';
 
@@ -34,7 +32,7 @@ define([
                 'method': this.item.method,
                 'additional_data': {
                     'gateway_id': this.item.gateway_id,
-                    'agreements_ids': agreements.getCheckedAgreementsIds(),
+                    'agreements_ids': model.getCheckedAgreementsIds(),
                 }
             };
         },
@@ -57,7 +55,7 @@ define([
         },
 
         selectPaymentMethod: function () {
-            selectedGateway(this.item);
+            model.selectedGatewayId(this.item);
             selectPaymentMethodAction(this.getData());
             setPaymentInformationAction(this.messageContainer, this.getData());
 

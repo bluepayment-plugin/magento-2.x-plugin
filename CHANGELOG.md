@@ -1,11 +1,17 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.X
+- Dodaliśmy możliwość ustawienia metody płatności powyżej zbiorczą metodą "Blue Media" (płatność przelewem).
+- Wykonaliśmy refactoring kodu front-end (JS) dla wszystkich kanałów Blue Media.
+
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
 - Dodaliśmy informację o środowisku testowym w panelu administracyjnym.
 - Zaktualizowaliśmy opis metody **PayPo**.
 - Poprawiliśmy błąd z niepoprawnym użyciem metody `array_contains` zamiast `in_array` - [GitHub #8](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/8).
 - Poprawiliśmy błąd z brakiem komentarza o zwrocie do szczegółów zamówienia w przypadku opcji **-- Nie zmieniaj statusu--**.
+- Ustandaryzowaliśmy tekst **Klucz konfiguracyjny (hash)** (wcześniej _Klucz współdzielony_) w konfiguracji modułu.
+- Dodaliśmy informację o aktualnej wersji platformy oraz moduły podczas rozpoczęcia transakcji.
 
 ## Wersja 2.21.3
 - Dodaliśmy opcji "Wyłącz link kontynuacji płatności wraz z wygaśnięciem transakcji".

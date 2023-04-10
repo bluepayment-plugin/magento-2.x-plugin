@@ -76,7 +76,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
     3. Ustaw **Tryb testowy (Test Mode)**
 3. Uzupełnij dane dotyczące obsługiwanych walut (otrzymasz je od Blue Media)
    1. **ID serwisu (Service partner ID)**
-   2. **Klucz współdzielony (Shared Key)** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Konfiguracja hasha** -> **klucz**
+   2. **Klucz konfiguracyjny (hash) (Configuration key (hash))** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Klucz konfiguracyjny (hash)**
       ![configuration3.png](docs/configuration3.png "Screenshot")
 4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
@@ -111,7 +111,9 @@ Moduł umożliwia automatyczne odświeżanie kanału płatności co 5 minut. Że
         - 1 – pierwsza pozycja na liście,
         - 2 – druga pozycja na liście,
         - ...
-        - 0 – ostatnia pozycja na liście.
+        - 0 – ostatnia pozycja na liście.  
+         
+       *W przypadku oddzielnych metod płatności, zbiorcza metoda **BlueMedia** (płatność przelewem) posiada domyślnie kolejność 1. Jeśli chcesz ustawić oddzielną metodę nad metodą Blue Media - wykorzystaj ujemne wartości (-5, -4, -3 itd.).* 
     10. **Rodzaj (Type)**.
     11. **Traktuj jako oddzielną metodę płatności (Is separated method)** – powoduje wyświetlanie danego kanału jako osobnej metody płatności. _BLIK, Karty płatnicze oraz kanały ratalne są zawsze wyświetlane jako osobne metody płatności._
     12. **Gateway Logo**

@@ -1,11 +1,17 @@
 # What's new in BluePayment?
 
+## Version 2.X
+- We added the ability to set the payment method above the bulk method "Blue Media" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Blue Media channels.
+
 ## Version 2.21.4
 - We have added a new payment method **Visa Mobile**.
 - We have added information about the test environment in the administration panel.
 - We have updated the description of **PayPo** method.
 - We have fixed a bug with incorrect use of `array_contains` method instead of `in_array` - [GitHub #8](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/8).
 - We have fixed a bug with missing return comment for order details in case of **--Do not change status--** option.
+- We have standardized the text **Configuration key (hash)** (formerly _Shared key_) in the module configuration.
+- We have added information about the current version of the platform and modules when starting a transaction.
 
 ## Version 2.21.3
 - We have added the option "Disable the payment continuation link with the expiration of the transaction".

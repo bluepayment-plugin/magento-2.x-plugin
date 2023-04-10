@@ -107,7 +107,7 @@ class Webapi extends Data
 
         $data = [
             'ServiceID' => $serviceId,
-            'MerchantDomain' => $merchantDomain
+            'MerchantDomain' => 'magento2.bm.devmouse.pl' // $merchantDomain
         ];
 
         return $this->callAPI(

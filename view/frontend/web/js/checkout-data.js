@@ -5,43 +5,34 @@ define([
 ], function ($, checkoutData, storage) {
     'use strict';
 
-    var cacheKey = 'checkout-data';
+    const cacheKey = 'checkout-data';
 
-    var getData = function () {
+    const getData = function () {
         return storage.get(cacheKey)();
     };
 
-    var saveData = function (checkoutData) {
+    const saveData = function (checkoutData) {
         storage.set(cacheKey, checkoutData);
     };
 
     return $.extend(checkoutData, {
-        setBlueMediaPaymentMethod: function (data) {
-            var obj = getData();
+        setBluepaymentGatewayId: function (data) {
+            const obj = getData();
 
-            obj.blueMediaSelectedPaymentMethod = data;
+            obj.bluepaymentGatewayId = data;
             saveData(obj);
         },
-        getBlueMediaPaymentMethod: function () {
-            return getData().blueMediaSelectedPaymentMethod;
-        },
-        setIndividualGatewayFlag: function (data) {
-            var obj = getData();
-
-            obj.individual_gateway = data;
-            saveData(obj);
-        },
-        getIndividualGatewayFlag: function () {
-            return getData().individual_gateway;
+        getBluepaymentGatewayId: function () {
+            return getData().bluepaymentGatewayId || null;
         },
         setCardIndex: function (index) {
-            var obj = getData();
+            const obj = getData();
 
             obj.card_index = index;
             saveData(obj);
         },
         getCardIndex: function () {
-            return getData().card_index;
+            return getData().card_index || null;
         }
     });
 });
