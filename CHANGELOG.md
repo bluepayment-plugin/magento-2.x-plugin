@@ -2,6 +2,7 @@
 
 ## Wersja 2.21.5
 - Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
+- Dodaliśmy stylowanie checkoutu dla modułu Mageplaza One Step Checkout.
 
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
