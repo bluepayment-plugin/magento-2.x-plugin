@@ -4,6 +4,10 @@
 - Dodaliśmy możliwość ustawienia metody płatności powyżej zbiorczą metodą "Blue Media" (płatność przelewem).
 - Wykonaliśmy refactoring kodu front-end (JS) dla wszystkich kanałów Blue Media.
 
+## Wersja 2.21.5
+- Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
+- Dodaliśmy stylowanie checkoutu dla modułu Mageplaza One Step Checkout.
+
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
 - Dodaliśmy informację o środowisku testowym w panelu administracyjnym.

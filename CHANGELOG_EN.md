@@ -4,6 +4,10 @@
 - We added the ability to set the payment method above the bulk method "Blue Media" (payment by wire transfer).
 - We refactored the front-end code (JS) for all Blue Media channels.
 
+## Version 2.21.5
+- We have fixed a bug with **Google Pay** method.
+- We have added checkout styling for the Mageplaza One Step Checkout module.
+
 ## Version 2.21.4
 - We have added a new payment method **Visa Mobile**.
 - We have added information about the test environment in the administration panel.
