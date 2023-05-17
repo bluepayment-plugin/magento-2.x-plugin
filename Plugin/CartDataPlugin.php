@@ -39,15 +39,15 @@ class CartDataPlugin
         $quote = $this->checkoutSession->getQuote();
         $address = $quote->getShippingAddress();
 
-        $result['cart_id'] = $quote->getId();
-        $result['currency'] = $quote->getQuoteCurrencyCode();
+        $result['bm_cart_id'] = $quote->getId();
+        $result['bm_currency'] = $quote->getQuoteCurrencyCode();
 
-        $result['grand_total'] = (float) $quote->getGrandTotal();
-        $result['tax_amount'] = $address->getBaseTaxAmount() + $address->getBaseDiscountTaxCompensationAmount();
-        $result['shipping_incl_tax'] = (float) $address->getShippingInclTax();
+        $result['bm_grand_total'] = (float) $quote->getGrandTotal();
+        $result['bm_tax_amount'] = $address->getBaseTaxAmount() + $address->getBaseDiscountTaxCompensationAmount();
+        $result['bm_shipping_incl_tax'] = (float) $address->getShippingInclTax();
 
-        $result['base_subtotal_with_discount'] = (float) $address->getBaseSubtotalWithDiscount();
-        $result['base_subtotal'] = (float) $address->getBaseSubtotal();
+        $result['bm_base_subtotal_with_discount'] = (float) $address->getBaseSubtotalWithDiscount();
+        $result['bm_base_subtotal'] = (float) $address->getBaseSubtotal();
 
         return $result;
     }

@@ -94,6 +94,9 @@ class QuoteManagement implements QuoteManagementInterface
     /** @var PlaceOrderResponseDataFactory */
     private $placeOrderResponseDataFactory;
 
+    /** @var GetCartDetails */
+    private $getCartDetails;
+
     /** @var Metadata */
     private $metadata;
 
@@ -117,6 +120,7 @@ class QuoteManagement implements QuoteManagementInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param PlaceOrderResponseFactory $placeOrderResponseFactory
      * @param PlaceOrderResponseDataFactory $placeOrderResponseDataFactory
+     * @param GetCartDetails $getCartDetails
      * @param Metadata $metadata
      * @param Logger $logger
      */

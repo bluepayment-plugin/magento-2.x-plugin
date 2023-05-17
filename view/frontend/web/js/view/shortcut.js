@@ -135,17 +135,10 @@ define([
                             // After add to cart
                             this.log('addToCart event');
 
-                            customerData.reload(['cart'], true);
-
                             if (!this.productAddedToCart) {
                                 reject('Product not added to cart');
                             } else {
-                                $(document).one('customer-data-reloaded', () => {
-                                    this.log('customer-data-reloaded event');
-
-                                    // After customerData reloaded
-                                    this.setAutopay(resolve, reject);
-                                });
+                                this.setAutopay(resolve, reject);
                             }
                         });
                     } else {
@@ -197,7 +190,14 @@ define([
             this.setPaymentMethod()
                 .then((result) => {
                     if (result) {
-                        this.setAutopayData(resolve, reject);
+                        customerData.reload(['cart'], true);
+
+                        $(document).one('customer-data-reloaded', () => {
+                            this.log('customer-data-reloaded event');
+
+                            // After customerData reloaded again
+                            this.setAutopayData(resolve, reject);
+                        });
                     } else {
                         reject('Error during setPaymentMethod', result);
                     }
@@ -220,10 +220,10 @@ define([
 
             // Validate minimum order amount
             if (minimumOrderConfig && minimumOrderConfig.active) {
-                const tax = minimumOrderConfig.includingTax ? cartData.tax_amount : 0;
+                const tax = minimumOrderConfig.includingTax ? cartData.bm_tax_amount : 0;
                 const amountToCompare = cartData.includingDiscount
-                    ? cartData.base_subtotal_with_discount
-                    : cartData.base_subtotal;
+                    ? cartData.bm_base_subtotal_with_discount
+                    : cartData.bm_base_subtotal;
 
                 if (amountToCompare + tax < minimumOrderConfig.amount) {
                     const text = (minimumOrderConfig.text)
@@ -241,10 +241,10 @@ define([
             }
 
             const data = {
-                id: cartData.cart_id,
+                id: cartData.bm_cart_id,
                 amount: this.calculateTotalWithoutShipping(cartData),
-                currency: cartData.currency,
-                label: cartData.cart_id,
+                currency: cartData.bm_currency,
+                label: cartData.bm_cart_id,
                 productList: cartData.items,
             };
 
@@ -260,9 +260,8 @@ define([
          * @returns {string}
          */
         calculateTotalWithoutShipping: function (cartData) {
-            console.log(cartData);
-            let totalWithoutShipping = parseFloat(cartData.grand_total);
-            let shippingInclTax = parseFloat(cartData.shipping_incl_tax);
+            let totalWithoutShipping = parseFloat(cartData.bm_grand_total);
+            let shippingInclTax = parseFloat(cartData.bm_shipping_incl_tax);
 
             if (shippingInclTax && ! isNaN(shippingInclTax)) {
                 totalWithoutShipping -= shippingInclTax;

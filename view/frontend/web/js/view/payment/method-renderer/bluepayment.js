@@ -655,6 +655,7 @@ define([
 
         getGPayTransactionData: function () {
             return {
+                environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION',
                 apiVersion: 2,
                 apiVersionMinor: 0,
                 merchantInfo: this.GPayMerchantInfo,
@@ -701,6 +702,7 @@ define([
                         environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
                     });
                     self.GPayClient.isReadyToPay({
+                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION',
                         apiVersion: 2,
                         apiVersionMinor: 0,
                         merchantInfo: this.GPayMerchantInfo,
@@ -711,7 +713,7 @@ define([
                                     allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
                                     allowedCardNetworks: [/*"AMEX", "DISCOVER", "JCB", */"MASTERCARD", "VISA"]
                                 }
-                        }
+                            }
                         ]
                     })
                         .then(function (response) {
