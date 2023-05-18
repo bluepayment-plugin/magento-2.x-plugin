@@ -1,7 +1,7 @@
 # Co nowego w BluePayment?
 
-## Wersja [IN PROGRESS]
-- Dodaliśmy obsługę Autopay
+## Wersja 2.21.5
+- Poprawiliśmy wyświetlanie metody płatności w przypadku gdy dostępna jest tylko płatność kartą.
 
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
