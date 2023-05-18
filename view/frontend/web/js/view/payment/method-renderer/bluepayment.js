@@ -653,6 +653,7 @@ define([
 
         getGPayTransactionData: function () {
             return {
+                environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                 apiVersion: 2,
                 apiVersionMinor: 0,
                 merchantInfo: this.GPayMerchantInfo,
@@ -671,7 +672,7 @@ define([
                                 'gatewayMerchantId': this.bluePaymentAcceptorId
                             }
                         }
-                }
+                    }
                 ],
                 shippingAddressRequired: false,
                 transactionInfo: {
@@ -696,9 +697,10 @@ define([
                     self.bluePaymentAcceptorId = response.acceptorId.toString();
 
                     self.GPayClient = new google.payments.api.PaymentsClient({
-                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION'
                     });
                     self.GPayClient.isReadyToPay({
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                         apiVersion: 2,
                         apiVersionMinor: 0,
                         merchantInfo: this.GPayMerchantInfo,
