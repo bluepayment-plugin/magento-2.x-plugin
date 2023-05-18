@@ -1,8 +1,11 @@
 # Co nowego w BluePayment?
 
-## Wersja 2.21.5
+## Wersja 2.21.6
 - Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
 - Dodaliśmy stylowanie checkoutu dla modułu Mageplaza One Step Checkout.
+
+## Wersja 2.21.5
+- Poprawiliśmy wyświetlanie metody płatności w przypadku gdy dostępna jest tylko płatność kartą.
 
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.

@@ -62,7 +62,8 @@ class ExtendPaymentMethod
             if (isset($result['bluepayment'])) {
                 // Remove if any gateway is not available
                 $options = $config['bluePaymentOptions'];
-                if ($options !== false && count($options) === 0) {
+                $separated = $config['bluePaymentSeparated'];
+                if ($options !== false && count($options) === 0 && count($separated) === 0) {
                     unset($result['bluepayment']);
                 }
             }
