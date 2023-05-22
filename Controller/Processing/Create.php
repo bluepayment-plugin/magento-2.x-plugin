@@ -302,8 +302,8 @@ class Create extends Action
                     'OrderID' => $orderId,
                     'GatewayID' => $gatewayId,
                     'hash' => $hash,
-                    'paymentStatus' => property_exists($xml, 'status') ? (string) $xml->status : null,
-                    'redirectUrl' => property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null,
+                    'paymentStatus' => property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null,
+                    'redirectUrl' => property_exists($xml, 'redirectUrl') ? (string) $xml->redirectUrl : null,
                 ];
                 $result = $this->prepareGPayJsonResponse($this->bluepayment->getUrlGateway(), $params);
 
@@ -351,7 +351,7 @@ class Create extends Action
                     return $response->setRedirect($redirectUrl);
                 }
 
-                $paymentStatus = property_exists($xml, 'status') ? (string) $xml->status : null;
+                $paymentStatus = property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null;
                 if ($paymentStatus == Payment::PAYMENT_STATUS_SUCCESS) {
                     // Got success status
 
