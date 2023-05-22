@@ -379,7 +379,7 @@ class Create extends Action
             );
             $xml = $this->sendRequest($params);
 
-            $redirecturl = property_exists($xml, 'redirecturl') ? (string)$xml->redirectUrl : null;
+            $redirecturl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
 
             if ($redirecturl !== null) {
                 $this->logger->info('CREATE:' . __LINE__, ['redirecturl' => $redirecturl]);
