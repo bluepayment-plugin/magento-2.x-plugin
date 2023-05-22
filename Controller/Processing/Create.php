@@ -341,7 +341,7 @@ class Create extends Action
                     return $resultJson;
                 }
 
-                $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+                $redirectUrl = property_exists($xml, 'redirectUrl') ? (string) $xml->redirectUrl : null;
                 if ($redirectUrl) {
                     // 3DS
                     $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
@@ -379,7 +379,7 @@ class Create extends Action
             );
             $xml = $this->sendRequest($params);
 
-            $redirectUrl = property_exists($xml, 'redirecturl') ? (string)$xml->redirecturl : null;
+            $redirectUrl = property_exists($xml, 'redirectUrl') ? (string)$xml->redirectUrl : null;
 
             if ($redirectUrl !== null) {
                 $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
