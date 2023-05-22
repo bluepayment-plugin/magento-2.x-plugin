@@ -303,7 +303,7 @@ class Create extends Action
                     'GatewayID' => $gatewayId,
                     'hash' => $hash,
                     'paymentStatus' => property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null,
-                    'redirectUrl' => property_exists($xml, 'redirectUrl') ? (string) $xml->redirectUrl : null,
+                    'redirecturl' => property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null,
                 ];
                 $result = $this->prepareGPayJsonResponse($this->bluepayment->getUrlGateway(), $params);
 
@@ -341,14 +341,14 @@ class Create extends Action
                     return $resultJson;
                 }
 
-                $redirectUrl = property_exists($xml, 'redirectUrl') ? (string) $xml->redirectUrl : null;
-                if ($redirectUrl) {
+                $redirecturl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+                if ($redirecturl) {
                     // 3DS
-                    $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
+                    $this->logger->info('CREATE:' . __LINE__, ['redirecturl' => $redirecturl]);
 
                     /** @var Http $response */
                     $response = $this->getResponse();
-                    return $response->setRedirect($redirectUrl);
+                    return $response->setRedirect($redirecturl);
                 }
 
                 $paymentStatus = property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null;
@@ -379,10 +379,10 @@ class Create extends Action
             );
             $xml = $this->sendRequest($params);
 
-            $redirectUrl = property_exists($xml, 'redirectUrl') ? (string)$xml->redirectUrl : null;
+            $redirecturl = property_exists($xml, 'redirecturl') ? (string)$xml->redirectUrl : null;
 
-            if ($redirectUrl !== null) {
-                $this->logger->info('CREATE:' . __LINE__, ['redirectUrl' => $redirectUrl]);
+            if ($redirecturl !== null) {
+                $this->logger->info('CREATE:' . __LINE__, ['redirecturl' => $redirecturl]);
 
                 $waitingPage = $this->scopeConfig->getValue(
                     'payment/bluepayment/waiting_page',
@@ -396,7 +396,7 @@ class Create extends Action
                     );
 
                     // Redirect only if set in settings
-                    $session->setRedirectUrl($redirectUrl);
+                    $session->setRedirectUrl($redirecturl);
                     $session->setWaitingPageSeconds($waitingPageSeconds);
 
                     $response = $this->getResponse();
@@ -405,7 +405,7 @@ class Create extends Action
 
                 /** @var Http $response */
                 $response = $this->getResponse();
-                return $response->setRedirect($redirectUrl);
+                return $response->setRedirect($redirecturl);
             }
 
             // Otherwise - redirect to "back" page
