@@ -302,8 +302,8 @@ class Create extends Action
                     'OrderID' => $orderId,
                     'GatewayID' => $gatewayId,
                     'hash' => $hash,
-                    'paymentStatus' => property_exists($xml, 'paymentStatus') ? (string) $xml->paymentStatus : null,
-                    'redirecturl' => property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null,
+                    'paymentStatus' => property_exists($xml, 'status') ? (string) $xml->status : null, // GPay has "status" key
+                    'redirectUrl' => property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null,
                 ];
                 $result = $this->prepareGPayJsonResponse($this->bluepayment->getUrlGateway(), $params);
 
