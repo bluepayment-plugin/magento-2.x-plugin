@@ -261,7 +261,7 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $amount = $this->checkoutSession->getQuote()->getGrandTotal();
+            $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
 
             $gateways = $this->getActiveGateways($currency, $amount);
 

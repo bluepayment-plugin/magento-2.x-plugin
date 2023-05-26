@@ -631,21 +631,19 @@ define([
                         data: {'token': token},
                         type: "POST",
                         dataType: "json",
-                        }).done(function (response) {
-                            console.log(response);
-
-                            if (response.params) {
-                                if (response.params.redirectUrl) {
-                                    window.location.href = response.params.redirectUrl;
+                    }).done(function (response) {
+                        if (response.params) {
+                            if (response.params.redirectUrl) {
+                                window.location.href = response.params.redirectUrl;
+                            } else {
+                                if (response.params.paymentStatus) {
+                                    self.handleGPayStatus(response.params.paymentStatus, response.params);
                                 } else {
-                                    if (response.params.paymentStatus) {
-                                        self.handleGPayStatus(response.params.paymentStatus, response.params);
-                                    } else {
-                                        console.error('Payment has no paymentStatus.');
-                                    }
+                                    self.handleGPayStatus(undefined, response.params);
                                 }
                             }
-                        });
+                        }
+                    });
                 });
             })
                 .catch(function (errorMessage) {
@@ -655,6 +653,7 @@ define([
 
         getGPayTransactionData: function () {
             return {
+                environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                 apiVersion: 2,
                 apiVersionMinor: 0,
                 merchantInfo: this.GPayMerchantInfo,
@@ -673,7 +672,7 @@ define([
                                 'gatewayMerchantId': this.bluePaymentAcceptorId
                             }
                         }
-                }
+                    }
                 ],
                 shippingAddressRequired: false,
                 transactionInfo: {
@@ -698,9 +697,10 @@ define([
                     self.bluePaymentAcceptorId = response.acceptorId.toString();
 
                     self.GPayClient = new google.payments.api.PaymentsClient({
-                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION'
                     });
                     self.GPayClient.isReadyToPay({
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                         apiVersion: 2,
                         apiVersionMinor: 0,
                         merchantInfo: this.GPayMerchantInfo,

@@ -1,5 +1,9 @@
 # What's new in BluePayment?
 
+## Version 2.21.6
+- We have fixed a bug with **Google Pay** method.
+- We have added checkout styling for the Mageplaza One Step Checkout module.
+
 ## Version 2.21.5
 - We have fixed displaying the payment method when only card payment is available.
 
