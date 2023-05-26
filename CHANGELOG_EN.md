@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version 2.21.7
+- We have added new payment method **Spingo** - 
+
 ## Version 2.21.6
 - We have fixed a bug with **Google Pay** method.
 - We have added checkout styling for the Mageplaza One Step Checkout module.
