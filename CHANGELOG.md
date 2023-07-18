@@ -1,7 +1,7 @@
 # Co nowego w BluePayment?
 
 ## Wersja 2.21.7
-- Dodaliśmy metodę płatności **Spingo** - deferred payment for businesses.
+- Dodaliśmy metodę płatności **Spingo** - odroczone płatności dla firm.
 
 ## Wersja 2.21.6
 - Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
