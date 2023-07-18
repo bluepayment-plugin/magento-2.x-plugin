@@ -84,6 +84,7 @@ define([
             smartney: 700,
             hub: 702,
             paypo: 705,
+            spingo: 706,
             card: 1500,
             one_click: 1503,
             alior_installments: 1506,
@@ -303,6 +304,10 @@ define([
                 return $t('Visa Mobile');
             }
 
+            if (gatewayId === this.gatewayIds.spingo) {
+                return $t('Spingo');
+            }
+
             return gateway.name;
         },
 
@@ -334,6 +339,10 @@ define([
 
             if (gatewayId === this.gatewayIds.visa_mobile) {
                 return $t('Enter the phone number and confirm the payment in the mobile app.');
+            }
+
+            if (gatewayId === this.gatewayIds.spingo) {
+                return $t('Deferred payment for businesses');
             }
 
             return gateway.description;
