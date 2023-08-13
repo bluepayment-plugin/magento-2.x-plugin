@@ -28,6 +28,7 @@ class ConfigProvider implements ConfigProviderInterface
     public const SMARTNEY_GATEWAY_ID = 700;
     public const HUB_GATEWAY_ID = 702;
     public const PAYPO_GATEWAY_ID = 705;
+    public const SPINGO_GATEWAY_ID = 706;
     public const CARD_GATEWAY_ID = 1500;
     public const ONECLICK_GATEWAY_ID = 1503;
     public const ALIOR_INSTALLMENTS_GATEWAY_ID = 1506;
@@ -40,6 +41,7 @@ class ConfigProvider implements ConfigProviderInterface
         self::SMARTNEY_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
         self::PAYPO_GATEWAY_ID,
+        self::SPINGO_GATEWAY_ID,
         self::CARD_GATEWAY_ID,
         self::ONECLICK_GATEWAY_ID,
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
@@ -87,18 +89,20 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var array */
     private $defaultSortOrder = [
         '', // Avoid pushing first element to the end
-        509, // BLIK
-        1503, // Kartowa płatność automatyczna
-        1500, // Płatność kartą
-        1523, // Visa Mobile
-        1512, // Google Pay
-        1513, // Apple Pay
+        self::BLIK_GATEWAY_ID, // BLIK
+        self::ONECLICK_GATEWAY_ID, // Kartowa płatność automatyczna
+        self::CARD_GATEWAY_ID, // Płatność kartą
+        self::VISA_MOBILE_GATEWAY_ID, // Visa Mobile
+        self::GPAY_GATEWAY_ID, // Google Pay
+        self::APPLE_PAY_GATEWAY_ID, // Apple Pay
 
-        700, // Smartney
-        1506, // Alior Raty
-        705, // PayPo
+        self::HUB_GATEWAY_ID, // Hub
+        self::SMARTNEY_GATEWAY_ID, // Smartney
+        self::ALIOR_INSTALLMENTS_GATEWAY_ID, // Alior Raty
+        self::PAYPO_GATEWAY_ID, // PayPo
+        self::SPINGO_GATEWAY_ID, // Spingo
 
-        1511, // Visa Checkout
+        self::VISA_MOBILE_GATEWAY_ID, // Visa Checkout
 
         106, // Tylko na teście
         68, // Płać z ING
@@ -269,7 +273,7 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $amount = $this->checkoutSession->getQuote()->getGrandTotal();
+            $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
 
             $gateways = $this->getActiveGateways($currency, (float) $amount);
 

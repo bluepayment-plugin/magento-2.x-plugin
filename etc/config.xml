@@ -7,26 +7,26 @@
                 <model>BlueMedia\BluePayment\Model\Payment</model>
                 <gateway_selection>1</gateway_selection>
                 <encoding>UTF</encoding>
-                <title>Online payment BM</title>
+                <title>Online payment Autopay</title>
                 <payment_action>order</payment_action>
                 <allowspecific>0</allowspecific>
-                <test_address_url>https://pay-accept.bm.pl/payment</test_address_url>
-                <prod_address_url>https://pay.bm.pl/payment</prod_address_url>
-                <test_address_refunds_url>https://pay-accept.bm.pl/transactionRefund</test_address_refunds_url>
-                <prod_address_refunds_url>https://pay.bm.pl/transactionRefund</prod_address_refunds_url>
-                <gpay_merchant_info_url_test>https://pay-accept.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
-                <gpay_merchant_info_url_prod>https://pay.bm.pl/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
-                <gateway_list_url_test>https://pay-accept.bm.pl/gatewayList/v2</gateway_list_url_test>
-                <gateway_list_url_prod>https://pay.bm.pl/gatewayList/v2</gateway_list_url_prod>
-                <legal_data_url_test>https://pay-accept.bm.pl/legalData</legal_data_url_test>
-                <legal_data_url_prod>https://pay.bm.pl/legalData</legal_data_url_prod>
-                <transaction_status_url_test>https://pay-accept.bm.pl/webapi/transactionStatus</transaction_status_url_test>
-                <transaction_status_url_prod>https://pay.bm.pl/webapi/transactionStatus</transaction_status_url_prod>
+                <test_address_url>https://testpay.autopay.eu/payment</test_address_url>
+                <prod_address_url>https://pay.autopay.eu/payment</prod_address_url>
+                <test_address_refunds_url>https://testpay.autopay.eu/transactionRefund</test_address_refunds_url>
+                <prod_address_refunds_url>https://pay.autopay.eu/transactionRefund</prod_address_refunds_url>
+                <gpay_merchant_info_url_test>https://testpay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
+                <gpay_merchant_info_url_prod>https://pay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
+                <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v2</gateway_list_url_test>
+                <gateway_list_url_prod>https://pay.autopay.eu/gatewayList/v2</gateway_list_url_prod>
+                <legal_data_url_test>https://testpay.autopay.eu/legalData</legal_data_url_test>
+                <legal_data_url_prod>https://pay.autopay.eu/legalData</legal_data_url_prod>
+                <transaction_status_url_test>https://testpay.autopay.eu/webapi/transactionStatus</transaction_status_url_test>
+                <transaction_status_url_prod>https://pay.autopay.eu/webapi/transactionStatus</transaction_status_url_prod>
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <transaction_life_hours />
                 <disable_link_after_expiration>0</disable_link_after_expiration>
-                <autopay_agreement>Wyrażam zgodę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Blue Media S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
+                <autopay_agreement>Wyrażam zgodę na zapisanie danych karty płatniczej w formie zaszyfrowanej w systemach krajowej instytucji płatniczej nadzorowanej przez Komisję Nadzoru Finansowego Autopay S.A. w celu dokonywania płatności "jednym kliknięciem", tj. bez konieczności każdorazowego wprowadzania danych karty płatniczej. Mam możliwość usunięcia swoich danych.</autopay_agreement>
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>
                 <blik_zero>1</blik_zero>

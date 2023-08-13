@@ -1103,7 +1103,7 @@ class Payment extends AbstractMethod
         try {
             $this->transactionRepository->save($transaction);
         } catch (CouldNotSaveException $e) {
-            $this->bmLooger->error(__('Could not save BluePayment Transaction entity: ') . $transaction->toJson());
+            $this->bmLooger->error(__('Could not save Autopay Transaction entity: ') . $transaction->toJson());
         }
     }
 

@@ -1,12 +1,17 @@
 # Co nowego w BluePayment?
 
-## Wersja 2.X
-- Dodaliśmy możliwość ustawienia metody płatności powyżej zbiorczą metodą "Blue Media" (płatność przelewem).
-- Wykonaliśmy refactoring kodu front-end (JS) dla wszystkich kanałów Blue Media.
+## Wersja 2.22.0
+- Zmieniliśmy swoją nazwę na Autopay.
 
-## Wersja 2.21.5
+## Wersja 2.21.7
+- Dodaliśmy metodę płatności **Spingo** - odroczone płatności dla firm.
+
+## Wersja 2.21.6
 - Poprawiliśmy błąd podczas tworzenia transakcji **Google Pay**.
 - Dodaliśmy stylowanie checkoutu dla modułu Mageplaza One Step Checkout.
+
+## Wersja 2.21.5
+- Poprawiliśmy wyświetlanie metody płatności w przypadku gdy dostępna jest tylko płatność kartą.
 
 ## Wersja 2.21.4
 - Dodaliśmy nową metodę płatności **Visa Mobile**.
@@ -36,12 +41,12 @@
 
 ## Wersja 2.21.0
 - Dodaliśmy walutę SEK.
-- Dodaliśmy tekst z informacją dla metody płatności BM.
+- Dodaliśmy tekst z informacją dla metody płatności Autopay.
 - Zmieniliśmy wygląd ekranu wyboru płatności.
 - Dodaliśmy teksty pomocnicze w konfiguracji modułu oraz konfiguracji kanałów.
 - Dodaliśmy nowy kanał płatności - PayPo.
 - Od teraz także "Płatność kartą" oraz "PayPo" są zawsze wyświetlane jako osobne metody płatności.
-- Poprawiliśmy obsługę wielu serwisów BM w ramach różnych kontekstów Magento.
+- Poprawiliśmy obsługę wielu serwisów Autopay w ramach różnych kontekstów Magento.
 
 ## Wersja 2.20.0
 - Dodaliśmy metodę **initialize** do klasy **BluePayment\Model\Method\BluePayment**, która ustawia domyślny status zamówienia, zgodnie z ustawieniem "Status waiting payment" w konfiguracji modułu (tylko dla zamówień złożonych z wykorzystaniem metody płatności BlueMedia).
@@ -174,7 +179,7 @@
 
 ## Wersja 2.7.3
 - Zmieniliśmy mechanizm sortowania.
-- Poprawiliśmy błąd związany z brakiem przekierowania na płatność BM.
+- Poprawiliśmy błąd związany z brakiem przekierowania na płatność Autopay.
 
 ## Wersja 2.7.2
 - Dostosowaliśmy moduł do wymagań Magento Marketplace.
