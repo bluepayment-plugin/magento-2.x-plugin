@@ -40,7 +40,7 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment',
-            logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+            logoUrl: window.checkoutConfig.payment.bluePaymentLogo,
             grandTotalAmount: 0
         },
 
@@ -318,7 +318,7 @@ define([
                 if (gateway.is_iframe) {
                     return $t("Pay with your credit or debit card.");
                 } else {
-                    return $t("You will be redirected to our partner Blue Media's website, where you will enter your card details.");
+                    return $t("You will be redirected to our partner Autopay's website, where you will enter your card details.");
                 }
             }
 

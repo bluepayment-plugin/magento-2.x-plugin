@@ -27,7 +27,7 @@ use Magento\Store\Model\ScopeInterface;
 use SimpleXMLElement;
 
 /**
- * Create payment (BM transaction) controller
+ * Create payment (Autopay transaction) controller
  */
 class Create extends Action
 {
