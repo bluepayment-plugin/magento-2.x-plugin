@@ -1,4 +1,4 @@
-@frame-line-color: #006ec7;
+@frame-line-color: #199BFA;
 
 .bm-frame {
     &-start {
@@ -7,7 +7,7 @@
         padding-top: 22px;
         padding-bottom: 8px;
 
-        &::before, &::after {
+        &::after {
             height: 2px;
             background-color: @frame-line-color;
             content: "";
@@ -15,18 +15,9 @@
             top: 40px;
         }
 
-        &::before {
-            width: 30px;
-            margin-right: 14px;
-        }
-
         &::after {
             width: 100%;
-            right: -110px;
-        }
-
-        img {
-            margin-left: 35px;
+            right: -130px;
         }
     }
 
@@ -39,7 +30,8 @@
 
 
     &__logo {
-        width: 75px;
+        width: 120px;
+        margin-top: 12px;
     }
 
     &__safe-brands {

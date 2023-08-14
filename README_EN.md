@@ -117,7 +117,7 @@ The module allows you to automatically refresh the payment channel every 5 minut
         - ...
         - 0 – the last position in the list.  
         <br />
-       *For separate payment methods, the aggregate method **BlueMedia** (transfer payment) has a default order of 1. If you want to set a separate method over the Blue Media method - use negative values (-5, -4, -3, etc.).*
+       *For separate payment methods, the aggregate method **Autopay** (transfer payment) has a default order of 1. If you want to set a separate method over the Autopay method - use negative values (-5, -4, -3, etc.).*
     10. **Type**.
     11. **Is separated method** – displays the channel as a separate payment method
     12. (informative) **Gateway Logo**

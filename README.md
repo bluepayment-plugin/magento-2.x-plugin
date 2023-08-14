@@ -113,7 +113,7 @@ Moduł umożliwia automatyczne odświeżanie kanału płatności co 5 minut. Że
         - ...
         - 0 – ostatnia pozycja na liście.  
          
-       *W przypadku oddzielnych metod płatności, zbiorcza metoda **BlueMedia** (płatność przelewem) posiada domyślnie kolejność 1. Jeśli chcesz ustawić oddzielną metodę nad metodą Blue Media - wykorzystaj ujemne wartości (-5, -4, -3 itd.).* 
+       *W przypadku oddzielnych metod płatności, zbiorcza metoda **Autopay** (płatność przelewem) posiada domyślnie kolejność 1. Jeśli chcesz ustawić oddzielną metodę nad metodą Autopay - wykorzystaj ujemne wartości (-5, -4, -3 itd.).* 
     10. **Rodzaj (Type)**.
     11. **Traktuj jako oddzielną metodę płatności (Is separated method)** – powoduje wyświetlanie danego kanału jako osobnej metody płatności. _BLIK, Karty płatnicze oraz kanały ratalne są zawsze wyświetlane jako osobne metody płatności._
     12. **Gateway Logo**
