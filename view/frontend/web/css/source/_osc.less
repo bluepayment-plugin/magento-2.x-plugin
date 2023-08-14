@@ -1,0 +1,19 @@
+.onestepcheckout-index-index {
+    .one-step-checkout-wrapper {
+        [type=radio]:checked + label,
+        [type=radio]:not(:checked) + label {
+            display: flex;
+            height: auto;
+            align-items: center;
+        }
+
+        [type=radio] + label:after,
+        [type=radio] + label:before {
+            top: auto;
+        }
+
+        .blue-payment .bluepayment-options-list .payment-option {
+            width: 150px;
+        }
+    }
+}

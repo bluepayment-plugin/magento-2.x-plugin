@@ -40,7 +40,7 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment',
-            logoUrl: window.checkoutConfig.payment.bluePaymentLogo || 'https://bm.pl/img/www/logos/bmLogo.png',
+            logoUrl: window.checkoutConfig.payment.bluePaymentLogo,
             grandTotalAmount: 0
         },
 
@@ -84,6 +84,7 @@ define([
             smartney: 700,
             hub: 702,
             paypo: 705,
+            spingo: 706,
             card: 1500,
             one_click: 1503,
             alior_installments: 1506,
@@ -303,6 +304,10 @@ define([
                 return $t('Visa Mobile');
             }
 
+            if (gatewayId === this.gatewayIds.spingo) {
+                return $t('Spingo');
+            }
+
             return gateway.name;
         },
 
@@ -313,7 +318,7 @@ define([
                 if (gateway.is_iframe) {
                     return $t("Pay with your credit or debit card.");
                 } else {
-                    return $t("You will be redirected to our partner Blue Media's website, where you will enter your card details.");
+                    return $t("You will be redirected to our partner Autopay's website, where you will enter your card details.");
                 }
             }
 
@@ -334,6 +339,10 @@ define([
 
             if (gatewayId === this.gatewayIds.visa_mobile) {
                 return $t('Enter the phone number and confirm the payment in the mobile app.');
+            }
+
+            if (gatewayId === this.gatewayIds.spingo) {
+                return $t('Deferred payment for businesses');
             }
 
             return gateway.description;
@@ -653,6 +662,7 @@ define([
 
         getGPayTransactionData: function () {
             return {
+                environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                 apiVersion: 2,
                 apiVersionMinor: 0,
                 merchantInfo: this.GPayMerchantInfo,
@@ -671,7 +681,7 @@ define([
                                 'gatewayMerchantId': this.bluePaymentAcceptorId
                             }
                         }
-                }
+                    }
                 ],
                 shippingAddressRequired: false,
                 transactionInfo: {
@@ -696,9 +706,10 @@ define([
                     self.bluePaymentAcceptorId = response.acceptorId.toString();
 
                     self.GPayClient = new google.payments.api.PaymentsClient({
-                        environment: self.bluePaymentTestMode === "1" ? 'TEST' : 'PRODUCTION'
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION'
                     });
                     self.GPayClient.isReadyToPay({
+                        environment: self.bluePaymentTestMode ? 'TEST' : 'PRODUCTION',
                         apiVersion: 2,
                         apiVersionMinor: 0,
                         merchantInfo: this.GPayMerchantInfo,

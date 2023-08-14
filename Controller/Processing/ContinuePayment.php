@@ -26,7 +26,7 @@ use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Store\Model\ScopeInterface;
 
 /**
- * Create payment (BM transaction) controller
+ * Create payment (Autopay transaction) controller
  */
 class ContinuePayment extends Action
 {

@@ -7,7 +7,7 @@ use Magento\Framework\HTTP\Client\Curl;
 use SimpleXMLElement;
 
 /**
- * BM API Client
+ * Autopay API Client
  */
 class Client implements ClientInterface
 {

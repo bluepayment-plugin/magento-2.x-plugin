@@ -4,7 +4,7 @@
     <system>
         <section id="payment">
             <group id="bluepayment" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Blue Media Online Payment</label>
+                <label>Autopay Online Payment</label>
                 <fieldset_css>complex bluepayment-section</fieldset_css>
                 <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Fieldset</frontend_model>
 

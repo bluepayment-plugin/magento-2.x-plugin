@@ -10,8 +10,8 @@
         </policy>
         <policy id="script-src">
             <values>
-                <value id="script_bm_cards_accept" type="host">cards-accept.bm.pl</value>
-                <value id="script_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="script_autopay_cards_accept" type="host">testcards.autopay.eu</value>
+                <value id="script_autopay_cards_prod" type="host">cards.autopay.eu</value>
                 <value id="script_gpay" type="host">pay.google.com</value>
                 <value id="script_ga" type="host">*.google-analytics.com</value>
                 <value id="script_gtm" type="host">*.googletagmanager.com</value>
@@ -19,20 +19,20 @@
         </policy>
         <policy id="style-src">
             <values>
-                <value id="style_bm_pay_accept" type="host">pay-accept.bm.pl</value>
-                <value id="style_bm_pay_prod" type="host">pay.bm.pl</value>
-                <value id="style_bm_cards_accept" type="host">cards-accept.bm.pl</value>
-                <value id="style_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="style_autopay_pay_accept" type="host">testpay.autopay.eu</value>
+                <value id="style_autopay_pay_prod" type="host">pay.autopay.eu</value>
+                <value id="style_autopay_cards_accept" type="host">testcards.autopay.eu</value>
+                <value id="style_autopay_cards_prod" type="host">cards.autopay.eu</value>
                 <value id="style_google_apis" type="host">*.googleapis.com</value>
             </values>
         </policy>
         <policy id="frame-src">
             <values>
                 <value id="frame_gpay" type="host">pay.google.com</value>
-                <value id="frame_bm_pay_accept" type="host">pay-accept.bm.pl</value>
-                <value id="frame_bm_pay_prod" type="host">pay.bm.pl</value>
-                <value id="frame_bm_cards_accept" type="host">cards-accept.bm.pl</value>
-                <value id="frame_bm_cards_prod" type="host">cards.bm.pl</value>
+                <value id="frame_autopay_pay_accept" type="host">testpay.autopay.eu</value>
+                <value id="frame_autopay_pay_prod" type="host">pay.autopay.eu</value>
+                <value id="frame_autopay_cards_accept" type="host">testcards.autopay.eu</value>
+                <value id="frame_autopay_cards_prod" type="host">cards.autopay.eu</value>
             </values>
         </policy>
         <policy id="connect-src">
