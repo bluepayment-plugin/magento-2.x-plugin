@@ -5,7 +5,7 @@ define(function () {
 
     return {
         testMode: config?.test_mode ?? true,
-        logo: config?.logo ?? 'https://bm.pl/img/www/logos/bmLogo.png',
+        logo: config?.logo,
         iframeEnabled: config?.iframe_enabled ?? false,
         options: config?.options ?? [],
         separated: config?.separated ?? [],

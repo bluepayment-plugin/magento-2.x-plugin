@@ -73,7 +73,7 @@ class ExtendPaymentMethod
     }
 
     /**
-     * Modify results of getMethodInstance() call to add in details about BM payment methods
+     * Modify results of getMethodInstance() call to add in details about Autppay payment methods
      *
      * @param Data $subject
      * @param callable $proceed
