@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: piotr
- * Date: 29.11.2016
- * Time: 12:06
- */
+
+declare(strict_types=1);
 
 namespace BlueMedia\BluePayment\Api\Data;
 
@@ -35,221 +31,302 @@ interface GatewayInterface
     public const MIN_VALIDITY_TIME = 'min_validity_time';
 
     /**
+     * Get entity id
+     *
      * @return int
      */
     public function getEntityId();
 
     /**
+     * Set entity id
+     *
      * @param int $entityId
      * @return GatewayInterface
      */
     public function setEntityId($entityId);
 
     /**
+     * Get Store ID for gateway.
+     *
      * @return int
      */
-    public function getStoreId();
+    public function getStoreId(): int;
 
     /**
+     * Set Store ID for gateway.
+     *
      * @param int $store
      * @return GatewayInterface
      */
-    public function setStoreId($store);
+    public function setStoreId(int $store): GatewayInterface;
 
     /**
+     * Get gateway Service ID.
+     *
      * @return int
      */
-    public function getServiceId();
+    public function getServiceId(): int;
 
     /**
+     * Set gateway Service ID.
+     *
      * @param int $serviceId
      * @return GatewayInterface
      */
-    public function setServiceId($serviceId);
+    public function setServiceId(int $serviceId): GatewayInterface;
 
     /**
+     * Get gateway currency.
+     *
      * @return string
      */
-    public function getCurrency();
+    public function getCurrency(): string;
 
     /**
+     * Set gateway currency.
+     *
      * @param string $currency
      * @return GatewayInterface
      */
-    public function setCurrency($currency);
+    public function setCurrency(string $currency): GatewayInterface;
 
     /**
+     * Get gateway status.
+     *
      * @return boolean
      */
-    public function getStatus();
+    public function getStatus(): bool;
 
     /**
+     * Set gateway status.
+     *
      * @param boolean $status
      * @return GatewayInterface
      */
-    public function setStatus($status);
+    public function setStatus(bool $status): GatewayInterface;
 
     /**
+     * Get gateway ID.
+     *
      * @return int
      */
-    public function getGatewayId();
+    public function getGatewayId(): int;
 
     /**
+     * Set gateway ID.
+     *
      * @param int $gatewayId
      * @return GatewayInterface
      */
-    public function setGatewayId($gatewayId);
+    public function setGatewayId(int $gatewayId): GatewayInterface;
 
     /**
+     * Get gateway bank name.
+     *
      * @return string
      */
-    public function getBankName();
+    public function getBankName(): string;
 
     /**
+     * Set gateway bank name.
+     *
      * @param string $bankName
      * @return GatewayInterface
      */
-    public function setBankName($bankName);
+    public function setBankName(string $bankName): GatewayInterface;
 
     /**
+     * Get gateway name.
+     *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
+     * Set gateway name.
+     *
      * @param string $name
      * @return GatewayInterface
      */
-    public function setName($name);
+    public function setName(string $name): GatewayInterface;
 
     /**
-     * @return string
+     * Get gateway description.
+     *
+     * @return ?string
      */
-    public function getDescription();
+    public function getDescription(): ?string;
 
     /**
-     * @param string $description
+     * Set gateway description.
+     *
+     * @param ?string $description
      * @return GatewayInterface
      */
-    public function setDescription($description);
+    public function setDescription(?string $description): GatewayInterface;
 
     /**
+     * Get gateway sort order.
+     *
      * @return int
      */
-    public function getSortOrder();
+    public function getSortOrder(): int;
 
     /**
+     * Set gateway sort order.
+     *
      * @param int $sortOrder
      * @return GatewayInterface
      */
-    public function setSortOrder($sortOrder);
+    public function setSortOrder(int $sortOrder): GatewayInterface;
 
     /**
+     * Get gateway type.
+     *
      * @return string
      */
-    public function getType();
+    public function getType(): string;
 
     /**
+     * Get gateway type.
+     *
      * @param string $type
      * @return GatewayInterface
      */
-    public function setType($type);
+    public function setType(string $type): GatewayInterface;
 
     /**
+     * Get gateway logo url.
+     *
      * @return string
      */
-    public function getLogoUrl();
+    public function getLogoUrl(): string;
+
     /**
+     * Set gateway logo url.
+     *
      * @param string $logoUrl
      * @return GatewayInterface
      */
-    public function setLogoUrl($logoUrl);
+    public function setLogoUrl(string $logoUrl): GatewayInterface;
 
     /**
+     * Get whether gateway uses custom logo.
+     *
      * @return boolean
      */
-    public function getUseOwnLogo();
+    public function shouldUseOwnLogo(): bool;
 
     /**
+     * Set whether gateway uses custom logo.
+     *
      * @param boolean $useOwnLogo
      * @return GatewayInterface
      */
-    public function setUseOwnLogo($useOwnLogo);
+    public function setUseOwnLogo(bool $useOwnLogo): GatewayInterface;
 
     /**
+     * Get gateway logo path.
+     *
      * @return string
      */
-    public function getLogoPath();
+    public function getLogoPath(): string;
 
     /**
+     * Set gateway logo path.
+     *
      * @param string $logoPath
      * @return GatewayInterface
      */
-    public function setLogoPath($logoPath);
+    public function setLogoPath(string $logoPath): GatewayInterface;
 
     /**
+     * Returns whether gateway should be displayed as separated payment method.
+     *
      * @return boolean
      */
-    public function getIsSeparatedMethod();
+    public function isSeparatedMethod(): bool;
 
     /**
+     * Sets whether gateway should be displayed as separated payment method.
+     *
      * @param boolean $isSeparatedMethod
      * @return GatewayInterface
      */
-    public function setIsSeparatedMethod($isSeparatedMethod);
+    public function setIsSeparatedMethod(bool $isSeparatedMethod): GatewayInterface;
 
     /**
-     * @return boolean
+     * Get gateway status date (last refresh).
+     *
+     * @return string
      */
-    public function getStatusDate();
+    public function getStatusDate(): string;
 
     /**
+     * Set gateway status date (last refresh).
+     *
      * @param string $statusDate
      * @return GatewayInterface
      */
-    public function setStatusDate($statusDate);
+    public function setStatusDate(string $statusDate): GatewayInterface;
 
     /**
+     * Is gateway force disabled.
+     *
      * @return boolean
      */
-    public function isForceDisabled();
+    public function isForceDisabled(): bool;
 
     /**
+     * Set should gateway be force disabled.
+     *
      * @param boolean $forceDisable
      * @return GatewayInterface
      */
-    public function setForceDisable($forceDisable);
+    public function setForceDisable(bool $forceDisable): GatewayInterface;
 
     /**
+     * Get gateway minimal amount.
+     *
      * @return ?float
      */
-    public function getMinAmount();
+    public function getMinAmount(): ?float;
 
     /**
+     * Set gateway minimal amount.
+     *
      * @param ?float $minAmount
      * @return GatewayInterface
      */
-    public function setMinAmount($minAmount);
+    public function setMinAmount(?float $minAmount): GatewayInterface;
 
     /**
+     * Get gateway maximal amount.
+     *
      * @return ?float
      */
-    public function getMaxAmount();
+    public function getMaxAmount(): ?float;
 
     /**
+     * Set gateway maximal amount.
+     *
      * @param ?float $maxAmount
      * @return GatewayInterface
      */
-    public function setMaxAmount($maxAmount);
+    public function setMaxAmount(?float $maxAmount): GatewayInterface;
 
     /**
+     * Get gateway minimal validity time.
+     *
      * @return ?float
      */
-    public function getMinValidityTime();
+    public function getMinValidityTime(): ?float;
 
     /**
+     * Set gateway minimal validity time.
+     *
      * @param ?float $minValidityTime
      * @return GatewayInterface
      */
-    public function setMinValidityTime($minValidityTime);
+    public function setMinValidityTime(?float $minValidityTime): GatewayInterface;
 }

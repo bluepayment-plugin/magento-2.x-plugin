@@ -1,7 +1,7 @@
-# Instrukcja modułu „BluePayment” dla platformy Magento 2
+# Instrukcja modułu „Autopay” dla platformy Magento 2
 
 ## Podstawowe informacje
-BluePayment to moduł płatności umożliwiający realizację transakcji bezgotówkowych w sklepie opartym na platformie Magento 2.
+Autopay to moduł płatności umożliwiający realizację transakcji bezgotówkowych w sklepie opartym na platformie Magento 2.
 
 ### Główne funkcje
 Do najważniejszych funkcji modułu zalicza się:
@@ -9,14 +9,14 @@ Do najważniejszych funkcji modułu zalicza się:
 - obsługę zakupów bez rejestracji w serwisie
 - obsługę dwóch trybów działania – testowego i produkcyjnego (dla każdego z nich wymagane są osobne dane kont, po które zwróć się do nas)
 - realizacja dwóch sposobów wyświetlenia form płatności w sklepie:
-  - na stronie Blue Media – widok klasyczny lub spersonalizowany (po uzgodnieniu z Blue Media),
+  - na stronie Autopay – widok klasyczny lub spersonalizowany (po uzgodnieniu z Autopay),
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
 - Wersja Magento: 2.3.0 – 2.4.6.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
-### [Co nowego w BluePayment?](CHANGELOG.md)
+### [Co nowego w Autopay?](CHANGELOG.md)
 
 ## Instalacja
 
@@ -66,7 +66,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
 1. Zaloguj się do panelu administracyjnego w platformie Magento 2.
 2. Wybierz z menu: **Sklepy (Store)** -> **Konfiguracja (Configuration)**
 3. W kolejnym menu wybierz: **Sprzedaż (Sales)** -> **Metody płatności (Payments methods)**
-4. Następnie rozwiń **Inne metody płatności (Other payment methods)** i wybierz **Płatność online BM (Online Payment BM)**. 
+4. Następnie rozwiń **Inne metody płatności (Other payment methods)** i wybierz **Płatność online Autopay (Online Payment Autopay)**. 
 
 ### Podstawowa konfiguracja modułu
 1. Przejdź do [Konfiguracji modułu](#konfiguracja).
@@ -74,9 +74,9 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
     1. Przy statusie **Włączony (Enabled)** kliknij **Tak (Yes)**.
     2. Uzupełnij **Tytuł (Title)** – czyli nazwę płatności widoczną dla klientów Twojego sklepu – może brzmieć np. Bezpieczna płatność online. 
     3. Ustaw **Tryb testowy (Test Mode)**
-3. Uzupełnij dane dotyczące obsługiwanych walut (otrzymasz je od Blue Media)
+3. Uzupełnij dane dotyczące obsługiwanych walut (otrzymasz je od Autopay)
    1. **ID serwisu (Service partner ID)**
-   2. **Klucz konfiguracyjny (hash) (Configuration key (hash))** - otrzymasz go od BM, możesz go odczytać także w panelu PayBM [Środowisko akceptacyjne](https://oplacasie-accept.bm.pl/admin), [Środowisko produkcyjne](https://oplacasie.bm.pl/admin) w szczegółach serwisu, jako **Klucz konfiguracyjny (hash)**
+   2. **Klucz konfiguracyjny (hash) (Configuration key (hash))** - otrzymasz go od Autopay, możesz go odczytać także w portalu Autopay [Środowisko testowe](https://testportal.autopay.eu/admin), [Środowisko produkcyjne](https://portal.autopay.eu/admin) w szczegółach serwisu, jako **Klucz konfiguracyjny (hash)**
       ![configuration3.png](docs/configuration3.png "Screenshot")
 4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
@@ -111,7 +111,9 @@ Moduł umożliwia automatyczne odświeżanie kanału płatności co 5 minut. Że
         - 1 – pierwsza pozycja na liście,
         - 2 – druga pozycja na liście,
         - ...
-        - 0 – ostatnia pozycja na liście.
+        - 0 – ostatnia pozycja na liście.  
+         
+       *W przypadku oddzielnych metod płatności, zbiorcza metoda **Autopay** (płatność przelewem) posiada domyślnie kolejność 1. Jeśli chcesz ustawić oddzielną metodę nad metodą Autopay - wykorzystaj ujemne wartości (-5, -4, -3 itd.).* 
     10. **Rodzaj (Type)**.
     11. **Traktuj jako oddzielną metodę płatności (Is separated method)** – powoduje wyświetlanie danego kanału jako osobnej metody płatności. _BLIK, Karty płatnicze oraz kanały ratalne są zawsze wyświetlane jako osobne metody płatności._
     12. **Gateway Logo**
@@ -200,11 +202,11 @@ Klient może usunąć zapamiętane karty z poziomu swojego konta w Twoim sklepie
 5. Kliknąć **Usuń** i potwierdzić
 
 ## Generowanie zamówień z poziomu panelu administracyjnego
-Moduł umożliwia wysłanie linka do płatności do klienta w przypadku zamówień utworzonych bezpośrednio w panelu administracyjnym. W tym celu, należy przy tworzeniu zamówienia wybrać kanał płatności BM.
+Moduł umożliwia wysłanie linka do płatności do klienta w przypadku zamówień utworzonych bezpośrednio w panelu administracyjnym. W tym celu, należy przy tworzeniu zamówienia wybrać kanał płatności Autopay.
 
 ![admin1.png](docs/admin1.png)
 
-Link do płatności zostanie przesłany przez BM na adres mailowy widoczny w danych klienta.
+Link do płatności zostanie przesłany przez Autopay na adres mailowy widoczny w danych klienta.
 
 ![admin2.png](docs/admin2.png)
 
@@ -245,9 +247,9 @@ Zwrot wygeneruje się automatycznie.
 ### Zwrot bezpośredni
 Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność. Żeby z niej skorzystać:
 
-1. Przejdź do [Konfiguracji modułu](#konfiguracja) i zaznacz **Włącz (Enable)** przy opcji **Pokaż ręczny zwrot BM w szczegółach zamówienia (Show manual BM refund in order details)**. Dzięki temu opcja ta będzie dostępna dla wszystkich zakończonych zamówień opłaconych poprzez ten moduł.
+1. Przejdź do [Konfiguracji modułu](#konfiguracja) i zaznacz **Włącz (Enable)** przy opcji **Pokaż ręczny zwrot Autopay w szczegółach zamówienia (Show manual Autopay refund in order details)**. Dzięki temu opcja ta będzie dostępna dla wszystkich zakończonych zamówień opłaconych poprzez ten moduł.
 2. Następnie przejdź do szczegółów zamówienia.
-3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności BM, w górnym menu powinien być widoczny przycisk Zwrot BM.\
+3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności Autopay, w górnym menu powinien być widoczny przycisk Zwrot Autopay.\
 
    ![refund1.png](docs/refund1.png)
 4. Po jego naciśnięciu zobaczysz okno umożliwiające dokonanie pełnego lub częściowego zwrotu.
@@ -266,12 +268,12 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
 Moduł umożliwia opłacenie zamówień złożonych z wykorzystaniem funkcjonalności multishipping.
 Konfiguracja dostawy zgodnie z [instrukcją w dokumentacji](https://docs.magento.com/user-guide/configuration/sales/multishipping-settings.html)
 
-Sam moduł płatności nie wymaga żadnych dodatkowych czynności. Płatności BM będą dostępne od razu.
+Sam moduł płatności nie wymaga żadnych dodatkowych czynności. Płatności Autopay będą dostępne od razu.
 
 **UWAGA!**
 
 Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności iFrame, Google Pay i BLIK 0.
-Dla zamówień multishipping, OrderID w wiadomościach do klienta oraz w panelu oplacasie.bm.pl będzie numerem koszyka z przedrostkiem QUOTE_, nie numerem zamówienia.
+Dla zamówień multishipping, OrderID w wiadomościach do klienta oraz w panelu portal.autopay.eu będzie numerem koszyka z przedrostkiem QUOTE_, nie numerem zamówienia.
 
 ## Informacje o płatności
 Informacja o wybranym przez klienta kanale płatności jest widoczna z poziomu listy zamówień (Order grid).  
@@ -296,7 +298,7 @@ Moduł dodaje obsługę dodatkowych zdarzeń w Google Analytics 4:
 - **begin_checkout** – użytkownik rozpoczął proces zamówienia (koszyk i/lub wybór metody dostawy),
 - **checkout_progress** – użytkownik przeszedł do drugiego kroku zamówienia (wybór metody płatności),
 - **set_checkout_option** – użytkownik uzupełnił dane zamówienia,
-- **purchase** – użytkownik złożył zamówienie **oraz opłacił je poprzez płatność BlueMedia** (oznaczenie jako konwersja).
+- **purchase** – użytkownik złożył zamówienie **oraz opłacił je poprzez płatność Autopay** (oznaczenie jako konwersja).
 
 ### Utworzenie nowego klucza API Google Analytics
 1. Przejdź do [Google Analytics](http://analytics.google.com).

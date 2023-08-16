@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
@@ -23,7 +25,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Class Create
  */
-class Blik extends Action
+class PaymentStatus extends Action
 {
     /** @var Session */
     public $session;
@@ -52,14 +54,15 @@ class Blik extends Action
     /**
      * Create constructor.
      *
-     * @param Context                           $context
-     * @param OrderSender                       $orderSender
-     * @param Session                           $session
-     * @param Logger                            $logger
-     * @param ScopeConfigInterface              $scopeConfig
-     * @param Data                              $helper
-     * @param JsonFactory                       $resultJsonFactory
-     * @param OrderFactory                      $orderFactory
+     * @param Context $context
+     * @param OrderSender $orderSender
+     * @param Session $session
+     * @param Logger $logger
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Data $helper
+     * @param JsonFactory $resultJsonFactory
+     * @param OrderFactory $orderFactory
+     * @param CollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
@@ -85,7 +88,7 @@ class Blik extends Action
     }
 
     /**
-     * Rozpoczęcie procesu płatności
+     * Get order payment status
      *
      * @return Json|ResponseInterface
      */
@@ -103,8 +106,7 @@ class Blik extends Action
                     ->getFirstItem();
             } else {
                 // Check status after back.
-                /** @var Order $order */
-                $order      = $this->orderFactory->create()->loadByIncrementId($orderId);
+                $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             }
 
             $hash       = $this->getRequest()->getParam('Hash');
@@ -189,15 +191,5 @@ class Blik extends Action
         }
 
         return parent::_redirect('checkout/cart');
-    }
-
-    /**
-     * Zwraca singleton dla Checkout Session Model
-     *
-     * @return \Magento\Checkout\Model\Session
-     */
-    public function getCheckout()
-    {
-        return $this->session;
     }
 }
