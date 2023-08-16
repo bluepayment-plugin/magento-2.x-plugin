@@ -336,7 +336,7 @@ Eventy uruchamiane są po zapisaniu nowego statusu zamówienia.
 W ramach eventu, przekazywane są dane:
 - `order` – instancja `\Magento\Sales\Model\Order`
 - `payment` – instancja `\Magento\Sales\Model\OrderPayment`
-- `transaction_id` – identyfikator transakcji w systemie BlueMedia (`string`)
+- `transaction_id` – identyfikator transakcji w systemie Autopay (`string`)
 
 
 ## Promowanie płatności odroczonych / na raty
