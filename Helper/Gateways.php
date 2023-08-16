@@ -283,14 +283,9 @@ class Gateways extends Data
                     $gatewayModel->setIsSeparatedMethod(true);
                 }
 
-<<<<<<< HEAD
-                $gatewayModel->setStoreId((int) $storeId);
-                $gatewayModel->setServiceId((int) $serviceId);
-=======
                 $gatewayModel->setName($gateway['gatewayName']);
                 $gatewayModel->setStoreId($storeId);
                 $gatewayModel->setServiceId($serviceId);
->>>>>>> MAGENTO-165
                 $gatewayModel->setCurrency($currency);
                 $gatewayModel->setGatewayId((int) $gateway['gatewayID']);
                 $gatewayModel->setStatus($gateway['state'] == 'OK');
