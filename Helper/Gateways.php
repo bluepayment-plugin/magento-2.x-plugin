@@ -269,7 +269,6 @@ class Gateways extends Data
                 } else {
                     $gatewayModel = $this->gatewayFactory->create();
                     $gatewayModel->setForceDisable(false);
-                    $gatewayModel->setName($gateway['gatewayName']);
                 }
 
                 if (// Always separated
@@ -278,6 +277,7 @@ class Gateways extends Data
                     $gatewayModel->setIsSeparatedMethod(true);
                 }
 
+                $gatewayModel->setName($gateway['gatewayName']);
                 $gatewayModel->setStoreId($storeId);
                 $gatewayModel->setServiceId($serviceId);
                 $gatewayModel->setCurrency($currency);
