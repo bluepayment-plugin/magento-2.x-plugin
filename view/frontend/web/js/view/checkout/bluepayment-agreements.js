@@ -3,22 +3,18 @@ define([
     'ko',
     'uiComponent',
     'mage/url',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-agreements',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-selected-gateway'
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment',
 ], function (
     $,
     ko,
     Component,
     url,
-    agreements,
-    selectedGateway
+    model,
 ) {
     'use strict';
 
-    selectedGateway.subscribe(function () {
+    model.selectedGatewayId.subscribe(function (gatewayId) {
         // Singleton - refresh agreement when gateway changed
-
-        var gatewayId = selectedGateway()?.gateway_id;
         if (gatewayId) {
             $.ajax({
                 showLoader: true,
@@ -29,15 +25,15 @@ define([
                 },
                 dataType: 'json'
             }).done(function (response) {
-                agreements.selected([]);
+                model.selectedAgreements([]);
 
                 if (!response.hasOwnProperty('error')) {
-                    agreements.agreements(response);
+                    model.agreements(response);
 
                     response.forEach(function (agreement) {
                         agreement['labelList'].forEach(function (label) {
                             if (label['showCheckbox'] === false) {
-                                agreements.selected.push(agreement['regulationID']);
+                                model.selectedAgreements.push(agreement['regulationID']);
                             }
                         });
                     });
@@ -48,9 +44,9 @@ define([
 
     return Component.extend({
         defaults: {
-            template: 'BlueMedia_BluePayment/checkout/bluepayment-agreements'
+            template: 'BlueMedia_BluePayment/checkout/bluepayment-agreements',
         },
-        agreements: agreements.agreements,
-        selected: agreements.selected
+        agreements: model.agreements,
+        selected: model.selectedAgreements,
     });
 });

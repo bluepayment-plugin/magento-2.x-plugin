@@ -23,7 +23,7 @@ define([
         function updateStatus() {
             $.ajax({
                 showLoader: false,
-                url: urlBuilder.build('/bluepayment/processing/blik'),
+                url: urlBuilder.build('/bluepayment/processing/paymentstatus'),
                 data: {
                     'ServiceID': config['ServiceID'],
                     'OrderID': config['OrderID'],
