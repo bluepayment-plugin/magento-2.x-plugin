@@ -93,7 +93,7 @@ define([
 
             if (gatewayId === model.gatewaysIds.smartney) {
                 return $t('Buy now and pay within 30 days. %1')
-                    .replace('%1', '<a href="https://pomoc.bluemedia.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
+                    .replace('%1', '<a href="https://pomoc.autopay.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
             }
 
             if (gatewayId === model.gatewaysIds.alior_installments) {
