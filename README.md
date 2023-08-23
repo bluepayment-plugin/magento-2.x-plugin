@@ -375,7 +375,7 @@ Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w p
 
 
 ## Obsługa GraphQL oraz integracja z Magento PWA
-Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.bluemedia.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.bluemedia.pl/online/wtyczki/magento-2/graphql).
+Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).
 
 
 ## Aktualizacja
