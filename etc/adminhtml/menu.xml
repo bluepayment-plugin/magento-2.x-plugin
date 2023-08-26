@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="BlueMedia_BluePayment::bluepayment" title="BluePayment" module="BlueMedia_BluePayment" sortOrder="200"
+        <add id="BlueMedia_BluePayment::bluepayment" title="Autopay" module="BlueMedia_BluePayment" sortOrder="200"
              resource="BlueMedia_BluePayment::bluepayment"/>
         <add id="BlueMedia_BluePayment::gateway" title="Gateways" module="BlueMedia_BluePayment" sortOrder="10"
              action="adminbluepayment/gateway" resource="BlueMedia_BluePayment::gateway"
