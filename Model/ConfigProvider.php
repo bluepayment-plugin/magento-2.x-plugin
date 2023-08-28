@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\GatewayInterface;
@@ -235,16 +237,20 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getConfig(): array
     {
         return [
-            'payment' => $this->getPaymentConfig(),
+            'payment' => [
+                Payment::METHOD_CODE => $this->getPaymentConfig(),
+            ],
         ];
     }
 
     /**
+     * Return payment config for Blue Payment.
+     *
      * @return array
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -253,9 +259,11 @@ class ConfigProvider implements ConfigProviderInterface
     {
         if (! $this->isGatewaySelectionEnabled()) {
             return [
-                'bluePaymentOptions' => false,
-                'bluePaymentSeparated' => false,
-                'bluePaymentLogo' => $this->block->getLogoSrc(),
+                'test_mode' => $this->isTestMode(),
+                'logo' => $this->block->getLogoSrc(),
+                'iframe_enabled' => $this->iframePaymentEnabled(),
+                'options' => false,
+                'separated' => false,
             ];
         }
 
@@ -267,7 +275,7 @@ class ConfigProvider implements ConfigProviderInterface
 
             $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
 
-            $gateways = $this->getActiveGateways($currency, $amount);
+            $gateways = $this->getActiveGateways($currency, (float) $amount);
 
             /** @var Gateway $gateway */
             foreach ($gateways as $gateway) {
@@ -286,19 +294,21 @@ class ConfigProvider implements ConfigProviderInterface
             $this->sortGateways($resultSeparated);
 
             $this->activeGateways[$currency] = [
-                'bluePaymentOptions' => $result,
-                'bluePaymentSeparated' => $resultSeparated,
-                'bluePaymentLogo' => $this->block->getLogoSrc(),
-                'bluePaymentTestMode' => $this->isTestMode(),
-                'bluePaymentCards' => $this->prepareCards(),
-                'bluePaymentAutopayAgreement' => $this->scopeConfig->getValue(
+                'test_mode' => $this->isTestMode(),
+                'logo' => $this->block->getLogoSrc(),
+                'iframe_enabled' => $this->iframePaymentEnabled(),
+                'blik_zero_enabled' => $this->blikZeroEnabled(),
+                'options' => $result,
+                'separated' => $resultSeparated,
+                'cards' => $this->prepareCards(),
+                'one_click_agreement' => $this->scopeConfig->getValue(
                     'payment/bluepayment/autopay_agreement',
                     ScopeInterface::SCOPE_STORE
                 ),
-                'bluePaymentCollapsible' => $this->scopeConfig->getValue(
+                'collapsible' => $this->scopeConfig->isSetFlag(
                     'payment/bluepayment/collapsible',
                     ScopeInterface::SCOPE_STORE
-                )
+                ),
             ];
         }
 
@@ -327,6 +337,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get active currency code.
+     *
      * @return string
      */
     public function getCurrentCurrencyCode(): string
@@ -335,38 +347,33 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Prepare gateway detail
+     *
      * @param Gateway $gateway
      * @return array
      */
     private function prepareGatewayStructure(GatewayInterface $gateway): array
     {
         $logoUrl = $gateway->getLogoUrl();
-        if ($gateway->getUseOwnLogo()) {
+        if ($gateway->shouldUseOwnLogo()) {
             $logoUrl = $gateway->getLogoPath();
         }
 
-        $gatewayId = $gateway->getGatewayId();
-        $name = $gateway->getName();
-
         return [
             'gateway_id' => $gateway->getGatewayId(),
-            'name' => $name,
+            'name' => $gateway->getName(),
             'bank' => $gateway->getBankName(),
             'description' => $gateway->getDescription(),
             'sort_order' => $gateway->getSortOrder(),
             'type' => $gateway->getType(),
             'logo_url' => $logoUrl,
             'is_separated_method' => $gateway->isSeparatedMethod(),
-
-            'is_iframe' => ($gatewayId == self::CARD_GATEWAY_ID || $gatewayId == self::ONECLICK_GATEWAY_ID) && $this->iframePayment(),
-            'is_blik' => ($gatewayId == self::BLIK_GATEWAY_ID) && $this->blikZero(),
-            'is_gpay' => $gatewayId == self::GPAY_GATEWAY_ID,
-            'is_autopay' => $gatewayId == self::ONECLICK_GATEWAY_ID,
-            'is_apple_pay' => $gatewayId == self::APPLE_PAY_GATEWAY_ID,
         ];
     }
 
     /**
+     * Sort gateways by sort_order and gateway_id
+     *
      * @param array|GatewayCollection $array
      *
      * @return array
@@ -412,6 +419,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get customer saved cards (for one click payment).
+     *
      * @return array
      */
     private function prepareCards(): array
@@ -495,6 +504,11 @@ class ConfigProvider implements ConfigProviderInterface
         return $gateways->load();
     }
 
+    /**
+     * Checks whether gateway selection on checkout is enabled.
+     *
+     * @return bool
+     */
     public function isGatewaySelectionEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
@@ -503,7 +517,12 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function iframePayment(): bool
+    /**
+     * Checks whether card iframe payment is enabled
+     *
+     * @return bool
+     */
+    protected function iframePaymentEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
@@ -511,7 +530,12 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
-    protected function blikZero(): bool
+    /**
+     * Checks whether blik zero payment is enabled.
+     *
+     * @return bool
+     */
+    protected function blikZeroEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/blik_zero',
@@ -519,6 +543,12 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
+    /**
+     * Get order statuses that cannot be changed
+     *
+     * @param StoreInterface|null $store
+     * @return array
+     */
     public function getUnchangableStatuses(?StoreInterface $store = null): array
     {
         return explode(
@@ -531,6 +561,12 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
+    /**
+     * Get status for order with waiting payment
+     *
+     * @param StoreInterface|null $store
+     * @return string|null
+     */
     public function getStatusWaitingPayment(?StoreInterface $store = null): ?string
     {
         return $this->scopeConfig->getValue(
@@ -540,6 +576,12 @@ class ConfigProvider implements ConfigProviderInterface
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
+    /**
+     * Get status for order with error payment
+     *
+     * @param StoreInterface|null $store
+     * @return string|null
+     */
     public function getStatusErrorPayment(?StoreInterface $store = null): ?string
     {
         return $this->scopeConfig->getValue(
@@ -549,6 +591,12 @@ class ConfigProvider implements ConfigProviderInterface
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
+    /**
+     * Get status for order with success payment
+     *
+     * @param StoreInterface|null $store
+     * @return string|null
+     */
     public function getStatusSuccessPayment(?StoreInterface $store = null): ?string
     {
         return $this->scopeConfig->getValue(
@@ -558,7 +606,13 @@ class ConfigProvider implements ConfigProviderInterface
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 
-    public function isConsumerFinanceEnabled($position): bool
+    /**
+     * Checks whether consumer finance is enabled for specific position.
+     *
+     * @param string $position
+     * @return bool
+     */
+    public function isConsumerFinanceEnabled(string $position): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/consumer_finance/' . $position,
@@ -566,6 +620,12 @@ class ConfigProvider implements ConfigProviderInterface
         );
     }
 
+    /**
+     * Get enabled gateways ids used for consumer finance.
+     *
+     * @return array
+     * @throws NoSuchEntityException
+     */
     public function getConsumerFinanceGatewaysEnabledIds(): array
     {
         $storeId = $this->storeManager->getStore()->getId();

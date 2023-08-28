@@ -1,12 +1,5 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/*
-    Created on : 2016-12-07, 16:07:23
-    Author     : krzysztof
-*/
+@blue: #199BFA;
+
 & when (@media-common = true) {
     .blik-modal {
         .modal-inner-wrap {
@@ -32,43 +25,67 @@ and open the template in the editor.
         min-height: 130px;
         padding-bottom: 0;
 
-        &__blik {
-            .blik-code {
-                width: 200px;
-                margin-left: 15px;
+        &__slideshow {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-right: 5px;
+        }
+        &__slideshow-slide {
+            opacity: 0;
+            position: absolute;
+            transition: opacity .17s linear .1s;
+
+            &.active {
+                opacity: 1;
             }
         }
 
-        &__card {
+        &._active {
             .payment-method-title {
-                .separated-payments-wrapper:not(:first-child) & {
-                    border-top: 1px solid #cccccc !important;
-                }
+                border: 2px solid @blue !important;
+
+                margin: 0 -10px 10px -10px;
+
+                padding-left: 10px;
+                padding-right: 10px;
             }
         }
 
-        &__blik {
-            .payment-method-title {
-                .separated-payments-wrapper:not(:first-child) & {
-                    border-top: 1px solid #cccccc !important;
-                }
+        &__separated {
+            &:first-child {
+                border-top: 1px solid #cccccc !important;
             }
         }
 
-        .payment-method-info {
-            margin-top: -15px;
-            margin-bottom: 15px;
+        .blik-code {
+            width: 200px;
+            margin-left: 15px;
         }
 
         .payment-method-title {
             display: flex;
             align-items: center;
+            width: 100%;
 
             input:focus,
             select:focus,
             textarea:focus,
             button:focus {
                 outline: none;
+            }
+
+            .method-name {
+                display: inline-block;
+                margin: 0;
+
+                .method-name-title {
+                    white-space: nowrap;
+                }
+
+                .payment-method-description {
+                    font-size: 1.2rem;
+                }
             }
 
             label {
@@ -125,37 +142,21 @@ and open the template in the editor.
                 }
 
                 &._active {
-                    border: 2px solid #00B5DD;
+                    border: 2px solid @blue;
                     z-index: 1;
 
                     &:hover {
-                        border: 2px solid #00B5DD;
+                        border: 2px solid @blue;
                     }
                 }
 
                 .radio {
                     display: none;
                 }
-            }
 
-            .card-option {
-                float: left;
-                width: 50%;
-                height: 84px;
-                position: relative;
-                border: 1px solid #e6e6e6;
-                margin: -1px 0 0 -1px;
-                box-sizing: border-box;
-
-                &._active {
-                    outline: 2px solid #a6a6a6;
-                    outline-offset: -2px;
-                    z-index: 1;
+                .payment-logo {
+                    max-height: 80px;
                 }
-            }
-
-            .payment-logo {
-                max-height: 80px;
             }
 
             input.radio {
@@ -181,6 +182,55 @@ and open the template in the editor.
                 }
                 &.title {
                     font-size: 14px;
+                }
+            }
+        }
+
+        /* One-click payment gateway */
+        .bluepayment_1503-options-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            border-width: 1px 0 0 1px;
+            border-style: solid;
+            border-color: transparent;
+            display: flex;
+            flex-wrap: wrap;
+
+            .card-option {
+                float: left;
+                width: 50%;
+                height: 84px;
+                position: relative;
+                border: 1px solid #e6e6e6;
+                margin: -1px 0 0 -1px;
+                box-sizing: border-box;
+
+                &._active {
+                    outline: 2px solid #a6a6a6;
+                    outline-offset: -2px;
+                    z-index: 1;
+                }
+
+                .radio {
+                    height: 13px;
+                    margin: 0;
+                    position: absolute;
+                    top: calc(50% - 6px);
+                    left: 20px;
+                }
+
+                .payment-logo {
+                    max-height: 80px;
+                    margin-left: 40px;
+                }
+
+                .details {
+                    left: 150px;
+                    top: 50%;
+                    position: absolute;
+                    transform: translateY(-50%);
+                    padding-right: 10px;
                 }
             }
         }
@@ -227,6 +277,22 @@ and open the template in the editor.
             }
         }
 
+        .payment-method-title {
+            .method-name {
+                display: inline-block;
+                margin: 0;
+
+                .payment-method-name {
+                    font-size: 1.6rem;
+                    font-weight: 600;
+                }
+
+                .payment-method-description {
+                    font-size: 1.2rem;
+                }
+            }
+        }
+
         &.multishipping {
             min-height: auto;
 
@@ -253,22 +319,6 @@ and open the template in the editor.
                 min-height: 15px;
                 padding-left: 17px;
                 color: #DF280A;
-            }
-        }
-
-        .payment-method-title {
-            .method-name {
-                display: inline-block;
-                margin: 0;
-
-                .payment-method-name {
-                    font-size: 1.6rem;
-                    font-weight: 600;
-                }
-
-                .payment-method-description {
-                    font-size: 1.2rem;
-                }
             }
         }
     }
@@ -307,32 +357,22 @@ and open the template in the editor.
     }
 }
 
-.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__l) {
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = 768px) {
     .blue-payment {
         .bluepayment-options-list {
+            justify-content: space-between;
+
             .payment-option {
-                width: 100%;
-
-                label {
-                    margin-left: 0;
-                    &:before {
-                        left: 10px;
-                    }
-                }
-                &.hide-option{
-                    display: none;
-                }
+                width: 150px;
             }
-            .mobile-show-more{
-                text-align: center;
-                float: left;
-                width: 100%;
-                padding: 30px 0 0;
+        }
 
-            }
+        .payment-method-title {
+            width: auto;
         }
     }
 }
 
 @import "_consumer-finance";
+@import "_frame";
 @import "_osc";

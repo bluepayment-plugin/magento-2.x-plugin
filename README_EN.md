@@ -1,7 +1,7 @@
-# The manual of „BluePayment” module for Magento 2
+# The manual of „Autopay” module for Magento 2
 
 ## Basic information
-The Blue Media Online Payment Plugin for Magento is the easiest way to allow your online store customers use the most popular payment methods. When integrated with the store, the plugin offers the possibility to add over 400 banks to the payment options.
+The Autopay Online Payment Plugin for Magento is the easiest way to allow your online store customers use the most popular payment methods. When integrated with the store, the plugin offers the possibility to add over 400 banks to the payment options.
 
 ### Main functions
 
@@ -10,7 +10,7 @@ The main functions of the module include:
 - support for shopping without registering on the site
 - support of two modes of operation - test and production (for each of them separate account data are required, which you should ask us for)
 - implementation of two ways to display forms of payment in the store:
-  - on the Blue Media site - classic or personalized view (after agreement with Blue Media),
+  - on the Autopay site - classic or personalized view (after agreement with Autopay),
   - on the store page - integrated, the customer is taken straight to the bank or card payment page.
 
 
@@ -18,7 +18,7 @@ The main functions of the module include:
 - Magento version: 2.3.0 - 2.4.6.
 - PHP version according to the requirements of your store version.
 
-### [What's new in BluePayment?](CHANGELOG_EN.md)
+### [What's new in Autopay?](CHANGELOG_EN.md)
 
 ## Installation
 
@@ -68,7 +68,7 @@ and the module will be activated.
 1. Log in to the admin panel in the Magento 2 platform.
 2. Choose from the menu: **Store** -> **Configuration**.
 3. In the next menu select: **Sales** -> **Payments methods**.
-4. Next, expand **Other payment methods** and select **Online Payment BM**. 
+4. Next, expand **Other payment methods** and select **Online Payment Autopay**. 
 
 ### Basic module configuration
 1. Go to [Module configuration](#configuration).
@@ -76,9 +76,9 @@ and the module will be activated.
    1. Set **Enabled** to **Yes**.
    2. Fill **Title** – the name of the payment visible to your customers - it can be for example Secure Online Payment. 
    3. Set the **Test Mode**
-3. Fill in the details of supported currencies (you will receive them from Blue Media)
+3. Fill in the details of supported currencies (you will receive them from Autopay)
    1. **Service partner ID**
-   2. **Configuration key (hash)** - you will receive it from BM, you can also read it in the PayBM panel [Acceptance Environment](https://oplacasie-accept.bm.pl/admin), [Production Environment](https://oplacasie.bm.pl/admin) in the service details as **Klucz konfiguracyjny (hash)**
+   2. **Configuration key (hash)** - you will receive it from Autopay, you can also read it in the Autopay adoministration panel [Test Environment](https://testportal.autopay.eu/admin), [Production Environment](https://portal.autopay.eu/admin) in the service details as **Klucz konfiguracyjny (hash)**
       ![configuration3.png](docs/configuration3.png "Screenshot")
 4. [Refresh cache](#refresh-cache)
 
@@ -115,7 +115,9 @@ The module allows you to automatically refresh the payment channel every 5 minut
         - 1 – first position in the list,
         - 2 – second position in the list,
         - ...
-        - 0 – the position in the list.
+        - 0 – the last position in the list.  
+        <br />
+       *For separate payment methods, the aggregate method **Autopay** (transfer payment) has a default order of 1. If you want to set a separate method over the Autopay method - use negative values (-5, -4, -3, etc.).*
     10. **Type**.
     11. **Is separated method** – displays the channel as a separate payment method
     12. (informative) **Gateway Logo**
@@ -204,11 +206,11 @@ The customer can remove the stored cards from his/her account in your online sto
 5. Click **Remove** and confirm.
 
 ## Generating orders from the administration panel
-The module allows you to send a link to the payment to the customer for orders created directly in the administration panel. To do this, select the payment method **BM** when creating an order.
+The module allows you to send a link to the payment to the customer for orders created directly in the administration panel. To do this, select the payment method **Autopay** when creating an order.
 
 ![admin1.png](docs/admin1.png)
 
-Payment link will be sent by BM to the e-mail address visible in the client's data.
+Payment link will be sent by Autopay to the e-mail address visible in the client's data.
 
 ![admin2.png](docs/admin2.png)
 
@@ -249,9 +251,9 @@ The refund will be generated automatically.
 ### Direct refund
 This option allows you to refund money directly to the customer's account from which the payment was sent. To use this option:
 
-1. Go to [Module configuration](#configuration) and check **Enable** for **Show manual BM refund in order details** option. This will make this action available for all completed orders paid through this module.
+1. Go to [Module configuration](#configuration) and check **Enable** for **Show manual Autopay refund in order details** option. This will make this action available for all completed orders paid through this module.
 2. Go to the order details.
-3. If the order was paid using the BM payment method, you should see the "BM return" button in the top menu.
+3. If the order was paid using the Autopay payment method, you should see the "Autopay return" button in the top menu.
    ![refund1.png](docs/refund1.png)
 4. When you click it, you will see a window that allows you to make a full or partial refund.
     1. For a partial refund, enter the amount in the format "000.00" (dot as decimal separator).
@@ -269,12 +271,12 @@ This option allows you to refund money directly to the customer's account from w
 This module allows you to pay for orders placed using the multishipping functionality.
 Configure the delivery according to [documentation](https://docs.magento.com/user-guide/configuration/sales/multishipping-settings.html).
 
-The payment module itself does not require any additional steps. BM payments will be available immediately.
+The payment module itself does not require any additional steps. Autopay payments will be available immediately.
 
 **NOTE!**
 
 The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run iFrame, Google Pay and BLIK 0 payments.
-For multishipping orders, the OrderID in messages to the customer and in the oplacasie.bm.pl panel will be the cart number with the QUOTE_ prefix, not the order number.
+For multishipping orders, the OrderID in messages to the customer and in the portal.autopay.eu panel will be the cart number with the QUOTE_ prefix, not the order number.
 
 ## Information about payment
 Information about the payment channel selected by the customer is visible from the Order grid.

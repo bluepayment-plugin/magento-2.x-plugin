@@ -1,0 +1,43 @@
+@frame-line-color: #199BFA;
+
+.bm-frame {
+    &-start {
+        position: relative;
+        overflow: hidden;
+        padding-top: 22px;
+        padding-bottom: 8px;
+
+        &::after {
+            height: 2px;
+            background-color: @frame-line-color;
+            content: "";
+            position: absolute;
+            top: 40px;
+        }
+
+        &::after {
+            width: 100%;
+            right: -130px;
+        }
+    }
+
+    &-end {
+        position: relative;
+        height: 2px;
+        width: 100%;
+        background-color: @frame-line-color;
+    }
+
+
+    &__logo {
+        width: 120px;
+        margin-top: 12px;
+    }
+
+    &__safe-brands {
+        width: 220px;
+        top: 48px;
+        right: 0;
+        position: absolute;
+    }
+}

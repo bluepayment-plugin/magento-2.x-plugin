@@ -37,7 +37,6 @@ define([
                     qty: qty
                 };
                 gtag('event', 'add_to_cart', {'items': [data]});
-                console.log('event', 'add_to_cart', {'items': [data]});
             }
         });
 

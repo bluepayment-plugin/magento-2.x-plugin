@@ -1,23 +1,21 @@
 define([
     'jquery',
     'ko',
-    'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',
     'Magento_Checkout/js/model/full-screen-loader',
     'Magento_Checkout/js/action/set-payment-information',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Checkout/js/action/select-payment-method',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-selected-gateway',
-    'BlueMedia_BluePayment/js/model/checkout/bluepayment-agreements'
+    'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment',
 ], function (
     $,
     ko,
-    Component,
     fullScreenLoader,
     setPaymentInformationAction,
     additionalValidators,
     selectPaymentMethodAction,
-    selectedGateway,
-    agreements
+    Component,
+    model,
 ) {
     'use strict';
 
@@ -39,7 +37,7 @@ define([
 
         initObservable: function () {
             // Observable is needed only once
-            agreements.selected.subscribe(function () {
+            model.selectedAgreements.subscribe(function () {
                 this.agreementChanged();
             }.bind(this));
 
@@ -67,7 +65,7 @@ define([
                 'method': this.item.method,
                 'additional_data': {
                     'gateway_id': this.gatewayId(),
-                    'agreements_ids': agreements.getCheckedAgreementsIds(),
+                    'agreements_ids': model.getCheckedAgreementsIds(),
                 }
             };
         },
@@ -118,7 +116,7 @@ define([
         setBlueMediaGatewayMethod: function (value) {
             this.gatewayId(value.gateway_id);
             setPaymentInformationAction(this.messageContainer, this.getData());
-            selectedGateway(value);
+            model.selectedGatewayId(value);
 
             return true;
         },
