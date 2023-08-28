@@ -440,4 +440,4 @@ DROP TABLE blue_transaction;
 DELETE FROM core_config_data WHERE path LIKE 'payment/bluepayment%';
 ```
 ### Autopay Checkout dla Magento 2
-W celu wdrożenia Autopay Checkout odsyłamy do dokumentacji na [Githubie]([https://github.com/bluepayment-plugin/magento-2.x-plugin/blob/autopay/AUTOPAY.md).
+W celu wdrożenia Autopay Checkout odsyłamy do dokumentacji na [Githubie](https://github.com/bluepayment-plugin/magento-2.x-plugin/blob/autopay/AUTOPAY.md).
