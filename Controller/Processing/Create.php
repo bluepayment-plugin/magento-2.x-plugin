@@ -415,6 +415,7 @@ class Create extends Action
 
             return $this->_redirect('bluepayment/processing/back', [
                 '_secure' => true,
+                '_scope' => $order->getStoreId(),
                 '_query' => [
                     'ServiceID' => $serviceId,
                     'OrderID' => $orderId,
