@@ -1,7 +1,12 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.1
+- Zmieniliśmy tekst pomocy dla płatności Alior Raty.
+
 ## Wersja 2.22.0
 - Zmieniliśmy swoją nazwę na Autopay.
+- Dodaliśmy możliwość ustawienia metody płatności powyżej metody zbiorczej "Autopay" (płatność przelewem).
+- Dokonaliśmy refaktoryzacji kodu front-end (JS) dla wszystkich kanałów Autopay.
 
 ## Wersja 2.21.7
 - Dodaliśmy metodę płatności **Spingo** - odroczone płatności dla firm.

@@ -1,11 +1,12 @@
 # What's new in BluePayment?
 
-## Version 2.X
-- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
-- We refactored the front-end code (JS) for all Autopay channels.
+## Version 2.22.1
+- We have changed the help text for Alior installments payments.
 
 ## Version 2.22.0
 - We have changed our name to Autopay.
+- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Autopay channels.
 
 ## Version 2.21.7
 - We have added new payment method **Spingo** - deffered payment for business.
