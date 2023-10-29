@@ -2,6 +2,8 @@
 
 ## Version 2.22.1
 - We have changed the help text for Alior installments payments.
+- We have changed the text of the commission information in the administration panel.
+- We have changed the link to the regulations offer in the administration panel.
 
 ## Version 2.22.0
 - We have changed our name to Autopay.

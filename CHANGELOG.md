@@ -2,6 +2,8 @@
 
 ## Wersja 2.22.1
 - Zmieniliśmy tekst pomocy dla płatności Alior Raty.
+- Zmieniliśmy tekst informacji o prowizji w panelu administracyjnym.
+- Zmieniliśmy link do oferty regulaminów w panelu administracyjnym.
 
 ## Wersja 2.22.0
 - Zmieniliśmy swoją nazwę na Autopay.
