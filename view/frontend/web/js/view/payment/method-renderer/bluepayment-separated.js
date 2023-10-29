@@ -97,8 +97,8 @@ define([
             }
 
             if (gatewayId === model.gatewaysIds.alior_installments) {
-                return $t('0% installments and even 48 installments. %1')
-                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+                return $t('Pay for your purchases using convenient instalments (%1).')
+                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('check out the details') + '</a>');
             }
 
             if (gatewayId === model.gatewaysIds.paypo) {
