@@ -1,10 +1,11 @@
 # What's new in BluePayment?
 
-## Version 2.X
-- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
-- We refactored the front-end code (JS) for all Autopay channels.
+## Version 2.22.1
+- We have improved the operation in the event of an ITN status race.
 
 ## Version 2.22.0
+- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Autopay channels.
 - We have changed our name to Autopay.
 
 ## Version 2.21.7

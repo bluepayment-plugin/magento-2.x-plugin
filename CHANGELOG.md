@@ -1,6 +1,11 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.1
+- Poprawiliśmy działanie w przypadku wystąpienia wyścigu statusów ITN.
+
 ## Wersja 2.22.0
+- Dodaliśmy możliwość ustawienia metody płatności powyżej metody zbiorczej "Autopay" (płatność przelewem).
+- Dokonaliśmy refaktoryzacji kodu front-end (JS) dla wszystkich kanałów Autopay.
 - Zmieniliśmy swoją nazwę na Autopay.
 
 ## Wersja 2.21.7
