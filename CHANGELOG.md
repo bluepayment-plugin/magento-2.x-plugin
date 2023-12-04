@@ -4,6 +4,7 @@
 - Zmieniliśmy tekst pomocy dla płatności Alior Raty.
 - Zmieniliśmy tekst informacji o prowizji w panelu administracyjnym.
 - Zmieniliśmy link do oferty regulaminów w panelu administracyjnym.
+- Dodaliśmy metodę płatności "BLIK Zapłać później".
 
 ## Wersja 2.22.0
 - Zmieniliśmy swoją nazwę na Autopay.
