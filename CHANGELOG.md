@@ -6,6 +6,7 @@
 - Zmieniliśmy link do oferty regulaminów w panelu administracyjnym.
 - Dodaliśmy metodę płatności "BLIK Zapłać później".
 - Poprawiliśmy działanie w przypadku wystąpienia wyścigu statusów ITN.
+- Poprawiliśmy błąd, który powodował brak widoczności metody Autopay w przypadku dostępnych tylko oddzielnych metod płatności.
 
 ## Wersja 2.22.0
 - Dodaliśmy możliwość ustawienia metody płatności powyżej metody zbiorczej "Autopay" (płatność przelewem).
