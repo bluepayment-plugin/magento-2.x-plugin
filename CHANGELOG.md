@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.1
+- Dodaliśmy metodę płatności "BLIK Zapłać później".
+
 ## Wersja 2.22.0
 - Zmieniliśmy swoją nazwę na Autopay.
 
