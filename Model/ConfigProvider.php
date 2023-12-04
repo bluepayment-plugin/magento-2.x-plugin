@@ -25,6 +25,7 @@ use Magento\Store\Model\StoreManagerInterface;
 class ConfigProvider implements ConfigProviderInterface
 {
     public const BLIK_GATEWAY_ID = 509;
+    public const BLIK_BNPL_GATEWAY_ID = 523;
     public const SMARTNEY_GATEWAY_ID = 700;
     public const HUB_GATEWAY_ID = 702;
     public const PAYPO_GATEWAY_ID = 705;
@@ -38,6 +39,7 @@ class ConfigProvider implements ConfigProviderInterface
 
     public const ALWAYS_SEPARATED = [
         self::BLIK_GATEWAY_ID,
+        self::BLIK_BNPL_GATEWAY_ID,
         self::SMARTNEY_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
         self::PAYPO_GATEWAY_ID,

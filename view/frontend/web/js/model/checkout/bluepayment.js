@@ -51,6 +51,7 @@ define([
          */
         gatewaysIds: {
             blik: 509,
+            blik_bnpl: 523,
             smartney: 700,
             hub: 702,
             paypo: 705,
