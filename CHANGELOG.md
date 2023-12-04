@@ -5,11 +5,12 @@
 - Zmieniliśmy tekst informacji o prowizji w panelu administracyjnym.
 - Zmieniliśmy link do oferty regulaminów w panelu administracyjnym.
 - Dodaliśmy metodę płatności "BLIK Zapłać później".
+- Poprawiliśmy działanie w przypadku wystąpienia wyścigu statusów ITN.
 
 ## Wersja 2.22.0
-- Zmieniliśmy swoją nazwę na Autopay.
 - Dodaliśmy możliwość ustawienia metody płatności powyżej metody zbiorczej "Autopay" (płatność przelewem).
 - Dokonaliśmy refaktoryzacji kodu front-end (JS) dla wszystkich kanałów Autopay.
+- Zmieniliśmy swoją nazwę na Autopay.
 
 ## Wersja 2.21.7
 - Dodaliśmy metodę płatności **Spingo** - odroczone płatności dla firm.
