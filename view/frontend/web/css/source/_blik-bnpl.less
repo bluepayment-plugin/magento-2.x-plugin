@@ -21,7 +21,12 @@
         display: flex;
         align-items: center;
 
-        & .modal-header,
+        & .modal-header {
+            position: absolute;
+            right: 0;
+            z-index: 10000;
+        }
+
         & .modal-footer {
             display: none;
         }
@@ -39,6 +44,7 @@
         width: auto;
         border-radius: 12px;
         box-shadow: 0 4px 4px 0 @blik-shadow-color;
+        background: @blik-bg;
         height: auto !important;
     }
 
@@ -51,7 +57,6 @@
         display: flex;
         flex: 1;
         align-items: stretch;
-        background: @blik-bg;
 
         &--logo {
             max-width: 210px;
