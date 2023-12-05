@@ -98,12 +98,12 @@ define([
 
             if (gatewayId === model.gatewaysIds.alior_installments) {
                 return $t('0% installments and even 48 installments. %1')
-                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Check out other installment options') + '</a>');
+                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Learn more') + '</a>');
             }
 
             if (gatewayId === model.gatewaysIds.paypo) {
                 return $t('Pick up your purchases, check them out and pay later &mdash; in 30 days or in convenient installments. %1')
-                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
+                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Learn more') + '</a>');
             }
 
             if (gatewayId === model.gatewaysIds.visa_mobile) {
