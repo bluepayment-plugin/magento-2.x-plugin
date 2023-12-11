@@ -829,7 +829,7 @@ class Payment extends AbstractMethod
         $updateOrders = true;
         if ($paymentStatus === self::PAYMENT_STATUS_FAILURE) {
             // Double verify current order status, based on response from WebAPI.
-            if ($this->verifyTransactionInWebapi($serviceId, $orderId, $currency, $store)) {
+            if (! $this->hasOnlyFailureStatuses($serviceId, $orderId, $currency, $store)) {
                 // Order has one success transaction - do not change status to failure
                 $updateOrders = false;
                 $this->bmLooger->info('Change order ignored');
@@ -1457,13 +1457,12 @@ class Payment extends AbstractMethod
         return $orders;
     }
 
-    private function verifyTransactionInWebapi(
+    private function hasOnlyFailureStatuses(
         int $serviceId,
         string $orderId,
         string $currency,
         StoreInterface $store
-    ): bool
-    {
+    ): bool {
         $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
@@ -1483,17 +1482,16 @@ class Payment extends AbstractMethod
 
             $this->bmLooger->info('PAYMENT:' . __LINE__, [
                 'paymentStatus' => $status,
-                'paymentStatusCode' => self::PAYMENT_STATUS_SUCCESS,
                 'transaction' => json_decode(json_encode($transaction), true),
             ]);
 
-            if ($status === self::PAYMENT_STATUS_SUCCESS) {
-                $this->bmLooger->info('Has success payment');
-                return true;
+            if ($status !== self::PAYMENT_STATUS_FAILURE) {
+                $this->bmLooger->info('Has not final status.');
+                return false;
             }
         }
 
-        $this->bmLooger->info('Has not success payment');
-        return false;
+        $this->bmLooger->info('Has ONLY FAILURE statuses');
+        return true;
     }
 }

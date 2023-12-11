@@ -1,10 +1,16 @@
 # What's new in BluePayment?
 
-## Version 2.X
-- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
-- We refactored the front-end code (JS) for all Autopay channels.
+## Version 2.22.1
+- We have changed the help text for Alior installments payments.
+- We have changed the text of the commission information in the administration panel.
+- We have changed the link to the regulations offer in the administration panel.
+- We have added a new payment method "BLIK Pay later".
+- We have improved the operation in the event of an ITN status race.
+- We have fixed a bug that caused the Autopay method not to be visible when only separate payment methods were available.
 
 ## Version 2.22.0
+- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Autopay channels.
 - We have changed our name to Autopay.
 
 ## Version 2.21.7
