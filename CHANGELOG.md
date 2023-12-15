@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.3
+- Zmieniliśmy tekst pomocniczy dla BLIK Płacę Później.
+
 ## Wersja 2.22.2
 - Poprawiliśmy literówką w tłumaczeniach.
 
