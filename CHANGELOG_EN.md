@@ -1,5 +1,11 @@
 # What's new in BluePayment?
 
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
+## Version 2.22.2
+- We have corrected a typo in the translations.
+
 ## Version 2.22.1
 - We have changed the help text for Alior installments payments.
 - We have changed the text of the commission information in the administration panel.
