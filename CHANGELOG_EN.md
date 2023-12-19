@@ -1,5 +1,22 @@
 # What's new in BluePayment?
 
+## Version 2.X
+- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Autopay channels.
+
+## Version 2.22.0
+- We have changed our name to Autopay.
+
+## Version 2.21.7
+- We have added new payment method **Spingo** - deffered payment for business.
+
+## Version 2.21.6
+- We have fixed a bug with **Google Pay** method.
+- We have added checkout styling for the Mageplaza One Step Checkout module.
+
+## Version 2.21.5
+- We have fixed displaying the payment method when only card payment is available.
+
 ## Version 2.21.4
 - We have added a new payment method **Visa Mobile**.
 - We have added information about the test environment in the administration panel.
@@ -23,12 +40,12 @@
 
 ## Version 2.21.0
 - We have added the SEK currency.
-- We added text with information for BM payment method.
+- We added text with information for Autopay payment method.
 - We changed the appearance of the payment selection screen.
 - We added help texts in module configuration and channel configuration.
 - We have added new payment channel "PayPo".
 - From now on, also "Card payment" and "PayPo" gateways are always displayed as separate payment methods.
-- We have improved support for many BM services within different Magento contexts.
+- We have improved support for many Autopay services within different Magento contexts.
 
 ## Version 2.20.0
 - We have added the **initialize** method to the **BluePayment\Model\Method\BluePayment**, which sets the default order status, according to the "Payment waiting status" setting in the module configuration (only for orders placed using the BlueMedia payment method).
@@ -161,7 +178,7 @@
 
 ## Version 2.7.3.
 - We changed the sorting mechanism.
-- We fixed the bug related to lack of redirection to BM payment.
+- We fixed the bug related to lack of redirection to Autopay payment.
 
 ## Version 2.7.2
 - We adjusted module to Magento Marketplace requirements.

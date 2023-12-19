@@ -57,20 +57,20 @@ class Gateways extends Data
     /**
      * Gateways constructor.
      *
-     * @param  Context  $context
-     * @param  LayoutFactory  $layoutFactory
-     * @param  Factory  $paymentMethodFactory
-     * @param  Emulation  $appEmulation
-     * @param  Config  $paymentConfig
-     * @param  Initial  $initialConfig
-     * @param  GatewayInterfaceFactory  $gatewayFactory
-     * @param  GatewayRepositoryInterface  $gatewayRepository
-     * @param  Client  $apiClient
-     * @param  Logger  $logger
-     * @param  EmailHelper  $emailHelper
-     * @param  Collection  $collection
-     * @param  StoreManagerInterface  $storeManager
-     * @param  Webapi  $webapi
+     * @param Context $context
+     * @param LayoutFactory $layoutFactory
+     * @param Factory $paymentMethodFactory
+     * @param Emulation $appEmulation
+     * @param Config $paymentConfig
+     * @param Initial $initialConfig
+     * @param GatewayInterfaceFactory $gatewayFactory
+     * @param GatewayRepositoryInterface $gatewayRepository
+     * @param Client $apiClient
+     * @param Logger $logger
+     * @param EmailHelper $emailHelper
+     * @param Collection $collection
+     * @param StoreManagerInterface $storeManager
+     * @param Webapi $webapi
      */
     public function __construct(
         Context $context,
@@ -109,6 +109,8 @@ class Gateways extends Data
     }
 
     /**
+     * Synchronize gateways list.
+     *
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -169,6 +171,8 @@ class Gateways extends Data
     }
 
     /**
+     * Get simple gateways list.
+     *
      * @return array
      * @throws LocalizedException
      */
@@ -230,11 +234,13 @@ class Gateways extends Data
     }
 
     /**
-     * @param  integer  $serviceId
-     * @param  StoreInterface  $store
-     * @param  array  $gatewayList
-     * @param  array  $existingGateways
-     * @param  string  $currency
+     * Save gateways list
+     *
+     * @param integer $serviceId
+     * @param StoreInterface $store
+     * @param array $gatewayList
+     * @param array $existingGateways
+     * @param string $currency
      *
      * @return bool
      * @throws LocalizedException
@@ -269,19 +275,19 @@ class Gateways extends Data
                 } else {
                     $gatewayModel = $this->gatewayFactory->create();
                     $gatewayModel->setForceDisable(false);
-                    $gatewayModel->setName($gateway['gatewayName']);
                 }
 
                 if (// Always separated
                     in_array($gateway['gatewayID'], ConfigProvider::ALWAYS_SEPARATED)
-                    || ($gateway['gatewayID'] == ConfigProvider::BLIK_GATEWAY_ID && $this->blikZero($store))) {
+                    || ($gateway['gatewayID'] == ConfigProvider::BLIK_GATEWAY_ID && $this->isBlikZeroEnabled($store))) {
                     $gatewayModel->setIsSeparatedMethod(true);
                 }
 
+                $gatewayModel->setName($gateway['gatewayName']);
                 $gatewayModel->setStoreId($storeId);
                 $gatewayModel->setServiceId($serviceId);
                 $gatewayModel->setCurrency($currency);
-                $gatewayModel->setGatewayId($gateway['gatewayID']);
+                $gatewayModel->setGatewayId((int) $gateway['gatewayID']);
                 $gatewayModel->setStatus($gateway['state'] == 'OK');
                 $gatewayModel->setBankName($gateway['bankName']);
                 $gatewayModel->setType($gateway['gatewayType']);
@@ -296,8 +302,10 @@ class Gateways extends Data
                         // For now - we support only one currency per service
                         $save = true;
 
-                        $gatewayModel->setMinAmount($currencyInfo['minAmount'] ?? null);
-                        $gatewayModel->setMaxAmount($currencyInfo['maxAmount'] ?? null);
+                        $gatewayModel->setMinAmount(isset($currencyInfo['minAmount'])
+                            ? (float) $currencyInfo['minAmount'] : null);
+                        $gatewayModel->setMaxAmount(isset($currencyInfo['maxAmount'])
+                            ? (float) $currencyInfo['maxAmount'] : null);
                     }
                 }
 
@@ -312,7 +320,7 @@ class Gateways extends Data
         }
 
         $disabledGateways = [];
-        if (isset($existingGateways[$storeId]) && isset($existingGateways[$storeId][$currency])) {
+        if (isset($existingGateways[$storeId][$currency])) {
             foreach ($existingGateways[$storeId][$currency] as $existingGatewayId => $existingGatewayData) {
                 if (!in_array(
                     $existingGatewayId,
@@ -348,7 +356,7 @@ class Gateways extends Data
      * @param  StoreInterface $store
      * @return bool
      */
-    protected function blikZero(StoreInterface $store): bool
+    protected function isBlikZeroEnabled(StoreInterface $store): bool
     {
         return (boolean) $this->scopeConfig->getValue(
             'payment/bluepayment/blik_zero',

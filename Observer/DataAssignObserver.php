@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Observer;
 
 use Magento\Framework\Event\Observer;
@@ -26,8 +28,9 @@ class DataAssignObserver extends AbstractDataAssignObserver
     ];
 
     /**
-     * @param  Observer  $observer
+     * Assign additional data to payment info instance.
      *
+     * @param  Observer  $observer
      * @return void
      */
     public function execute(Observer $observer): void

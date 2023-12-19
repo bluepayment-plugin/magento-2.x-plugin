@@ -7,7 +7,7 @@
     ">
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
-        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!-- ko template: getTemplate() --><!--/ko-->
         <!--/ko-->
 
         <!-- ko if: renderSubOptions != false && renderSubOptions.length > 0 -->
@@ -31,12 +31,18 @@
 
                     <!-- ko if: bluePaymentCollapsible -->
                     <div class="gateway-collapsible">
-                        <a href="#" class="expand" data-bind="{visible: collapsed(), click: function() {this.collapsed(false)}}">
-                            <!-- ko i18n: 'Show all' --><!-- /ko -->
+                        <a href="#" class="expand" data-bind="
+                            visible: collapsed(),
+                            click: function() {this.collapsed(false)}
+                        ">
+                            <!-- ko i18n: 'Show all' --><!--/ko-->
                         </a>
 
-                        <a href="#" class="collapse" data-bind="{visible: !collapsed(), click: function() {this.collapsed(true)}}">
-                            <!-- ko i18n: 'Collapse' --><!-- /ko -->
+                        <a href="#" class="collapse" data-bind="
+                            visible: !collapsed(),
+                            click: function() {this.collapsed(true)}
+                        ">
+                            <!-- ko i18n: 'Collapse' --><!--/ko-->
                         </a>
                     </div>
                     <!--/ko-->
@@ -46,18 +52,18 @@
         <!--/ko-->
 
         <!-- ko if: (renderSubOptions != false && renderSubOptions.length == 0)-->
-        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!-- /ko -->
+        <!-- ko i18n: 'No online payment is available at this time. Feel free to contact us about that.' --><!--/ko-->
         <!--/ko-->
 
         <!-- ko if: (renderSubOptions != false && renderSubOptions.length > 0) -->
-        <div class="payment-method-empty-gateway mage-error" data-bind="{visible: validationFailed}">
+        <div class="payment-method-empty-gateway mage-error" data-bind="visible: validationFailed">
             <p data-bind="i18n: 'No gateway was selected.'"></p>
         </div>
         <!--/ko-->
 
         <div class="bluepayment-agreements-block">
             <!-- ko foreach: getRegion('bluepayment-agreements') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- ko template: getTemplate() --><!--/ko-->
             <!--/ko-->
         </div>
 
@@ -67,7 +73,7 @@
                         type="submit"
                         data-bind="{click: placeOrderClick}"
                         class="action primary checkout">
-                    <span data-bind="i18n: 'Place Order'"></span>
+                    <span translate="'Place Order'"></span>
                 </button>
             </div>
         </div>

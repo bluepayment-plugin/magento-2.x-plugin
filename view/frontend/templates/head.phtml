@@ -2,9 +2,9 @@
 /** @var \BlueMedia\BluePayment\Block\Head $block */
 
 if ($block->isTest()) {
-    echo '<script src="https://cards-accept.bm.pl/integration/checkout.js"></script>';
+    echo '<script src="https://testcards.autopay.eu/integration/checkout.js"></script>';
 } else {
-    echo '<script src="https://cards.bm.pl/integration/checkout.js"></script>';
+    echo '<script src="https://cards.autopay.eu/integration/checkout.js"></script>';
 }
 
 if ($block->hasGPay())

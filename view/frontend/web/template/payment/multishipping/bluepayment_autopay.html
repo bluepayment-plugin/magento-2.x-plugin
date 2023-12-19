@@ -7,7 +7,7 @@
     ">
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
-        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!-- ko template: getTemplate() --><!--/ko-->
         <!--/ko-->
 
         <fieldset class="fieldset">
@@ -34,7 +34,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="mage-error" style="clear: both;" data-bind="{i18n: 'You have to choose payment card.', visible: validationFailed}"></div>
+                <div class="mage-error" style="clear: both;" data-bind="i18n: 'You have to choose payment card.', visible: validationFailed"></div>
             </div>
         </fieldset>
 
@@ -43,12 +43,12 @@
             <label for="autopay-agreement">
                 <span data-bind="html: bluePaymentAutopayAgreement"></span>
             </label>
-            <div class="mage-error" style="display: none; clear: both;" data-bind="{i18n: 'You have to agree.', visible: validationAgreementFailed}"></div>
+            <div class="mage-error" style="display: none; clear: both;" data-bind="i18n: 'You have to agree.', visible: validationAgreementFailed"></div>
         </div>
 
         <div class="bluepayment-agreements-block">
             <!-- ko foreach: getRegion('bluepayment-agreements') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- ko template: getTemplate() --><!--/ko-->
             <!--/ko-->
         </div>
 
@@ -56,9 +56,9 @@
             <div class="primary">
                 <button data-role="review-save"
                         type="submit"
-                        data-bind="{click: placeOrderClick}"
+                        data-bind="click: placeOrderClick"
                         class="action primary checkout">
-                    <span data-bind="i18n: 'Place Order'"></span>
+                    <span translate="'Place Order'"></span>
                 </button>
             </div>
         </div>

@@ -1,0 +1,37 @@
+.onestepcheckout-index-index {
+    .one-step-checkout-wrapper {
+        [type=radio]:checked + label,
+        [type=radio]:not(:checked) + label {
+            display: flex;
+            height: auto;
+            align-items: center;
+        }
+
+        [type=radio] + label:after,
+        [type=radio] + label:before {
+            top: auto;
+        }
+
+        .blue-payment .bluepayment-options-list .payment-option {
+            width: 150px;
+        }
+
+        .field.choice {
+            padding-left: 10px;
+        }
+
+        .blue-payment .bluepayment_1503-options-list .card-option {
+            height: auto;
+
+            .payment-logo {
+                margin-left: 0;
+            }
+
+            .details {
+                position: initial;
+                transform: none;
+                padding-right: 0;
+            }
+        }
+    }
+}

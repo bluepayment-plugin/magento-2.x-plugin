@@ -1,0 +1,68 @@
+<!-- ko if: isAvailable() -->
+    <div class="payment-method blue-payment" data-bind="css: {'_active': (getCode() == isChecked())}">
+        <div class="payment-method-title field choice">
+            <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="
+                   attr:{id: getCode()},
+                   value: getCode(),
+                   checked: isChecked,
+                   click: selectPaymentMethod,
+                   visible: isRadioButtonVisible()
+               "/>
+
+            <label data-bind="attr: {for: getCode()}" class="label">
+                <img src=""
+                     alt=""
+                     data-bind="attr: {src: gateway_logo_url, alt: gateway_name}"
+                     class="payment-icon"
+                />
+
+                <p class="method-name">
+                    <span data-bind="text: getGatewayTitle()" class="payment-method-name"></span>
+                    <!-- ko if: getGatewayDescription() -->
+                        <br />
+                        <span data-bind="html: getGatewayDescription()" class="payment-method-description"></span>
+                    <!--/ko-->
+
+                    <!-- ko if: (getGatewayHelp() && (isChecked() === getCode())) -->
+                        <span data-bind="html: getGatewayHelp()" class="payment-method-help-text"></span>
+                    <!--/ko-->
+                </p>
+            </label>
+        </div>
+        <div class="payment-method-content" data-bind="visible: isChecked()">
+            <!-- ko foreach: getRegion('messages') -->
+                <!-- ko template: getTemplate() --><!--/ko-->
+            <!--/ko-->
+
+            <div class="payment-method-billing-address">
+                <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+                    <!-- ko template: getTemplate() --><!--/ko-->
+                <!--/ko-->
+            </div>
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parent.getRegion('before-place-order') -->
+                    <!-- ko template: getTemplate() --><!--/ko-->
+                <!--/ko-->
+            </div>
+            <div class="bluepayment-agreements-block">
+                <!-- ko foreach: $parent.getRegion('bluepayment-agreements') -->
+                    <!-- ko template: getTemplate() --><!--/ko-->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button class="action primary checkout"
+                            type="submit"
+                            data-bind="
+                                click: callGooglePayPayment
+                            ">
+                        <span translate="'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--/ko-->
