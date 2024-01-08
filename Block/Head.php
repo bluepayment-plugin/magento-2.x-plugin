@@ -43,7 +43,7 @@ class Head extends Template
      */
     public function isActive(): bool
     {
-        return $this->_scopeConfig->getValue(
+        return $this->_scopeConfig->isSetFlag(
             'payment/bluepayment/active',
             ScopeInterface::SCOPE_STORE
         );
