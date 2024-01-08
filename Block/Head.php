@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Model\ConfigProvider;
@@ -28,17 +30,31 @@ class Head extends Template
         CollectionFactory $gatewayFactory,
         PriceCurrencyInterface $priceCurrency,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct($context, $data);
         $this->gatewayFactory = $gatewayFactory;
         $this->priceCurrency = $priceCurrency;
     }
 
     /**
-     * @return boolean
+     * Returns true if Blue Media payment method is active.
+     *
+     * @return bool
      */
-    public function isTest()
+    public function isActive(): bool
+    {
+        return $this->_scopeConfig->getValue(
+            'payment/bluepayment/active',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Returns true if test mode is enabled.
+     *
+     * @return bool
+     */
+    public function isTest(): bool
     {
         return (bool)$this->_scopeConfig->getValue(
             'payment/bluepayment/test_mode',
@@ -47,9 +63,11 @@ class Head extends Template
     }
 
     /**
+     * Returns true if Google Pay is enabled for current currency.
+     *
      * @return bool
      */
-    public function hasGPay()
+    public function hasGPay(): bool
     {
         $currency = $this->getCurrentCurrencyCode();
 
@@ -67,9 +85,11 @@ class Head extends Template
     }
 
     /**
+     * Returns current currency code.
+     *
      * @return string
      */
-    public function getCurrentCurrencyCode()
+    public function getCurrentCurrencyCode(): string
     {
         return $this->priceCurrency->getCurrency()->getCurrencyCode();
     }
