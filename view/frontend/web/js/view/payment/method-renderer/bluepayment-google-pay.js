@@ -26,7 +26,7 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-google-pay',
-            gateway_id: null,
+            gateway_id: 1512,
             gateway_logo_url: null,
             gateway_name: null,
             gateway_description: null,
@@ -188,7 +188,7 @@ define([
                 self.placeOrderAfterValidation(function () {
                     const token = data.paymentMethodData.tokenizationData.token;
                     const urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id=' + this.gateway_id
+                        + '?gateway_id=1512'
                         + '&automatic=true';
 
                     $.ajax({
@@ -266,3 +266,4 @@ define([
         },
     });
 });
+

@@ -1,5 +1,14 @@
 # What's new in BluePayment?
 
+## Version 2.22.4
+- From now on, JS scripts are not included when the Autopay payment method is disabled.
+
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
+## Version 2.22.2
+- We have corrected a typo in the translations.
+
 ## Version 2.22.1
 - We have changed the help text for Alior installments payments.
 - We have changed the text of the commission information in the administration panel.
