@@ -5,13 +5,6 @@
 ?>
 <?php if ($block->isEnabled()): ?>
     <div class="bluemedia consumer-finance horizontal position-<?= $block->getPosition() ?>">
-        <?php if ($block->isSmartneyEnabled()): ?>
-            <div class="cf-item later">
-                <span class="label"><?= __('PAY LATER') ?></span>
-                <span class="text"><?= __('Buy now and pay within 30 days') ?></span>
-            </div>
-        <?php endif; ?>
-
         <?php if ($block->isInstallmentsAvailable()): ?>
             <div class="cf-item installments">
                 <span class="label"><?= __('INSTALLMENTS') ?></span>

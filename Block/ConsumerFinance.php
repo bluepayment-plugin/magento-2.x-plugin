@@ -34,11 +34,6 @@ class ConsumerFinance extends Template
         return false;
     }
 
-    public function isSmartneyEnabled(): bool
-    {
-        return ($this->isEnabled() && $this->isGatewayEnabled(ConfigProvider::SMARTNEY_GATEWAY_ID));
-    }
-
     public function isInstallmentsAvailable(): bool
     {
         return ($this->isEnabled() && $this->isGatewayEnabled(ConfigProvider::ALIOR_INSTALLMENTS_GATEWAY_ID));
