@@ -36,16 +36,16 @@ define([
         merchantInfo: null,
         acceptorId: null,
         modal: modal({
-            title: $t('Waiting for the confirmation of the transaction.'),
-            autoOpen: false,
-            clickableOverlay: false,
-            buttons: [],
-            type: 'popup',
-            popupTpl: popupTpl,
-            keyEventHandlers: {},
-            modalClass: 'blik-modal',
-        },
-        $('<div />').html()),
+                title: $t('Waiting for the confirmation of the transaction.'),
+                autoOpen: false,
+                clickableOverlay: false,
+                buttons: [],
+                type: 'popup',
+                popupTpl: popupTpl,
+                keyEventHandlers: {},
+                modalClass: 'blik-modal',
+            },
+            $('<div />').html()),
 
 
         /**
@@ -103,7 +103,7 @@ define([
                     self.acceptorId = response.acceptorId.toString();
 
                     let client = new google.payments.api.PaymentsClient({
-                        environment: self.testMode === "1" ? 'TEST' : 'PRODUCTION'
+                        environment: self.testMode ? 'TEST' : 'PRODUCTION'
                     });
                     self.client(client);
                     client.isReadyToPay({
