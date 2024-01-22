@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.4
+- Dodaliśmy tłumaczenie kanałów płatności w szczegółach zamówienia.
+
 ## Wersja 2.22.3
 - Zmieniliśmy tekst pomocniczy dla BLIK Płacę Później.
 

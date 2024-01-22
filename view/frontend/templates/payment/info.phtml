@@ -8,7 +8,7 @@ $link = $block->getContinuationLink();
 
 ?>
 <dl class="payment-method">
-    <dt class="title"><?= /* @noEscape */ $title ?> <?= ($gatewayName) ? ' - '.$gatewayName : null ?></dt><br />
+    <dt class="title"><?= /* @noEscape */ $title ?> <?= ($gatewayName) ? ' - ' . __($gatewayName) : null ?></dt><br />
 
     <?php if ($link): ?>
         <a href="<?= /* @noEscape */ $link ?>">
