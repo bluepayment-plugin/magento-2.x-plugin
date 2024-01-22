@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BlueMedia\BluePayment\Block;
 
 use BlueMedia\BluePayment\Helper\Data;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\GetTransactionLifetime;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
 use Magento\Checkout\Model\Session;
@@ -116,7 +117,24 @@ class Info extends \Magento\Payment\Block\Info
         /** @var Payment $info */
         $payment = $this->getInfo();
 
-        return $payment->getOrder()->getPaymentChannel();
+        $info = $payment->getAdditionalInformation();
+        $gatewayId = false;
+        if (isset($info['gateway_id'])) {
+            $gatewayId = (int)$info['gateway_id'];
+        }
+
+        switch ($gatewayId) {
+            case ConfigProvider::CARD_GATEWAY_ID:
+                return 'Card Payment';
+            case ConfigProvider::SMARTNEY_GATEWAY_ID:
+                return 'Pay later';
+            case ConfigProvider::ALIOR_INSTALLMENTS_GATEWAY_ID:
+                return 'Alior Installments';
+            case ConfigProvider::VISA_MOBILE_GATEWAY_ID:
+                return 'Visa Mobile';
+            default:
+                return $payment->getOrder()->getPaymentChannel();
+        }
     }
 
     /**

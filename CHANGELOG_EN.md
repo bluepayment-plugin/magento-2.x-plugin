@@ -6,6 +6,12 @@
 ## Version 2.22.3
 - We have changed the supporting text for BLIK Pay Later.
 
+## Version 2.22.4
+- We have added a translation of the payment channels in the order details.
+
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
 ## Version 2.22.2
 - We have corrected a typo in the translations.
 
