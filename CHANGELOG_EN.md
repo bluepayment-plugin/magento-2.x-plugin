@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version 2.22.4
+- We have removed the Pay Smartney method.
+
 ## Version 2.22.3
 - We have changed the supporting text for BLIK Pay Later.
 

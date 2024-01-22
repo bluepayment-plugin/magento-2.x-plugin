@@ -4,7 +4,6 @@ define([], function () {
     return {
         ids: {
             blik: 509,
-            smartney: 700,
             hub: 702,
             paypo: 705,
             card: 1500,
