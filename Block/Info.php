@@ -126,8 +126,6 @@ class Info extends \Magento\Payment\Block\Info
         switch ($gatewayId) {
             case ConfigProvider::CARD_GATEWAY_ID:
                 return 'Card Payment';
-            case ConfigProvider::SMARTNEY_GATEWAY_ID:
-                return 'Pay later';
             case ConfigProvider::ALIOR_INSTALLMENTS_GATEWAY_ID:
                 return 'Alior Installments';
             case ConfigProvider::VISA_MOBILE_GATEWAY_ID:
