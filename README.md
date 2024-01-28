@@ -349,7 +349,7 @@ W ramach eventu, przekazywane są dane:
 Klienci chętniej zdecydują się na zakup produktów, nawet w wyższej cenie, jeśli będą mogli zapłacić później lub rozłożyć spłatę na raty.
 
 
-Opcja dostępna tylko w przypadku, gdy dla danego serwisu są dostępne płatności **Kup teraz, zapłać później** (Smartney), **Alior Raty** lub **Kup na dopasowane raty**.    
+Opcja dostępna tylko w przypadku, gdy dla danego serwisu są dostępne płatności **Alior Raty** lub **Kup na dopasowane raty**.    
 Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w przypadku aktualizacji, należy przejść do ręcznej konfiguracji.
 
 ### Konfiguracja

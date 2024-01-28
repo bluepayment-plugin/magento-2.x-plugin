@@ -311,7 +311,7 @@ Provided event data:
 
 Customers are more likely to decide to buy products, even at a higher price, if they can pay later or spread the repayment in installments.
 
-The option is available only if **Purchase Now, Pay Later** (Smartney), **Alior Installments** or **Buy on tailored installments** payments are available for the service.    
+The option is available only if **Alior Installments** or **Buy on tailored installments** payments are available for the service.    
 The option is triggered automatically only for new module installations - in case of updates, go to manual configuration.
 
 ### Configuration
