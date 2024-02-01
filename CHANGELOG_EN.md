@@ -1,5 +1,13 @@
 # What's new in BluePayment?
 
+## Version 2.22.4
+- From now on, JS scripts are not included when the Autopay payment method is disabled.
+- We have added a translation of the payment channels in the order details.
+- We have removed the Pay Smartney method.
+
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
 ## Version 2.22.3
 - We have changed the supporting text for BLIK Pay Later.
 

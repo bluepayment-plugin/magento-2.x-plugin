@@ -26,7 +26,6 @@ class ConfigProvider implements ConfigProviderInterface
 {
     public const BLIK_GATEWAY_ID = 509;
     public const BLIK_BNPL_GATEWAY_ID = 523;
-    public const SMARTNEY_GATEWAY_ID = 700;
     public const HUB_GATEWAY_ID = 702;
     public const PAYPO_GATEWAY_ID = 705;
     public const SPINGO_GATEWAY_ID = 706;
@@ -40,7 +39,6 @@ class ConfigProvider implements ConfigProviderInterface
     public const ALWAYS_SEPARATED = [
         self::BLIK_GATEWAY_ID,
         self::BLIK_BNPL_GATEWAY_ID,
-        self::SMARTNEY_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
         self::PAYPO_GATEWAY_ID,
         self::SPINGO_GATEWAY_ID,
@@ -54,8 +52,8 @@ class ConfigProvider implements ConfigProviderInterface
 
     public const STATIC_GATEWAY_NAME = [
         self::CARD_GATEWAY_ID,
-        self::SMARTNEY_GATEWAY_ID,
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
+        self::VISA_MOBILE_GATEWAY_ID,
     ];
 
     /** @var GatewayCollectionFactory */
@@ -99,7 +97,6 @@ class ConfigProvider implements ConfigProviderInterface
         self::APPLE_PAY_GATEWAY_ID, // Apple Pay
 
         self::HUB_GATEWAY_ID, // Hub
-        self::SMARTNEY_GATEWAY_ID, // Smartney
         self::ALIOR_INSTALLMENTS_GATEWAY_ID, // Alior Raty
         self::PAYPO_GATEWAY_ID, // PayPo
         self::SPINGO_GATEWAY_ID, // Spingo
@@ -647,7 +644,6 @@ class ConfigProvider implements ConfigProviderInterface
             ->addFieldToFilter(GatewayInterface::IS_FORCE_DISABLED, ['eq' => 0])
             ->addFieldToFilter(GatewayInterface::GATEWAY_ID, ['in' => [
                 self::HUB_GATEWAY_ID,
-                self::SMARTNEY_GATEWAY_ID,
                 self::ALIOR_INSTALLMENTS_GATEWAY_ID,
             ]]);
 

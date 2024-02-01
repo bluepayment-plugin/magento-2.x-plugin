@@ -1,5 +1,10 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.4
+- Od teraz skrypty JS nie są dołączane w przypadku wyłączonej metody płatności Autopay.
+- Dodaliśmy tłumaczenie kanałów płatności w szczegółach zamówienia.
+- Usunęliśmy metodę Pay Smartney.
+
 ## Wersja 2.22.3
 - Zmieniliśmy tekst pomocniczy dla BLIK Płacę Później.
 
