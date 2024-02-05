@@ -21,7 +21,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
-use Zend\Uri\Http;
+use Laminas\Uri\Http;
 
 /**
  * Class Webapi
