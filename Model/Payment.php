@@ -1472,12 +1472,7 @@ class Payment extends AbstractMethod
             'transactions' => json_decode(json_encode($response), true),
         ]);
 
-        $transactions = $response->transactions->transaction;
-        if (!is_array($response->transactions->transaction)) {
-            $transactions = [$response->transactions->transaction];
-        }
-
-        foreach ($transactions as $transaction) {
+        foreach ($response->transactions->transaction as $transaction) {
             $status = (string) $transaction->paymentStatus;
 
             $this->bmLooger->info('PAYMENT:' . __LINE__, [
