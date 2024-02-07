@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.5
+- Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
+- Poprawiliśmy problem z wyścigiem statusów.
+
 ## Wersja 2.22.4
 - Od teraz skrypty JS nie są dołączane w przypadku wyłączonej metody płatności Autopay.
 - Dodaliśmy tłumaczenie kanałów płatności w szczegółach zamówienia.

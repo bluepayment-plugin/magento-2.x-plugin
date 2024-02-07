@@ -8,7 +8,7 @@ use Magento\Framework\App\ProductMetadataInterface;
 
 class Metadata
 {
-    private const VERSION = '2.22.4';
+    private const VERSION = '2.22.5';
 
     /** @var ProductMetadataInterface */
     private $productMetadata;
