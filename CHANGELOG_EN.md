@@ -1,5 +1,9 @@
 # What's new in BluePayment?
 
+## Version 2.22.5
+- We have fixed support for Magneto 2.4.6 (Zend -> Laminas change).
+- We have fixed the problem with status race.
+
 ## Version 2.22.4
 - From now on, JS scripts are not included when the Autopay payment method is disabled.
 - We have added a translation of the payment channels in the order details.
