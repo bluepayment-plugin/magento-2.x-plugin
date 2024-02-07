@@ -81,7 +81,7 @@ class Webapi extends Data
         $this->cache = $cache;
         $this->serializer = $serializer;
 
-        if (\Magento\Setup\Model\class_exists('\\Laminas\Uri\Http')) {
+        if (class_exists('\\Laminas\Uri\Http')) {
             $this->zendUri = new \Laminas\Uri\Http();
         } else {
             $this->zendUri = new \Zend\Uri\Http();
