@@ -488,11 +488,11 @@ class ConfigProvider implements ConfigProviderInterface
             $gateways
                 ->addFieldToFilter(GatewayInterface::MIN_AMOUNT, [
                     ['lteq' => $amount],
-                    ['null' => true]
+                    ['null' => true],
                 ])
                 ->addFieldToFilter(GatewayInterface::MAX_AMOUNT, [
                     ['gteq' => $amount],
-                    ['null' => true]
+                    ['null' => true],
                 ]);
         }
 
@@ -648,5 +648,13 @@ class ConfigProvider implements ConfigProviderInterface
             ]]);
 
         return $gateways->getColumnValues(GatewayInterface::GATEWAY_ID);
+    }
+
+    public function isWithPhoneEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/with_phone',
+            ScopeInterface::SCOPE_STORE
+        );
     }
 }

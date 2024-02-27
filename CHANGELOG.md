@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.6
+- Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
+
 ## Wersja 2.22.5
 - Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
 - Poprawiliśmy problem z wyścigiem statusów.
