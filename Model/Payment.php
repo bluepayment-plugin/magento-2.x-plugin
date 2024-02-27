@@ -85,6 +85,7 @@ class Payment extends AbstractMethod
         'CustomerIP',
         'Title',
         'Products',
+        'CustomerPhone',
         'ValidityTime',
         'LinkValidityTime',
         'ReturnURL',
@@ -259,40 +260,44 @@ class Payment extends AbstractMethod
     /** @var Metadata */
     private $metadata;
 
+    /** @var GetPhoneForOrder */
+    private $getPhoneForOrder;
+
     /**
      * Payment constructor.
      *
-     * @param OrderSender $orderSender
-     * @param Data $helper
-     * @param UrlInterface $url
-     * @param OrderFactory $orderFactory
-     * @param Context $context
-     * @param Registry $registry
-     * @param ExtensionAttributesFactory $extensionFactory
-     * @param AttributeValueFactory $customAttributeFactory
-     * @param PaymentData $paymentData
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Logger $logger
-     * @param TransactionFactory $transactionFactory
-     * @param TransactionRepositoryInterface $transactionRepository
-     * @param CardFactory $cardFactory
-     * @param CardCollectionFactory $cardCollectionFactory
-     * @param CardResource $cardResource
-     * @param OrderCollectionFactory $orderCollectionFactory
-     * @param Curl $curl
-     * @param BMLogger $bmLogger
-     * @param OrderRepositoryInterface $orderRepository
-     * @param GatewayFactory $gatewayFactory
-     * @param Refunds $refunds
-     * @param ConfigProvider $configProvider
-     * @param Webapi $webapi
-     * @param GetStateForStatus $getStateForStatus
-     * @param GetStoreByServiceId $getStoreByServiceId
-     * @param GetTransactionLifetime $getTransactionLifetime
-     * @param Metadata $metadata
-     * @param AbstractResource|null $resource
-     * @param AbstractDb|null $resourceCollection
-     * @param array $data
+     * @param  OrderSender  $orderSender
+     * @param  Data  $helper
+     * @param  UrlInterface  $url
+     * @param  OrderFactory  $orderFactory
+     * @param  Context  $context
+     * @param  Registry  $registry
+     * @param  ExtensionAttributesFactory  $extensionFactory
+     * @param  AttributeValueFactory  $customAttributeFactory
+     * @param  PaymentData  $paymentData
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  Logger  $logger
+     * @param  TransactionFactory  $transactionFactory
+     * @param  TransactionRepositoryInterface  $transactionRepository
+     * @param  CardFactory  $cardFactory
+     * @param  CardCollectionFactory  $cardCollectionFactory
+     * @param  CardResource  $cardResource
+     * @param  OrderCollectionFactory  $orderCollectionFactory
+     * @param  Curl  $curl
+     * @param  BMLogger  $bmLogger
+     * @param  OrderRepositoryInterface  $orderRepository
+     * @param  GatewayFactory  $gatewayFactory
+     * @param  Refunds  $refunds
+     * @param  ConfigProvider  $configProvider
+     * @param  Webapi  $webapi
+     * @param  GetStateForStatus  $getStateForStatus
+     * @param  GetStoreByServiceId  $getStoreByServiceId
+     * @param  GetTransactionLifetime  $getTransactionLifetime
+     * @param  Metadata  $metadata
+     * @param  GetPhoneForOrder  $getPhoneForOrder
+     * @param  AbstractResource|null  $resource
+     * @param  AbstractDb|null  $resourceCollection
+     * @param  array  $data
      */
     public function __construct(
         OrderSender $orderSender,
@@ -323,6 +328,7 @@ class Payment extends AbstractMethod
         GetStoreByServiceId $getStoreByServiceId,
         GetTransactionLifetime $getTransactionLifetime,
         Metadata $metadata,
+        GetPhoneForOrder $getPhoneForOrder,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -348,6 +354,7 @@ class Payment extends AbstractMethod
         $this->getStoreByServiceId = $getStoreByServiceId;
         $this->getTransactionLifetime = $getTransactionLifetime;
         $this->metadata = $metadata;
+        $this->getPhoneForOrder = $getPhoneForOrder;
 
         parent::__construct(
             $context,
@@ -475,6 +482,10 @@ class Payment extends AbstractMethod
             $params['ReturnURL'] = $backUrl;
         }
 
+        if ($this->configProvider->isWithPhoneEnabled() && $phone = $this->getPhoneForOrder->execute($order)) {
+            $params['CustomerPhone'] = $phone;
+        }
+
         if ($automatic === true) {
             switch ($gatewayId) {
                 case ConfigProvider::CARD_GATEWAY_ID:
@@ -566,7 +577,7 @@ class Payment extends AbstractMethod
 
         if (! $store) {
             $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
-                'serviceID' => $serviceId
+                'serviceID' => $serviceId,
             ]);
 
             return false;
@@ -594,7 +605,7 @@ class Payment extends AbstractMethod
 
         if (! $store) {
             $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
-                'serviceID' => $serviceId
+                'serviceID' => $serviceId,
             ]);
 
             return false;
@@ -613,7 +624,7 @@ class Payment extends AbstractMethod
             }
         } catch (Exception $e) {
             $this->bmLooger->err('PAYMENT: ' . __LINE__, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             return false;
@@ -914,7 +925,7 @@ class Payment extends AbstractMethod
                         $this->_eventManager->dispatch($eventToCall, [
                             'order' => $order,
                             'payment' => $payment,
-                            'transaction_id' => $remoteId
+                            'transaction_id' => $remoteId,
                         ]);
                     }
                 } else {
@@ -944,7 +955,7 @@ class Payment extends AbstractMethod
             'orderID' => $orderId,
             'paymentStatus' => $paymentStatus,
             'orderPaymentState' => $orderPaymentState,
-            'time' => round(($time2 - $time1) * 1000, 2) . ' ms'
+            'time' => round(($time2 - $time1) * 1000, 2) . ' ms',
         ]);
 
         return $this->returnConfirmation(
@@ -1147,7 +1158,7 @@ class Payment extends AbstractMethod
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'ip' => $ip,
             'incrementId' => $order->getIncrementId(),
-            'additionalInformation' => $payment->getAdditionalInformation()
+            'additionalInformation' => $payment->getAdditionalInformation(),
         ]);
 
         $createOrder = $payment->getAdditionalInformation('create_payment') === true || $order->getRemoteIp() === null;
@@ -1165,7 +1176,7 @@ class Payment extends AbstractMethod
             $this->bmLooger->info('PAYMENT:' . __LINE__, [
                 'backUrl' => $backUrl,
                 'gatewayId' => $gatewayId,
-                'agreementsIds' => $agreementsIds
+                'agreementsIds' => $agreementsIds,
             ]);
 
             $params = $this->getFormRedirectFields(
@@ -1447,7 +1458,7 @@ class Payment extends AbstractMethod
 
             $this->bmLooger->info('PAYMENT:' . __LINE__, [
                 'quoteId' => (string)$quoteId,
-                'orderIds' => $orderIds
+                'orderIds' => $orderIds,
             ]);
         } else {
             /** @var Order[] $orders */
