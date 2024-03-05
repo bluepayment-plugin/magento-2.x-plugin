@@ -39,7 +39,6 @@ use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Store\Api\Data\StoreInterface;
@@ -218,9 +217,6 @@ class Payment extends AbstractMethod
     /** @var UrlInterface */
     private $url;
 
-    /** @var OrderSender */
-    private $sender;
-
     /** @var TransactionFactory */
     private $transactionFactory;
 
@@ -266,7 +262,6 @@ class Payment extends AbstractMethod
     /**
      * Payment constructor.
      *
-     * @param  OrderSender  $orderSender
      * @param  Data  $helper
      * @param  UrlInterface  $url
      * @param  OrderFactory  $orderFactory
@@ -295,12 +290,12 @@ class Payment extends AbstractMethod
      * @param  GetTransactionLifetime  $getTransactionLifetime
      * @param  Metadata  $metadata
      * @param  GetPhoneForOrder  $getPhoneForOrder
+     * @param  SendConfirmationEmail  $sendConfirmationEmail
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
      */
     public function __construct(
-        OrderSender $orderSender,
         Data $helper,
         UrlInterface $url,
         OrderFactory $orderFactory,
@@ -329,11 +324,11 @@ class Payment extends AbstractMethod
         GetTransactionLifetime $getTransactionLifetime,
         Metadata $metadata,
         GetPhoneForOrder $getPhoneForOrder,
+        SendConfirmationEmail $sendConfirmationEmail,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->sender = $orderSender;
         $this->url = $url;
         $this->helper = $helper;
         $this->orderFactory = $orderFactory;
@@ -355,6 +350,7 @@ class Payment extends AbstractMethod
         $this->getTransactionLifetime = $getTransactionLifetime;
         $this->metadata = $metadata;
         $this->getPhoneForOrder = $getPhoneForOrder;
+        $this->sendConfirmationEmail = $sendConfirmationEmail;
 
         parent::__construct(
             $context,
@@ -939,10 +935,7 @@ class Payment extends AbstractMethod
                 }
 
                 $this->orderRepository->save($order);
-
-                if (!$order->getEmailSent()) {
-                    $this->sender->send($order);
-                }
+                $this->sendConfirmationEmail->execute($order);
             } catch (Exception $e) {
                 $this->bmLooger->critical($e);
                 $confirmed = false;

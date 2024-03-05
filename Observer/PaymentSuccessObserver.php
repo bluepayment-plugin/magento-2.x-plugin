@@ -2,22 +2,12 @@
 
 namespace BlueMedia\BluePayment\Observer;
 
-use BlueMedia\BluePayment\Helper\Analytics\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Analytics;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Pricing\Price\FinalPrice;
-use Magento\Checkout\Model\Session;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\Pricing\PriceCurrencyInterface;
-use Magento\Quote\Api\Data\CartInterface;
-use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 
 class PaymentSuccessObserver implements ObserverInterface

@@ -7,6 +7,8 @@
                 <value id="img_bm" type="host">platnosci.bm.pl</value>
                 <value id="img_bm_accept" type="host">platnosci-accept.bm.pl</value>
                 <value id="img_google_pay" type="host">www.gstatic.com</value>
+                <value id="img_autopay_test" type="host">testimages.autopay.eu</value>
+                <value id="img_autopay_prod" type="host">images.autopay.eu</value>
             </values>
         </policy>
         <policy id="script-src">
