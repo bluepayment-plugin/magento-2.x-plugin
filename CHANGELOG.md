@@ -2,6 +2,8 @@
 
 ## Wersja 2.22.6
 - Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
+- Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
+- Poprawiliśmy błąd z wielokrotną wysyłką e-maila przy płatności Google Pay / BLIK 0 / Kartą.
 
 ## Wersja 2.22.5
 - Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
