@@ -348,7 +348,7 @@ class Create extends Action
                 if ($paymentStatus == Payment::PAYMENT_STATUS_SUCCESS) {
                     // Got success status
 
-                    return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    return $this->_redirect('checkout/onepage/success', ['_scope' => $order->getStoreId(), '_secure' => true]);
                 }
 
                 // Otherwise - redirect to "waiting" page
@@ -357,6 +357,7 @@ class Create extends Action
 
                 return $this->_redirect('bluepayment/processing/back', [
                     '_secure' => true,
+                    '_scope' => $order->getStoreId(),
                     '_query' => [
                         'ServiceID' => $serviceId,
                         'OrderID' => $orderId,
@@ -407,6 +408,7 @@ class Create extends Action
 
             return $this->_redirect('bluepayment/processing/back', [
                 '_secure' => true,
+                '_scope' => $order->getStoreId(),
                 '_query' => [
                     'ServiceID' => $serviceId,
                     'OrderID' => $orderId,
