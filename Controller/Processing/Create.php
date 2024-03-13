@@ -9,6 +9,7 @@ use BlueMedia\BluePayment\Model\GetStateForStatus;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
+use BlueMedia\BluePayment\Model\SendConfirmationEmail;
 use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -20,7 +21,6 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Magento\Store\Model\ScopeInterface;
@@ -46,9 +46,6 @@ class Create extends Action
     /** @var ScopeConfigInterface */
     public $scopeConfig;
 
-    /** @var OrderSender */
-    public $orderSender;
-
     /** @var Data */
     public $helper;
 
@@ -73,11 +70,13 @@ class Create extends Action
     /** @var OrderRepositoryInterface */
     private $orderRepository;
 
+    /** @var SendConfirmationEmail */
+    private $sendConfirmationEmail;
+
     /**
      * Create constructor.
      *
      * @param  Context  $context
-     * @param  OrderSender  $orderSender
      * @param  PaymentFactory  $paymentFactory
      * @param  OrderFactory  $orderFactory
      * @param  Session  $session
@@ -90,10 +89,10 @@ class Create extends Action
      * @param  GetStateForStatus  $getStateForStatus
      * @param  ConfigProvider  $configProvider
      * @param  OrderRepositoryInterface  $orderRepository
+     * @param  SendConfirmationEmail  $sendConfirmationEmail
      */
     public function __construct(
         Context $context,
-        OrderSender $orderSender,
         PaymentFactory $paymentFactory,
         OrderFactory $orderFactory,
         Session $session,
@@ -105,20 +104,21 @@ class Create extends Action
         CollectionFactory $gatewayFactory,
         GetStateForStatus $getStateForStatus,
         ConfigProvider $configProvider,
-        OrderRepositoryInterface $orderRepository
+        OrderRepositoryInterface $orderRepository,
+        SendConfirmationEmail $sendConfirmationEmail
     ) {
-        $this->scopeConfig       = $scopeConfig;
-        $this->logger            = $logger;
-        $this->session           = $session;
-        $this->orderFactory      = $orderFactory;
-        $this->orderSender       = $orderSender;
-        $this->helper            = $helper;
+        $this->scopeConfig = $scopeConfig;
+        $this->logger = $logger;
+        $this->session = $session;
+        $this->orderFactory = $orderFactory;
+        $this->helper = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
-        $this->collection        = $collection;
-        $this->gatewayFactory    = $gatewayFactory;
+        $this->collection = $collection;
+        $this->gatewayFactory = $gatewayFactory;
         $this->getStateForStatus = $getStateForStatus;
-        $this->configProvider    = $configProvider;
+        $this->configProvider = $configProvider;
         $this->orderRepository = $orderRepository;
+        $this->sendConfirmationEmail = $sendConfirmationEmail;
 
         $this->bluepayment = $paymentFactory->create();
 
@@ -189,16 +189,9 @@ class Create extends Action
 
             $order->setBlueGatewayId($gatewayId);
             $order->setPaymentChannel($gateway->getData('gateway_name'));
-            $this->orderRepository->save($order);
 
-            if ($order->getCanSendNewEmailFlag()) {
-                $this->logger->info('CREATE:' . __LINE__, ['getCanSendNewEmailFlag']);
-                try {
-                    $this->orderSender->send($order);
-                } catch (Exception $e) {
-                    $this->logger->critical($e);
-                }
-            }
+            $this->orderRepository->save($order);
+            $this->sendConfirmationEmail->execute($order);
 
             if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(
@@ -355,7 +348,7 @@ class Create extends Action
                 if ($paymentStatus == Payment::PAYMENT_STATUS_SUCCESS) {
                     // Got success status
 
-                    return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    return $this->_redirect('checkout/onepage/success', ['_scope' => $order->getStoreId(), '_secure' => true]);
                 }
 
                 // Otherwise - redirect to "waiting" page
@@ -364,6 +357,7 @@ class Create extends Action
 
                 return $this->_redirect('bluepayment/processing/back', [
                     '_secure' => true,
+                    '_scope' => $order->getStoreId(),
                     '_query' => [
                         'ServiceID' => $serviceId,
                         'OrderID' => $orderId,
@@ -414,6 +408,7 @@ class Create extends Action
 
             return $this->_redirect('bluepayment/processing/back', [
                 '_secure' => true,
+                '_scope' => $order->getStoreId(),
                 '_query' => [
                     'ServiceID' => $serviceId,
                     'OrderID' => $orderId,

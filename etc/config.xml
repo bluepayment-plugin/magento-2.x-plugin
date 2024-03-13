@@ -30,6 +30,7 @@
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>
                 <blik_zero>1</blik_zero>
+                <with_phone>0</with_phone>
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
                 <privateInfoKeys>bluepayment_gateway</privateInfoKeys>
 

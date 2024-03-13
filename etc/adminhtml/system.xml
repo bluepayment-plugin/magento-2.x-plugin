@@ -108,6 +108,11 @@
                         <field id="gateway_selection">1</field>
                     </depends>
                 </field>
+                <field id="with_phone" translate="label comment" type="select" sortOrder="570" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start transaction with phone number</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[Requires configuration on the Autopay side. ENABLE ONLY AT THE REQUEST OF THE SUPPORT TEAM.]]></comment>
+                </field>
                 <field id="autopay_agreement" translate="label comment" type="editor" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Autopay Agreement</label>
                     <depends>
