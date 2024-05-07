@@ -1,5 +1,15 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.6
+- Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
+- Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
+- Poprawiliśmy błąd z wielokrotną wysyłką e-maila przy płatności Google Pay / BLIK 0 / Kartą.
+- Naprawiliśmy błąd z nieprawidłowym przekierowaniem, gdy opcja "Dodaj kod sklepu do adresu URL" była ustawiona na wartość true (dzięki @piotrmatras).
+
+## Wersja 2.22.5
+- Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
+- Poprawiliśmy problem z wyścigiem statusów.
+
 ## Wersja 2.22.4
 - Od teraz skrypty JS nie są dołączane w przypadku wyłączonej metody płatności Autopay.
 - Dodaliśmy tłumaczenie kanałów płatności w szczegółach zamówienia.
