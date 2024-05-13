@@ -3,6 +3,7 @@
 ## Version 2.22.7
 - We have added support for Magento 2.4.7.
 - We have fixed issue with CSP for Analytics.
+- We have fixed error if logo URL is empty in gateway list response.
 
 ## Version 2.22.6
 - We have added the ability to include a phone number for payment start.
