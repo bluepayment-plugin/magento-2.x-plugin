@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.7
+- Dodaliśmy wsparcie dla Magento 2.4.7.
+- Naprawiliśmy błąd z CSP dla Analytics.
+
 ## Wersja 2.22.6
 - Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
 - Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
