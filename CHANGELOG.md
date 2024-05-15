@@ -4,6 +4,7 @@
 - Dodaliśmy wsparcie dla Magento 2.4.7.
 - Naprawiliśmy błąd z CSP dla Analytics.
 - Naprawiliśmy błąd, jeśli adres URL logo jest pusty w odpowiedzi na listę bramek.
+- Zaktualizowaliśmy treści dla płatności BLIK Płacę Później.
 
 ## Wersja 2.22.6
 - Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
