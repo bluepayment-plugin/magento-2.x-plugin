@@ -138,8 +138,8 @@ class GaData extends Template
                     'name' => $product->getName(),
                     'category' => $this->analytics->getCategoryName($product),
                     'quantity' => 1,
-                    'price' => $this->analytics->getPrice($product)
-                ]
+                    'price' => $this->analytics->getPrice($product),
+                ],
             ];
 
             $this->analytics->addEvent([
@@ -175,7 +175,7 @@ class GaData extends Template
                 'name'      => $item->getName(),
                 'category'  => $this->analytics->getCategoryName($item->getProduct()),
                 'quantity'  => $item->getQtyOrdered() ?: $item->getQty(),
-                'price'     => $this->analytics->convertPrice((float) $item->getBasePrice())
+                'price'     => $this->analytics->convertPrice((float) $item->getBasePrice()),
             ];
         }
 
@@ -185,7 +185,7 @@ class GaData extends Template
                 'items'         => $products,
                 'coupon'        => $quote->getCouponCode() ?: '',
                 'checkout_step' => $checkout ? 2 : 1,
-            ]
+            ],
         ]);
 
         $this->analytics->addEvent([
@@ -193,7 +193,7 @@ class GaData extends Template
             'data' => [
                 'checkout_step'   => $checkout ? 2 : 1,
                 'checkout_option' => 'checkout',
-            ]
+            ],
         ]);
     }
 }

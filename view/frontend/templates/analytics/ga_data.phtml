@@ -1,17 +1,27 @@
 <?php
 /** @var \BlueMedia\BluePayment\Block\Analytics\GaData $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
 $events = $block->getAnalyticsData();
 $serializer = $block->getJsonSerializer();
+
+$content = '';
+
+foreach ($events as $event) {
+    $content .=
+<<<JS
+    gtag(
+        'event',
+        '{$event['event']}',
+        {$serializer->serialize($event['data'])}
+    );
+JS;
+}
 ?>
 
-<?php if (is_array($events)): ?>
-    <script>
-        <?php foreach ($events as $event): ?>
-        gtag(
-            'event',
-            '<?= /** @noEscape */ $event['event'] ?>',
-            <?= /** @noEscape */ $serializer->serialize($event['data']) ?>
-        );
-        <?php endforeach; ?>
-    </script>
+<?php if (!empty($content)): ?>
+    <?php if (isset($secureRenderer)): ?>
+        <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $content, false); ?>
+    <?php else: ?>
+        <?= /* @noEscape */ "<script>" . $content . "</script>" ?>
+    <?php endif; ?>
 <?php endif; ?>
