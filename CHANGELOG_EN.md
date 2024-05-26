@@ -11,6 +11,7 @@
 - We have added new entries (for photos) to CSP whitelist.
 - We have fixed a bug with multiple email sending for Google Pay / BLIK 0 / Card payment.
 - We have fixed a bug with wrong redirect when "Add Store Code to URLs" was set to true (credits @piotrmatras).
+- We have added support for Amasty's One Step Checkout module.
 
 ## Version 2.22.5
 - We have fixed support for Magneto 2.4.6 (Zend -> Laminas change).
