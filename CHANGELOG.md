@@ -11,6 +11,7 @@
 - Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
 - Poprawiliśmy błąd z wielokrotną wysyłką e-maila przy płatności Google Pay / BLIK 0 / Kartą.
 - Naprawiliśmy błąd z nieprawidłowym przekierowaniem, gdy opcja "Dodaj kod sklepu do adresu URL" była ustawiona na wartość true (dzięki @piotrmatras).
+- Dodaliśmy wsparcie dla modułu Amasty One Step Checkout.
 
 ## Wersja 2.22.5
 - Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
