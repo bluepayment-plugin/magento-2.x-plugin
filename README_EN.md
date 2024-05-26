@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.6.
+- Magento version: 2.3.0 - 2.4.7.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in Autopay?](CHANGELOG_EN.md)
@@ -147,18 +147,6 @@ Refresh the cache after each configuration edit. To do this:
    ![configuration2.png](docs/configuration2.png "Screenshot")
 
 
-## iFrame payment
-An option that allows customers to make a card payment without leaving the store and leaving the shopping process. The implementation of this form of payment, due to the requirements related to the security of the transaction processing, requires two additional documents: SAQ A and a site audit.
-
-![iframe1.png](docs/iframe1.png)
-
-### Activate iFrame payments
-1. Go to [Module configuration](#configuration).
-2. Select **Enable** for **Iframe Payment** option.
-3. Go to edit the channel with ID *1500* and bank name *Karty*.
-4. Check **Is separated method** option.
-5. [Refresh cache](#refresh-cache)
-
 ## BLIK 0
 BLIK "in-store" is characterized by the fact that the transaction security code must be entered directly on the store's website - in the last step of the shopping process.
 
@@ -275,7 +263,7 @@ The payment module itself does not require any additional steps. Autopay payment
 
 **NOTE!**
 
-The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run iFrame, Google Pay and BLIK 0 payments.
+The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run Google Pay and BLIK 0 payments.
 For multishipping orders, the OrderID in messages to the customer and in the portal.autopay.eu panel will be the cart number with the QUOTE_ prefix, not the order number.
 
 ## Information about payment

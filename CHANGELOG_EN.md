@@ -1,10 +1,17 @@
 # What's new in BluePayment?
 
+## Version 2.22.7
+- We have added support for Magento 2.4.7.
+- We have fixed issue with CSP for Analytics.
+- We have fixed error if logo URL is empty in gateway list response.
+- We have updated the information for BLIK Pay Later payment.
+
 ## Version 2.22.6
 - We have added the ability to include a phone number for payment start.
 - We have added new entries (for photos) to CSP whitelist.
 - We have fixed a bug with multiple email sending for Google Pay / BLIK 0 / Card payment.
 - We have fixed a bug with wrong redirect when "Add Store Code to URLs" was set to true (credits @piotrmatras).
+- We have added support for Amasty's One Step Checkout module.
 
 ## Version 2.22.5
 - We have fixed support for Magneto 2.4.6 (Zend -> Laminas change).

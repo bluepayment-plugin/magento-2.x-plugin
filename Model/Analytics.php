@@ -22,9 +22,6 @@ class Analytics
     /** @var AnalyticsHelper */
     private $analyticsHelper;
 
-    /** @var CategoryRepositoryInterface */
-    private $categoryRepository;
-
     /** @var Session */
     private $checkoutSession;
 
@@ -36,13 +33,11 @@ class Analytics
 
     public function __construct(
         AnalyticsHelper $analyticsHelper,
-        CategoryRepositoryInterface $categoryRepository,
         Session $checkoutSession,
         PriceCurrencyInterface $priceCurrency,
         Data $taxHelper
     ) {
         $this->analyticsHelper = $analyticsHelper;
-        $this->categoryRepository = $categoryRepository;
         $this->checkoutSession = $checkoutSession;
         $this->priceCurrency = $priceCurrency;
         $this->taxHelper = $taxHelper;

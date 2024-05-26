@@ -13,7 +13,7 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.6.
+- Wersja Magento: 2.3.0 – 2.4.7.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ### [Co nowego w Autopay?](CHANGELOG.md)
@@ -141,18 +141,6 @@ Odśwież pamięć podręczną po każdej edycji konfiguracji. Żeby to zrobić:
    
    ![configuration2.png](docs/configuration2.png "Screenshot")
 
-## Płatność w iFrame
-Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia ze sklepu i opuszczania procesu zakupowego. Implementacja tej formy płatności, ze względu na wymogi związane z bezpieczeństwem procesowania transakcji, wymaga dwóch dodatkowych dokumentów: SAQ A oraz audyt strony.
-
-![iframe1.png](docs/iframe1.png)
-
-### Aktywacja płatności iFrame
-1. Przejdź do [Konfiguracji modułu](#konfiguracja)
-2. Kliknij **Włącz (Enable)** przy opcji **Płatność w iFrame (Iframe Payment)**.
-3. Przejdź do edycji kanału o ID *1500* i nazwie banku *Karty*.
-4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
-
 
 ## BLIK 0
 BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję należy wpisać bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -272,7 +260,7 @@ Sam moduł płatności nie wymaga żadnych dodatkowych czynności. Płatności A
 
 **UWAGA!**
 
-Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności iFrame, Google Pay i BLIK 0.
+Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności Google Pay i BLIK 0.
 Dla zamówień multishipping, OrderID w wiadomościach do klienta oraz w panelu portal.autopay.eu będzie numerem koszyka z przedrostkiem QUOTE_, nie numerem zamówienia.
 
 ## Informacje o płatności
