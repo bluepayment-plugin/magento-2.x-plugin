@@ -4,12 +4,14 @@ define([
     'Magento_Checkout/js/model/quote',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-abstract',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
 ], function (
     ko,
     $t,
     quote,
     Component,
     model,
+    config
 ) {
     'use strict';
 
@@ -88,8 +90,12 @@ define([
             let gatewayId = Number(this.gateway_id);
 
             if (gatewayId === model.gatewaysIds.alior_installments) {
+                const link = '<a href="' + config.aliorCalculatorUrl + '"  target="_blank">'
+                    + $t('Learn more') +
+                    '</a>';
+
                 return $t('Pay for your purchases using convenient instalments. %1')
-                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Learn more') + '</a>');
+                    .replace('%1', link);
             }
 
             if (gatewayId === model.gatewaysIds.paypo) {
