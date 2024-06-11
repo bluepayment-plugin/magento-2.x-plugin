@@ -687,8 +687,7 @@ class ConfigProvider implements ConfigProviderInterface
 
         }
 
-        $amount = round($this->getGrandTotalForQuote());
-        return str_replace('{amount}', (string) $amount, $url);
+        return $url;
     }
 
     protected function getGrandTotalForQuote(): float

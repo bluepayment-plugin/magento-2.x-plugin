@@ -4,6 +4,7 @@ define([
     'mage/translate',
     'mage/url',
     'Magento_Checkout/js/model/quote',
+    'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Ui/js/modal/modal',
     'BlueMedia_BluePayment/js/checkout-data',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated',
@@ -15,6 +16,7 @@ define([
     $t,
     url,
     quote,
+    additionalValidators,
     modal,
     checkoutData,
     Component,
@@ -53,14 +55,7 @@ define([
          */
         initObservable: function () {
             this._super();
-            this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
             this.currencyCode = quote.totals()['base_currency_code'];
-
-            quote.totals.subscribe(function () {
-                if (this.grandTotalAmount !== quote.totals()['base_grand_total']) {
-                    this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
-                }
-            }.bind(this));
 
             return this;
         },
@@ -74,6 +69,28 @@ define([
             if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                 this.initGooglePay();
             }
+        },
+
+
+        /**
+         * Place order - with validation.
+         */
+        placeOrder: function (data, event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (this.validate() &&
+                additionalValidators.validate()
+            ) {
+                this.callGooglePayPayment();
+            }
+
+            return false;
+        },
+
+        afterPlaceOrder: function () {
+            return true;
         },
 
         /**
@@ -141,7 +158,6 @@ define([
             });
         },
 
-
         /**
          * Get Google Pay transaction data
          *
@@ -170,7 +186,7 @@ define([
                 shippingAddressRequired: false,
                 transactionInfo: {
                     totalPriceStatus: 'FINAL',
-                    totalPrice: this.grandTotalAmount,
+                    totalPrice: this.grandTotalAmount(),
                     currencyCode: this.currencyCode
                 },
             };

@@ -24,6 +24,24 @@ define([
             gateway_description: null,
         },
 
+        grandTotalAmount: ko.observable(0),
+
+        /**
+         * Subscribe to grand totals
+         */
+        initObservable: function () {
+            this._super();
+
+            this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+            quote.totals.subscribe(function () {
+                if (this.grandTotalAmount() !== quote.totals()['base_grand_total']) {
+                    this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+                }
+            }.bind(this));
+
+            return this;
+        },
+
         /**
          * Get payment method data
          */
@@ -95,7 +113,7 @@ define([
                     '</a>';
 
                 return $t('Pay for your purchases using convenient instalments. %1')
-                    .replace('%1', link);
+                    .replace('%1', link.replace('{amount}', Math.round(this.grandTotalAmount())));
             }
 
             if (gatewayId === model.gatewaysIds.paypo) {

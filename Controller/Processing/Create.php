@@ -193,6 +193,12 @@ class Create extends Action
             $this->orderRepository->save($order);
             $this->sendConfirmationEmail->execute($order);
 
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'gatewayId' => $gatewayId,
+                'automatic' => $automatic === true ? 'true' : 'false'
+            ]);
+
             if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(
                     $order,
