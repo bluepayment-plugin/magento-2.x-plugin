@@ -2,7 +2,8 @@
 
 ## Wersja 2.22.8
 - Dodaliśmy wsparcie dla modułu Amasty One Step Checkout.
-- Dodaliśmy opcję ustawienia linku do odpowiedniego kalkulatora (0 lub 1%) dla "Alior Raty". 
+- Dodaliśmy opcję ustawienia linku do odpowiedniego kalkulatora (0 lub 1%) dla "Alior Raty".
+- Poprawiliśmy działanie Google Pay.
 
 ## Wersja 2.22.7
 - Dodaliśmy wsparcie dla Magento 2.4.7.

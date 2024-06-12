@@ -146,6 +146,12 @@ class Create extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'currency' => $currency
+            ]);
+
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
                 ScopeInterface::SCOPE_STORE

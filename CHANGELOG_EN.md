@@ -3,6 +3,7 @@
 ## Version 2.22.8
 - We have added support for Amasty's One Step Checkout module.
 - We have added the option to set a link to the relevant calculator (0 or 1%) for "Alior Instalments".
+- Poprawiliśmy działanie Google Pay.
 
 ## Version 2.22.7
 - We have added support for Magento 2.4.7.

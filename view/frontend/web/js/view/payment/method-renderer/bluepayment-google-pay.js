@@ -9,6 +9,7 @@ define([
     'BlueMedia_BluePayment/js/checkout-data',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-gateways',
     'text!BlueMedia_BluePayment/template/wait-popup.html',
 ], function (
     $,
@@ -21,6 +22,7 @@ define([
     checkoutData,
     Component,
     config,
+    gateways,
     popupTpl,
 ) {
     'use strict';
@@ -28,11 +30,12 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-google-pay',
-            gateway_id: 1512,
+            gateway_id: gateways.ids.google_pay,
             gateway_logo_url: null,
             gateway_name: null,
             gateway_description: null,
         },
+        redirectAfterPlaceOrder: false,
         client: ko.observable(false),
         testMode: config.testMode,
         merchantInfo: null,
@@ -204,7 +207,7 @@ define([
                 self.placeOrderAfterValidation(function () {
                     const token = data.paymentMethodData.tokenizationData.token;
                     const urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id=1512'
+                        + '?gateway_id=' + gateways.ids.google_pay
                         + '&automatic=true';
 
                     $.ajax({
