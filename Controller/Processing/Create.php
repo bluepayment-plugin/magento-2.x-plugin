@@ -146,6 +146,12 @@ class Create extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
             $currency       = $order->getOrderCurrencyCode();
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'currency' => $currency
+            ]);
+
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
                 ScopeInterface::SCOPE_STORE
@@ -192,6 +198,12 @@ class Create extends Action
 
             $this->orderRepository->save($order);
             $this->sendConfirmationEmail->execute($order);
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'gatewayId' => $gatewayId,
+                'automatic' => $automatic === true ? 'true' : 'false'
+            ]);
 
             if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(

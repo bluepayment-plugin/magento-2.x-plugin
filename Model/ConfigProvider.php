@@ -272,7 +272,7 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
+            $amount = $this->getGrandTotalForQuote();
 
             $gateways = $this->getActiveGateways($currency, (float) $amount);
 
@@ -297,6 +297,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
                 'blik_zero_enabled' => $this->blikZeroEnabled(),
+                'alior_calculator_url' => $this->getAliorCalculatorUrl(),
                 'options' => $result,
                 'separated' => $resultSeparated,
                 'cards' => $this->prepareCards(),
@@ -656,5 +657,41 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/with_phone',
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    /**
+     * Returns current configuration for alior installments.
+     *
+     * @return string 'one' or 'zero'
+     */
+    public function getAliorInstallments(): string
+    {
+        $value = (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/alior_installments',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        if (!in_array($value, ['one', 'zero'])) {
+            return 'one';
+        }
+
+        return $value;
+    }
+
+    public function getAliorCalculatorUrl(): string
+    {
+        if ($this->getAliorInstallments() === 'zero') {
+            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=F&amount={amount}';;
+        } else {
+            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B&amount={amount}';
+
+        }
+
+        return $url;
+    }
+
+    protected function getGrandTotalForQuote(): float
+    {
+        return (float) $this->checkoutSession->getQuote()->getGrandTotal();
     }
 }
