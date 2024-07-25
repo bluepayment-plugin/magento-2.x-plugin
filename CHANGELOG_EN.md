@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version 2.22.9
+- We removed the place-order.js override (submission #12).
+
 ## Version 2.22.8
 - We have added support for Amasty's One Step Checkout module.
 - We have added the option to set a link to the relevant calculator (0 or 1%) for "Alior Instalments".

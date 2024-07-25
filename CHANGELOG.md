@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.9
+- Usunęliśmy nadpisanie place-order.js (zgłoszenie #12).
+
 ## Wersja 2.22.8
 - Dodaliśmy wsparcie dla modułu Amasty One Step Checkout.
 - Dodaliśmy opcję ustawienia linku do odpowiedniego kalkulatora (0 lub 1%) dla "Alior Raty".
