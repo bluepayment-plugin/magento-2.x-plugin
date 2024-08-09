@@ -1,5 +1,8 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.10
+- Poprawienie literówki w config.xml
+
 ## Wersja 2.22.9
 - Usunęliśmy nadpisanie place-order.js (zgłoszenie #12).
 
