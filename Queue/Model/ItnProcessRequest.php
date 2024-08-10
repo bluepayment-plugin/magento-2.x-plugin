@@ -18,36 +18,61 @@ class ItnProcessRequest implements ItnProcessRequestInterface
     /** @var int */
     private $storeId;
 
+    /**
+     * ItnProcessRequest constructor.
+     * @return SimpleXMLElement
+     */
     public function getPayment(): SimpleXMLElement
     {
         return $this->payment;
     }
 
+    /**
+     * @param  SimpleXMLElement  $payment
+     * @return ItnProcessRequestInterface
+     */
     public function setPayment(SimpleXMLElement $payment): ItnProcessRequestInterface
     {
         $this->payment = $payment;
+
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getServiceId(): string
     {
         return $this->serviceId;
     }
 
+    /**
+     * @param  string  $serviceId
+     * @return ItnProcessRequestInterface
+     */
     public function setServiceId(string $serviceId): ItnProcessRequestInterface
     {
         $this->serviceId = $serviceId;
+
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getStoreId(): int
     {
-        return $this->store;
+        return $this->storeId;
     }
 
-    public function setStoreId(int $store): ItnProcessRequestInterface
+    /**
+     * @param  int  $storeId
+     * @return ItnProcessRequestInterface
+     */
+    public function setStoreId(int $storeId): ItnProcessRequestInterface
     {
-        $this->store = $store;
+        $this->storeId = $storeId;
+
         return $this;
     }
 }
