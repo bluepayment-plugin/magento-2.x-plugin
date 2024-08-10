@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\Data\ItnProcessRequestInterface;
+use BlueMedia\BluePayment\Api\Data\ItnProcessRequestInterfaceFactory;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Helper\Webapi;
 use BlueMedia\BluePayment\Logger\Logger;
@@ -12,6 +14,7 @@ use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\MessageQueue\PublisherInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
@@ -57,6 +60,12 @@ class ProcessNotification
     /** @var OrderFactory */
     protected $orderFactory;
 
+    /** @var PublisherInterface */
+    protected $publisher;
+
+    /** @var ItnProcessRequestInterfaceFactory */
+    protected $itnProcessRequestFactory;
+
     public function __construct(
         Logger $logger,
         GatewayFactory $gatewayFactory,
@@ -69,7 +78,9 @@ class ProcessNotification
         SendConfirmationEmail $sendConfirmationEmail,
         OrderCollectionFactory $orderCollectionFactory,
         Webapi $webapi,
-        OrderFactory $orderFactory
+        OrderFactory $orderFactory,
+        PublisherInterface $publisher,
+        ItnProcessRequestInterfaceFactory $itnProcessRequestFactory
     ) {
         $this->logger = $logger;
         $this->gatewayFactory = $gatewayFactory;
@@ -83,6 +94,39 @@ class ProcessNotification
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->webapi = $webapi;
         $this->orderFactory = $orderFactory;
+        $this->publisher = $publisher;
+        $this->itnProcessRequestFactory = $itnProcessRequestFactory;
+    }
+
+    public function asyncExecute(
+        SimpleXMLElement $payment,
+        string $serviceId,
+        StoreInterface $store
+    ) {
+        $isAsyncEnabled = $this->configProvider->isAsyncProcess();
+
+        $this->logger->info('ProcessNotification:' . __LINE__, [
+            'isAsyncEnabled' => $isAsyncEnabled,
+        ]);
+
+        if ($isAsyncEnabled) {
+            /** @var ItnProcessRequestInterface $data */
+            $data = $this->itnProcessRequestFactory->create()
+                ->setPayment($payment)
+                ->setServiceId($serviceId)
+                ->setStoreId($store->getId());
+
+            $this->publisher->publish(
+                'autopay.itn.process',
+                $data
+            );
+
+            $this->logger->info('ProcessNotification:' . __LINE__, [
+                'published' => 'autopay.itn.process',
+            ]);
+        } else {
+            $this->execute($payment, $serviceId, $store);
+        }
     }
 
     public function execute(
@@ -98,7 +142,7 @@ class ProcessNotification
         $currency = (string) $payment->currency;
         $amount = (float) str_replace(',', '.', $payment->amount);
 
-        $this->logger->info('PAYMENT:' . __LINE__, [
+        $this->logger->info('ProcessNotification:' . __LINE__, [
             'remoteId' => $remoteId,
             'orderId' => $orderId,
             'gatewayId' => $gatewayId,
@@ -146,7 +190,6 @@ class ProcessNotification
 
         $time1 = microtime(true);
         $orderPaymentState = null;
-        $confirmed = true;
 
         foreach ($orders as $order) {
             $orderPayment = $order->getPayment();
@@ -290,7 +333,7 @@ class ProcessNotification
                 $orderIds[] = $order->getIncrementId();
             }
 
-            $this->logger->info('PAYMENT:' . __LINE__, [
+            $this->logger->info('ProcessNotification:' . __LINE__, [
                 'quoteId' => (string)$quoteId,
                 'orderIds' => $orderIds,
             ]);
@@ -310,7 +353,7 @@ class ProcessNotification
     ): bool {
         $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
 
-        $this->logger->info('PAYMENT:' . __LINE__, [
+        $this->logger->info('ProcessNotification:' . __LINE__, [
             'serviceId' => $serviceId,
             'orderId' => $orderId,
             'currency' => $currency,
@@ -320,7 +363,7 @@ class ProcessNotification
         foreach ($response->transactions->transaction as $transaction) {
             $status = (string) $transaction->paymentStatus;
 
-            $this->logger->info('PAYMENT:' . __LINE__, [
+            $this->logger->info('ProcessNotification:' . __LINE__, [
                 'paymentStatus' => $status,
                 'transaction' => json_decode(json_encode($transaction), true),
             ]);

@@ -690,6 +690,14 @@ class ConfigProvider implements ConfigProviderInterface
         return $url;
     }
 
+    public function isAsyncProcess(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/async_process',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
     protected function getGrandTotalForQuote(): float
     {
         return (float) $this->checkoutSession->getQuote()->getGrandTotal();

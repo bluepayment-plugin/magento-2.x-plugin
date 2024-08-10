@@ -785,7 +785,7 @@ class Payment extends AbstractMethod
         $currency = (string) $payment->currency;
 
         $this->processNotification
-            ->execute(
+            ->asyncExecute(
                 $payment,
                 $serviceId,
                 $store

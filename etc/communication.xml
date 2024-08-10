@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
-    <topic name="synchronous.rpc.test" request="string" response="string">
-        <handler name="processRpcRequest" type="BlueMedia\BluePayment\Model\RpcRequestHandler" method="process"/>
+    <topic name="autopay.itn.process" request="BlueMedia\BluePayment\Api\Data\ItnProcessRequestInterface">
+        <handler name="autopay.itn.process.handler" type="BlueMedia\BluePayment\Queue\Handler\ItnProcessRequestHandler" method="process"/>
     </topic>
 </config>
