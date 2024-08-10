@@ -217,32 +217,17 @@ class Payment extends AbstractMethod
     /** @var UrlInterface */
     private $url;
 
-    /** @var TransactionFactory */
-    private $transactionFactory;
-
     /** @var TransactionRepositoryInterface */
     private $transactionRepository;
 
-    /** @var OrderRepositoryInterface */
-    private $orderRepository;
-
-    /** @var GatewayFactory */
-    private $gatewayFactory;
-
     /** @var Refunds */
     private $refunds;
-
-    /** @var OrderCollectionFactory */
-    private $orderCollectionFactory;
 
     /** @var string */
     private $title;
 
     /** @var ConfigProvider */
     private $configProvider;
-
-    /** @var Webapi */
-    private $webapi;
 
     /** @var GetStateForStatus */
     private $getStateForStatus;
@@ -258,6 +243,9 @@ class Payment extends AbstractMethod
 
     /** @var GetPhoneForOrder */
     private $getPhoneForOrder;
+
+    /** @var ProcessNotification */
+    private $processNotification;
 
     /**
      * Payment constructor.
@@ -325,6 +313,7 @@ class Payment extends AbstractMethod
         Metadata $metadata,
         GetPhoneForOrder $getPhoneForOrder,
         SendConfirmationEmail $sendConfirmationEmail,
+        ProcessNotification $processNotification,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -351,6 +340,7 @@ class Payment extends AbstractMethod
         $this->metadata = $metadata;
         $this->getPhoneForOrder = $getPhoneForOrder;
         $this->sendConfirmationEmail = $sendConfirmationEmail;
+        $this->processNotification = $processNotification;
 
         parent::__construct(
             $context,
@@ -791,170 +781,20 @@ class Payment extends AbstractMethod
         string $serviceId,
         StoreInterface $store
     ): string {
-        $paymentStatus = (string) $payment->paymentStatus;
-
-        $remoteId = (string) $payment->remoteID;
         $orderId = (string) $payment->orderID;
-        $gatewayId = (int) $payment->gatewayID;
         $currency = (string) $payment->currency;
-        $amount = (float) str_replace(',', '.', $payment->amount);
 
-        $this->bmLooger->info('PAYMENT:' . __LINE__, [
-            'remoteId' => $remoteId,
-            'orderId' => $orderId,
-            'gatewayId' => $gatewayId,
-        ]);
-
-        $gateway = $this->gatewayFactory->create()
-            ->addFieldToFilter('gateway_service_id', $serviceId)
-            ->addFieldToFilter('gateway_id', $gatewayId)
-            ->getFirstItem();
-
-        $this->saveTransactionResponse($payment);
-
-        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses($store);
-        $statusSuccess = $this->configProvider->getStatusSuccessPayment($store);
-
-        switch ($paymentStatus) {
-            case self::PAYMENT_STATUS_SUCCESS:
-                $status = $this->configProvider->getStatusSuccessPayment($store);
-                $state = Order::STATE_PROCESSING;
-                break;
-            case self::PAYMENT_STATUS_FAILURE:
-                $status = $this->configProvider->getStatusErrorPayment($store);
-                $state = Order::STATE_CANCELED;
-                break;
-            case self::PAYMENT_STATUS_PENDING:
-            default:
-                $status = $this->configProvider->getStatusWaitingPayment($store);
-                $state = Order::STATE_PENDING_PAYMENT;
-                break;
-        }
-
-        $state = $this->getStateForStatus->execute($status, $state);
-
-        $updateOrders = true;
-        if ($paymentStatus === self::PAYMENT_STATUS_FAILURE) {
-            // Double verify current order status, based on response from WebAPI.
-            if (! $this->hasOnlyFailureStatuses($serviceId, $orderId, $currency, $store)) {
-                // Order has one success transaction - do not change status to failure
-                $updateOrders = false;
-                $this->bmLooger->info('Change order ignored');
-            }
-        }
-
-        $orders = $this->getOrdersByOrderId($orderId);
-
-        $time1 = microtime(true);
-        $orderPaymentState = null;
-        $confirmed = true;
-
-        foreach ($orders as $order) {
-            $orderPayment = $order->getPayment();
-
-            if ($orderPayment === null || $orderPayment->getMethod() !== self::METHOD_CODE) {
-                continue;
-            }
-
-            /** @var string $orderPaymentState */
-            $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-            $formattedAmount = number_format(round($amount, 2), 2, '.', '');
-
-            $changeable = $updateOrders;
-
-            if ($changeable) {
-                if (in_array($order->getStatus(), $unchangeableStatuses)) {
-                    $changeable = false;
-                }
-                foreach ($order->getAllStatusHistory() as $historyStatus) {
-                    if ($historyStatus->getStatus() == $statusSuccess && $order->getTotalDue() == 0) {
-                        $changeable = false;
-                    }
-                }
-            }
-
-            try {
-                $eventToCall = null;
-
-                if ($changeable && $orderPaymentState != $paymentStatus) {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
-                        . ' | Status: ' . $paymentStatus;
-
-                    $order->setState($state);
-                    $order->addStatusToHistory($status, $orderComment);
-                    $order->setBlueGatewayId($gatewayId);
-                    $order->setPaymentChannel($gateway->getData('gateway_name'));
-
-                    $orderPayment->setTransactionId($remoteId);
-                    $orderPayment->prependMessage('[' . $paymentStatus . ']');
-                    $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-                    $orderPayment->setAdditionalInformation('bluepayment_gateway', $gatewayId);
-
-                    switch ($paymentStatus) {
-                        case self::PAYMENT_STATUS_FAILURE:
-                            $eventToCall = 'bluemedia_payment_failure';
-                            break;
-                        case self::PAYMENT_STATUS_PENDING:
-                            $eventToCall = 'bluemedia_payment_pending';
-                            $orderPayment->setIsTransactionPending(true);
-                            break;
-                        case self::PAYMENT_STATUS_SUCCESS:
-                            $eventToCall = 'bluemedia_payment_success';
-
-                            if ($order->getBaseCurrencyCode() !== $currency) {
-                                $rate = $order->getBaseToOrderRate();
-                                $amount = $amount / $rate;
-                            }
-
-                            $orderPayment->registerCaptureNotification($amount, true);
-                            $orderPayment->setIsTransactionApproved(true);
-                            $orderPayment->setIsTransactionClosed(true);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if ($eventToCall) {
-                        // Dispatch event
-                        $this->_eventManager->dispatch($eventToCall, [
-                            'order' => $order,
-                            'payment' => $payment,
-                            'transaction_id' => $remoteId,
-                        ]);
-                    }
-                } else {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
-                        . ' | Status: ' . $paymentStatus . ' [IGNORED]'
-                        . (!$updateOrders ? ' Status SUCCESS is in other transaction based on WebAPI.' : '');
-
-                    $order->addStatusToHistory($order->getStatus(), $orderComment);
-                }
-
-                $this->orderRepository->save($order);
-                $this->sendConfirmationEmail->execute($order);
-            } catch (Exception $e) {
-                $this->bmLooger->critical($e);
-                $confirmed = false;
-            }
-        }
-
-        $time2 = microtime(true);
-
-        $this->bmLooger->info('PAYMENT:' . __LINE__, [
-            'orderID' => $orderId,
-            'paymentStatus' => $paymentStatus,
-            'orderPaymentState' => $orderPaymentState,
-            'time' => round(($time2 - $time1) * 1000, 2) . ' ms',
-        ]);
+        $this->processNotification
+            ->execute(
+                $payment,
+                $serviceId,
+                $store
+            );
 
         return $this->returnConfirmation(
             $orderId,
             $currency,
-            $confirmed ? self::TRANSACTION_CONFIRMED : self::TRANSACTION_NOTCONFIRMED,
+            self::TRANSACTION_CONFIRMED,
             $store
         );
     }
@@ -1084,31 +924,6 @@ class Payment extends AbstractMethod
         $xml = $dom->saveXML();
 
         return $xml ?: '';
-    }
-
-    /**
-     * @param SimpleXMLElement $transactionResponse
-     *
-     * @return void
-     */
-    private function saveTransactionResponse(SimpleXMLElement $transactionResponse): void
-    {
-        /** @var Transaction $transaction */
-        $transaction = $this->transactionFactory->create();
-        $transaction->setOrderId((string)$transactionResponse->orderID)
-            ->setRemoteId((string)$transactionResponse->remoteID)
-            ->setAmount((float)$transactionResponse->amount)
-            ->setCurrency((string)$transactionResponse->currency)
-            ->setGatewayId((int)$transactionResponse->gatewayID)
-            ->setPaymentDate((string)$transactionResponse->paymentDate)
-            ->setPaymentStatus((string)$transactionResponse->paymentStatus)
-            ->setPaymentStatusDetails((string)$transactionResponse->paymentStatusDetails);
-
-        try {
-            $this->transactionRepository->save($transaction);
-        } catch (CouldNotSaveException $e) {
-            $this->bmLooger->error(__('Could not save Autopay Transaction entity: ') . $transaction->toJson());
-        }
     }
 
     /**
@@ -1432,65 +1247,5 @@ class Payment extends AbstractMethod
         }
 
         return false;
-    }
-
-    private function getOrdersByOrderId(string $orderId): array
-    {
-        if (strpos($orderId, self::QUOTE_PREFIX) === 0) {
-            $quoteId = substr($orderId, strlen(self::QUOTE_PREFIX));
-
-            /** @var DataObject|Order[] $orders */
-            $orders = $this->orderCollectionFactory->create()
-                ->addFieldToFilter('quote_id', $quoteId)
-                ->load();
-
-            $orderIds = [];
-            foreach ($orders as $order) {
-                $orderIds[] = $order->getIncrementId();
-            }
-
-            $this->bmLooger->info('PAYMENT:' . __LINE__, [
-                'quoteId' => (string)$quoteId,
-                'orderIds' => $orderIds,
-            ]);
-        } else {
-            /** @var Order[] $orders */
-            $orders = [$this->orderFactory->create()->loadByIncrementId($orderId)];
-        }
-
-        return $orders;
-    }
-
-    private function hasOnlyFailureStatuses(
-        int $serviceId,
-        string $orderId,
-        string $currency,
-        StoreInterface $store
-    ): bool {
-        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
-
-        $this->bmLooger->info('PAYMENT:' . __LINE__, [
-            'serviceId' => $serviceId,
-            'orderId' => $orderId,
-            'currency' => $currency,
-            'transactions' => json_decode(json_encode($response), true),
-        ]);
-
-        foreach ($response->transactions->transaction as $transaction) {
-            $status = (string) $transaction->paymentStatus;
-
-            $this->bmLooger->info('PAYMENT:' . __LINE__, [
-                'paymentStatus' => $status,
-                'transaction' => json_decode(json_encode($transaction), true),
-            ]);
-
-            if ($status !== self::PAYMENT_STATUS_FAILURE) {
-                $this->bmLooger->info('Has not final status.');
-                return false;
-            }
-        }
-
-        $this->bmLooger->info('Has ONLY FAILURE statuses');
-        return true;
     }
 }
