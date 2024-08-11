@@ -1,5 +1,11 @@
 # What's new in BluePayment?
 
+## Version 2.23.0
+- We have added possibility for asynchronous ITN processing.
+
+## Version 2.22.10
+- Fix typo in config.xml
+
 ## Version 2.22.9
 - We removed the place-order.js override (submission #12).
 

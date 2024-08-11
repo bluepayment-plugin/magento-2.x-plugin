@@ -10,7 +10,7 @@
                 <title>Online payment Autopay</title>
                 <payment_action>order</payment_action>
                 <allowspecific>0</allowspecific>
-                <test_address_url>https://testpay.autopay.eu/payment`</test_address_url>
+                <test_address_url>https://testpay.autopay.eu/payment</test_address_url>
                 <prod_address_url>https://pay.autopay.eu/payment</prod_address_url>
                 <test_address_refunds_url>https://testpay.autopay.eu/transactionRefund</test_address_refunds_url>
                 <prod_address_refunds_url>https://pay.autopay.eu/transactionRefund</prod_address_refunds_url>

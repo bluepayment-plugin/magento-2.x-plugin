@@ -1064,10 +1064,13 @@ class Payment extends AbstractMethod
         }
 
         $params = (array) $params;
-
-        $this->bmLooger->info('PAYMENT:' . __LINE__, ['params' => $params]);
-
         $url = $this->getUrlGateway();
+
+        $this->bmLooger->info('PAYMENT:' . __LINE__, [
+            'url' => $url,
+            'params' => $params,
+        ]);
+
         $this->curl->post($url, $params);
         $response = $this->curl->getBody();
 
