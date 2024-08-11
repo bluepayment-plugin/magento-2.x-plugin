@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace BlueMedia\BluePayment\Api\Data;
 
-use SimpleXMLElement;
-
 interface ItnProcessRequestInterface
 {
     /**
-     * @return SimpleXMLElement
+     * @return string
      */
-    public function getPayment(): SimpleXMLElement;
+    public function getPaymentXml(): string;
 
     /**
-     * @param SimpleXMLElement $payment
+     * @param string $payment
      *
      * @return ItnProcessRequestInterface
      */
-    public function setPayment(SimpleXMLElement $payment): ItnProcessRequestInterface;
+    public function setPaymentXml(string $payment): ItnProcessRequestInterface;
 
     /**
      * @return string

@@ -112,9 +112,9 @@ class ProcessNotification
         if ($isAsyncEnabled) {
             /** @var ItnProcessRequestInterface $data */
             $data = $this->itnProcessRequestFactory->create()
-                ->setPayment($payment)
+                ->setPaymentXml($payment->asXML())
                 ->setServiceId($serviceId)
-                ->setStoreId($store->getId());
+                ->setStoreId((int) $store->getId());
 
             $this->publisher->publish(
                 'autopay.itn.process',

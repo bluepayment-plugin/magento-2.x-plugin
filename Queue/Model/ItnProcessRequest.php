@@ -9,8 +9,8 @@ use SimpleXMLElement;
 
 class ItnProcessRequest implements ItnProcessRequestInterface
 {
-    /** @var SimpleXMLElement */
-    private $payment;
+    /** @var string */
+    private $paymentXml;
 
     /** @var string */
     private $serviceId;
@@ -20,20 +20,20 @@ class ItnProcessRequest implements ItnProcessRequestInterface
 
     /**
      * ItnProcessRequest constructor.
-     * @return SimpleXMLElement
+     * @return string
      */
-    public function getPayment(): SimpleXMLElement
+    public function getPaymentXml(): string
     {
-        return $this->payment;
+        return $this->paymentXml;
     }
 
     /**
      * @param  SimpleXMLElement  $payment
      * @return ItnProcessRequestInterface
      */
-    public function setPayment(SimpleXMLElement $payment): ItnProcessRequestInterface
+    public function setPaymentXml(string $payment): ItnProcessRequestInterface
     {
-        $this->payment = $payment;
+        $this->paymentXml = $payment;
 
         return $this;
     }
