@@ -571,7 +571,11 @@ class Payment extends AbstractMethod
 
         if ($this->validAllTransaction($response, $store, $currency)) {
             $transaction = $response->transactions->transaction;
-            return $this->updateStatusTransactionAndOrder($transaction, $serviceId, $store);
+            return $this->updateStatusTransactionAndOrder(
+                $transaction,
+                $serviceId,
+                (int) $store->getId()
+            );
         }
 
         return null;
@@ -779,7 +783,7 @@ class Payment extends AbstractMethod
     protected function updateStatusTransactionAndOrder(
         SimpleXMLElement $payment,
         string $serviceId,
-        StoreInterface $store
+        int $storeId
     ): string {
         $orderId = (string) $payment->orderID;
         $currency = (string) $payment->currency;
@@ -788,14 +792,14 @@ class Payment extends AbstractMethod
             ->asyncExecute(
                 $payment,
                 $serviceId,
-                $store
+                $storeId
             );
 
         return $this->returnConfirmation(
             $orderId,
             $currency,
             self::TRANSACTION_CONFIRMED,
-            $store
+            $storeId
         );
     }
 
@@ -830,17 +834,17 @@ class Payment extends AbstractMethod
         string $orderId,
         string $currency,
         string $confirmation,
-        StoreInterface $store
+        int $storeId
     ): string {
         $serviceId = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/service_id',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         );
         $sharedKey = $this->_scopeConfig->getValue(
             'payment/bluepayment/' . strtolower($currency) . '/shared_key',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         );
         $hashData = [$serviceId, $orderId, $confirmation, $sharedKey];
         $hashConfirmation = $this->helper->generateAndReturnHash($hashData);

@@ -19,7 +19,6 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
-use Magento\Store\Api\Data\StoreInterface;
 use SimpleXMLElement;
 
 class ProcessNotification
@@ -101,7 +100,7 @@ class ProcessNotification
     public function asyncExecute(
         SimpleXMLElement $payment,
         string $serviceId,
-        StoreInterface $store
+        int $storeId
     ) {
         $isAsyncEnabled = $this->configProvider->isAsyncProcess();
 
@@ -114,7 +113,7 @@ class ProcessNotification
             $data = $this->itnProcessRequestFactory->create()
                 ->setPaymentXml($payment->asXML())
                 ->setServiceId($serviceId)
-                ->setStoreId((int) $store->getId());
+                ->setStoreId((int) $storeId);
 
             $this->publisher->publish(
                 'autopay.itn.process',
@@ -125,14 +124,14 @@ class ProcessNotification
                 'published' => 'autopay.itn.process',
             ]);
         } else {
-            $this->execute($payment, $serviceId, $store);
+            $this->execute($payment, $serviceId, $storeId);
         }
     }
 
     public function execute(
         SimpleXMLElement $payment,
         string $serviceId,
-        StoreInterface $store
+        int $storeId
     ) {
         $paymentStatus = (string) $payment->paymentStatus;
 
@@ -140,7 +139,7 @@ class ProcessNotification
         $orderId = (string) $payment->orderID;
         $gatewayId = (int) $payment->gatewayID;
         $currency = (string) $payment->currency;
-        $amount = (float) str_replace(',', '.', $payment->amount);
+        $amount = (float) str_replace(',', '.', (string) $payment->amount);
 
         $this->logger->info('ProcessNotification:' . __LINE__, [
             'remoteId' => $remoteId,
@@ -155,21 +154,21 @@ class ProcessNotification
 
         $this->saveTransactionResponse($payment);
 
-        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses($store);
-        $statusSuccess = $this->configProvider->getStatusSuccessPayment($store);
+        $unchangeableStatuses = $this->configProvider->getUnchangableStatuses($storeId);
+        $statusSuccess = $this->configProvider->getStatusSuccessPayment($storeId);
 
         switch ($paymentStatus) {
             case Payment::PAYMENT_STATUS_SUCCESS:
-                $status = $this->configProvider->getStatusSuccessPayment($store);
+                $status = $this->configProvider->getStatusSuccessPayment($storeId);
                 $state = Order::STATE_PROCESSING;
                 break;
             case Payment::PAYMENT_STATUS_FAILURE:
-                $status = $this->configProvider->getStatusErrorPayment($store);
+                $status = $this->configProvider->getStatusErrorPayment($storeId);
                 $state = Order::STATE_CANCELED;
                 break;
             case Payment::PAYMENT_STATUS_PENDING:
             default:
-                $status = $this->configProvider->getStatusWaitingPayment($store);
+                $status = $this->configProvider->getStatusWaitingPayment($storeId);
                 $state = Order::STATE_PENDING_PAYMENT;
                 break;
         }
@@ -349,9 +348,9 @@ class ProcessNotification
         int $serviceId,
         string $orderId,
         string $currency,
-        StoreInterface $store
+        int $storeId
     ): bool {
-        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $store);
+        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $storeId);
 
         $this->logger->info('ProcessNotification:' . __LINE__, [
             'serviceId' => $serviceId,

@@ -241,7 +241,7 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
 
 1. Przejdź do [Konfiguracji modułu](#konfiguracja) i zaznacz **Włącz (Enable)** przy opcji **Pokaż ręczny zwrot Autopay w szczegółach zamówienia (Show manual Autopay refund in order details)**. Dzięki temu opcja ta będzie dostępna dla wszystkich zakończonych zamówień opłaconych poprzez ten moduł.
 2. Następnie przejdź do szczegółów zamówienia.
-3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności Autopay, w górnym menu powinien być widoczny przycisk Zwrot Autopay.\
+3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności Autopay, w górnym menu powinien być widoczny przycisk Zwrot Autopay.
 
    ![refund1.png](docs/refund1.png)
 4. Po jego naciśnięciu zobaczysz okno umożliwiające dokonanie pełnego lub częściowego zwrotu.
@@ -371,12 +371,18 @@ Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w p
 ## Asynchroniczne przetwarzanie ITN
 Opcja dostępna od wersji 2.23.0.
 
-Moduł umożliwia asynchroniczne przetwarzanie powiadomień ITN (Instant Transaction Notification) z systemu Autopay.
+Moduł umożliwia asynchroniczne przetwarzanie powiadomień ITN (Instant Transaction Notification) wysyłanych przez system Autopay po zakończeniu transakcji. Włączenie tej opcji oznacza, że powiadomienia ITN będą przetwarzane w tle, co może być przydatne w scenariuszach z większym obciążeniem lub specyficznymi wymaganiami dotyczącymi obsługi powiadomień.
+Rozwiązuje również problem z "wyścigami statusów".
+Moduł Autopay domyślnie wykorzystuje kolejkowanie z wykorzystaniem MySQL (connection "db"). W przypadku chęci wykorzystania RabbitMQ — wymagane jest dostosowanie konfiguracji kolejki [zgodnie z instrukcją](https://developer.adobe.com/commerce/php/development/components/message-queues/#change-message-queue-from-mysql-to-amqp).
 
-Moduł Autopay domyślnie wykorzystuje kolejkowanie z wykorzystaniem MySQL (connection "db"). W przypadku chęci wykorzystania RabbitMQ — wymagane jest dostosowanie konfiguracji kolejki [zgodnie z instrukcją](https://developer.adobe.com/commerce/php/development/components/message-queues/#change-message-queue-from-mysql-to-amqp).  
-
-> W celu skorzystania z tej funkcjonalności, Magento musi posiadać aktywne moduły **Magento_MessageQueue** oraz **Magento_MysqlMq** lub **Magento_Amqp**.
+> W celu skorzystania z tej funkcjonalności, Magento musi posiadać aktywne moduły **Magento_MessageQueue** oraz **Magento_MysqlMq** lub **Magento_Amqp**.  
 > Musi być również poprawnie skonfigurowany CRON [zgodnie z dokumentacją Magento](https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs).
+
+**UWAGA!**
+Przy wykorzystaniu standardowej konfiguracji z użyciem CRONa - aktualizacja statusu może zająć do minuty, zgodnie z częstotliwością uruchamiania CRONa. W przypadku potrzeby częstszej aktualizacji, wymagane jest oddzielne uruchomienie konsumera (consumer) kolejki:
+```shell
+bin/magento queue:consumers:start autopay.itn.process
+```
 
 ### Aktywacja
 Żeby aktywować stronę oczekiwania na przekierowanie:
