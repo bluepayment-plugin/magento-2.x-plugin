@@ -1462,7 +1462,7 @@ class Payment extends AbstractMethod
     }
 
     private function hasOnlyFailureStatuses(
-        int $serviceId,
+        string $serviceId,
         string $orderId,
         string $currency,
         StoreInterface $store

@@ -1,5 +1,9 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.22.11
+- Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
+- Poprawiliśmy błąd w tłumaczeniach
+
 ## Wersja 2.22.10
 - Poprawienie literówki w config.xml
 
