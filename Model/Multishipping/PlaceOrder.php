@@ -183,7 +183,6 @@ class PlaceOrder implements PlaceOrderInterface
         );
 
         $customerId = $order->getCustomerId();
-        $customerEmail = $order->getCustomerEmail();
 
         $xml = new \SimpleXMLElement('<productList/>');
 
@@ -210,9 +209,13 @@ class PlaceOrder implements PlaceOrderInterface
             'OrderID' => Payment::QUOTE_PREFIX . $order->getQuoteId(),
             'Amount' => $amount,
             'Currency' => $currency,
-            'CustomerEmail' => $customerEmail,
+            'CustomerEmail' => $order->getCustomerEmail(),
             'Products' => base64_encode($xml->asXML()),
             'GatewayID' => $gatewayId,
+
+            'VerificationFName' => $order->getCustomerFirstname(),
+            'VerificationLName' => $order->getCustomerLastname(),
+
             'PlatformName' => Payment::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),

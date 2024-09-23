@@ -2,6 +2,7 @@
 
 ## Version 2.23.0
 - We have added possibility for asynchronous ITN processing.
+- We have added FirstName and LastName to transaction start parameters.
 
 ## Version 2.22.11
 - We have fixed the bug related to forcing int in Payment.php
