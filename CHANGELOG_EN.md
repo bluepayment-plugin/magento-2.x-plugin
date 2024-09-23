@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version 2.23.0
+- We have added FirstName and LastName to transaction start parameters.
+
 ## Wersja 2.22.10
 - Fix typo in config.xml
 
