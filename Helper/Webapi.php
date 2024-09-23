@@ -185,7 +185,7 @@ class Webapi extends Data
         return $result;
     }
 
-    public function transactionStatus(int $serviceId, string $orderId, string $currency, int $storeId)
+    public function transactionStatus(string $serviceId, string $orderId, string $currency, int $storeId)
     {
         return $this->callXMLApi(
             [

@@ -3,6 +3,10 @@
 ## Version 2.23.0
 - We have added possibility for asynchronous ITN processing.
 
+## Version 2.22.11
+- We have fixed the bug related to forcing int in Payment.php
+- We have fixed a bug in translations
+
 ## Version 2.22.10
 - Fix typo in config.xml
 
