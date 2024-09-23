@@ -443,7 +443,6 @@ class Payment extends AbstractMethod
         );
 
         $customerId = $order->getCustomerId();
-        $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifetime($order);
 
         $locale = $this->_scopeConfig
@@ -458,7 +457,9 @@ class Payment extends AbstractMethod
             'OrderID' => $orderId,
             'Amount' => $amount,
             'Currency' => $currency,
-            'CustomerEmail' => $customerEmail,
+            'CustomerEmail' => $order->getCustomerEmail(),
+            'VerificationFName' => $order->getCustomerFirstname(),
+            'VerificationLName' => $order->getCustomerLastname(),
             'Language' => $language,
             'PlatformName' => self::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
