@@ -1,6 +1,61 @@
 # Co nowego w BluePayment?
 
+## Wersja 2.23.0
+- Dodanie możliwości asynchronicznego przetwarzania ITN.
+
+## Wersja 2.22.11
+- Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
+- Poprawiliśmy błąd w tłumaczeniach
+
+## Wersja 2.22.10
+- Poprawienie literówki w config.xml
+
+## Wersja 2.22.9
+- Usunęliśmy nadpisanie place-order.js (zgłoszenie #12).
+
+## Wersja 2.22.8
+- Dodaliśmy wsparcie dla modułu Amasty One Step Checkout.
+- Dodaliśmy opcję ustawienia linku do odpowiedniego kalkulatora (0 lub 1%) dla "Alior Raty".
+- Poprawiliśmy działanie Google Pay.
+
+## Wersja 2.22.7
+- Dodaliśmy wsparcie dla Magento 2.4.7.
+- Naprawiliśmy błąd z CSP dla Analytics.
+- Naprawiliśmy błąd, jeśli adres URL logo jest pusty w odpowiedzi na listę bramek.
+- Zaktualizowaliśmy treści dla płatności BLIK Płacę Później.
+
+## Wersja 2.22.6
+- Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
+- Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
+- Poprawiliśmy błąd z wielokrotną wysyłką e-maila przy płatności Google Pay / BLIK 0 / Kartą.
+- Naprawiliśmy błąd z nieprawidłowym przekierowaniem, gdy opcja "Dodaj kod sklepu do adresu URL" była ustawiona na wartość true (dzięki @piotrmatras).
+
+## Wersja 2.22.5
+- Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).
+- Poprawiliśmy problem z wyścigiem statusów.
+
+## Wersja 2.22.4
+- Od teraz skrypty JS nie są dołączane w przypadku wyłączonej metody płatności Autopay.
+- Dodaliśmy tłumaczenie kanałów płatności w szczegółach zamówienia.
+- Usunęliśmy metodę Pay Smartney.
+
+## Wersja 2.22.3
+- Zmieniliśmy tekst pomocniczy dla BLIK Płacę Później.
+
+## Wersja 2.22.2
+- Poprawiliśmy literówką w tłumaczeniach.
+
+## Wersja 2.22.1
+- Zmieniliśmy tekst pomocy dla płatności Alior Raty.
+- Zmieniliśmy tekst informacji o prowizji w panelu administracyjnym.
+- Zmieniliśmy link do oferty regulaminów w panelu administracyjnym.
+- Dodaliśmy metodę płatności "BLIK Zapłać później".
+- Poprawiliśmy działanie w przypadku wystąpienia wyścigu statusów ITN.
+- Poprawiliśmy błąd, który powodował brak widoczności metody Autopay w przypadku dostępnych tylko oddzielnych metod płatności.
+
 ## Wersja 2.22.0
+- Dodaliśmy możliwość ustawienia metody płatności powyżej metody zbiorczej "Autopay" (płatność przelewem).
+- Dokonaliśmy refaktoryzacji kodu front-end (JS) dla wszystkich kanałów Autopay.
 - Zmieniliśmy swoją nazwę na Autopay.
 
 ## Wersja 2.21.7

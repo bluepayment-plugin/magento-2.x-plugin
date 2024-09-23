@@ -101,12 +101,25 @@
                         <field id="gateway_selection">1</field>
                     </depends>
                 </field>
+                <field id="alior_installments" translate="label comment" type="select" sortOrder="556" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Alior Installments - link to calculator</label>
+                    <source_model>BlueMedia\BluePayment\Model\Config\Source\AliorInstallments</source_model>
+                    <comment><![CDATA[Select the appropriate interest rate in your agreement with Autopay to display the correct calculator to the customer.]]></comment>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
+                </field>
                 <field id="collapsible" translate="label comment" type="select" sortOrder="560" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Collapsible gateway list</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <depends>
                         <field id="gateway_selection">1</field>
                     </depends>
+                </field>
+                <field id="with_phone" translate="label comment" type="select" sortOrder="570" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start transaction with phone number</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[Requires configuration on the Autopay side. ENABLE ONLY AT THE REQUEST OF THE SUPPORT TEAM.]]></comment>
                 </field>
                 <field id="autopay_agreement" translate="label comment" type="editor" sortOrder="600" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Autopay Agreement</label>
@@ -134,6 +147,12 @@
                 <field id="status_partial_refund" translate="label" type="select" sortOrder="632" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Status partial refund</label>
                     <source_model>BlueMedia\BluePayment\Model\Config\Order\Status</source_model>
+                </field>
+
+                <field id="async_process" translate="label" type="select" sortOrder="640" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Asynchronous process ITN</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[This setting enables asynchronous processing of ITN notifications sent by the Autopay system after a transaction is completed. Enabling this option means that ITN notifications will be processed in the background, which can be useful in scenarios with higher loads or specific requirements related to handling notifications.<br><br><strong>Note:</strong> This option should only be selected by individuals who fully understand how asynchronous ITN processing works and the potential implications for the store’s operation. Incorrect configuration of this setting may lead to issues with transaction handling.<br>More information in <a href="https://developers.autopay.pl/online/wtyczki/magento-2" target="_blank">module documentation</a>.]]></comment>
                 </field>
 
                 <group id="consumer_finance" translate="label" type="text" sortOrder="699" showInDefault="1" showInWebsite="1" showInStore="1">

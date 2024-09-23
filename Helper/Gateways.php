@@ -291,7 +291,7 @@ class Gateways extends Data
                 $gatewayModel->setStatus($gateway['state'] == 'OK');
                 $gatewayModel->setBankName($gateway['bankName']);
                 $gatewayModel->setType($gateway['gatewayType']);
-                $gatewayModel->setLogoUrl($gateway['iconURL'] ?? null);
+                $gatewayModel->setLogoUrl($gateway['iconURL'] ?? '');
                 $gatewayModel->setData('status_date', $gateway['stateDate']);
 
                 $save = false;

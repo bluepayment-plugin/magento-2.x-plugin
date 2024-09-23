@@ -51,4 +51,6 @@
     <preference for="BlueMedia\BluePayment\Api\Data\TransactionInterface" type="BlueMedia\BluePayment\Model\Transaction"/>
     <preference for="BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface" type="BlueMedia\BluePayment\Model\RefundTransactionRepository"/>
     <preference for="BlueMedia\BluePayment\Api\Data\RefundTransactionInterface" type="BlueMedia\BluePayment\Model\RefundTransaction"/>
+
+    <preference for="BlueMedia\BluePayment\Api\Data\ItnProcessRequestInterface" type="BlueMedia\BluePayment\Queue\Model\ItnProcessRequest"/>
 </config>

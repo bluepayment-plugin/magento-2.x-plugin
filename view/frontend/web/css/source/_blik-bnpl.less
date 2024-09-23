@@ -1,0 +1,158 @@
+@blik-bg: #F1F2FE;
+@blik-shadow-color: #00000038;
+@blik-text-color: #000000;
+
+& when (@media-common = true) {
+    .payment-method.blue-payment {
+        .blik-bnpl-modal {
+            // Make sure that modal will not be shown when JS error occurs
+            display: none;
+        }
+    }
+}
+
+.blik-bnpl-modal-wrapper {
+    color: @blik-text-color !important;
+
+    .modal-popup {
+        left: 20px !important;
+        right: 20px !important;
+        z-index: 902;
+        display: flex;
+        align-items: center;
+
+        & .modal-header {
+            position: absolute;
+            right: 0;
+            z-index: 10000;
+        }
+
+        & .modal-footer {
+            display: none;
+        }
+
+        & .modal-content {
+            margin: 0;
+            padding: 0;
+        }
+    }
+
+    .modal-inner-wrap {
+        flex: 1;
+        margin: 0;
+        max-height: unset !important;
+        width: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 4px 0 @blik-shadow-color;
+        background: @blik-bg;
+        height: auto !important;
+    }
+
+    .modal-content {
+        display: flex;
+        flex: 1;
+    }
+
+    .blik-bnpl-modal {
+        display: flex;
+        flex: 1;
+        align-items: stretch;
+
+        &--logo {
+            max-width: 210px;
+            align-self: center;
+            margin: 0 0 24px 0;
+        }
+
+        &--container {
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 40px 24px;
+        }
+
+        &--header {
+            margin: 0 0 24px 0;
+            padding: 0;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        &--items {
+            margin: 0 0 24px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        &--item {
+            display: flex;
+            gap: 16px;
+
+            &-img {
+                width: 64px;
+            }
+
+            &-right {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            &-header {
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            &-text {
+                font-size: 16px;
+                line-height: 1.5;
+            }
+        }
+
+        &--footer {
+            font-size: 16px;
+
+            &-link {
+                color: @blik-text-color;
+                text-decoration: underline;
+                margin-left: 10px;
+
+                &:hover {
+                    text-decoration: none;
+                }
+            }
+
+            &-example {
+                margin-top: 14px;
+                color: @blik-text-color;
+                font-size: 12px;
+                line-height: 2;
+            }
+        }
+    }
+}
+
+//
+// Tablet
+// _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__s) {
+    .blik-bnpl-modal-wrapper {
+        .modal-inner-wrap {
+
+        }
+    }
+}
+
+//
+//  Desktop
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    .blik-bnpl-modal-wrapper {
+
+    }
+}

@@ -1,10 +1,64 @@
 # What's new in BluePayment?
 
-## Version 2.X
-- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
-- We refactored the front-end code (JS) for all Autopay channels.
+## Version 2.23.0
+- We have added possibility for asynchronous ITN processing.
+
+## Version 2.22.11
+- We have fixed the bug related to forcing int in Payment.php
+- We have fixed a bug in translations
+
+## Version 2.22.10
+- Fix typo in config.xml
+
+## Version 2.22.9
+- We removed the place-order.js override (submission #12).
+
+## Version 2.22.8
+- We have added support for Amasty's One Step Checkout module.
+- We have added the option to set a link to the relevant calculator (0 or 1%) for "Alior Instalments".
+- Poprawiliśmy działanie Google Pay.
+
+## Version 2.22.7
+- We have added support for Magento 2.4.7.
+- We have fixed issue with CSP for Analytics.
+- We have fixed error if logo URL is empty in gateway list response.
+- We have updated the information for BLIK Pay Later payment.
+
+## Version 2.22.6
+- We have added the ability to include a phone number for payment start.
+- We have added new entries (for photos) to CSP whitelist.
+- We have fixed a bug with multiple email sending for Google Pay / BLIK 0 / Card payment.
+- We have fixed a bug with wrong redirect when "Add Store Code to URLs" was set to true (credits @piotrmatras).
+
+## Version 2.22.5
+- We have fixed support for Magneto 2.4.6 (Zend -> Laminas change).
+- We have fixed the problem with status race.
+
+## Version 2.22.4
+- From now on, JS scripts are not included when the Autopay payment method is disabled.
+- We have added a translation of the payment channels in the order details.
+- We have removed the Pay Smartney method.
+
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
+## Version 2.22.3
+- We have changed the supporting text for BLIK Pay Later.
+
+## Version 2.22.2
+- We have corrected a typo in the translations.
+
+## Version 2.22.1
+- We have changed the help text for Alior installments payments.
+- We have changed the text of the commission information in the administration panel.
+- We have changed the link to the regulations offer in the administration panel.
+- We have added a new payment method "BLIK Pay later".
+- We have improved the operation in the event of an ITN status race.
+- We have fixed a bug that caused the Autopay method not to be visible when only separate payment methods were available.
 
 ## Version 2.22.0
+- We added the ability to set the payment method above the bulk method "Autopay" (payment by wire transfer).
+- We refactored the front-end code (JS) for all Autopay channels.
 - We have changed our name to Autopay.
 
 ## Version 2.21.7

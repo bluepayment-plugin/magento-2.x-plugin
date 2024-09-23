@@ -4,10 +4,12 @@ define([
     'mage/translate',
     'mage/url',
     'Magento_Checkout/js/model/quote',
+    'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Ui/js/modal/modal',
     'BlueMedia_BluePayment/js/checkout-data',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-gateways',
     'text!BlueMedia_BluePayment/template/wait-popup.html',
 ], function (
     $,
@@ -15,10 +17,12 @@ define([
     $t,
     url,
     quote,
+    additionalValidators,
     modal,
     checkoutData,
     Component,
     config,
+    gateways,
     popupTpl,
 ) {
     'use strict';
@@ -26,26 +30,27 @@ define([
     return Component.extend({
         defaults: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-google-pay',
-            gateway_id: null,
+            gateway_id: gateways.ids.google_pay,
             gateway_logo_url: null,
             gateway_name: null,
             gateway_description: null,
         },
+        redirectAfterPlaceOrder: false,
         client: ko.observable(false),
         testMode: config.testMode,
         merchantInfo: null,
         acceptorId: null,
         modal: modal({
-            title: $t('Waiting for the confirmation of the transaction.'),
-            autoOpen: false,
-            clickableOverlay: false,
-            buttons: [],
-            type: 'popup',
-            popupTpl: popupTpl,
-            keyEventHandlers: {},
-            modalClass: 'blik-modal',
-        },
-        $('<div />').html()),
+                title: $t('Waiting for the confirmation of the transaction.'),
+                autoOpen: false,
+                clickableOverlay: false,
+                buttons: [],
+                type: 'popup',
+                popupTpl: popupTpl,
+                keyEventHandlers: {},
+                modalClass: 'blik-modal',
+            },
+            $('<div />').html()),
 
 
         /**
@@ -53,14 +58,7 @@ define([
          */
         initObservable: function () {
             this._super();
-            this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
             this.currencyCode = quote.totals()['base_currency_code'];
-
-            quote.totals.subscribe(function () {
-                if (this.grandTotalAmount !== quote.totals()['base_grand_total']) {
-                    this.grandTotalAmount = parseFloat(quote.totals()['base_grand_total']).toFixed(2);
-                }
-            }.bind(this));
 
             return this;
         },
@@ -74,6 +72,28 @@ define([
             if (typeof google !== 'undefined' && typeof google.payments !== 'undefined') {
                 this.initGooglePay();
             }
+        },
+
+
+        /**
+         * Place order - with validation.
+         */
+        placeOrder: function (data, event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (this.validate() &&
+                additionalValidators.validate()
+            ) {
+                this.callGooglePayPayment();
+            }
+
+            return false;
+        },
+
+        afterPlaceOrder: function () {
+            return true;
         },
 
         /**
@@ -103,7 +123,7 @@ define([
                     self.acceptorId = response.acceptorId.toString();
 
                     let client = new google.payments.api.PaymentsClient({
-                        environment: self.testMode === "1" ? 'TEST' : 'PRODUCTION'
+                        environment: self.testMode ? 'TEST' : 'PRODUCTION'
                     });
                     self.client(client);
                     client.isReadyToPay({
@@ -141,7 +161,6 @@ define([
             });
         },
 
-
         /**
          * Get Google Pay transaction data
          *
@@ -170,7 +189,7 @@ define([
                 shippingAddressRequired: false,
                 transactionInfo: {
                     totalPriceStatus: 'FINAL',
-                    totalPrice: this.grandTotalAmount,
+                    totalPrice: this.grandTotalAmount(),
                     currencyCode: this.currencyCode
                 },
             };
@@ -188,7 +207,7 @@ define([
                 self.placeOrderAfterValidation(function () {
                     const token = data.paymentMethodData.tokenizationData.token;
                     const urlResponse = url.build('bluepayment/processing/create')
-                        + '?gateway_id=' + this.gateway_id
+                        + '?gateway_id=' + gateways.ids.google_pay
                         + '&automatic=true';
 
                     $.ajax({
@@ -266,3 +285,4 @@ define([
         },
     });
 });
+

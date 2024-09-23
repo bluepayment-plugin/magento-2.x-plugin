@@ -45,6 +45,9 @@ define([
                 case model.gatewaysIds.blik:
                     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-blik';
                     break;
+                case model.gatewaysIds.blik_bnpl:
+                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-blik-bnpl';
+                    break;
                 case model.gatewaysIds.card:
                     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-card';
                     break;

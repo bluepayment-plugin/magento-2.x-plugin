@@ -18,14 +18,13 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
     public const BLIK_GATEWAY_ID = 509;
-    public const SMARTNEY_GATEWAY_ID = 700;
+    public const BLIK_BNPL_GATEWAY_ID = 523;
     public const HUB_GATEWAY_ID = 702;
     public const PAYPO_GATEWAY_ID = 705;
     public const SPINGO_GATEWAY_ID = 706;
@@ -38,7 +37,7 @@ class ConfigProvider implements ConfigProviderInterface
 
     public const ALWAYS_SEPARATED = [
         self::BLIK_GATEWAY_ID,
-        self::SMARTNEY_GATEWAY_ID,
+        self::BLIK_BNPL_GATEWAY_ID,
         self::HUB_GATEWAY_ID,
         self::PAYPO_GATEWAY_ID,
         self::SPINGO_GATEWAY_ID,
@@ -52,8 +51,8 @@ class ConfigProvider implements ConfigProviderInterface
 
     public const STATIC_GATEWAY_NAME = [
         self::CARD_GATEWAY_ID,
-        self::SMARTNEY_GATEWAY_ID,
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
+        self::VISA_MOBILE_GATEWAY_ID,
     ];
 
     /** @var GatewayCollectionFactory */
@@ -97,7 +96,6 @@ class ConfigProvider implements ConfigProviderInterface
         self::APPLE_PAY_GATEWAY_ID, // Apple Pay
 
         self::HUB_GATEWAY_ID, // Hub
-        self::SMARTNEY_GATEWAY_ID, // Smartney
         self::ALIOR_INSTALLMENTS_GATEWAY_ID, // Alior Raty
         self::PAYPO_GATEWAY_ID, // PayPo
         self::SPINGO_GATEWAY_ID, // Spingo
@@ -273,7 +271,7 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
+            $amount = $this->getGrandTotalForQuote();
 
             $gateways = $this->getActiveGateways($currency, (float) $amount);
 
@@ -298,6 +296,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
                 'blik_zero_enabled' => $this->blikZeroEnabled(),
+                'alior_calculator_url' => $this->getAliorCalculatorUrl(),
                 'options' => $result,
                 'separated' => $resultSeparated,
                 'cards' => $this->prepareCards(),
@@ -489,11 +488,11 @@ class ConfigProvider implements ConfigProviderInterface
             $gateways
                 ->addFieldToFilter(GatewayInterface::MIN_AMOUNT, [
                     ['lteq' => $amount],
-                    ['null' => true]
+                    ['null' => true],
                 ])
                 ->addFieldToFilter(GatewayInterface::MAX_AMOUNT, [
                     ['gteq' => $amount],
-                    ['null' => true]
+                    ['null' => true],
                 ]);
         }
 
@@ -546,17 +545,17 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get order statuses that cannot be changed
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return array
      */
-    public function getUnchangableStatuses(?StoreInterface $store = null): array
+    public function getUnchangableStatuses(?int $storeId = null): array
     {
         return explode(
             ',',
             $this->scopeConfig->getValue(
                 'payment/bluepayment/unchangeable_statuses',
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             ) ?: ''
         );
     }
@@ -564,45 +563,45 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get status for order with waiting payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusWaitingPayment(?StoreInterface $store = null): ?string
+    public function getStatusWaitingPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_waiting_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with error payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $store
      * @return string|null
      */
-    public function getStatusErrorPayment(?StoreInterface $store = null): ?string
+    public function getStatusErrorPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_error_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with success payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusSuccessPayment(?StoreInterface $store = null): ?string
+    public function getStatusSuccessPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 
@@ -645,10 +644,61 @@ class ConfigProvider implements ConfigProviderInterface
             ->addFieldToFilter(GatewayInterface::IS_FORCE_DISABLED, ['eq' => 0])
             ->addFieldToFilter(GatewayInterface::GATEWAY_ID, ['in' => [
                 self::HUB_GATEWAY_ID,
-                self::SMARTNEY_GATEWAY_ID,
                 self::ALIOR_INSTALLMENTS_GATEWAY_ID,
             ]]);
 
         return $gateways->getColumnValues(GatewayInterface::GATEWAY_ID);
+    }
+
+    public function isWithPhoneEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/with_phone',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Returns current configuration for alior installments.
+     *
+     * @return string 'one' or 'zero'
+     */
+    public function getAliorInstallments(): string
+    {
+        $value = (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/alior_installments',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        if (!in_array($value, ['one', 'zero'])) {
+            return 'one';
+        }
+
+        return $value;
+    }
+
+    public function getAliorCalculatorUrl(): string
+    {
+        if ($this->getAliorInstallments() === 'zero') {
+            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=F&amount={amount}';;
+        } else {
+            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B&amount={amount}';
+
+        }
+
+        return $url;
+    }
+
+    public function isAsyncProcess(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/async_process',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    protected function getGrandTotalForQuote(): float
+    {
+        return (float) $this->checkoutSession->getQuote()->getGrandTotal();
     }
 }

@@ -21,7 +21,6 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
-use Zend\Uri\Http;
 
 /**
  * Class Webapi
@@ -30,7 +29,7 @@ class Webapi extends Data
 {
     public const DEFAULT_HASH_SEPARATOR = '|';
 
-    /** @var Http */
+    /** @var \Zend\Uri\Http | \Laminas\Uri\Http */
     public $zendUri;
 
     /** @var CacheInterface */
@@ -53,7 +52,6 @@ class Webapi extends Data
      * @param  StoreManagerInterface  $storeManager
      * @param  CacheInterface  $cache
      * @param  SerializerInterface  $serializer
-     * @param  Http  $zendUri
      */
     public function __construct(
         Context $context,
@@ -66,8 +64,7 @@ class Webapi extends Data
         Logger $logger,
         StoreManagerInterface $storeManager,
         CacheInterface $cache,
-        SerializerInterface $serializer,
-        Http $zendUri
+        SerializerInterface $serializer
     ) {
         parent::__construct(
             $context,
@@ -81,9 +78,14 @@ class Webapi extends Data
             $storeManager
         );
 
-        $this->zendUri = $zendUri;
         $this->cache = $cache;
         $this->serializer = $serializer;
+
+        if (class_exists('\\Laminas\Uri\Http')) {
+            $this->zendUri = new \Laminas\Uri\Http();
+        } else {
+            $this->zendUri = new \Zend\Uri\Http();
+        }
     }
 
     /**
@@ -183,14 +185,14 @@ class Webapi extends Data
         return $result;
     }
 
-    public function transactionStatus(int $serviceId, string $orderId, string $currency, StoreInterface $store)
+    public function transactionStatus(string $serviceId, string $orderId, string $currency, int $storeId)
     {
         return $this->callXMLApi(
             [
                 'ServiceID' => $serviceId,
                 'OrderID' => $orderId,
             ],
-            $this->getConfigValue('shared_key', $currency, $store),
+            $this->getConfigValue('shared_key', $currency, $storeId),
             $this->getTransactionStatusUrl()
         );
     }
@@ -202,13 +204,13 @@ class Webapi extends Data
      *
      * @return mixed
      */
-    private function getConfigValue(string $name, string $currency = null, ?StoreInterface $store = null)
+    private function getConfigValue(string $name, string $currency = null, ?int $storeId = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             );
         }
 
