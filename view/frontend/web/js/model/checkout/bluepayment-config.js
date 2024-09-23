@@ -13,5 +13,6 @@ define(function () {
         cards: config?.cards ?? [],
         oneClickAgreement: config?.one_click_agreement ?? false,
         blikZeroEnabled: config?.blik_zero_enabled ?? true,
+        aliorCalculatorUrl: config?.alior_calculator_url ?? 'one',
     };
 });

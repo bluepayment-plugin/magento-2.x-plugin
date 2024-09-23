@@ -4,12 +4,14 @@ define([
     'Magento_Checkout/js/model/quote',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-abstract',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
 ], function (
     ko,
     $t,
     quote,
     Component,
     model,
+    config
 ) {
     'use strict';
 
@@ -20,6 +22,24 @@ define([
             gateway_logo_url: null,
             gateway_name: null,
             gateway_description: null,
+        },
+
+        grandTotalAmount: ko.observable(0),
+
+        /**
+         * Subscribe to grand totals
+         */
+        initObservable: function () {
+            this._super();
+
+            this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+            quote.totals.subscribe(function () {
+                if (this.grandTotalAmount() !== quote.totals()['base_grand_total']) {
+                    this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+                }
+            }.bind(this));
+
+            return this;
         },
 
         /**
@@ -68,10 +88,6 @@ define([
                 return $t('Card Payment');
             }
 
-            if (gatewayId === model.gatewaysIds.smartney) {
-                return $t('Pay later');
-            }
-
             if (gatewayId === model.gatewaysIds.alior_installments) {
                 return $t('Spread the cost over installments');
             }
@@ -91,19 +107,18 @@ define([
         getGatewayDescription: function () {
             let gatewayId = Number(this.gateway_id);
 
-            if (gatewayId === model.gatewaysIds.smartney) {
-                return $t('Buy now and pay within 30 days. %1')
-                    .replace('%1', '<a href="https://pomoc.autopay.pl/platnosci-online-w-e-commerce/pay-smartney" target="_blank">' + $t('Learn more') + '</a>');
-            }
-
             if (gatewayId === model.gatewaysIds.alior_installments) {
-                return $t('Pay for your purchases using convenient instalments (%1).')
-                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('check out the details') + '</a>');
+                const link = '<a href="' + config.aliorCalculatorUrl + '"  target="_blank">'
+                    + $t('Learn more') +
+                    '</a>';
+
+                return $t('Pay for your purchases using convenient instalments. %1')
+                    .replace('%1', link.replace('{amount}', Math.round(this.grandTotalAmount())));
             }
 
             if (gatewayId === model.gatewaysIds.paypo) {
                 return $t('Pick up your purchases, check them out and pay later &mdash; in 30 days or in convenient installments. %1')
-                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Find out the details') + '</a>');
+                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Learn more') + '</a>');
             }
 
             if (gatewayId === model.gatewaysIds.visa_mobile) {
@@ -120,10 +135,6 @@ define([
          */
         getGatewayHelp: function () {
             let gatewayId = Number(this.gateway_id);
-
-            if (gatewayId === model.gatewaysIds.smartney) {
-                return $t("You will be redirected to Smartney's partner website. After your application and positive verification, Smartney will pay for your purchases for you.");
-            }
 
             if (gatewayId === model.gatewaysIds.alior_installments) {
                 return $t("You will be redirected to the bank's website. After your application and positive verification, the bank will send you a loan agreement by email. You can accept it online. Average time of the whole transaction - 15 minutes.");

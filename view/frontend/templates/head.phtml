@@ -1,13 +1,14 @@
 <?php
 /** @var \BlueMedia\BluePayment\Block\Head $block */
 
-if ($block->isTest()) {
-    echo '<script src="https://testcards.autopay.eu/integration/checkout.js"></script>';
-} else {
-    echo '<script src="https://cards.autopay.eu/integration/checkout.js"></script>';
-}
+if ($block->isActive()) {
+    if ($block->isTest()) {
+        echo '<script src="https://testcards.autopay.eu/integration/checkout.js"></script>';
+    } else {
+        echo '<script src="https://cards.autopay.eu/integration/checkout.js"></script>';
+    }
 
-if ($block->hasGPay())
-{
-    echo '<script src="https://pay.google.com/gp/p/js/pay.js"></script>';
+    if ($block->hasGPay()) {
+        echo '<script src="https://pay.google.com/gp/p/js/pay.js"></script>';
+    }
 }
