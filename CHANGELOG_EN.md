@@ -1,5 +1,8 @@
 # What's new in BluePayment?
 
+## Version 2.23.0
+- We have added FirstName and LastName to transaction start parameters.
+
 ## Version 2.22.11
 - We have fixed the bug related to forcing int in Payment.php
 - We have fixed a bug in translations

@@ -74,32 +74,34 @@ class Payment extends AbstractMethod
 
     /** @var string[] */
     private static $orderParams = [
-        'ServiceID',
-        'OrderID',
-        'Amount',
-        'GatewayID',
-        'Currency',
-        'CustomerEmail',
-        'Language',
-        'CustomerIP',
-        'Title',
-        'Products',
-        'CustomerPhone',
-        'ValidityTime',
-        'LinkValidityTime',
-        'ReturnURL',
-        'RecurringAcceptanceState',
-        'RecurringAction',
-        'DefaultRegulationAcceptanceState',
-        'DefaultRegulationAcceptanceID',
-        'DefaultRegulationAcceptanceTime',
-        'ClientHash',
-        'AuthorizationCode',
-        'ScreenType',
-        'PaymentToken',
-        'PlatformName',
-        'PlatformVersion',
-        'PlatformPluginVersion',
+        'ServiceID', // 1
+        'OrderID', // 2
+        'Amount', // 3
+        'GatewayID', // 5
+        'Currency', // 6
+        'CustomerEmail', // 7
+        'Language', // 7
+        'CustomerIP', // 13
+        'Title', // 14
+        'Products', // 16
+        'CustomerPhone', // 17
+        'ValidityTime', // 19
+        'VerificationFName', // 25
+        'VerificationLName', // 26
+        'LinkValidityTime', // 34
+        'RecurringAcceptanceState', // 35
+        'RecurringAction', // 36
+        'ClientHash', // 37
+        'AuthorizationCode', // 40
+        'ScreenType', // 41
+        'ReturnURL', // 45
+        'PaymentToken', // 47
+        'DefaultRegulationAcceptanceState', // 51
+        'DefaultRegulationAcceptanceID', // 52
+        'DefaultRegulationAcceptanceTime', // 53
+        'PlatformName', // 170
+        'PlatformVersion', // 171
+        'PlatformPluginVersion', // 172
     ];
 
     /**
@@ -441,7 +443,6 @@ class Payment extends AbstractMethod
         );
 
         $customerId = $order->getCustomerId();
-        $customerEmail = $order->getCustomerEmail();
         $validityTime = $this->getTransactionLifetime($order);
 
         $locale = $this->_scopeConfig
@@ -456,7 +457,9 @@ class Payment extends AbstractMethod
             'OrderID' => $orderId,
             'Amount' => $amount,
             'Currency' => $currency,
-            'CustomerEmail' => $customerEmail,
+            'CustomerEmail' => $order->getCustomerEmail(),
+            'VerificationFName' => $order->getCustomerFirstname(),
+            'VerificationLName' => $order->getCustomerLastname(),
             'Language' => $language,
             'PlatformName' => self::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
