@@ -1,4 +1,4 @@
-# Instrukcja modułu „Autopay” dla platformy Magento 2
+# Instrukcja dla modułu Magento 2: bramka płatności Autopay
 
 ## Podstawowe informacje
 Autopay to moduł płatności umożliwiający realizację transakcji bezgotówkowych w sklepie opartym na platformie Magento 2.
