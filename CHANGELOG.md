@@ -1,4 +1,4 @@
-# Co nowego w BluePayment?
+# Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.23.0
 - Dodanie FirstName oraz LastName do parametrów startu transakcji.

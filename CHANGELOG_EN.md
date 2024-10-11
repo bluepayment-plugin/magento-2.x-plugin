@@ -1,4 +1,4 @@
-# What's new in BluePayment?
+# What's new in the Autopay payment gateway module?
 
 ## Version 2.23.0
 - We have added FirstName and LastName to transaction start parameters.
