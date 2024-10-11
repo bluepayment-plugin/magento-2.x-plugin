@@ -1,4 +1,4 @@
-# The manual of „Autopay” module for Magento 2
+# The manual of "Autopay" module for Magento 2
 
 ## Basic information
 The Autopay Online Payment Plugin for Magento is the easiest way to allow your online store customers use the most popular payment methods. When integrated with the store, the plugin offers the possibility to add over 400 banks to the payment options.
