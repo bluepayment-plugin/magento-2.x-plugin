@@ -1,6 +1,7 @@
 # What's new in BluePayment?
 
 ## Version 2.23.0
+- We have added FirstName and LastName to transaction start parameters.
 - We have added possibility for asynchronous ITN processing.
 
 ## Version 2.22.11
