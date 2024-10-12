@@ -11,6 +11,7 @@ use BlueMedia\BluePayment\Helper\Webapi;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
 use Exception;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -65,6 +66,9 @@ class ProcessNotification
     /** @var ItnProcessRequestInterfaceFactory */
     protected $itnProcessRequestFactory;
 
+    /** @var ResourceConnection */
+    protected $resourceConnection;
+
     public function __construct(
         Logger $logger,
         GatewayFactory $gatewayFactory,
@@ -79,7 +83,8 @@ class ProcessNotification
         Webapi $webapi,
         OrderFactory $orderFactory,
         PublisherInterface $publisher,
-        ItnProcessRequestInterfaceFactory $itnProcessRequestFactory
+        ItnProcessRequestInterfaceFactory $itnProcessRequestFactory,
+        ResourceConnection $resourceConnection
     ) {
         $this->logger = $logger;
         $this->gatewayFactory = $gatewayFactory;
@@ -95,6 +100,7 @@ class ProcessNotification
         $this->orderFactory = $orderFactory;
         $this->publisher = $publisher;
         $this->itnProcessRequestFactory = $itnProcessRequestFactory;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function asyncExecute(
@@ -109,11 +115,10 @@ class ProcessNotification
         ]);
 
         if ($isAsyncEnabled) {
-            /** @var ItnProcessRequestInterface $data */
             $data = $this->itnProcessRequestFactory->create()
                 ->setPaymentXml($payment->asXML())
                 ->setServiceId($serviceId)
-                ->setStoreId((int) $storeId);
+                ->setStoreId($storeId);
 
             $this->publisher->publish(
                 'autopay.itn.process',
@@ -159,125 +164,76 @@ class ProcessNotification
 
         switch ($paymentStatus) {
             case Payment::PAYMENT_STATUS_SUCCESS:
-                $status = $this->configProvider->getStatusSuccessPayment($storeId);
-                $state = Order::STATE_PROCESSING;
+                $status = $statusSuccess;
+                $defaultState = Order::STATE_PROCESSING;
                 break;
             case Payment::PAYMENT_STATUS_FAILURE:
                 $status = $this->configProvider->getStatusErrorPayment($storeId);
-                $state = Order::STATE_CANCELED;
+                $defaultState = Order::STATE_CANCELED;
                 break;
             case Payment::PAYMENT_STATUS_PENDING:
             default:
                 $status = $this->configProvider->getStatusWaitingPayment($storeId);
-                $state = Order::STATE_PENDING_PAYMENT;
+                $defaultState = Order::STATE_PENDING_PAYMENT;
                 break;
         }
 
-        $state = $this->getStateForStatus->execute($status, $state);
+        $state = $this->getStateForStatus->execute($status, $defaultState);
 
-        $updateOrders = true;
-        if ($paymentStatus === Payment::PAYMENT_STATUS_FAILURE) {
-            // Double verify current order status, based on response from WebAPI.
-            if (! $this->hasOnlyFailureStatuses((int) $serviceId, $orderId, $currency, $store)) {
-                // Order has one success transaction - do not change status to failure
-                $updateOrders = false;
-                $this->logger->info('Change order ignored');
-            }
-        }
+        $shouldUpdateOrder = $this->shouldUpdateOrder(
+            $paymentStatus,
+            $serviceId,
+            $orderId,
+            $currency,
+            $storeId
+        );
 
         $orders = $this->getOrdersByOrderId($orderId);
 
         $time1 = microtime(true);
         $orderPaymentState = null;
 
+        $connection = $this->resourceConnection->getConnection();
+
         foreach ($orders as $order) {
-            $orderPayment = $order->getPayment();
-
-            if ($orderPayment === null || $orderPayment->getMethod() !== Payment::METHOD_CODE) {
-                continue;
-            }
-
-            /** @var string $orderPaymentState */
-            $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
-            $formattedAmount = number_format(round($amount, 2), 2, '.', '');
-
-            $changeable = $updateOrders;
-
-            if ($changeable) {
-                if (in_array($order->getStatus(), $unchangeableStatuses)) {
-                    $changeable = false;
-                }
-                foreach ($order->getAllStatusHistory() as $historyStatus) {
-                    if ($historyStatus->getStatus() == $statusSuccess && $order->getTotalDue() == 0) {
-                        $changeable = false;
-                    }
-                }
-            }
-
             try {
-                $eventToCall = null;
+                $orderPayment = $order->getPayment();
 
-                if ($changeable && $orderPaymentState != $paymentStatus) {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
-                        . ' | Status: ' . $paymentStatus;
-
-                    $order->setState($state);
-                    $order->addStatusToHistory($status, $orderComment);
-                    $order->setBlueGatewayId($gatewayId);
-                    $order->setPaymentChannel($gateway->getData('gateway_name'));
-
-                    $orderPayment->setTransactionId($remoteId);
-                    $orderPayment->prependMessage('[' . $paymentStatus . ']');
-                    $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
-                    $orderPayment->setAdditionalInformation('bluepayment_gateway', $gatewayId);
-
-                    switch ($paymentStatus) {
-                        case Payment::PAYMENT_STATUS_FAILURE:
-                            $eventToCall = 'bluemedia_payment_failure';
-                            break;
-                        case Payment::PAYMENT_STATUS_PENDING:
-                            $eventToCall = 'bluemedia_payment_pending';
-                            $orderPayment->setIsTransactionPending(true);
-                            break;
-                        case Payment::PAYMENT_STATUS_SUCCESS:
-                            $eventToCall = 'bluemedia_payment_success';
-
-                            if ($order->getBaseCurrencyCode() !== $currency) {
-                                $rate = $order->getBaseToOrderRate();
-                                $amount = $amount / $rate;
-                            }
-
-                            $orderPayment->registerCaptureNotification($amount, true);
-                            $orderPayment->setIsTransactionApproved(true);
-                            $orderPayment->setIsTransactionClosed(true);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if ($eventToCall) {
-                        // Dispatch event
-                        $this->eventManager->dispatch($eventToCall, [
-                            'order' => $order,
-                            'payment' => $payment,
-                            'transaction_id' => $remoteId,
-                        ]);
-                    }
-                } else {
-                    $orderComment =
-                        '[BM] Transaction ID: ' . $remoteId
-                        . ' | Amount: ' . $formattedAmount . ' ' . $currency
-                        . ' | Status: ' . $paymentStatus . ' [IGNORED]'
-                        . (!$updateOrders ? ' Status SUCCESS is in other transaction based on WebAPI.' : '');
-
-                    $order->addStatusToHistory($order->getStatus(), $orderComment);
+                if ($orderPayment === null || $orderPayment->getMethod() !== Payment::METHOD_CODE) {
+                    continue;
                 }
 
-                $this->orderRepository->save($order);
-                $this->sendConfirmationEmail->execute($order);
+                // Lock the order row
+                $tableName = $this->resourceConnection->getTableName('sales_order');
+                $orderId = $order->getId();
+
+                $select = $connection->select()
+                    ->from($tableName)
+                    ->where('entity_id = ?', $orderId)
+                    ->forUpdate();
+                $connection->fetchAll($select);
+
+                $orderPaymentState = $this->processOrder(
+                    $orderPayment,
+                    $amount,
+                    $shouldUpdateOrder,
+                    $order,
+                    $unchangeableStatuses,
+                    $statusSuccess,
+                    $paymentStatus,
+                    $remoteId,
+                    $currency,
+                    $state,
+                    $status,
+                    $gatewayId,
+                    $gateway,
+                    $payment
+                );
+
+                // Unlock
+                $connection->commit();
             } catch (Exception $e) {
+                $connection->rollBack();
                 $this->logger->critical($e);
             }
         }
@@ -344,13 +300,56 @@ class ProcessNotification
         return $orders;
     }
 
-    private function hasOnlyFailureStatuses(
-        int $serviceId,
+    /**
+     * For failure status, check if order has only failure statuses by API.
+     *
+     * @param string $paymentStatus
+     * @param string $serviceId
+     * @param string $orderId
+     * @param string $currency
+     * @param int $storeId
+     * @return bool
+     */
+    protected function shouldUpdateOrder(
+        string $paymentStatus,
+        string $serviceId,
         string $orderId,
         string $currency,
         int $storeId
     ): bool {
-        $response = $this->webapi->transactionStatus($serviceId, $orderId, $currency, $storeId);
+        if ($paymentStatus === Payment::PAYMENT_STATUS_FAILURE) {
+            // Double verify current order status, based on response from WebAPI.
+            if (!$this->hasOnlyFailureStatuses($serviceId, $orderId, $currency, $storeId)) {
+                // Order has one success transaction - do not change status to failure
+                $this->logger->info('Change order ignored');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if order has only failure statuses by API.
+     *
+     * @param string $serviceId
+     * @param string $orderId
+     * @param string $currency
+     * @param int $storeId
+     * @return bool
+     */
+    private function hasOnlyFailureStatuses(
+        string $serviceId,
+        string $orderId,
+        string $currency,
+        int $storeId
+    ): bool {
+        $response = $this->webapi->transactionStatus(
+            $serviceId,
+            $orderId,
+            $currency,
+            $storeId
+        );
 
         $this->logger->info('ProcessNotification:' . __LINE__, [
             'serviceId' => $serviceId,
@@ -375,5 +374,146 @@ class ProcessNotification
 
         $this->logger->info('Has ONLY FAILURE statuses');
         return true;
+    }
+
+    /**
+     * @param $orderPayment
+     * @param $amount
+     * @param bool $shouldUpdateOrder
+     * @param Order $order
+     * @param array $unchangeableStatuses
+     * @param ?string $statusSuccess
+     * @param string $paymentStatus
+     * @param string $remoteId
+     * @param $currency
+     * @param $state
+     * @param string|null $status
+     * @param int $gatewayId
+     * @param DataObject $gateway
+     * @param SimpleXMLElement $payment
+     * @return string
+     */
+    protected function processOrder(
+        $orderPayment,
+        $amount,
+        bool $shouldUpdateOrder,
+        Order $order,
+        array $unchangeableStatuses,
+        ?string $statusSuccess,
+        string $paymentStatus,
+        string $remoteId,
+        $currency,
+        $state,
+        ?string $status,
+        int $gatewayId,
+        DataObject $gateway,
+        SimpleXMLElement $payment
+    ): string {
+        /** @var string $orderPaymentState */
+        $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
+        $formattedAmount = number_format(round($amount, 2), 2, '.', '');
+
+        $changeable = $shouldUpdateOrder;
+
+        if ($changeable) {
+            if (in_array($order->getStatus(), $unchangeableStatuses)) {
+                $changeable = false;
+            }
+            foreach ($order->getAllStatusHistory() as $historyStatus) {
+                if ($historyStatus->getStatus() == $statusSuccess && $order->getTotalDue() == 0) {
+                    $changeable = false;
+                }
+            }
+        }
+
+        if ($changeable && $orderPaymentState != $paymentStatus) {
+            $orderComment =
+                '[BM] Transaction ID: '.$remoteId
+                .' | Amount: '.$formattedAmount.' '.$currency
+                .' | Status: '.$paymentStatus;
+
+            $order->setState($state);
+            $order->addStatusToHistory($status, $orderComment);
+            $order->setBlueGatewayId($gatewayId);
+            $order->setPaymentChannel($gateway->getData('gateway_name'));
+
+            $orderPayment->setTransactionId($remoteId);
+            $orderPayment->prependMessage('['.$paymentStatus.']');
+            $orderPayment->setAdditionalInformation('bluepayment_state', $paymentStatus);
+            $orderPayment->setAdditionalInformation('bluepayment_gateway', $gatewayId);
+
+            switch ($paymentStatus) {
+                case Payment::PAYMENT_STATUS_PENDING:
+                    $orderPayment->setIsTransactionPending(true);
+                    break;
+                case Payment::PAYMENT_STATUS_SUCCESS:
+                    if ($order->getBaseCurrencyCode() !== $currency) {
+                        $rate = $order->getBaseToOrderRate();
+                        $amount = $amount / $rate;
+                    }
+
+                    $orderPayment->registerCaptureNotification($amount, true);
+                    $orderPayment->setIsTransactionApproved(true);
+                    $orderPayment->setIsTransactionClosed(true);
+                    break;
+                default:
+                case Payment::PAYMENT_STATUS_FAILURE:
+                    break;
+            }
+
+            $this->dispatchEvent(
+                $paymentStatus,
+                $order,
+                $payment,
+                $remoteId
+            );
+        } else {
+            $orderComment =
+                '[BM] Transaction ID: '.$remoteId
+                .' | Amount: '.$formattedAmount.' '.$currency
+                .' | Status: '.$paymentStatus.' [IGNORED]'
+                .(!$shouldUpdateOrder ? ' Status SUCCESS/PENDING is in other transaction based on WebAPI.' : '');
+
+            $order->addStatusToHistory($order->getStatus(), $orderComment);
+        }
+
+        $this->orderRepository->save($order);
+        $this->sendConfirmationEmail->execute($order);
+
+        return $orderPaymentState;
+    }
+
+    /**
+     * @param $paymentStatus
+     * @param  Order  $order
+     * @param  SimpleXMLElement  $payment
+     * @param  string  $remoteId
+     * @return void
+     */
+    protected function dispatchEvent($paymentStatus, Order $order, SimpleXMLElement $payment, string $remoteId): void
+    {
+        $eventToCall = null;
+        switch ($paymentStatus) {
+            case Payment::PAYMENT_STATUS_FAILURE:
+                $eventToCall = 'bluemedia_payment_failure';
+                break;
+            case Payment::PAYMENT_STATUS_PENDING:
+                $eventToCall = 'bluemedia_payment_pending';
+                break;
+            case Payment::PAYMENT_STATUS_SUCCESS:
+                $eventToCall = 'bluemedia_payment_success';
+                break;
+            default:
+                break;
+        }
+
+        if ($eventToCall) {
+            // Dispatch event
+            $this->eventManager->dispatch($eventToCall, [
+                'order' => $order,
+                'payment' => $payment,
+                'transaction_id' => $remoteId,
+            ]);
+        }
     }
 }

@@ -1,8 +1,10 @@
 # Co nowego w BluePayment?
 
 ## Wersja 2.23.0
-- Dodanie FirstName oraz LastName do parametrów startu transakcji.
-- Dodanie możliwości asynchronicznego przetwarzania ITN.
+- Dodaliśmy FirstName oraz LastName do parametrów startu transakcji.
+- Dodaliśmy możliwość asynchronicznego przetwarzania ITN.
+- Dodaliśmy lock na tabeli zamówień w przypadku wielokrotnego wywołania ITN.
+
 
 ## Wersja 2.22.11
 - Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
