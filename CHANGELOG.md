@@ -4,7 +4,6 @@
 - Dodanie możliwości asynchronicznego przetwarzania ITN.
 - Dodanie FirstName oraz LastName do parametrów startu transakcji.
 
-
 ## Wersja 2.22.11
 - Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
 - Poprawiliśmy błąd w tłumaczeniach

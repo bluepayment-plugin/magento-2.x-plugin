@@ -8,7 +8,7 @@
 - We have fixed the bug related to forcing int in Payment.php
 - We have fixed a bug in translations
 
-## Version 2.22.10
+## Wersja 2.22.10
 - Fix typo in config.xml
 
 ## Version 2.22.9
