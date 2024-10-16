@@ -207,6 +207,7 @@ class ProcessNotification
                 $tableName = $this->resourceConnection->getTableName('sales_order');
                 $orderId = $order->getId();
 
+                $connection->beginTransaction();
                 $select = $connection->select()
                     ->from($tableName)
                     ->where('entity_id = ?', $orderId)
@@ -233,8 +234,8 @@ class ProcessNotification
                 // Unlock
                 $connection->commit();
             } catch (Exception $e) {
+                $this->logger->critical('ProcessNotification:' . __LINE__ . ' - ' . $e->getMessage());
                 $connection->rollBack();
-                $this->logger->critical($e);
             }
         }
 

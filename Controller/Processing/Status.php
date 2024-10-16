@@ -98,7 +98,7 @@ class Status extends Action
                 return $result;
             }
         } catch (Exception $e) {
-            $this->logger->critical('BlueMedia: ' . $e->getMessage());
+            $this->logger->critical('[Status] Error processing Notification: ' . $e->getMessage());
         }
 
         $result->setContents('Error');
