@@ -1,10 +1,11 @@
 # Co nowego w module bramki płatności Autopay?
 
-## Wersja 2.23.0
-- Dodaliśmy FirstName oraz LastName do parametrów startu transakcji.
+## Wersja 2.24.0
 - Dodaliśmy możliwość asynchronicznego przetwarzania ITN.
 - Dodaliśmy lock na tabeli zamówień w przypadku wielokrotnego wywołania ITN.
 
+## Wersja 2.23.0
+- Dodaliśmy FirstName oraz LastName do parametrów startu transakcji.
 
 ## Wersja 2.22.11
 - Poprawiliśmy błąd związany z wymuszaniem int w Payment.php

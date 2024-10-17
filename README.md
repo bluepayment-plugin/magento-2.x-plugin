@@ -369,7 +369,7 @@ Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w p
 
 
 ## Asynchroniczne przetwarzanie ITN
-Opcja dostępna od wersji 2.23.0.
+Opcja dostępna od wersji 2.24.0.
 
 Moduł umożliwia asynchroniczne przetwarzanie powiadomień ITN (Instant Transaction Notification) wysyłanych przez system Autopay po zakończeniu transakcji. Włączenie tej opcji oznacza, że powiadomienia ITN będą przetwarzane w tle, co może być przydatne w scenariuszach z większym obciążeniem lub specyficznymi wymaganiami dotyczącymi obsługi powiadomień.
 Rozwiązuje również problem z "wyścigami statusów".

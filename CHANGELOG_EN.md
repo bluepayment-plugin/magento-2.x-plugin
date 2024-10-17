@@ -1,9 +1,11 @@
 # What's new in the Autopay payment gateway module?
 
-## Version 2.23.0
+## Version 2.24.0
 - We have added possibility for asynchronous ITN processing.
-- We have added FirstName and LastName to transaction start parameters.
 - We have added a lock on the orders table in case of multiple ITN calls.
+
+## Version 2.23.0
+- We have added FirstName and LastName to transaction start parameters.
 
 ## Version 2.22.11
 - We have fixed the bug related to forcing int in Payment.php
