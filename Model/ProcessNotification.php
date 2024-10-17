@@ -409,7 +409,7 @@ class ProcessNotification
         int $gatewayId,
         DataObject $gateway,
         SimpleXMLElement $payment
-    ): string {
+    ): ?string {
         /** @var string $orderPaymentState */
         $orderPaymentState = $orderPayment->getAdditionalInformation('bluepayment_state');
         $formattedAmount = number_format(round($amount, 2), 2, '.', '');
