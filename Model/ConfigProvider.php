@@ -18,7 +18,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -546,17 +545,17 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get order statuses that cannot be changed
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return array
      */
-    public function getUnchangableStatuses(?StoreInterface $store = null): array
+    public function getUnchangableStatuses(?int $storeId = null): array
     {
         return explode(
             ',',
             $this->scopeConfig->getValue(
                 'payment/bluepayment/unchangeable_statuses',
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             ) ?: ''
         );
     }
@@ -564,45 +563,45 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get status for order with waiting payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusWaitingPayment(?StoreInterface $store = null): ?string
+    public function getStatusWaitingPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_waiting_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with error payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $store
      * @return string|null
      */
-    public function getStatusErrorPayment(?StoreInterface $store = null): ?string
+    public function getStatusErrorPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_error_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with success payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusSuccessPayment(?StoreInterface $store = null): ?string
+    public function getStatusSuccessPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
     }
 
@@ -688,6 +687,14 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $url;
+    }
+
+    public function isAsyncProcess(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/async_process',
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     protected function getGrandTotalForQuote(): float

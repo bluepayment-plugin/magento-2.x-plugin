@@ -1,24 +1,27 @@
 {
-  "name": "bluepayment-plugin/module-bluepayment",
-  "description": "Autopay payment gateway for Magento 2.",
-  "type": "magento2-module",
-  "version": "2.23.0",
-  "require": {
-    "magento/framework": "^102||^103",
-    "magento/module-config": "^101.1",
-    "magento/module-sales": "^102.0||^103.0",
-    "magento/module-payment": "^100.3",
-    "magento/module-checkout": "^100.3",
-    "magento/module-quote": "^101",
-    "ext-curl": "*",
-    "ext-xml": "*"
-  },
-  "autoload": {
-    "files": [
-      "registration.php"
-    ],
-    "psr-4": {
-      "BlueMedia\\BluePayment\\": ""
+    "name": "bluepayment-plugin/module-bluepayment",
+    "description": "Autopay payment gateway for Magento 2.",
+    "type": "magento2-module",
+    "version": "2.23.0",
+    "require": {
+        "magento/framework": "^102||^103",
+        "magento/module-config": "^101.1",
+        "magento/module-sales": "^102.0||^103.0",
+        "magento/module-payment": "^100.3",
+        "magento/module-checkout": "^100.3",
+        "magento/module-quote": "^101",
+        "ext-curl": "*",
+        "ext-xml": "*",
+        "ext-dom": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "BlueMedia\\BluePayment\\": ""
+        }
     }
-  }
 }

@@ -185,14 +185,14 @@ class Webapi extends Data
         return $result;
     }
 
-    public function transactionStatus(string $serviceId, string $orderId, string $currency, StoreInterface $store)
+    public function transactionStatus(string $serviceId, string $orderId, string $currency, int $storeId)
     {
         return $this->callXMLApi(
             [
                 'ServiceID' => $serviceId,
                 'OrderID' => $orderId,
             ],
-            $this->getConfigValue('shared_key', $currency, $store),
+            $this->getConfigValue('shared_key', $currency, $storeId),
             $this->getTransactionStatusUrl()
         );
     }
@@ -204,13 +204,13 @@ class Webapi extends Data
      *
      * @return mixed
      */
-    private function getConfigValue(string $name, string $currency = null, ?StoreInterface $store = null)
+    private function getConfigValue(string $name, string $currency = null, ?int $storeId = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             );
         }
 

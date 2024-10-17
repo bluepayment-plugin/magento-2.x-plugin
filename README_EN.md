@@ -20,6 +20,7 @@ The main functions of the module include:
 
 ### [What's new in Autopay?](CHANGELOG_EN.md)
 
+
 ## Installation
 
 ### With composer
@@ -159,6 +160,7 @@ BLIK "in-store" is characterized by the fact that the transaction security code 
 4. Check **Is separated method** option.
 5. [Refresh cache](#refresh-cache)
 
+
 ## Google Pay
 This option allows you to pay with Google Pay directly on the store page - in the last step of the shopping process.
 
@@ -166,6 +168,7 @@ This option allows you to pay with Google Pay directly on the store page - in th
 
 ### Activating Google Pay
 Google Pay is **default activated and always displayed** as a separate payment method.
+
 
 ## Automatic payments
 
@@ -193,6 +196,7 @@ The customer can remove the stored cards from his/her account in your online sto
    ![automatic2.png](docs/automatic2.png)
 5. Click **Remove** and confirm.
 
+
 ## Generating orders from the administration panel
 The module allows you to send a link to the payment to the customer for orders created directly in the administration panel. To do this, select the payment method **Autopay** when creating an order.
 
@@ -202,6 +206,7 @@ Payment link will be sent by Autopay to the e-mail address visible in the client
 
 ![admin2.png](docs/admin2.png)
 
+
 ## E-mail templates
 For messages:
 - email_creditmemo_set_template_vars_before
@@ -210,6 +215,7 @@ For messages:
 - email_shipment_set_template_vars_before
 module extends the list of available variables with **payment_channel**. Example usage in the template:
 `{{var payment_channel|raw}}`
+
 
 ## Redirection waiting page
 The module allows you to add an intermediate page, displayed before the user is redirected to the payment itself. This feature can be used for example for e-commerce tracking in Google Analytics.
@@ -223,6 +229,7 @@ To activate the redirection waiting page:
 2. Select **Enable** for **Show waiting page before redirect** option.
 3. Fill **Seconds to wait before redirect** – to specify how long the page should be displayed.
 4. [Refresh cache](#refresh-cache)
+
 
 ## Refunds
 The module allows you to refund money directly to the customer's account from which the payment was sent, via a **Credit Memo on-line** and directly from the order.
@@ -266,6 +273,7 @@ The payment module itself does not require any additional steps. Autopay payment
 The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run Google Pay and BLIK 0 payments.
 For multishipping orders, the OrderID in messages to the customer and in the portal.autopay.eu panel will be the cart number with the QUOTE_ prefix, not the order number.
 
+
 ## Information about payment
 Information about the payment channel selected by the customer is visible from the Order grid.
 To do this, add a column **Payment Channel**.  
@@ -274,6 +282,7 @@ The text information about the payment channel will be visible in the table.
 Information about the selected payment channel is stored in the database:
 - in the **blue_gateway_id** (channel id) and **payment_channel** (channel name) column in the **sales_order** table,
 - in the **payment_channel** (channel name) column in the **sales_order_grid** table.
+
 
 ## Custom event
 Option available since version 2.19.0.
@@ -324,12 +333,35 @@ The option is triggered automatically only for new module installations - in cas
 ![cf6.png](docs/cf6.png "Screenshot")
 
 
+## Asynchronous ITN processing
+Option available since version 2.23.0.
+
+The module allows asynchronous processing of ITN (Instant Transaction Notification) notifications sent by the Autopay system after the completion of a transaction. Enabling this option means that ITN notifications will be processed in the background, which can be useful in scenarios with higher loads or specific requirements for handling notifications. It also resolves the issue of “status races.”
+
+By default, the Autopay module uses queuing with MySQL (connection “db”). If you wish to use RabbitMQ instead, queue configuration adjustments are required as per the instructions.
+
+> To use this functionality, Magento must have the Magento_MessageQueue and Magento_MysqlMq or Magento_Amqp modules enabled.  
+> CRON must also be properly configured as per the Magento documentation.
+
+**NOTE!**
+When using the standard CRON configuration,
+the status update may take up to a minute, depending on the CRON execution frequency.
+If more frequent updates are needed, a separate consumer for the queue must be started:
+
+### Activation
+
+1. Go to **module configuration**.
+2. Ustaw **Enable** for option **Asynchronous process ITN**
+3. [Refresh cache](#refresh-cache)
+
+
 ## Integration with GraphQL and Magento PWA
 GraphQL module is available at:
 https://github.com/bluepayment-plugin/module-bluepayment-graphql
 
 PWA Studio module is available at: 
 https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+
 
 ## Update
 
@@ -353,6 +385,7 @@ bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 4. The module is already active.
+
 
 ## Deactivate module
 
