@@ -1,4 +1,4 @@
-# The manual of „Autopay” module for Magento 2
+# The manual of "Autopay" module for Magento 2
 
 ## Basic information
 The Autopay Online Payment Plugin for Magento is the easiest way to allow your online store customers use the most popular payment methods. When integrated with the store, the plugin offers the possibility to add over 400 banks to the payment options.
@@ -334,7 +334,7 @@ The option is triggered automatically only for new module installations - in cas
 
 
 ## Asynchronous ITN processing
-Option available since version 2.23.0.
+Option available since version 2.24.0.
 
 The module allows asynchronous processing of ITN (Instant Transaction Notification) notifications sent by the Autopay system after the completion of a transaction. Enabling this option means that ITN notifications will be processed in the background, which can be useful in scenarios with higher loads or specific requirements for handling notifications. It also resolves the issue of “status races.”
 

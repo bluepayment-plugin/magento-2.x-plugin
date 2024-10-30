@@ -1,6 +1,14 @@
-# Co nowego w BluePayment?
+# Co nowego w module bramki płatności Autopay?
+
+## Wersja 2.24.1
+- Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
+
+## Wersja 2.24.0
+- Dodaliśmy możliwość asynchronicznego przetwarzania ITN.
+- Dodaliśmy lock na tabeli zamówień w przypadku wielokrotnego wywołania ITN.
 
 ## Wersja 2.23.0
+- Dodaliśmy FirstName oraz LastName do parametrów startu transakcji.
 - Dodanie możliwości asynchronicznego przetwarzania ITN.
 - Dodanie FirstName oraz LastName do parametrów startu transakcji.
 
