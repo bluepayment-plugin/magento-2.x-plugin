@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.24.1
+- Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
+
 ## Version 2.24.0
 - We have added possibility for asynchronous ITN processing.
 - We have added a lock on the orders table in case of multiple ITN calls.
