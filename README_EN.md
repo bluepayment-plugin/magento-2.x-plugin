@@ -234,6 +234,9 @@ To activate the redirection waiting page:
 ## Refunds
 The module allows you to refund money directly to the customer's account from which the payment was sent, via a **Credit Memo on-line** and directly from the order.
 
+Refunds are performed asynchronously - first a refund order is placed, and then it is processed by the Autopay system.  
+Updating is done via CRON.
+
 ### Via a Credit Memo on-line
 To refund this way:
 1. Go to **Invoice** details for the order.
@@ -261,6 +264,14 @@ This option allows you to refund money directly to the customer's account from w
    
       ![refund3.png](docs/refund3.png)
 
+### Notifications
+
+If the return fails, the module generates a notification in the admin panel.  
+For this purpose, it is required to launch and activate the `Magento_AdminNotification` module.
+
+![refund4.png](docs/refund4.png)
+
+![refund5.png](docs/refund5.png)
 
 ## Delivery to multiple addresses (multishipping)
 This module allows you to pay for orders placed using the multishipping functionality.

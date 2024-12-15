@@ -12,8 +12,6 @@
                 <allowspecific>0</allowspecific>
                 <test_address_url>https://testpay.autopay.eu/payment</test_address_url>
                 <prod_address_url>https://pay.autopay.eu/payment</prod_address_url>
-                <test_address_refunds_url>https://testpay.autopay.eu/transactionRefund</test_address_refunds_url>
-                <prod_address_refunds_url>https://pay.autopay.eu/transactionRefund</prod_address_refunds_url>
                 <gpay_merchant_info_url_test>https://testpay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
                 <gpay_merchant_info_url_prod>https://pay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
                 <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v2</gateway_list_url_test>
@@ -22,6 +20,12 @@
                 <legal_data_url_prod>https://pay.autopay.eu/legalData</legal_data_url_prod>
                 <transaction_status_url_test>https://testpay.autopay.eu/webapi/transactionStatus</transaction_status_url_test>
                 <transaction_status_url_prod>https://pay.autopay.eu/webapi/transactionStatus</transaction_status_url_prod>
+
+                <refund_url_test>https://testpay.autopay.eu/settlementapi/transactionRefund</refund_url_test>
+                <refund_url_prod>https://pay.autopay.eu/settlementapi/transactionRefund</refund_url_prod>
+                <refund_status_url_test>https://testpay.autopay.eu/settlementapi/outDetails</refund_status_url_test>
+                <refund_status_url_prod>https://pay.autopay.eu/settlementapi/outDetails</refund_status_url_prod>
+
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>
                 <transaction_life_hours />

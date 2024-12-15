@@ -69,6 +69,7 @@
                 comment="Entity ID"/>
         <column xsi:type="varchar" name="order_id" nullable="false" length="50" comment="Order increment ID"/>
         <column xsi:type="varchar" name="remote_id" nullable="false" length="50" comment="Remote transaction ID"/>
+        <column xsi:type="varchar" name="message_id" nullable="false" length="200" comment="Remote refund ID"/>
         <column xsi:type="varchar" name="remote_out_id" nullable="false" length="50" comment="Remote refund ID"/>
         <column xsi:type="decimal" name="amount" scale="4" precision="12" unsigned="true" nullable="false" default="0"
                 comment="Refund amount"/>

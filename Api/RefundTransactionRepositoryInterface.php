@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Api;
 
 use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
 use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction\Collection;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 
 /**
@@ -14,18 +18,18 @@ use Magento\Sales\Api\Data\OrderInterface;
 interface RefundTransactionRepositoryInterface
 {
     /**
-     * @param RefundTransactionInterface $page
+     * @param RefundTransactionInterface $refundTransaction
      *
      * @return mixed
      */
-    public function save(RefundTransactionInterface $page);
+    public function save(RefundTransactionInterface $refundTransaction);
 
     /**
-     * @param int $id
+     * @param  int  $id
      *
      * @return mixed
      */
-    public function getById($id);
+    public function getById(int $id);
 
     /**
      * @param SearchCriteriaInterface $criteria
@@ -39,26 +43,35 @@ interface RefundTransactionRepositoryInterface
      *
      * @return Collection
      */
-    public function getListForOrder(OrderInterface $order);
+    public function getListForOrder(OrderInterface $order): Collection;
 
     /**
-     * @param RefundTransactionInterface $page
+     * @param RefundTransactionInterface $refundTransaction
      *
      * @return mixed
      */
-    public function delete(RefundTransactionInterface $page);
+    public function delete(RefundTransactionInterface $refundTransaction);
 
     /**
-     * @param int $id
+     * @param  int  $id
      *
      * @return mixed
      */
-    public function deleteById($id);
+    public function deleteById(int $id);
 
     /**
      * @param TransactionInterface $transaction
      *
      * @return float
      */
-    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction);
+    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction): float;
+
+
+    /**
+     * Get all pending refund transactions
+     *
+     * @return SearchResultsInterface
+     * @throws NoSuchEntityException
+     */
+    public function getPendingRefundTransactions(): SearchResultsInterface;
 }

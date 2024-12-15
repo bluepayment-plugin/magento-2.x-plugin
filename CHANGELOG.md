@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.25.0
+- Zmieniliśmy zachowanie przy tworzeniu zwrotów płatności.
+
 ## Wersja 2.24.1
 - Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
 
