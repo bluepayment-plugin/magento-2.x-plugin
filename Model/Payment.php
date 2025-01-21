@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\GatewayRepositoryInterface;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Block\Info;
@@ -86,6 +87,7 @@ class Payment extends AbstractMethod
         'Products', // 16
         'CustomerPhone', // 17
         'ValidityTime', // 19
+        'Nip', // 23
         'VerificationFName', // 25
         'VerificationLName', // 26
         'LinkValidityTime', // 34
@@ -99,6 +101,7 @@ class Payment extends AbstractMethod
         'DefaultRegulationAcceptanceState', // 51
         'DefaultRegulationAcceptanceID', // 52
         'DefaultRegulationAcceptanceTime', // 53
+        'AccountHolderName', // 59
         'PlatformName', // 170
         'PlatformVersion', // 171
         'PlatformPluginVersion', // 172
@@ -249,6 +252,9 @@ class Payment extends AbstractMethod
     /** @var ProcessNotification */
     private $processNotification;
 
+    /** @var CustomFieldResolver */
+    private $customFieldResolver;
+
     /**
      * Payment constructor.
      *
@@ -281,6 +287,8 @@ class Payment extends AbstractMethod
      * @param  Metadata  $metadata
      * @param  GetPhoneForOrder  $getPhoneForOrder
      * @param  SendConfirmationEmail  $sendConfirmationEmail
+     * @param  ProcessNotification  $processNotification
+     * @param  CustomFieldResolver  $customFieldResolver
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -316,6 +324,7 @@ class Payment extends AbstractMethod
         GetPhoneForOrder $getPhoneForOrder,
         SendConfirmationEmail $sendConfirmationEmail,
         ProcessNotification $processNotification,
+        CustomFieldResolver $customFieldResolver,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -343,6 +352,7 @@ class Payment extends AbstractMethod
         $this->getPhoneForOrder = $getPhoneForOrder;
         $this->sendConfirmationEmail = $sendConfirmationEmail;
         $this->processNotification = $processNotification;
+        $this->customFieldResolver = $customFieldResolver;
 
         parent::__construct(
             $context,
@@ -465,6 +475,12 @@ class Payment extends AbstractMethod
         /* Wybrana bramka płatnicza */
         if ($gatewayId !== 0) {
             $params['GatewayID'] = $gatewayId;
+
+            $params = $this->customFieldResolver->resolve(
+                $gatewayId,
+                $order,
+                $params
+            );
         }
 
         if ($backUrl !== null) {

@@ -20,9 +20,9 @@
 
             <p class="method-name">
                 <span data-bind="text: getGatewayTitle()" class="payment-method-name"></span>
-                <!-- ko if: getGatewayDescription() -->
+                <!-- ko if: getGatewayShortDescription() -->
                     <br />
-                    <span data-bind="html: getGatewayDescription()" class="payment-method-description"></span>
+                    <span data-bind="html: getGatewayShortDescription()" class="payment-method-description"></span>
                 <!--/ko-->
 
                 <!-- ko if: (getGatewayHelp() && (isChecked() === getCode())) -->

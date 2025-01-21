@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.25.0
+- Zaktualizowaliśmy kanały płatności do obsługi gatewayList/v3
+
 ## Wersja 2.24.1
 - Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
 

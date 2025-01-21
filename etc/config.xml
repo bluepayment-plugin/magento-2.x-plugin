@@ -16,8 +16,8 @@
                 <prod_address_refunds_url>https://pay.autopay.eu/transactionRefund</prod_address_refunds_url>
                 <gpay_merchant_info_url_test>https://testpay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
                 <gpay_merchant_info_url_prod>https://pay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
-                <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v2</gateway_list_url_test>
-                <gateway_list_url_prod>https://pay.autopay.eu/gatewayList/v2</gateway_list_url_prod>
+                <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v3</gateway_list_url_test>
+                <gateway_list_url_prod>https://pay.autopay.eu/gatewayList/v3</gateway_list_url_prod>
                 <legal_data_url_test>https://testpay.autopay.eu/legalData</legal_data_url_test>
                 <legal_data_url_prod>https://pay.autopay.eu/legalData</legal_data_url_prod>
                 <transaction_status_url_test>https://testpay.autopay.eu/webapi/transactionStatus</transaction_status_url_test>

@@ -17,6 +17,7 @@
         <column xsi:type="varchar" name="bank_name" nullable="false" length="100" comment="Bank Name"/>
         <column xsi:type="varchar" name="gateway_name" nullable="false" length="100" comment="Gateway name"/>
         <column xsi:type="text" name="gateway_description" nullable="true" comment="Gateway Description"/>
+        <column xsi:type="text" name="gateway_short_description" nullable="true" comment="Gateway Short Description"/>
         <column xsi:type="int" name="gateway_sort_order" padding="11" unsigned="false" nullable="true" identity="false"
                 comment="Gateway Sort Order"/>
         <column xsi:type="varchar" name="gateway_type" nullable="false" length="50" comment="Gateway Type"/>
@@ -36,6 +37,7 @@
                 comment="Maximum amount"/>
         <column xsi:type="int" name="min_validity_time" padding="11" unsigned="false" nullable="false" identity="false"
                 comment="Minimum validity time"/>
+        <column xsi:type="text" name="required_params" nullable="true" comment="Required params"/>
 
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>

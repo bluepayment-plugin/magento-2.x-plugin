@@ -23,6 +23,7 @@ define([
             gateway_id: null,
             gateway_logo_url: null,
             gateway_name: null,
+            gateway_short_description: null,
             gateway_description: null,
 
             iframeEnabled: config.iframeEnabled,
@@ -40,19 +41,6 @@ define([
                     window.location.href = cardRedirectUrl;
                 };
             }
-        },
-
-        /**
-         * Get gateway description.
-         *
-         * @returns {string}
-         */
-        getGatewayDescription: function () {
-            if (this.iframeEnabled) {
-                return $t("Pay with your credit or debit card.");
-            }
-
-            return $t("You will be redirected to our partner Autopay's website, where you will enter your card details.");
         },
 
         /**
