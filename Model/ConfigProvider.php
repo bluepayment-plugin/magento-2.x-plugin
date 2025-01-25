@@ -293,7 +293,6 @@ class ConfigProvider implements ConfigProviderInterface
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
                 'blik_zero_enabled' => $this->blikZeroEnabled(),
-                'alior_calculator_url' => $this->getAliorCalculatorUrl(),
                 'options' => $result,
                 'separated' => $resultSeparated,
                 'cards' => $this->prepareCards(),
@@ -673,18 +672,6 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $value;
-    }
-
-    public function getAliorCalculatorUrl(): string
-    {
-        if ($this->getAliorInstallments() === 'zero') {
-            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=F&amount={amount}';;
-        } else {
-            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B&amount={amount}';
-
-        }
-
-        return $url;
     }
 
     public function isAsyncProcess(): bool
