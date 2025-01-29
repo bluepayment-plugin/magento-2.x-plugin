@@ -448,8 +448,6 @@ class Payment extends AbstractMethod
             'Amount' => $amount,
             'Currency' => $currency,
             'CustomerEmail' => $order->getCustomerEmail(),
-            'VerificationFName' => $order->getCustomerFirstname(),
-            'VerificationLName' => $order->getCustomerLastname(),
             'Language' => $language,
             'PlatformName' => self::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),

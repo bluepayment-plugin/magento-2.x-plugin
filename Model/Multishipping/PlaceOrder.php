@@ -213,9 +213,6 @@ class PlaceOrder implements PlaceOrderInterface
             'Products' => base64_encode($xml->asXML()),
             'GatewayID' => $gatewayId,
 
-            'VerificationFName' => $order->getCustomerFirstname(),
-            'VerificationLName' => $order->getCustomerLastname(),
-
             'PlatformName' => Payment::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),

@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.24.2
+- Wycofaliśmy zmianę dot. FirstName oraz LastName przy starcie transakcji (z wersji 2.23.0).
+
 ## Wersja 2.24.1
 - Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
 

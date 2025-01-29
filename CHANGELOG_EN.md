@@ -1,7 +1,10 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.24.2
+- We have withdrawn the change regarding FirstName and LastName at transaction start (from version 2.23.0).
+
 ## Version 2.24.1
-- Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
+- We have corrected an error with text translation for the Apple Pay method.
 
 ## Version 2.24.0
 - We have added possibility for asynchronous ITN processing.
