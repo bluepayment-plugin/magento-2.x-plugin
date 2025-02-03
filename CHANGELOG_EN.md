@@ -1,7 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.25.0
-- We have changed the behavior when creating payment returns.
+We have changed the way of creating payment returns. We have made modifications to the handling of the parameter related to the status of the return transaction (RemoteOutId - previously, the ID and status were automatically assigned when the return was generated). Currently, Magento asynchronously retrieves the status of the return using CRON.
 
 ## Version 2.24.1
 - We have corrected an error with text translation for the Apple Pay method.
