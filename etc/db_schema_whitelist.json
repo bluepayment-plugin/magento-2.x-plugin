@@ -32,6 +32,7 @@
             "transaction_id": true,
             "order_id": true,
             "remote_id": true,
+            "message_id": true,
             "amount": true,
             "currency": true,
             "gateway_id": true,

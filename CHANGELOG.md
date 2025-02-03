@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.25.0
+- Zmieniliśmy sposób tworzenia zwrotów płatności. Dokonaliśmy modyfikacji w zarządzaniu parametrem związanym ze statusem transakcji zwrotu (RemoteOutId – dotychczas identyfikator i status były automatycznie przypisywane przy generowaniu zwrotu). Aktualnie Magento asynchronicznie pobiera status zwrotu za pomocą CRONa.
+
 ## Wersja 2.24.1
 - Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
 

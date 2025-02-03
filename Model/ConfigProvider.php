@@ -198,13 +198,15 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Is BlueMedia payment method in test (ACC) mode.
      *
+     * @param  int|null  $storeId
      * @return bool
      */
-    public function isTestMode(): bool
+    public function isTestMode(?int $storeId = null): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $storeId
         );
     }
 
@@ -457,6 +459,68 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get service ID.
+     *
+     * @param  string  $currency
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getServiceID(string $currency = 'PLN', ?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get shared key.
+     *
+     * @param  string  $currency
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getSharedKey(string $currency = 'PLN', ?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get hash separator.
+     *
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getHashSeparator(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_separator',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get hash algorithm.
+     *
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getHashAlgorithm(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_algorithm',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?? 'sha256';
+    }
+
+    /**
      * Get active gateways
      *
      * @param string $currency
@@ -606,6 +670,36 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get status for order with partial refund
+     *
+     * @param  int|null  $storeId
+     * @return string|null
+     */
+    public function getStatusPartialRefund(?int $storeId = null): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_partial_refund',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+    }
+
+    /**
+     * Get status for order with full refund
+     *
+     * @param  int|null  $storeId
+     * @return string|null
+     */
+    public function getStatusFullRefund(?int $storeId = null): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_full_refund',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+    }
+
+    /**
      * Checks whether consumer finance is enabled for specific position.
      *
      * @param string $position
@@ -687,6 +781,27 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $url;
+    }
+
+    /**
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getRefundStatusUrl(?int $storeId = null): string
+    {
+        if ($this->isTestMode($storeId)) {
+            return $this->scopeConfig->getValue(
+                'payment/bluepayment/refund_status_url_test',
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            );
+        }
+
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/refund_status_url_prod',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     public function isAsyncProcess(): bool
