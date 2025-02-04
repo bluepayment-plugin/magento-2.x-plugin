@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Model\Multishipping;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\CustomFieldResolver;
 use BlueMedia\BluePayment\Model\Metadata;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
@@ -53,17 +54,21 @@ class PlaceOrder implements PlaceOrderInterface
     /** @var Metadata */
     public $metadata;
 
+    /** @var CustomFieldResolver */
+    public $customFieldResolver;
+
     /**
-     * @param OrderManagementInterface $orderManagement
-     * @param CollectionFactory $gatewayFactory
-     * @param ScopeConfigInterface $scopeConfig
-     * @param ConvertArray $convertArray
-     * @param Data $helper
-     * @param Curl $curl
-     * @param Generic $session
-     * @param CardCollectionFactory $cardCollectionFactory
-     * @param Logger $logger
-     * @param Metadata $metadata
+     * @param  OrderManagementInterface  $orderManagement
+     * @param  CollectionFactory  $gatewayFactory
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  ConvertArray  $convertArray
+     * @param  Data  $helper
+     * @param  Curl  $curl
+     * @param  Generic  $session
+     * @param  CardCollectionFactory  $cardCollectionFactory
+     * @param  Logger  $logger
+     * @param  Metadata  $metadata
+     * @param  CustomFieldResolver  $customFieldResolver
      */
     public function __construct(
         OrderManagementInterface $orderManagement,
@@ -75,7 +80,8 @@ class PlaceOrder implements PlaceOrderInterface
         Generic $session,
         CardCollectionFactory $cardCollectionFactory,
         Logger $logger,
-        Metadata $metadata
+        Metadata $metadata,
+        CustomFieldResolver $customFieldResolver
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -87,6 +93,7 @@ class PlaceOrder implements PlaceOrderInterface
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->logger = $logger;
         $this->metadata = $metadata;
+        $this->customFieldResolver = $customFieldResolver;
     }
 
     /**
@@ -220,6 +227,14 @@ class PlaceOrder implements PlaceOrderInterface
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
+
+        if ((int) $gatewayId !== 0) {
+            $params = $this->customFieldResolver->resolve(
+                (int)$gatewayId,
+                $order,
+                $params
+            );
+        }
 
         /* Płatność one-click kartowa */
         if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {

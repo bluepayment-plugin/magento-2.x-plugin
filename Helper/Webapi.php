@@ -125,16 +125,21 @@ class Webapi extends Data
      * @param  int  $serviceId
      * @param  string  $sharedKey
      * @param  string  $currency
-     *
+     * @param  string  $language // PL, EN for now
      * @return array|bool
      */
-    public function gatewayList(int $serviceId, string $sharedKey, string $currency)
-    {
+    public function gatewayList(
+        int $serviceId,
+        string $sharedKey,
+        string $currency,
+        string $language
+    ) {
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
         $data = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
-            'Currencies' => $currency
+            'Currencies' => $currency,
+            'Language' => $language,
         ];
 
         return $this->callAPI(

@@ -18,6 +18,7 @@ interface GatewayInterface
     public const BANK_NAME = 'bank_name';
     public const NAME = 'gateway_name';
     public const DESCRIPTION = 'gateway_description';
+    public const SHORT_DESCRIPTION = 'gateway_short_description';
     public const SORT_ORDER = 'gateway_sort_order';
     public const TYPE = 'gateway_type';
     public const LOGO_URL = 'gateway_logo_url';
@@ -29,6 +30,7 @@ interface GatewayInterface
     public const MIN_AMOUNT = 'min_amount';
     public const MAX_AMOUNT = 'max_amount';
     public const MIN_VALIDITY_TIME = 'min_validity_time';
+    public const REQUIRED_PARAMS = 'required_params';
 
     /**
      * Get entity id
@@ -164,6 +166,21 @@ interface GatewayInterface
      * @return GatewayInterface
      */
     public function setDescription(?string $description): GatewayInterface;
+
+    /**
+     * Get gateway short description.
+     *
+     * @return ?string
+     */
+    public function getShortDescription(): ?string;
+
+    /**
+     * Set gateway short description.
+     *
+     * @param ?string $shortDescription
+     * @return GatewayInterface
+     */
+    public function setShortDescription(?string $shortDescription): GatewayInterface;
 
     /**
      * Get gateway sort order.
@@ -329,4 +346,19 @@ interface GatewayInterface
      * @return GatewayInterface
      */
     public function setMinValidityTime(?float $minValidityTime): GatewayInterface;
+
+    /**
+     * Get gateway minimal validity time.
+     *
+     * @return ?string[]
+     */
+    public function getRequiredParams(): ?array;
+
+    /**
+     * Set gateway minimal validity time.
+     *
+     * @param ?string[] $requiredParams
+     * @return GatewayInterface
+     */
+    public function setRequiredParams(?array $requiredParams): GatewayInterface;
 }

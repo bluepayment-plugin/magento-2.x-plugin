@@ -101,14 +101,6 @@
                         <field id="gateway_selection">1</field>
                     </depends>
                 </field>
-                <field id="alior_installments" translate="label comment" type="select" sortOrder="556" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Alior Installments - link to calculator</label>
-                    <source_model>BlueMedia\BluePayment\Model\Config\Source\AliorInstallments</source_model>
-                    <comment><![CDATA[Select the appropriate interest rate in your agreement with Autopay to display the correct calculator to the customer.]]></comment>
-                    <depends>
-                        <field id="gateway_selection">1</field>
-                    </depends>
-                </field>
                 <field id="collapsible" translate="label comment" type="select" sortOrder="560" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Collapsible gateway list</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>

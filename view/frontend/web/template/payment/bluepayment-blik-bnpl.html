@@ -21,12 +21,10 @@
             <p class="method-name">
                 <span data-bind="text: getGatewayTitle()" class="payment-method-name"></span>
                 <br />
-                <span class="payment-method-description">
-                    <span data-bind="i18n: 'Buy now and pay within 30 days. Service only available to Millennium Bank and VeloBank customers.'"></span>
-                    <a href="#" data-bind="click: openModal" role="button">
-                        <span data-bind="i18n: 'Learn more'"></span>
-                    </a>
-                </span>
+                <!-- ko if: getGatewayShortDescription() -->
+                    <br />
+                    <span data-bind="html: getGatewayShortDescription()" class="payment-method-description"></span>
+                <!--/ko-->
 
                 <!-- ko if: (getGatewayHelp() && (isChecked() === getCode())) -->
                     <span data-bind="html: getGatewayHelp()" class="payment-method-help-text"></span>
@@ -63,51 +61,6 @@
                         ">
                     <span data-bind="i18n: 'Place Order'"></span>
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="blik-bnpl-modal" class="blik-bnpl-modal" data-bind="{ afterRender: initializeModal }">
-        <div class="blik-bnpl-modal--container">
-            <img class="blik-bnpl-modal--logo" data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/blik/logo.svg') }" alt="BLIK Płacę później" />
-
-            <p class="blik-bnpl-modal--header" data-bind="i18n: 'Kupuj teraz, płać w ciągu 30 dni'"></p>
-
-            <div class="blik-bnpl-modal--items">
-                <div class="blik-bnpl-modal--item">
-                    <img class="blik-bnpl-modal--item-img" data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/blik/img1.svg') }" />
-                    <div class="blik-bnpl-modal--item-content">
-                        <div class="blik-bnpl-modal--item-header" data-bind="i18n: 'Activation'"></div>
-                        <div class="blik-bnpl-modal--item-text" data-bind="i18n: 'You choose the BLIK Płacę Później option, enter your BLIK code and we offer you up to a 4 000 zł limit on your purchases.'"></div>
-                    </div>
-                </div>
-                <div class="blik-bnpl-modal--item">
-                    <img class="blik-bnpl-modal--item-img" data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/blik/img2.svg') }" />
-                    <div class="blik-bnpl-modal--item-content">
-                        <div class="blik-bnpl-modal--item-header" data-bind="i18n: 'Zakupy'"></div>
-                        <div class="blik-bnpl-modal--item-text" data-bind="i18n: 'You buy products that you do not pay for at the time of purchase. You have time to check that everything suits you.'"></div>
-                    </div>
-                </div>
-                <div class="blik-bnpl-modal--item">
-                    <img class="blik-bnpl-modal--item-img" data-bind="attr: { src: require.toUrl('BlueMedia_BluePayment/images/blik/img3.svg') }" />
-                    <div class="blik-bnpl-modal--item-right">
-                        <div class="blik-bnpl-modal--item-header" data-bind="i18n: 'After each purchase'"></div>
-                        <div class="blik-bnpl-modal--item-text" data-bind="i18n: 'You pay within 30 days at no extra cost. You can also return your purchase within the period provided by the shop.'"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="blik-bnpl-modal--footer">
-                <span data-bind="i18n: 'Representative example'"></span>
-                <!-- ko if: !expanded() -->
-                    <a href="#" data-bind="i18n: 'Expand', click: expand" role="button" class="blik-bnpl-modal--footer-link"></a>
-                <!--/ko-->
-
-                <!-- ko if: expanded() -->
-                    <a href="#" data-bind="i18n: 'Collapse', click: collapse" role="button" class="blik-bnpl-modal--footer-link"></a>
-                    <p class="blik-bnpl-modal--footer-example">Przykład reprezentatywny dla limitu kredytowego w wysokości 2 000 zł, który został wykorzystany jednorazowo w całości:</p>
-                    <p class="blik-bnpl-modal--footer-example">Jeśli spłacisz zobowiązanie w ciągu 30 dni: Rzeczywista Roczna Stopa Oprocentowania (RRSO): 0%, całkowita kwota kredytu: 2 000 zł, całkowita kwota do zapłaty: 2 000 zł, oprocentowanie stałe: 0%, całkowity koszt kredytu: 0 zł. Kalkulacja dokonana na dzień 06.12.2022 na reprezentatywnym przykładzie.</p>
-                <!--/ko-->
             </div>
         </div>
     </div>
