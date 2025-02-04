@@ -73,6 +73,7 @@ define([
                     gateway_id: method.gateway_id,
                     gateway_logo_url: method.logo_url,
                     gateway_name: method.name,
+                    gateway_short_description: method.short_description,
                     gateway_description: method.description
                 }
             });

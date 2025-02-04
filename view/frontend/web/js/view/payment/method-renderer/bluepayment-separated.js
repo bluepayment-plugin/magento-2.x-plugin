@@ -91,6 +91,7 @@ define([
          * @returns {string|null}
          */
         getGatewayShortDescription: function () {
+            console.log(this.gateway_short_description);
             return this.gateway_short_description;
         },
 
