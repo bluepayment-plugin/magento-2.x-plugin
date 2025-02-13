@@ -14,8 +14,8 @@
                 <prod_address_url>https://pay.autopay.eu/payment</prod_address_url>
                 <gpay_merchant_info_url_test>https://testpay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_test>
                 <gpay_merchant_info_url_prod>https://pay.autopay.eu/webapi/googlePayMerchantInfo</gpay_merchant_info_url_prod>
-                <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v2</gateway_list_url_test>
-                <gateway_list_url_prod>https://pay.autopay.eu/gatewayList/v2</gateway_list_url_prod>
+                <gateway_list_url_test>https://testpay.autopay.eu/gatewayList/v3</gateway_list_url_test>
+                <gateway_list_url_prod>https://pay.autopay.eu/gatewayList/v3</gateway_list_url_prod>
                 <legal_data_url_test>https://testpay.autopay.eu/legalData</legal_data_url_test>
                 <legal_data_url_prod>https://pay.autopay.eu/legalData</legal_data_url_prod>
                 <transaction_status_url_test>https://testpay.autopay.eu/webapi/transactionStatus</transaction_status_url_test>
@@ -35,7 +35,6 @@
                 <show_manual_refund>1</show_manual_refund>
                 <blik_zero>1</blik_zero>
                 <with_phone>0</with_phone>
-                <alior_installments>one</alior_installments>
                 <async_process>0</async_process>
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>
                 <privateInfoKeys>bluepayment_gateway</privateInfoKeys>

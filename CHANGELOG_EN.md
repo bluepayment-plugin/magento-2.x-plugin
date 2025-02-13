@@ -1,7 +1,10 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.26.0
+- We have introduced support for gatewayList/v3, offering an even broader selection of the latest payment methods and improved gateway communication performance. The updated endpoint and expanded configuration parameters allow merchants to instantly access new, dynamically emerging payment options, resulting in higher conversion rates and an enhanced user experience.
+
 ## Version 2.25.0
-We have changed the way of creating payment returns. We have made modifications to the handling of the parameter related to the status of the return transaction (RemoteOutId - previously, the ID and status were automatically assigned when the return was generated). Currently, Magento asynchronously retrieves the status of the return using CRON.
+- We have changed the way of creating payment returns. We have made modifications to the handling of the parameter related to the status of the return transaction (RemoteOutId - previously, the ID and status were automatically assigned when the return was generated). Currently, Magento asynchronously retrieves the status of the return using CRON.
 
 ## Version 2.24.1
 - We have corrected an error with text translation for the Apple Pay method.

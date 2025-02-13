@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.26.0
+- Wprowadziliśmy obsługę gatewayList/v3, która zapewnia jeszcze szerszy wachlarz najnowszych metod płatności oraz wyższą wydajność komunikacji z bramkami. Zaktualizowany endpoint i rozszerzone parametry konfiguracyjne umożliwiają sprzedawcom natychmiastowy dostęp do nowych, dynamicznie pojawiających się opcji płatności, co przekłada się na wyższą konwersję i lepsze doświadczenie użytkownika.
+
 ## Wersja 2.25.0
 - Zmieniliśmy sposób tworzenia zwrotów płatności. Dokonaliśmy modyfikacji w zarządzaniu parametrem związanym ze statusem transakcji zwrotu (RemoteOutId – dotychczas identyfikator i status były automatycznie przypisywane przy generowaniu zwrotu). Aktualnie Magento asynchronicznie pobiera status zwrotu za pomocą CRONa.
 

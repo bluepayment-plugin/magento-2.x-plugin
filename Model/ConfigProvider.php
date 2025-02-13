@@ -23,6 +23,9 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
+    public const TYPE_PBL = 'PBL';
+    public const TYPE_FR = 'FR';
+
     public const BLIK_GATEWAY_ID = 509;
     public const BLIK_BNPL_GATEWAY_ID = 523;
     public const HUB_GATEWAY_ID = 702;
@@ -46,12 +49,6 @@ class ConfigProvider implements ConfigProviderInterface
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::GPAY_GATEWAY_ID,
         self::APPLE_PAY_GATEWAY_ID,
-        self::VISA_MOBILE_GATEWAY_ID,
-    ];
-
-    public const STATIC_GATEWAY_NAME = [
-        self::CARD_GATEWAY_ID,
-        self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::VISA_MOBILE_GATEWAY_ID,
     ];
 
@@ -298,7 +295,6 @@ class ConfigProvider implements ConfigProviderInterface
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
                 'blik_zero_enabled' => $this->blikZeroEnabled(),
-                'alior_calculator_url' => $this->getAliorCalculatorUrl(),
                 'options' => $result,
                 'separated' => $resultSeparated,
                 'cards' => $this->prepareCards(),
@@ -364,6 +360,7 @@ class ConfigProvider implements ConfigProviderInterface
             'gateway_id' => $gateway->getGatewayId(),
             'name' => $gateway->getName(),
             'bank' => $gateway->getBankName(),
+            'short_description' => $gateway->getShortDescription(),
             'description' => $gateway->getDescription(),
             'sort_order' => $gateway->getSortOrder(),
             'type' => $gateway->getType(),
@@ -769,18 +766,6 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $value;
-    }
-
-    public function getAliorCalculatorUrl(): string
-    {
-        if ($this->getAliorInstallments() === 'zero') {
-            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=F&amount={amount}';;
-        } else {
-            $url = 'https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B&amount={amount}';
-
-        }
-
-        return $url;
     }
 
     /**

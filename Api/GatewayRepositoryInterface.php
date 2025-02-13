@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Api;
 
 use BlueMedia\BluePayment\Api\Data\GatewayInterface;
@@ -29,6 +31,20 @@ interface GatewayRepositoryInterface
      * @throws LocalizedException
      */
     public function getById($id);
+
+    /**
+     * Get gateway by gateway id and store id.
+     *
+     * @param int $gatewayId
+     * @param int $storeId
+     *
+     * @return GatewayInterface|null
+     * @throws LocalizedException
+     */
+    public function getByGatewayIdAndStoreId(
+        int $gatewayId,
+        int $storeId
+    ): ?GatewayInterface;
 
     /**
      * Delete gateway.

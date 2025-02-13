@@ -10,6 +10,7 @@
             "bank_name": true,
             "gateway_name": true,
             "gateway_description": true,
+            "gateway_short_description": true,
             "gateway_sort_order": true,
             "gateway_type": true,
             "gateway_logo_url": true,
@@ -20,7 +21,8 @@
             "force_disable": true,
             "min_amount": true,
             "max_amount": true,
-            "min_validity_time": true
+            "min_validity_time": true,
+            "required_params": true
         },
         "constraint": {
             "PRIMARY": true,
