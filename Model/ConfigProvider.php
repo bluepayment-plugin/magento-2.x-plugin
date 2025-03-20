@@ -678,7 +678,7 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/status_partial_refund',
             ScopeInterface::SCOPE_STORE,
             $storeId
-        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+        );
     }
 
     /**
@@ -693,7 +693,7 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/status_full_refund',
             ScopeInterface::SCOPE_STORE,
             $storeId
-        ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+        );
     }
 
     /**
