@@ -20,6 +20,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\App\ObjectManager;
 
 class ConfigProvider implements ConfigProviderInterface
 {
@@ -147,7 +148,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * ConfigProvider constructor.
      *
-     * @param GatewayCollectionFactory $gatewayCollectionFactory $gatewayCollectionFactory
+     * @param GatewayCollectionFactory $gatewayCollectionFactory
      * @param Form $block
      * @param PriceCurrencyInterface $priceCurrency
      * @param ScopeConfigInterface $scopeConfig
@@ -337,10 +338,35 @@ class ConfigProvider implements ConfigProviderInterface
      * Get active currency code.
      *
      * @return string
+     * @throws NoSuchEntityException
      */
     public function getCurrentCurrencyCode(): string
     {
+        if ($this->isUseBaseCurrency()) {
+            return $this->storeManager->getStore()->getBaseCurrency()->getCode();
+        }
+
         return $this->priceCurrency->getCurrency()->getCurrencyCode();
+    }
+
+    /**
+     * Check if base currency is used for transactions.
+     *
+     * @return bool
+     */
+    /**
+     * Check if base currency should be used for transactions
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isUseBaseCurrency(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/use_base_currency',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     /**
@@ -639,7 +665,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get status for order with error payment
      *
-     * @param int|null $store
+     * @param int|null $storeId
      * @return string|null
      */
     public function getStatusErrorPayment(?int $storeId = null): ?string
@@ -799,6 +825,11 @@ class ConfigProvider implements ConfigProviderInterface
 
     protected function getGrandTotalForQuote(): float
     {
-        return (float) $this->checkoutSession->getQuote()->getGrandTotal();
+        $quote = $this->checkoutSession->getQuote();
+
+        if ($this->isUseBaseCurrency()) {
+            return (float) $quote->getBaseGrandTotal();
+        }
+        return (float) $quote->getGrandTotal();
     }
 }

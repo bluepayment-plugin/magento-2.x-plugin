@@ -70,6 +70,9 @@ class PlaceOrder implements PlaceOrderInterface
      * @param  Metadata  $metadata
      * @param  CustomFieldResolver  $customFieldResolver
      */
+    /** @var ConfigProvider */
+    public $configProvider;
+
     public function __construct(
         OrderManagementInterface $orderManagement,
         CollectionFactory $gatewayFactory,
@@ -81,7 +84,8 @@ class PlaceOrder implements PlaceOrderInterface
         CardCollectionFactory $cardCollectionFactory,
         Logger $logger,
         Metadata $metadata,
-        CustomFieldResolver $customFieldResolver
+        CustomFieldResolver $customFieldResolver,
+        ConfigProvider $configProvider
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -94,6 +98,7 @@ class PlaceOrder implements PlaceOrderInterface
         $this->logger = $logger;
         $this->metadata = $metadata;
         $this->customFieldResolver = $customFieldResolver;
+        $this->configProvider = $configProvider;
     }
 
     /**
@@ -135,7 +140,11 @@ class PlaceOrder implements PlaceOrderInterface
 
             if ($payment->getMethod() == Payment::METHOD_CODE) {
                 $gatewayId = $payment->getAdditionalInformation('gateway_id');
-                $currency = $order->getOrderCurrencyCode();
+                $useBaseCurrency = $this->scopeConfig->isSetFlag(
+                    'payment/bluepayment/use_base_currency',
+                    ScopeInterface::SCOPE_STORE
+                );
+                $currency = $useBaseCurrency ? $order->getBaseCurrencyCode() : $order->getOrderCurrencyCode();
                 $serviceId = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . strtolower($currency) . '/service_id',
                     ScopeInterface::SCOPE_STORE
@@ -151,9 +160,11 @@ class PlaceOrder implements PlaceOrderInterface
 
                 $this->logger->info('PlaceOrder:' . __LINE__, ['gatewayID' => $gatewayId]);
 
+                $useBaseCurrency = $this->configProvider->isUseBaseCurrency();
+
                 foreach ($order->getAllItems() as $item) {
                     $productsList[] = [
-                        'subAmount' => $item->getRowTotalInclTax(),
+                        'subAmount' => $useBaseCurrency ? $item->getBaseRowTotalInclTax() : $item->getRowTotalInclTax(),
                         'params' => [
                             'productName' => ($item->getQtyOrdered() * 1) . 'x ' . $item->getName(),
                         ],
@@ -164,20 +175,33 @@ class PlaceOrder implements PlaceOrderInterface
                     && ((double)$order->getShippingAmount() || $order->getShippingDescription())
                 ) {
                     $productsList[] = [
-                        'subAmount' => (double)$order->getShippingAmount(),
+                        'subAmount' => $useBaseCurrency ? (double)$order->getBaseShippingAmount() : (double)$order->getShippingAmount(),
                         'params' => [
                             'productName' => __('Shipping & Handling')->render(),
                         ],
                     ];
                 }
 
-                $totalToPay += $order->getGrandTotal();
+                $totalToPay += $useBaseCurrency ? $order->getBaseGrandTotal() : $order->getGrandTotal();
             }
         }
 
         // @ToDo Create Payment
+        $useBaseCurrency = $this->configProvider->isUseBaseCurrency();
+
+        if ($useBaseCurrency) {
+            $totalToPay = 0;
+            foreach ($orderList as $o) {
+                if ($o->getPayment()->getMethod() == Payment::METHOD_CODE) {
+                    $totalToPay += $o->getBaseGrandTotal();
+                }
+            }
+            $currency = $order->getBaseCurrencyCode();
+        } else {
+            $currency = $order->getOrderCurrencyCode();
+        }
+
         $amount = number_format(round($totalToPay, 2), 2, '.', '');
-        $currency = $order->getOrderCurrencyCode();
 
         // Config
         $serviceId = $this->scopeConfig->getValue(

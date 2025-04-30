@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.27.0
+- We have added the ability to use base currency for creating orders.
+
 ## Version 2.26.1
 - We have fixed bug related to missing header in requests to pay.autopay.eu.
 - We have fixed the behavior of the module in case of no status selection for refunds.
