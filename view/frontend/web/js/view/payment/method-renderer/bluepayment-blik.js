@@ -86,7 +86,7 @@ define([
                 }
             }
 
-            return true;
+            return this._super();
         },
 
         /**

@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.27.1
+- Dodaliśmy walidację imienia i nazwiska przed rozpoczęciem płatności.
+
 ## Wersja 2.27.0
 - Dodaliśmy możliwość korzystania z waluty bazowej do tworzenia zamówień.
 

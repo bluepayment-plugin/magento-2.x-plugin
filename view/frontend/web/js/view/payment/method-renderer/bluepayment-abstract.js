@@ -2,6 +2,7 @@ define([
     'jquery',
     'ko',
     'mage/url',
+    'mage/translate',
     'Magento_Checkout/js/view/payment/default',
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/model/payment/additional-validators',
@@ -12,6 +13,7 @@ define([
     $,
     ko,
     url,
+    $t,
     Component,
     quote,
     additionalValidators,
@@ -43,6 +45,22 @@ define([
          * @return {Boolean}
          */
         validate: function () {
+            let firstname = quote.billingAddress().firstname ?? quote.shippingAddress().firstname;
+            let lastname = quote.billingAddress().lastname ?? quote.shippingAddress().lastname;
+
+            // MAGENTO-264 - This regex allows letters, apostrophes, hyphens, dots, and spaces.
+            const regex = /^[\p{L}'\-\.\s]+$/u;
+
+            if (!regex.test(firstname)) {
+                this.messageContainer.addErrorMessage({message: $t('Invalid characters in firstname. Please use only letters, apostrophes, hyphens, dots, and spaces.')});
+                return false;
+            }
+
+            if (!regex.test(lastname)) {
+                this.messageContainer.addErrorMessage({message: $t('Invalid characters in lastname. Please use only letters, apostrophes, hyphens, dots, and spaces.')});
+                return false;
+            }
+
             if (! additionalValidators.validate()) {
                 return false;
             }

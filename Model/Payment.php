@@ -466,8 +466,8 @@ class Payment extends AbstractMethod
             'Amount' => $amount,
             'Currency' => $currency,
             'CustomerEmail' => $order->getCustomerEmail(),
-            'VerificationFName' => $order->getCustomerFirstname(),
-            'VerificationLName' => $order->getCustomerLastname(),
+            'VerificationFName' => $this->getFirstnameFromOrder($order),
+            'VerificationLName' => $this->getLastnameFromOrder($order),
             'Language' => $language,
             'PlatformName' => self::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
@@ -1281,5 +1281,19 @@ class Payment extends AbstractMethod
         }
 
         return false;
+    }
+
+    protected function getFirstnameFromOrder(Order $order): string
+    {
+        return $order->getBillingAddress()->getFirstname()
+            ?? $order->getShippingAddress()->getFirstname()
+            ?? $order->getCustomerFirstname();
+    }
+
+    protected function getLastnameFromOrder(Order $order): string
+    {
+        return $order->getBillingAddress()->getFirstname()
+            ?? $order->getShippingAddress()->getFirstname()
+            ?? $order->getCustomerFirstname();
     }
 }

@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.27.1
+- We have added validation of first name and last name before starting the payment.
+
 ## Version 2.27.0
 - We have added the ability to use base currency for creating orders.
 

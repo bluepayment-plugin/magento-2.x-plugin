@@ -157,7 +157,7 @@ define([
                 return false;
             }
 
-            return true;
+            return this._super();
         },
 
         /**
