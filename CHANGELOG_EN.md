@@ -1,5 +1,9 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.26.1
+- We have fixed bug related to missing header in requests to pay.autopay.eu.
+- We have fixed the behavior of the module in case of no status selection for refunds.
+
 ## Version 2.26.0
 - We have introduced support for gatewayList/v3, offering an even broader selection of the latest payment methods and improved gateway communication performance. The updated endpoint and expanded configuration parameters allow merchants to instantly access new, dynamically emerging payment options, resulting in higher conversion rates and an enhanced user experience.
 

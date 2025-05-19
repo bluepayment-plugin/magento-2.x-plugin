@@ -1,5 +1,9 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.26.1
+- Poprawiliśmy błąd związany z brakiem nagłówka przy zapytaniach do pay.autopay.eu.
+- Poprawiliśmy zachowanie modułu w przypadku braku wyboru statusu dla zwrotów.
+
 ## Wersja 2.26.0
 - Wprowadziliśmy obsługę gatewayList/v3, która zapewnia jeszcze szerszy wachlarz najnowszych metod płatności oraz wyższą wydajność komunikacji z bramkami. Zaktualizowany endpoint i rozszerzone parametry konfiguracyjne umożliwiają sprzedawcom natychmiastowy dostęp do nowych, dynamicznie pojawiających się opcji płatności, co przekłada się na wyższą konwersję i lepsze doświadczenie użytkownika.
 
