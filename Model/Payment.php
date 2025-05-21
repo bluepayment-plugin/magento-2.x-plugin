@@ -429,8 +429,16 @@ class Payment extends AbstractMethod
         string $backUrl = null
     ): array {
         $orderId       = $order->getRealOrderId();
-        $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-        $currency      = $order->getOrderCurrencyCode();
+
+        if ($this->configProvider->isUseBaseCurrency()) {
+            $amount = $order->getBaseGrandTotal();
+            $currency = $order->getBaseCurrencyCode();
+        } else {
+            $amount = $order->getGrandTotal();
+            $currency = $order->getOrderCurrencyCode();
+        }
+
+        $amount = number_format($amount, 2, '.', '');
 
         // Config
         $serviceId     = $this->_scopeConfig->getValue(
