@@ -76,6 +76,7 @@ define([
                 checkoutData.setBluepaymentGatewayId(value);
             });
 
+            // Slideshow
             // Subscribe first to ensure changes are captured
             model.selectedGatewayId.subscribe(function (value) {
                 // Only save if the current method is bluepayment to avoid overwriting other methods' data potentially
@@ -85,7 +86,8 @@ define([
                 }
             }.bind(this));
 
-            setTimeout(() => {
+            // Defer checks until quote is likely loaded
+            setTimeout(function () {
                 const storedGatewayId = checkoutData.getBluepaymentGatewayId();
                 const currentQuoteMethod = quote.paymentMethod();
 
@@ -115,7 +117,7 @@ define([
                 } else {
                     model.selectedGatewayId(null);
                 }
-            }, 250);
+            }.bind(this), 250);
 
             // Slideshow
             this.initSlideshow();
