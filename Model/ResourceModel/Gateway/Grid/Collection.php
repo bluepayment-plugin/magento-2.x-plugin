@@ -24,32 +24,31 @@ class Collection extends GatewayCollection implements SearchResultInterface
     /**
      * Collection constructor.
      *
-     * @param EntityFactoryInterface $entityFactory
-     * @param LoggerInterface $logger
-     * @param FetchStrategyInterface $fetchStrategy
-     * @param ManagerInterface $eventManager
-     * @param string $mainTable
-     * @param string $eventPrefix
-     * @param string $eventObject
-     * @param string $resourceModel
-     * @param string $model
-     * @param AdapterInterface|null $connection
-     * @param AbstractDb|null $resource
+     * @param  EntityFactoryInterface  $entityFactory
+     * @param  LoggerInterface  $logger
+     * @param  FetchStrategyInterface  $fetchStrategy
+     * @param  ManagerInterface  $eventManager
+     * @param  string  $mainTable
+     * @param  string  $eventPrefix
+     * @param  string  $eventObject
+     * @param  string  $resourceModel
+     * @param  string  $model
+     * @param  AdapterInterface|null  $connection
+     * @param  AbstractDb|null  $resource
      */
     public function __construct(
         EntityFactoryInterface $entityFactory,
         LoggerInterface $logger,
         FetchStrategyInterface $fetchStrategy,
         ManagerInterface $eventManager,
-        $mainTable,
-        $eventPrefix,
-        $eventObject,
-        $resourceModel,
-        $model = Document::class,
-        AdapterInterface $connection = null,
-        AbstractDb $resource = null
-    )
-    {
+        string $mainTable,
+        string $eventPrefix,
+        string $eventObject,
+        string $resourceModel,
+        string $model = Document::class,
+        ?AdapterInterface $connection = null,
+        ?AbstractDb $resource = null
+    ) {
         parent::__construct(
             $entityFactory,
             $logger,
@@ -68,7 +67,7 @@ class Collection extends GatewayCollection implements SearchResultInterface
     /**
      * @inheritDoc
      */
-    public function setItems(array $items = null)
+    public function setItems(?array $items = null)
     {
         return $this;
     }

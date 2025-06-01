@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.28.0
+- Dodaliśmy wsparcie dla Magento 2.4.8.
+
 ## Wersja 2.27.0
 - Dodaliśmy możliwość korzystania z waluty bazowej do tworzenia zamówień.
 
