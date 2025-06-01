@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.26.2
+- Poprawiliśmy błąd z brakiem wyświetlania głównej metody płatności Autopay.
+
 ## Wersja 2.26.1
 - Poprawiliśmy błąd związany z brakiem nagłówka przy zapytaniach do pay.autopay.eu.
 - Poprawiliśmy zachowanie modułu w przypadku braku wyboru statusu dla zwrotów.

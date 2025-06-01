@@ -87,7 +87,7 @@ define([
             }.bind(this));
 
             // Defer checks until quote is likely loaded
-            ko.defer(function () {
+            setTimeout(function () {
                 const storedGatewayId = checkoutData.getBluepaymentGatewayId();
                 const currentQuoteMethod = quote.paymentMethod();
 
@@ -122,7 +122,7 @@ define([
                 } else {
                      model.selectedGatewayId(null); // Clear model if bluepayment isn't active method
                 }
-            }.bind(this));
+            }.bind(this), 250);
 
             // Slideshow
             this.initSlideshow();
