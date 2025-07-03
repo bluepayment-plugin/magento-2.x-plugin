@@ -205,11 +205,10 @@ class Webapi extends Data
     /**
      * @param  string  $name
      * @param  string|null  $currency
-     * @param  StoreInterface|null  $store
-     *
+     * @param  int|null  $storeId
      * @return mixed
      */
-    private function getConfigValue(string $name, string $currency = null, ?int $storeId = null)
+    private function getConfigValue(string $name, ?string $currency = null, ?int $storeId = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(

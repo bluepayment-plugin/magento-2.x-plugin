@@ -325,8 +325,8 @@ class Payment extends AbstractMethod
         SendConfirmationEmail $sendConfirmationEmail,
         ProcessNotification $processNotification,
         CustomFieldResolver $customFieldResolver,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->url = $url;
@@ -426,7 +426,7 @@ class Payment extends AbstractMethod
         string $authorizationCode = '',
         string $paymentToken = '',
         int $cardIndex = -1,
-        string $backUrl = null
+        ?string $backUrl = null
     ): array {
         $orderId       = $order->getRealOrderId();
 

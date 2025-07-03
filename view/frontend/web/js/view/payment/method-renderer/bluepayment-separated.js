@@ -98,8 +98,6 @@ define([
         isChecked: ko.computed(function () {
             const paymentMethod = quote.paymentMethod();
 
-            console.log(paymentMethod?.additional_data?.gateway_id);
-
             if (!paymentMethod || !paymentMethod.additional_data || !paymentMethod.additional_data.gateway_id) {
                 return null;
             }

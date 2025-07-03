@@ -1,7 +1,13 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.28.0
+- We have added support for Magento 2.4.8.
+
 ## Version 2.27.0
 - We have added the ability to use base currency for creating orders.
+
+## Version 2.26.2
+- We have fixed the bug with the main Autopay payment method not being displayed.
 
 ## Version 2.26.1
 - We have fixed bug related to missing header in requests to pay.autopay.eu.

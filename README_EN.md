@@ -15,7 +15,7 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.7.
+- Magento version: 2.3.0 - 2.4.8.
 - PHP version according to the requirements of your store version.
 
 ### [What's new in Autopay?](CHANGELOG_EN.md)
