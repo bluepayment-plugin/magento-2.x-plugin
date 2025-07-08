@@ -50,7 +50,7 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             },
-            $('<div />').html()),
+            $('<div></div>').html()),
 
 
         /**

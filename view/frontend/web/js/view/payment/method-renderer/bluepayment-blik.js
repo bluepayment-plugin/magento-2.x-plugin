@@ -48,7 +48,7 @@ define([
                 keyEventHandlers: {},
                 modalClass: 'blik-modal',
             },
-            $('<div />').html(
+            $('<div></div>').html(
                 $t("Confirm the payment in your bank's app.")
             )
         ),

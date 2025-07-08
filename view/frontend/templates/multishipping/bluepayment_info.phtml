@@ -8,6 +8,6 @@ $gatewayId = $block->getInfo()->getAdditionalInformation('gateway_id');
 
 ?>
     <dl class="payment-method">
-        <dt class="title"><?= /* @noEscape */ $title ?> - <?= $block->getGatewayNameFromQuote() ?></dt>
+        <dt class="title"><?= /* @noEscape */ $title ?> - <?= /* @noEscape */ $block->getGatewayNameFromQuote() ?></dt>
     </dl>
 <?= $block->getChildHtml() ?>

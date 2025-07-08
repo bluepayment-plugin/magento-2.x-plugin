@@ -4,18 +4,18 @@
  */
 ?>
 <?php if ($block->isEnabled()): ?>
-    <div class="bluemedia consumer-finance horizontal position-<?= $block->getPosition() ?>">
+    <div class="bluemedia consumer-finance horizontal position-<?= /* @noEscape */ $block->getPosition() ?>">
         <?php if ($block->isInstallmentsAvailable()): ?>
             <div class="cf-item installments">
-                <span class="label"><?= __('INSTALLMENTS') ?></span>
-                <span class="text"><?= __('Up to 48 installments') ?></span>
+                <span class="label"><?= /* @noEscape */ __('INSTALLMENTS') ?></span>
+                <span class="text"><?= /* @noEscape */ __('Up to 48 installments') ?></span>
             </div>
         <?php endif; ?>
 
         <?php if ($block->isHubAvailable()): ?>
             <div class="cf-item hub">
-                <span class="label"><?= __('TAILORED INSTALLMENTS') ?></span>
-                <span class="text"><?= __('Buy on tailored installments') ?></span>
+                <span class="label"><?= /* @noEscape */ __('TAILORED INSTALLMENTS') ?></span>
+                <span class="text"><?= /* @noEscape */ __('Buy on tailored installments') ?></span>
             </div>
         <?php endif; ?>
     </div>

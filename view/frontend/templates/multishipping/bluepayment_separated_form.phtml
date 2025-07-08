@@ -11,13 +11,13 @@ $gatewayId = $block->getGatewayId();
         $(function () {
             var paymentMethodData = {
                 method: 'bluepayment',
-                gateway_id: <?= $gatewayId; ?>,
+                gateway_id: <?= /* @noEscape */ $gatewayId; ?>,
             };
 
             layout([
                 {
                     component: 'BlueMedia_BluePayment/js/view/payment/method-renderer/multishipping/bluepayment_separated',
-                    name: 'payment_method_bluepayment_<?= $gatewayId; ?>',
+                    name: 'payment_method_bluepayment_<?= /* @noEscape */ $gatewayId; ?>',
                     method: paymentMethodData.method,
                     item: paymentMethodData,
                     children: [{

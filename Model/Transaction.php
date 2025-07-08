@@ -181,12 +181,4 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     {
         return $this->setData(TransactionInterface::PAYMENT_STATUS_DETAILS, $status);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function _construct()
-    {
-        $this->_init(TransactionResource::class);
-    }
 }

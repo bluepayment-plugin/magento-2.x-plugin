@@ -105,13 +105,13 @@ define([
 
             var isPartialReturn = $(this).parents('form').find('[name="' + self.options.form.radioName + '"]:checked');
             if (!isPartialReturn.is(':checked')) {
-                errorContainer.append($('<li />').html($.mage.__('Refund type is not selected.')));
+                errorContainer.append($('<li></li>').html($.mage.__('Refund type is not selected.')));
                 return false;
             }
             if (parseInt(isPartialReturn.val()) === 1
                 && !/^\d+\.?\d{0,2}$/g.test($('#' + self.options.form.inputId).val())
             ) {
-                errorContainer.append($('<li />').html($.mage.__('Invalid refund amount. Example of correct value: 123.23')));
+                errorContainer.append($('<li></li>').html($.mage.__('Invalid refund amount. Example of correct value: 123.23')));
                 return false;
             }
 
