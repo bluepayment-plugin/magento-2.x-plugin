@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.29.0
+- Dodaliśmy obsługę ReturnURL dla wszystkich transakcji.
+
 ## Wersja 2.28.0
 - Dodaliśmy wsparcie dla Magento 2.4.8.
 

@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.29.0
+- We have added ReturnURL support for all transactions.
+
 ## Version 2.28.0
 - We have added support for Magento 2.4.8.
 
