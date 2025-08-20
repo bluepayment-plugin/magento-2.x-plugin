@@ -19,7 +19,7 @@ define([
     // Prepend - only frame
     rendererList.push({
         type: bluepaymentType + '-prepend',
-        component: 'uiComponent',
+        component: 'Magento_Checkout/js/view/payment/default',
         config: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-prepend',
         },
@@ -91,7 +91,7 @@ define([
     // Append - only frame
     rendererList.push({
         type: bluepaymentType + '-append',
-        component: 'uiComponent',
+        component: 'Magento_Checkout/js/view/payment/default',
         config: {
             template: 'BlueMedia_BluePayment/payment/bluepayment-append',
         },
