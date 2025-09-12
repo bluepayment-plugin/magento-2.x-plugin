@@ -345,6 +345,22 @@ W ramach eventu, przekazywane są dane:
 - `payment` – instancja `\Magento\Sales\Model\OrderPayment`
 - `transaction_id` – identyfikator transakcji w systemie Autopay (`string`)
 
+## Obsługa transakcji z dynamicznym NRB (indywidualne konta rozliczeń)
+
+Opcja dostępna od wersji 2.29.0.
+
+Rozwiązanie wymaga konfiguracji serwisu po stronie Autopay - w tym celu skontaktuj się z opiekunem biznesowym.
+Dodatkowe informacje techniczne dostępne są w [dokumentacji](https://developers.autopay.pl/online/dokumentacja#model-rozlicze%C5%84-transakcji-po-ka%C5%BCdej-wp%C5%82acie).
+
+W celu skorzystania z tej funkcjonalności należy przy tworzeniu zamówienia ustawić dodatkowe atrybuty:
+
+```php
+$order
+    ->setCustomAttribute('customer_nrb', '771020298033458958399339243308')
+    ->setCustomAttribute('receiver_title', 'Tytuł przelewu')
+    ->setCustomAttribute('receiver_name', 'Firma ABC Sp. z o.o.')
+;
+```
 
 ## Promowanie płatności odroczonych / na raty
 

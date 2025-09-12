@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.29.0
+- Dodaliśmy obsługę rozliczeń transakcji po każdej wpłacie (opis działania [tutaj](https://developers.autopay.pl/online/dokumentacja#model-rozlicze%C5%84-transakcji-po-ka%C5%BCdej-wp%C5%82acie), dokumentacja modułu w README.md).
+
 ## Wersja 2.28.0
 - Dodaliśmy wsparcie dla Magento 2.4.8.
 

@@ -81,9 +81,13 @@ class Payment extends AbstractMethod
         'GatewayID', // 5
         'Currency', // 6
         'CustomerEmail', // 7
-        'Language', // 7
+        'Language', // 8
+        'CustomerNRB', // 9
+        'SwiftCode', // 10
+        'ForeignTransferMode', // 11
         'CustomerIP', // 13
         'Title', // 14
+        'ReceiverName', // 15,
         'Products', // 16
         'CustomerPhone', // 17
         'ValidityTime', // 19
@@ -473,6 +477,20 @@ class Payment extends AbstractMethod
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
+
+        /* Transaction settlement model after each payment */
+        $customerNrb = $order->getCustomAttribute('receiver_nrb')
+            ? $order->getCustomAttribute('receiver_nrb')->getValue() : null;
+        $title = $order->getCustomAttribute('receiver_title')
+            ? $order->getCustomAttribute('receiver_title')->getValue() : null;
+        $receiverName = $order->getCustomAttribute('receiver_name')
+            ? $order->getCustomAttribute('receiver_name')->getValue() : null;
+
+        if ($customerNrb && $title && $receiverName) {
+            $params['CustomerNRB'] = $customerNrb;
+            $params['Title'] = $title;
+            $params['ReceiverName'] = $receiverName;
+        }
 
         /* Ustawiona ważność linku */
         if ($validityTime !== null) {

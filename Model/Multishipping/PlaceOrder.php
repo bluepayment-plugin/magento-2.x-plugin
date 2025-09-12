@@ -252,6 +252,20 @@ class PlaceOrder implements PlaceOrderInterface
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
 
+        /* Transaction settlement model after each payment */
+        $customerNrb = $order->getCustomAttribute('customer_nrb')
+            ? $order->getCustomAttribute('customer_nrb')->getValue() : null;
+        $title = $order->getCustomAttribute('receiver_title')
+            ? $order->getCustomAttribute('receiver_title')->getValue() : null;
+        $receiverName = $order->getCustomAttribute('receiver_name')
+            ? $order->getCustomAttribute('receiver_name')->getValue() : null;
+
+        if ($customerNrb && $title && $receiverName) {
+            $params['CustomerNRB'] = $customerNrb;
+            $params['Title'] = $title;
+            $params['ReceiverName'] = $receiverName;
+        }
+
         if ((int) $gatewayId !== 0) {
             $params = $this->customFieldResolver->resolve(
                 (int)$gatewayId,

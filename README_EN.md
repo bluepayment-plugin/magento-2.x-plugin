@@ -310,6 +310,23 @@ Provided event data:
 - `transaction_id` - `string` transaction identifier in BlueMedia system
 
 
+## Handling Transactions with Dynamic NRB (Individual Settlement Accounts)
+
+This option is available from version 2.29.0.
+
+The solution requires service configuration on the Autopay side – please contact your business representative for assistance.
+Additional technical details can be found in the [documentation](https://developers.autopay.pl/online/dokumentacja#model-rozlicze%C5%84-transakcji-po-ka%C5%BCdej-wp%C5%82acie).
+
+To use this functionality, you need to set additional attributes when creating an order:
+
+```php
+$order
+    ->setCustomAttribute('customer_nrb', '771020298033458958399339243308')
+    ->setCustomAttribute('receiver_title', 'Tytuł przelewu')
+    ->setCustomAttribute('receiver_name', 'Firma ABC Sp. z o.o.')
+;
+```
+
 ## Promoting installments payments
 
 ### Why promote?
