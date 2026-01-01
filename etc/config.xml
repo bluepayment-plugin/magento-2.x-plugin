@@ -23,8 +23,8 @@
 
                 <refund_url_test>https://testpay.autopay.eu/settlementapi/transactionRefund</refund_url_test>
                 <refund_url_prod>https://pay.autopay.eu/settlementapi/transactionRefund</refund_url_prod>
-                <refund_status_url_test>https://testpay.autopay.eu/settlementapi/outDetails</refund_status_url_test>
-                <refund_status_url_prod>https://pay.autopay.eu/settlementapi/outDetails</refund_status_url_prod>
+                <refund_status_url_test>https://testpay.autopay.eu/settlementapi/outDetails/v2</refund_status_url_test>
+                <refund_status_url_prod>https://pay.autopay.eu/settlementapi/outDetails/v2</refund_status_url_prod>
 
                 <hash_algorithm>sha256</hash_algorithm>
                 <hash_separator>|</hash_separator>

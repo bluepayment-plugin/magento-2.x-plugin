@@ -267,6 +267,7 @@ This option allows you to refund money directly to the customer's account from w
 ### Notifications
 
 If the return fails, the module generates a notification in the admin panel.  
+The notification and the order comment contain a detailed reason returned by Autopay (for example, lack of funds on the Autopay balance or an exceeded transaction amount).  
 For this purpose, it is required to launch and activate the `Magento_AdminNotification` module.
 
 ![refund4.png](docs/refund4.png)

@@ -262,6 +262,7 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
 ### Powiadomienia
 
 W przypadku niepowodzenia zwrotu moduł generuje powiadomienie w panelu administracyjnym.  
+Treść powiadomienia oraz komentarza do zamówienia zawiera szczegółową przyczynę zwrotu, zwracaną przez Autopay (np. brak środków na saldzie Autopay lub przekroczenie kwoty transakcji).  
 W tym celu wymagane jest uruchomienie i aktywowanie modułu `Magento_AdminNotification`.
 
 ![refund4.png](docs/refund4.png)
