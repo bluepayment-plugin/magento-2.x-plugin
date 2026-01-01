@@ -9,6 +9,7 @@ use DateTime;
 use DateTimeZone;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
@@ -20,23 +21,24 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     const CACHE_TAG = 'blue_transaction';
 
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
+     * @var TimezoneInterface
      */
     private $timezone;
 
     /**
-     * @param \Magento\Framework\Model\Context                        $context
-     * @param \Magento\Framework\Registry                             $registry
-     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface    $timezone
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
+     * @param  Context  $context
+     * @param  Registry  $registry
+     * @param  TimezoneInterface  $timezone
+     * @param  AbstractResource|null  $resource
+     * @param  AbstractDb|null  $resourceCollection
+     * @throws LocalizedException
      */
     public function __construct(
         Context $context,
         Registry $registry,
         TimezoneInterface $timezone,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null
     ) {
         parent::__construct($context, $registry, $resource, $resourceCollection);
         $this->timezone = $timezone;
@@ -45,17 +47,9 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
-    protected function _construct()
-    {
-        $this->_init(TransactionResource::class);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getIdentities()
     {
-        return [self::CACHE_TAG . '_' . $this->getId()];
+        return [self::CACHE_TAG.'_'.$this->getId()];
     }
 
     /**
@@ -186,5 +180,13 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     public function setPaymentStatusDetails($status)
     {
         return $this->setData(TransactionInterface::PAYMENT_STATUS_DETAILS, $status);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _construct()
+    {
+        $this->_init(TransactionResource::class);
     }
 }

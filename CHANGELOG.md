@@ -1,5 +1,30 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.30.0
+- Dodanie tłumaczeń dla języków: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
+## Wersja 2.29.0
+- Dodaliśmy obsługę ReturnURL dla wszystkich transakcji.
+
+## Wersja 2.28.0
+- Dodaliśmy wsparcie dla Magento 2.4.8.
+
+## Wersja 2.27.0
+- Dodaliśmy możliwość korzystania z waluty bazowej do tworzenia zamówień.
+
+## Wersja 2.26.2
+- Poprawiliśmy błąd z brakiem wyświetlania głównej metody płatności Autopay.
+
+## Wersja 2.26.1
+- Poprawiliśmy błąd związany z brakiem nagłówka przy zapytaniach do pay.autopay.eu.
+- Poprawiliśmy zachowanie modułu w przypadku braku wyboru statusu dla zwrotów.
+
+## Wersja 2.26.0
+- Wprowadziliśmy obsługę gatewayList/v3, która zapewnia jeszcze szerszy wachlarz najnowszych metod płatności oraz wyższą wydajność komunikacji z bramkami. Zaktualizowany endpoint i rozszerzone parametry konfiguracyjne umożliwiają sprzedawcom natychmiastowy dostęp do nowych, dynamicznie pojawiających się opcji płatności, co przekłada się na wyższą konwersję i lepsze doświadczenie użytkownika.
+
+## Wersja 2.25.0
+- Zmieniliśmy sposób tworzenia zwrotów płatności. Dokonaliśmy modyfikacji w zarządzaniu parametrem związanym ze statusem transakcji zwrotu (RemoteOutId – dotychczas identyfikator i status były automatycznie przypisywane przy generowaniu zwrotu). Aktualnie Magento asynchronicznie pobiera status zwrotu za pomocą CRONa.
+
 ## Wersja 2.24.1
 - Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
 

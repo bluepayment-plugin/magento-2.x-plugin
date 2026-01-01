@@ -66,22 +66,26 @@ class ContinuePayment extends Action
     /** @var GetTransactionLifetime */
     public $getTransactionLifetime;
 
+    /** @var ConfigProvider */
+    public $configProvider;
+
     /**
      * Create constructor.
      *
-     * @param Context $context
-     * @param OrderSender $orderSender
-     * @param PaymentFactory $paymentFactory
-     * @param OrderFactory $orderFactory
-     * @param Session $session
-     * @param Logger $logger
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Data $helper
-     * @param JsonFactory $resultJsonFactory
-     * @param Collection $collection
-     * @param Curl $curl
-     * @param CollectionFactory $gatewayFactory
-     * @param GetTransactionLifetime $getTransactionLifetime
+     * @param  Context  $context
+     * @param  OrderSender  $orderSender
+     * @param  PaymentFactory  $paymentFactory
+     * @param  OrderFactory  $orderFactory
+     * @param  Session  $session
+     * @param  Logger  $logger
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  Data  $helper
+     * @param  JsonFactory  $resultJsonFactory
+     * @param  Collection  $collection
+     * @param  Curl  $curl
+     * @param  CollectionFactory  $gatewayFactory
+     * @param  GetTransactionLifetime  $getTransactionLifetime
+     * @param  ConfigProvider  $configProvider
      */
     public function __construct(
         Context $context,
@@ -96,7 +100,8 @@ class ContinuePayment extends Action
         Collection $collection,
         Curl $curl,
         CollectionFactory $gatewayFactory,
-        GetTransactionLifetime $getTransactionLifetime
+        GetTransactionLifetime $getTransactionLifetime,
+        ConfigProvider $configProvider
     ) {
         $this->paymentFactory    = $paymentFactory;
         $this->scopeConfig       = $scopeConfig;
@@ -110,6 +115,7 @@ class ContinuePayment extends Action
         $this->curl              = $curl;
         $this->gatewayFactory    = $gatewayFactory;
         $this->getTransactionLifetime = $getTransactionLifetime;
+        $this->configProvider    = $configProvider;
 
         parent::__construct($context);
     }
@@ -130,7 +136,12 @@ class ContinuePayment extends Action
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             $orderPayment = $order->getPayment();
 
-            $currency = strtolower($order->getOrderCurrencyCode());
+            if ($this->configProvider->isUseBaseCurrency((int) $order->getStoreId())) {
+                $currency = $order->getBaseCurrencyCode();
+            } else {
+                $currency = $order->getOrderCurrencyCode();
+            }
+
             $serviceId = $this->scopeConfig->getValue(
                 'payment/bluepayment/' . $currency . '/service_id',
                 ScopeInterface::SCOPE_STORE,

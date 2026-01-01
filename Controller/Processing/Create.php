@@ -145,7 +145,11 @@ class Create extends Action
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
-            $currency       = $order->getOrderCurrencyCode();
+            if ($this->configProvider->isUseBaseCurrency((int) $order->getStoreId())) {
+                $currency = $order->getBaseCurrencyCode();
+            } else {
+                $currency = $order->getOrderCurrencyCode();
+            }
 
             $this->logger->info('CREATE:' . __LINE__, [
                 'orderId' => $order->getId(),

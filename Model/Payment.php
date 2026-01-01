@@ -2,6 +2,7 @@
 
 namespace BlueMedia\BluePayment\Model;
 
+use BlueMedia\BluePayment\Api\GatewayRepositoryInterface;
 use BlueMedia\BluePayment\Api\TransactionRepositoryInterface;
 use BlueMedia\BluePayment\Block\Form;
 use BlueMedia\BluePayment\Block\Info;
@@ -44,6 +45,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -86,6 +88,7 @@ class Payment extends AbstractMethod
         'Products', // 16
         'CustomerPhone', // 17
         'ValidityTime', // 19
+        'Nip', // 23
         'VerificationFName', // 25
         'VerificationLName', // 26
         'LinkValidityTime', // 34
@@ -99,6 +102,7 @@ class Payment extends AbstractMethod
         'DefaultRegulationAcceptanceState', // 51
         'DefaultRegulationAcceptanceID', // 52
         'DefaultRegulationAcceptanceTime', // 53
+        'AccountHolderName', // 59
         'PlatformName', // 170
         'PlatformVersion', // 171
         'PlatformPluginVersion', // 172
@@ -249,6 +253,12 @@ class Payment extends AbstractMethod
     /** @var ProcessNotification */
     private $processNotification;
 
+    /** @var CustomFieldResolver */
+    private $customFieldResolver;
+
+    /** @var StoreManagerInterface */
+    private $storeManager;
+
     /**
      * Payment constructor.
      *
@@ -281,6 +291,9 @@ class Payment extends AbstractMethod
      * @param  Metadata  $metadata
      * @param  GetPhoneForOrder  $getPhoneForOrder
      * @param  SendConfirmationEmail  $sendConfirmationEmail
+     * @param  ProcessNotification  $processNotification
+     * @param  CustomFieldResolver  $customFieldResolver
+     * @param  StoreManagerInterface  $storeManager
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -316,8 +329,10 @@ class Payment extends AbstractMethod
         GetPhoneForOrder $getPhoneForOrder,
         SendConfirmationEmail $sendConfirmationEmail,
         ProcessNotification $processNotification,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        CustomFieldResolver $customFieldResolver,
+        StoreManagerInterface $storeManager,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->url = $url;
@@ -343,6 +358,8 @@ class Payment extends AbstractMethod
         $this->getPhoneForOrder = $getPhoneForOrder;
         $this->sendConfirmationEmail = $sendConfirmationEmail;
         $this->processNotification = $processNotification;
+        $this->customFieldResolver = $customFieldResolver;
+        $this->storeManager = $storeManager;
 
         parent::__construct(
             $context,
@@ -416,11 +433,19 @@ class Payment extends AbstractMethod
         string $authorizationCode = '',
         string $paymentToken = '',
         int $cardIndex = -1,
-        string $backUrl = null
+        ?string $backUrl = null
     ): array {
         $orderId       = $order->getRealOrderId();
-        $amount        = number_format(round($order->getGrandTotal(), 2), 2, '.', '');
-        $currency      = $order->getOrderCurrencyCode();
+
+        if ($this->configProvider->isUseBaseCurrency()) {
+            $amount = $order->getBaseGrandTotal();
+            $currency = $order->getBaseCurrencyCode();
+        } else {
+            $amount = $order->getGrandTotal();
+            $currency = $order->getOrderCurrencyCode();
+        }
+
+        $amount = number_format($amount, 2, '.', '');
 
         // Config
         $serviceId     = $this->_scopeConfig->getValue(
@@ -440,7 +465,7 @@ class Payment extends AbstractMethod
                 'general/locale/code',
                 ScopeInterface::SCOPE_STORE
             );
-        $language = $this->helper->getLanguageFromLocale($locale);
+        $language = LocaleMapper::getLanguageFromLocale($locale);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -465,10 +490,18 @@ class Payment extends AbstractMethod
         /* Wybrana bramka płatnicza */
         if ($gatewayId !== 0) {
             $params['GatewayID'] = $gatewayId;
+
+            $params = $this->customFieldResolver->resolve(
+                $gatewayId,
+                $order,
+                $params
+            );
         }
 
         if ($backUrl !== null) {
             $params['ReturnURL'] = $backUrl;
+        } else {
+            $params['ReturnURL'] = $this->getReturnUrl($order);
         }
 
         if ($this->configProvider->isWithPhoneEnabled() && $phone = $this->getPhoneForOrder->execute($order)) {
@@ -1257,5 +1290,13 @@ class Payment extends AbstractMethod
         }
 
         return false;
+    }
+
+    protected function getReturnUrl(
+        Order $order
+    ): string {
+        return $this->storeManager
+            ->getStore($order->getStoreId())
+            ->getUrl('bluepayment/processing/back');
     }
 }

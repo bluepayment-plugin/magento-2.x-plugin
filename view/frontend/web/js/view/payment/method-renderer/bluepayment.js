@@ -77,6 +77,49 @@ define([
             });
 
             // Slideshow
+            // Subscribe first to ensure changes are captured
+            model.selectedGatewayId.subscribe(function (value) {
+                // Only save if the current method is bluepayment to avoid overwriting other methods' data potentially
+                const currentQuoteMethod = quote.paymentMethod();
+                if (currentQuoteMethod && currentQuoteMethod.method === this.item.method) {
+                    checkoutData.setBluepaymentGatewayId(value);
+                }
+            }.bind(this));
+
+            // Defer checks until quote is likely loaded
+            setTimeout(function () {
+                const storedGatewayId = checkoutData.getBluepaymentGatewayId();
+                const currentQuoteMethod = quote.paymentMethod();
+
+                if (currentQuoteMethod && currentQuoteMethod.method === this.item.method) {
+                    const isSeparatedStored = config.separated.some(gateway => gateway.gateway_id === storedGatewayId);
+
+                    if (storedGatewayId && !isSeparatedStored) {
+                        model.selectedGatewayId(storedGatewayId);
+
+                        if (!currentQuoteMethod.additional_data || currentQuoteMethod.additional_data.gateway_id !== storedGatewayId || currentQuoteMethod.additional_data.separated) {
+                            const newData = currentQuoteMethod ?? {};
+                            newData.additional_data = newData.additional_data || {};
+                            newData.additional_data.gateway_id = storedGatewayId;
+                            newData.additional_data.separated = false;
+                            quote.paymentMethod(newData);
+                        }
+                    } else {
+                        model.selectedGatewayId(null);
+
+                        if (currentQuoteMethod.additional_data && currentQuoteMethod.additional_data.gateway_id && !currentQuoteMethod.additional_data.separated) {
+                            const newData = currentQuoteMethod ?? {};
+                            newData.additional_data.gateway_id = storedGatewayId;
+                            newData.additional_data.separated = false;
+                            quote.paymentMethod(newData);
+                        }
+                    }
+                } else {
+                    model.selectedGatewayId(null);
+                }
+            }.bind(this), 250);
+
+            // Slideshow
             this.initSlideshow();
         },
 

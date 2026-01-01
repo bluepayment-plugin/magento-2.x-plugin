@@ -33,7 +33,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getOrderId()
+    public function getOrderId(): string
     {
         return $this->_getData(RefundTransactionInterface::ORDER_ID);
     }
@@ -41,7 +41,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function setOrderId($orderId)
+    public function setOrderId(string $orderId): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::ORDER_ID, $orderId);
     }
@@ -49,7 +49,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getRemoteId()
+    public function getRemoteId(): string
     {
         return $this->_getData(RefundTransactionInterface::REMOTE_ID);
     }
@@ -57,7 +57,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function setRemoteId($remoteId)
+    public function setRemoteId(string $remoteId): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::REMOTE_ID, $remoteId);
     }
@@ -65,7 +65,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getAmount()
+    public function getAmount(): float
     {
         return $this->_getData(RefundTransactionInterface::AMOUNT);
     }
@@ -73,7 +73,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function setAmount($amount)
+    public function setAmount(float $amount): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::AMOUNT, $amount);
     }
@@ -81,7 +81,7 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function getCurrency()
+    public function getCurrency(): string
     {
         return $this->_getData(RefundTransactionInterface::CURRENCY);
     }
@@ -89,25 +89,41 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * {@inheritdoc}
      */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::CURRENCY, $currency);
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getMessageId(): string
+    {
+        return $this->_getData(RefundTransactionInterface::MESSAGE_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMessageId(string $messageId): RefundTransactionInterface
+    {
+        return $this->setData(RefundTransactionInterface::MESSAGE_ID, $messageId);
+    }
+
+    /**
      * @return string
      */
-    public function getRemoteOutId()
+    public function getRemoteOutId(): string
     {
         return $this->_getData(RefundTransactionInterface::REMOTE_OUT_ID);
     }
 
     /**
-     * @param string $remoteId
+     * @param  string  $remoteId
      *
      * @return $this
      */
-    public function setRemoteOutId($remoteId)
+    public function setRemoteOutId(string $remoteId): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::REMOTE_OUT_ID, $remoteId);
     }
@@ -115,17 +131,17 @@ class RefundTransaction extends AbstractModel implements RefundTransactionInterf
     /**
      * @return bool
      */
-    public function isPartial()
+    public function isPartial(): bool
     {
         return (bool) $this->_getData(RefundTransactionInterface::IS_PARTIAL);
     }
 
     /**
-     * @param bool $isPartial
+     * @param  bool  $isPartial
      *
      * @return $this
      */
-    public function setIsPartial($isPartial)
+    public function setIsPartial(bool $isPartial): RefundTransactionInterface
     {
         return $this->setData(RefundTransactionInterface::IS_PARTIAL, $isPartial);
     }

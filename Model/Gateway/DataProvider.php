@@ -61,7 +61,7 @@ class DataProvider extends AbstractDataProvider
 
             $this->loadedData[$model->getId()] = $model->getData();
             $this->loadedData[$model->getId()]['always_separated'] = $this->isAlwaysSeparated($gatewayId);
-            $this->loadedData[$model->getId()]['static_name'] = $this->hasStaticName($gatewayId);
+            $this->loadedData[$model->getId()]['static_name'] = false;
         }
         $data = $this->dataPersistor->get('bluemedia_bluepayment_gateway');
 
@@ -85,18 +85,6 @@ class DataProvider extends AbstractDataProvider
     protected function isAlwaysSeparated(int $gatewayId): bool
     {
         return in_array($gatewayId, ConfigProvider::ALWAYS_SEPARATED);
-    }
-
-    /**
-     * Check if gateway has static name.
-     *
-     * @param  int  $gatewayId
-     *
-     * @return bool
-     */
-    protected function hasStaticName(int $gatewayId): bool
-    {
-        return in_array($gatewayId, ConfigProvider::STATIC_GATEWAY_NAME);
     }
 }
 

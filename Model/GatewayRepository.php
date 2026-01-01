@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\GatewayInterface;
 use BlueMedia\BluePayment\Api\Data\GatewayInterfaceFactory;
 use BlueMedia\BluePayment\Api\GatewayRepositoryInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway as GatewayResource;
+use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayCollectionFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
@@ -19,12 +22,17 @@ class GatewayRepository implements GatewayRepositoryInterface
     /** @var GatewayResource */
     private $resource;
 
+    /** @var GatewayCollectionFactory */
+    private $collectionFactory;
+
     public function __construct(
         GatewayInterfaceFactory $factory,
-        GatewayResource $resource
+        GatewayResource $resource,
+        GatewayCollectionFactory $collectionFactory
     ) {
         $this->factory = $factory;
         $this->resource = $resource;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
@@ -66,6 +74,29 @@ class GatewayRepository implements GatewayRepositoryInterface
         );
         if (! $gateway->getId()) {
             throw new NoSuchEntityException(__('Unable to find gateway with Entity ID "%1"', $id));
+        }
+
+        return $gateway;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getByGatewayIdAndStoreId(
+        int $gatewayId,
+        int $storeId
+    ): ?GatewayInterface {
+        $collection = $this->collectionFactory->create()
+            ->addFieldToFilter(GatewayInterface::GATEWAY_ID, $gatewayId)
+            ->addFieldToFilter(GatewayInterface::STORE_ID, $storeId)
+            ->setPageSize(1);
+
+        $gateway = $collection->getFirstItem();
+
+        if (!$gateway->getId()) {
+            throw new NoSuchEntityException(
+                __('Unable to find gateway with Gateway ID "%1" and Store ID "%2"', $gatewayId, $storeId)
+            );
         }
 
         return $gateway;

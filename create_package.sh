@@ -31,7 +31,8 @@ if [ $METADATA_VERSION == $PACKAGE_VERSION ]; then
       -x *.git* \
       -x *.DS_Store* \
       -x *create_package.sh* \
-      -x *.doc*
+      -x *.doc* \
+      -x *.aider*
 
     echo "======================================================================================================"
     echo "${green}Package ${bold}bm-bluepayment-$PACKAGE_VERSION.zip${normal}${green} created"

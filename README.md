@@ -13,7 +13,7 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.7.
+- Wersja Magento: 2.3.0 – 2.4.8.
 - Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
 
 ### [Co nowego w Autopay?](CHANGELOG.md)
@@ -225,7 +225,10 @@ Wykorzystywany szablon: `view/frontend/template/redirect.phtml`
 
 
 ## Zwroty
-Moduł umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność, poprzez fakturę korygującą (**Credit Memo on-line**) oraz bezpośrednio z zamówienia.
+Moduł umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność, poprzez fakturę korygującą (**Credit Memo on-line**) oraz bezpośrednio z zamówienia.  
+
+Zwroty wykonywane są asynchronicznie — w pierwszej kolejności składane jest zlecenie zwrotu, a następnie jest on realizowany przez system Autopay.
+Aktualizacja odbywa się poprzez CRON-a.
 
 ### Zwrot poprzez fakturę korygującą
 Żeby zlecić zwrot w ten sposób:
@@ -254,6 +257,16 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
    2. na liście transakcji
    
       ![refund3.png](docs/refund3.png)
+
+
+### Powiadomienia
+
+W przypadku niepowodzenia zwrotu moduł generuje powiadomienie w panelu administracyjnym.  
+W tym celu wymagane jest uruchomienie i aktywowanie modułu `Magento_AdminNotification`.
+
+![refund4.png](docs/refund4.png)
+
+![refund5.png](docs/refund5.png)
 
 
 ## Dostawa na wiele adresów (multishipping)

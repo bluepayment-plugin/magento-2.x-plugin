@@ -4,6 +4,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
+use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Payment;
 use Exception;
 use Magento\Checkout\Model\Session;
@@ -58,15 +59,22 @@ class Back extends Action
     public $orderCollectionFactory;
 
     /**
+     * @var ConfigProvider
+     */
+    public $configProvider;
+
+    /**
      * Back constructor.
      *
-     * @param Context $context
-     * @param PageFactory $pageFactory
-     * @param Logger $logger
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Data $helper
-     * @param OrderFactory $orderFactory
-     * @param Onepage $onepage
+     * @param  Context  $context
+     * @param  PageFactory  $pageFactory
+     * @param  Logger  $logger
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  Data  $helper
+     * @param  OrderFactory  $orderFactory
+     * @param  Onepage  $onepage
+     * @param  CollectionFactory  $orderCollectionFactory
+     * @param  ConfigProvider  $configProvider
      */
     public function __construct(
         Context $context,
@@ -76,9 +84,9 @@ class Back extends Action
         Data $helper,
         OrderFactory $orderFactory,
         Onepage $onepage,
-        CollectionFactory $orderCollectionFactory
-    )
-    {
+        CollectionFactory $orderCollectionFactory,
+        ConfigProvider $configProvider
+    ) {
         $this->helper = $helper;
         $this->pageFactory = $pageFactory;
         $this->scopeConfig = $scopeConfig;
@@ -86,6 +94,7 @@ class Back extends Action
         $this->orderFactory = $orderFactory;
         $this->onepage = $onepage;
         $this->orderCollectionFactory = $orderCollectionFactory;
+        $this->configProvider = $configProvider;
 
         parent::__construct($context);
     }
@@ -126,8 +135,13 @@ class Back extends Action
                 $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             }
 
-            /** @var Order $order */
-            $currency = strtolower($order->getOrderCurrencyCode() ?? '');
+            if ($this->configProvider->isUseBaseCurrency((int) $order->getStoreId())) {
+                /** @var Order $order */
+                $currency = strtolower($order->getBaseCurrencyCode() ?? '');
+            } else {
+                /** @var Order $order */
+                $currency = strtolower($order->getOrderCurrencyCode() ?? '');
+            }
 
             /** @var Order\Payment $payment */
             $payment = $order->getPayment();

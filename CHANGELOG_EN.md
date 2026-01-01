@@ -1,7 +1,32 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.30.0
+- We have added translations for languages: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
+## Version 2.29.0
+- We have added ReturnURL support for all transactions.
+
+## Version 2.28.0
+- We have added support for Magento 2.4.8.
+
+## Version 2.27.0
+- We have added the ability to use base currency for creating orders.
+
+## Version 2.26.2
+- We have fixed the bug with the main Autopay payment method not being displayed.
+
+## Version 2.26.1
+- We have fixed bug related to missing header in requests to pay.autopay.eu.
+- We have fixed the behavior of the module in case of no status selection for refunds.
+
+## Version 2.26.0
+- We have introduced support for gatewayList/v3, offering an even broader selection of the latest payment methods and improved gateway communication performance. The updated endpoint and expanded configuration parameters allow merchants to instantly access new, dynamically emerging payment options, resulting in higher conversion rates and an enhanced user experience.
+
+## Version 2.25.0
+- We have changed the way of creating payment returns. We have made modifications to the handling of the parameter related to the status of the return transaction (RemoteOutId - previously, the ID and status were automatically assigned when the return was generated). Currently, Magento asynchronously retrieves the status of the return using CRON.
+
 ## Version 2.24.1
-- Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
+- We have corrected an error with text translation for the Apple Pay method.
 
 ## Version 2.24.0
 - We have added possibility for asynchronous ITN processing.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Model;
 
 use BlueMedia\BluePayment\Api\Data\RefundTransactionInterface;
@@ -7,8 +9,11 @@ use BlueMedia\BluePayment\Api\Data\TransactionInterface;
 use BlueMedia\BluePayment\Api\RefundTransactionRepositoryInterface;
 use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction\Collection;
 use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction\CollectionFactory;
+use BlueMedia\BluePayment\Model\ResourceModel\RefundTransaction as RefundTransactionResource;
 use Exception;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Exception\CouldNotDeleteException;
@@ -18,6 +23,11 @@ use Magento\Sales\Api\Data\OrderInterface;
 
 class RefundTransactionRepository implements RefundTransactionRepositoryInterface
 {
+    /**
+     * @var RefundTransactionResource
+     */
+    protected $resource;
+
     /**
      * @var RefundTransactionFactory
      */
@@ -34,37 +44,48 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     protected $searchResultsFactory;
 
     /**
+     * @var SearchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
      * TransactionRepository constructor.
      *
-     * @param RefundTransactionFactory $transactionFactory
-     * @param CollectionFactory $transactionCollectionFactory
-     * @param SearchResultsInterfaceFactory $searchResultsFactory
+     * @param  RefundTransactionResource  $resource
+     * @param  RefundTransactionFactory  $transactionFactory
+     * @param  CollectionFactory  $transactionCollectionFactory
+     * @param  SearchResultsInterfaceFactory  $searchResultsFactory
+     * @param  SearchCriteriaBuilder  $searchCriteriaBuilder
      */
     public function __construct(
+        RefundTransactionResource $resource,
         RefundTransactionFactory $transactionFactory,
         CollectionFactory $transactionCollectionFactory,
-        SearchResultsInterfaceFactory $searchResultsFactory
+        SearchResultsInterfaceFactory $searchResultsFactory,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
+        $this->resource                     = $resource;
         $this->transactionFactory           = $transactionFactory;
         $this->transactionCollectionFactory = $transactionCollectionFactory;
         $this->searchResultsFactory         = $searchResultsFactory;
+        $this->searchCriteriaBuilder        = $searchCriteriaBuilder;
     }
 
     /**
-     * @param \BlueMedia\BluePayment\Api\Data\RefundTransactionInterface $object
+     * @param  RefundTransactionInterface  $refundTransaction
      *
-     * @return \BlueMedia\BluePayment\Api\Data\RefundTransactionInterface
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @return RefundTransactionInterface
+     * @throws CouldNotSaveException
      */
-    public function save(RefundTransactionInterface $object)
+    public function save(RefundTransactionInterface $refundTransaction)
     {
         try {
-            $object->save();
+            $this->resource->save($refundTransaction);
         } catch (Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
 
-        return $object;
+        return $refundTransaction;
     }
 
     /**
@@ -72,7 +93,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
      *
      * @return Collection
      */
-    public function getListForOrder(OrderInterface $order)
+    public function getListForOrder(OrderInterface $order): Collection
     {
         /** @var ResourceModel\RefundTransaction\Collection $collection */
         $collection = $this->transactionCollectionFactory->create();
@@ -83,17 +104,19 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      *
      * @return bool
+     * @throws CouldNotDeleteException
+     * @throws NoSuchEntityException
      */
-    public function deleteById($id)
+    public function deleteById(int $id): bool
     {
         return $this->delete($this->getById($id));
     }
 
     /**
-     * @param \BlueMedia\BluePayment\Api\Data\RefundTransactionInterface $object
+     * @param  RefundTransactionInterface  $object
      *
      * @return bool
      * @throws \Magento\Framework\Exception\CouldNotDeleteException
@@ -101,7 +124,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     public function delete(RefundTransactionInterface $object)
     {
         try {
-            $object->delete();
+            $this->resource->delete($object);
         } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
@@ -110,12 +133,12 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      *
-     * @return mixed
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return RefundTransaction
+     * @throws NoSuchEntityException
      */
-    public function getById($id)
+    public function getById(int $id)
     {
         /** @var \BlueMedia\BluePayment\Model\RefundTransaction $object */
         $object = $this->transactionFactory->create();
@@ -128,9 +151,9 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     }
 
     /**
-     * @param \Magento\Framework\Api\SearchCriteriaInterface $criteria
+     * @param  SearchCriteriaInterface  $criteria
      *
-     * @return mixed
+     * @return SearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $criteria)
     {
@@ -178,7 +201,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
      *
      * @return float
      */
-    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction)
+    public function getTotalRefundAmountOnTransaction(TransactionInterface $transaction): float
     {
         $total = 0.00;
 
@@ -193,4 +216,20 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
 
         return (float) $total;
     }
+
+    /**
+     * Pobierz wszystkie transakcje zwrotów o statusie 'pending'
+     *
+     * @return SearchResultsInterface
+     */
+    public function getPendingRefundTransactions(): SearchResultsInterface
+    {
+        $searchCriteria = $this->searchCriteriaBuilder
+            ->addFilter(RefundTransactionInterface::REMOTE_OUT_ID, null, 'eq')
+            ->addFilter(RefundTransactionInterface::MESSAGE_ID, null, 'neq')
+            ->create();
+
+        return $this->getList($searchCriteria);
+    }
+
 }
