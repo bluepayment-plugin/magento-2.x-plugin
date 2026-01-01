@@ -104,29 +104,4 @@ class Data extends \Magento\Payment\Helper\Data
 
         return $randomString;
     }
-
-    public function getLanguageFromLocale($locale)
-    {
-        $locales = [
-            'pl_' => 'PL', // polski
-            'en_' => 'EN', // angielski
-            'de_' => 'DE', // niemiecki
-            'cs_' => 'CS', // czeski
-            'fr_' => 'FR', // francuski
-            'it_' => 'IT', // włoski
-            'es_' => 'ES', // hiszpański
-            'sk_' => 'SK', // słowacki
-            'ro_' => 'RO', // rumuński
-            'uk_' => 'UK', // ukraiński
-            'hu_' => 'HU', // węgierski
-        ];
-
-        $prefix = substr($locale, 0, 3);
-
-        if (isset($locales[$prefix])) {
-            return $locales[$prefix];
-        }
-
-        return 'PL';
-    }
 }

@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.30.0
+- Dodanie tłumaczeń dla języków: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
 ## Wersja 2.29.0
 - Dodaliśmy obsługę ReturnURL dla wszystkich transakcji.
 

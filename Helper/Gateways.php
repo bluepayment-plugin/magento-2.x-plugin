@@ -9,6 +9,7 @@ use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Gateway;
+use BlueMedia\BluePayment\Model\LocaleMapper;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
 use Exception;
 use Magento\Framework\App\Config\Initial;
@@ -156,7 +157,7 @@ class Gateways extends Data
                                 $serviceId,
                                 $hashKey,
                                 $currency,
-                                $this->prepareLanguage($locale)
+                                LocaleMapper::getLanguageFromLocale($locale)
                             );
 
                             if (isset($loadResult['result']) && $loadResult['result'] == 'OK') {
@@ -406,8 +407,29 @@ class Gateways extends Data
      */
     protected function prepareLanguage(string $locale): string
     {
-        if ($locale == 'pl_PL') {
-            return 'PL';
+        $locales = [
+            'pl_' => 'PL', // polski
+            'en_' => 'EN', // angielski
+            'fr_' => 'FR', // francuski
+            'it_' => 'IT', // włoski
+            'de_' => 'DE', // niemiecki
+            'es_' => 'ES', // hiszpański
+            'cs_' => 'CS', // czeski
+            'ro_' => 'RO', // rumuński
+            'sk_' => 'SK', // słowacki
+            'hu_' => 'HU', // węgierski
+            'uk_' => 'UK', // ukraiński
+            'el_' => 'EL', // grecki
+            'hr_' => 'HR', // chorwacki
+            'sl_' => 'SL', // słoweński
+            'tr_' => 'TR', // turecki
+            'bg_' => 'BG', // bułgarski
+        ];
+
+        $prefix = substr($locale, 0, 3);
+
+        if (isset($locales[$prefix])) {
+            return $locales[$prefix];
         }
 
         return 'EN';

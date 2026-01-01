@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.30.0
+- We have added translations for languages: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
 ## Version 2.29.0
 - We have added ReturnURL support for all transactions.
 
