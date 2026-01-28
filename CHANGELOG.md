@@ -1,8 +1,11 @@
 # Co nowego w module bramki płatności Autopay?
 
-## Wersja 2.30.0
+## Wersja 2.31.0
 - Zaktualizowaliśmy moduł GraphQL (BluePaymentGraphQl 1.3.0) z pełną zgodnością z PHP 8.2/8.3 oraz nowymi polami w schemacie (`bank_name`, `short_description`, `min_amount`, `max_amount`).
 - Poprawiliśmy dokumentację i tabele kompatybilności.
+
+## Wersja 2.30.0
+- Dodanie tłumaczeń dla języków: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
 
 ## Wersja 2.29.0
 - Dodaliśmy obsługę ReturnURL dla wszystkich transakcji.

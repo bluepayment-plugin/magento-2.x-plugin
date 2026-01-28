@@ -421,7 +421,7 @@ bin/magento cache:flush
 
 | BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQl | Magento       | PHP         |
 |-----------------------|------------------------------|---------------|-------------|
-| 2.30.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
+| 2.31.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
 | 2.21.2                | 1.2.6                        | 2.4.2 - 2.4.5 | 7.4 - 8.1   |
 
 Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).

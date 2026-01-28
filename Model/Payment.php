@@ -465,7 +465,7 @@ class Payment extends AbstractMethod
                 'general/locale/code',
                 ScopeInterface::SCOPE_STORE
             );
-        $language = $this->helper->getLanguageFromLocale($locale);
+        $language = LocaleMapper::getLanguageFromLocale($locale);
 
         $params = [
             'ServiceID' => $serviceId,

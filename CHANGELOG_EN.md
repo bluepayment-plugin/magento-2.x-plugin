@@ -1,8 +1,11 @@
 # What's new in the Autopay payment gateway module?
 
-## Version 2.30.0
+## Version 2.31.0
 - We have updated the GraphQL module (BluePaymentGraphQl 1.3.0) with full PHP 8.2/8.3 compatibility and new schema fields (`bank_name`, `short_description`, `min_amount`, `max_amount`).
 - We have improved documentation and compatibility tables.
+
+## Version 2.30.0
+- We have added translations for languages: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
 
 ## Version 2.29.0
 - We have added ReturnURL support for all transactions.
