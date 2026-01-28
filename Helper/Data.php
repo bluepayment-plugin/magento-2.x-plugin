@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
@@ -105,7 +107,7 @@ class Data extends \Magento\Payment\Helper\Data
         return $randomString;
     }
 
-    public function getLanguageFromLocale($locale)
+    public function getLanguageFromLocale($locale): string
     {
         $locales = [
             'pl_' => 'PL', // polski

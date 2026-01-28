@@ -14,7 +14,7 @@ Do najważniejszych funkcji modułu zalicza się:
   
 ### Wymagania
 - Wersja Magento: 2.3.0 – 2.4.8.
-- Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
+- Wersja PHP: 7.4 – 8.4 (zgodna z wymaganiami danej wersji Magento).
 
 ### [Co nowego w Autopay?](CHANGELOG.md)
 
@@ -407,7 +407,24 @@ bin/magento queue:consumers:start autopay.itn.process
 
 
 ## Obsługa GraphQL oraz integracja z Magento PWA
-Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).
+Moduł posiada dedykowane rozszerzenie GraphQL umożliwiające integrację z aplikacjami headless (PWA Studio, Vue Storefront, custom frontends).
+
+### Instalacja modułu GraphQL
+```bash
+composer require bluepayment-plugin/module-bluepayment-graphql
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+### Tabela kompatybilności
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQl | Magento       | PHP         |
+|-----------------------|------------------------------|---------------|-------------|
+| 2.30.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
+| 2.21.2                | 1.2.6                        | 2.4.2 - 2.4.5 | 7.4 - 8.1   |
+
+Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).
 
 
 ## Aktualizacja
