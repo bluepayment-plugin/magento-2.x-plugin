@@ -16,7 +16,7 @@ The main functions of the module include:
 
 ### Requirements
 - Magento version: 2.3.0 - 2.4.8.
-- PHP version according to the requirements of your store version.
+- PHP version: 7.4 - 8.4 (according to the requirements of your Magento version).
 
 ### [What's new in Autopay?](CHANGELOG_EN.md)
 
@@ -267,6 +267,7 @@ This option allows you to refund money directly to the customer's account from w
 ### Notifications
 
 If the return fails, the module generates a notification in the admin panel.  
+The notification and the order comment contain a detailed reason returned by Autopay (for example, lack of funds on the Autopay balance or an exceeded transaction amount).  
 For this purpose, it is required to launch and activate the `Magento_AdminNotification` module.
 
 ![refund4.png](docs/refund4.png)
@@ -367,11 +368,26 @@ If more frequent updates are needed, a separate consumer for the queue must be s
 
 
 ## Integration with GraphQL and Magento PWA
-GraphQL module is available at:
-https://github.com/bluepayment-plugin/module-bluepayment-graphql
+The module has a dedicated GraphQL extension for integration with headless applications (PWA Studio, Vue Storefront, custom frontends).
 
-PWA Studio module is available at: 
-https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+### Installing the GraphQL module
+```bash
+composer require bluepayment-plugin/module-bluepayment-graphql
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+### Compatibility table
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQl | Magento       | PHP         |
+|-----------------------|------------------------------|---------------|-------------|
+| 2.30.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
+| 2.21.2                | 1.2.6                        | 2.4.2 - 2.4.5 | 7.4 - 8.1   |
+
+GraphQL module repository: https://github.com/bluepayment-plugin/module-bluepayment-graphql
+
+PWA Studio module is available at: https://github.com/bluepayment-plugin/bluepayment-pwa-studio
 
 
 ## Update
