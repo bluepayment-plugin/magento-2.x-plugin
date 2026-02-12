@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.31.2
+- We have fixed a bug with payment methods not being displayed after manual save.
+
 ## Version 2.31.1
 - We have fixed a return status verification notification bug.
 

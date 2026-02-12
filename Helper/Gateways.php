@@ -336,10 +336,11 @@ class Gateways extends Data
                         // For now - we support only one currency per service
                         $save = true;
 
-                        $gatewayModel->setMinAmount(isset($currencyInfo['minAmount'])
-                            ? (float) $currencyInfo['minAmount'] : null);
-                        $gatewayModel->setMaxAmount(isset($currencyInfo['maxAmount'])
-                            ? (float) $currencyInfo['maxAmount'] : null);
+                        $minAmount = isset($currencyInfo['minAmount']) ? (float) $currencyInfo['minAmount'] : 0;
+                        $maxAmount = isset($currencyInfo['maxAmount']) ? (float) $currencyInfo['maxAmount'] : 0;
+
+                        $gatewayModel->setMinAmount($minAmount > 0 ? $minAmount : null);
+                        $gatewayModel->setMaxAmount($maxAmount > 0 ? $maxAmount : null);
                     }
                 }
 

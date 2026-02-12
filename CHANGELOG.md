@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.31.2
+- Poprawiliśmy błąd z niewyświetlaniem metod płatności po ręcznym zapisaniu.
+
 ## Wersja 2.31.1
 - Poprawiliśmy działanie sprawdzania statusu zwrotu.
 
