@@ -45,6 +45,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -255,6 +256,9 @@ class Payment extends AbstractMethod
     /** @var CustomFieldResolver */
     private $customFieldResolver;
 
+    /** @var StoreManagerInterface */
+    private $storeManager;
+
     /**
      * Payment constructor.
      *
@@ -289,6 +293,7 @@ class Payment extends AbstractMethod
      * @param  SendConfirmationEmail  $sendConfirmationEmail
      * @param  ProcessNotification  $processNotification
      * @param  CustomFieldResolver  $customFieldResolver
+     * @param  StoreManagerInterface  $storeManager
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -325,6 +330,7 @@ class Payment extends AbstractMethod
         SendConfirmationEmail $sendConfirmationEmail,
         ProcessNotification $processNotification,
         CustomFieldResolver $customFieldResolver,
+        StoreManagerInterface $storeManager,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
         array $data = []
@@ -353,6 +359,7 @@ class Payment extends AbstractMethod
         $this->sendConfirmationEmail = $sendConfirmationEmail;
         $this->processNotification = $processNotification;
         $this->customFieldResolver = $customFieldResolver;
+        $this->storeManager = $storeManager;
 
         parent::__construct(
             $context,
@@ -458,7 +465,7 @@ class Payment extends AbstractMethod
                 'general/locale/code',
                 ScopeInterface::SCOPE_STORE
             );
-        $language = $this->helper->getLanguageFromLocale($locale);
+        $language = LocaleMapper::getLanguageFromLocale($locale);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -493,6 +500,8 @@ class Payment extends AbstractMethod
 
         if ($backUrl !== null) {
             $params['ReturnURL'] = $backUrl;
+        } else {
+            $params['ReturnURL'] = $this->getReturnUrl($order);
         }
 
         if ($this->configProvider->isWithPhoneEnabled() && $phone = $this->getPhoneForOrder->execute($order)) {
@@ -1281,5 +1290,13 @@ class Payment extends AbstractMethod
         }
 
         return false;
+    }
+
+    protected function getReturnUrl(
+        Order $order
+    ): string {
+        return $this->storeManager
+            ->getStore($order->getStoreId())
+            ->getUrl('bluepayment/processing/back');
     }
 }
