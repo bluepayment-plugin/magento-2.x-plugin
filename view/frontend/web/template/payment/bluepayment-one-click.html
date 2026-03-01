@@ -47,6 +47,7 @@
                             <input required
                                    data-bind="
                                        attr: {id: 'bluepayment_card_' + index, value: index},
+                                       checked: $parent.selectedCard,
                                    "
                                    name="payment_method_bluepayment_card_index"
                                    class="radio"
@@ -66,7 +67,7 @@
             </div>
         </fieldset>
 
-        <div class="one-click-agreement field choice" style="margin-bottom: 15px;" visible="selectedCard() == -1">
+        <div class="one-click-agreement field choice" style="margin-bottom: 15px;" data-bind="visible: hasSelectedCard() && Number(selectedCard()) === -1">
             <input type="checkbox"
                    name="payment_method_bluepayment_one_click_agreement"
                    value="1"
@@ -76,6 +77,14 @@
             <label for="bluepayment-one-click-agreement">
                 <span data-bind="html: oneClickAgreement"></span>
             </label>
+        </div>
+
+        <div class="bluepayment-widget-container" data-bind="visible: isWidgetEnabled() && hasSelectedCard() && Number(selectedCard()) === -1">
+            <iframe
+                class="bluepayment-widget-frame"
+                scrolling="no"
+                data-bind="attr: { id: getWidgetFrameId(), title: 'Autopay One Click Card Widget' }"
+            ></iframe>
         </div>
 
         <div class="payment-method-billing-address">

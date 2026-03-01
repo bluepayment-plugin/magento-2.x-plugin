@@ -255,17 +255,18 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getPaymentConfig(): array
     {
+        $currency = $this->getCurrentCurrencyCode();
+
         if (! $this->isGatewaySelectionEnabled()) {
             return [
                 'test_mode' => $this->isTestMode(),
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
+                'service_id' => $this->getServiceID($currency),
                 'options' => false,
                 'separated' => false,
             ];
         }
-
-        $currency = $this->getCurrentCurrencyCode();
 
         if (!isset($this->activeGateways[$currency])) {
             $resultSeparated = [];
@@ -295,6 +296,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'test_mode' => $this->isTestMode(),
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
+                'service_id' => $this->getServiceID($currency),
                 'blik_zero_enabled' => $this->blikZeroEnabled(),
                 'options' => $result,
                 'separated' => $resultSeparated,
@@ -610,10 +612,17 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected function iframePaymentEnabled(): bool
     {
-        return (bool) $this->scopeConfig->getValue(
+        $isIframePaymentEnabled = (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
             ScopeInterface::SCOPE_STORE
         );
+
+        $isWidgetDocumentationConfirmed = (bool) $this->scopeConfig->getValue(
+            'payment/bluepayment/widget_documentation_confirmed',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        return $isIframePaymentEnabled && $isWidgetDocumentationConfirmed;
     }
 
     /**

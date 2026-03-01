@@ -34,6 +34,7 @@
                 <collapsible>1</collapsible>
                 <show_manual_refund>1</show_manual_refund>
                 <blik_zero>1</blik_zero>
+                <widget_documentation_confirmed>0</widget_documentation_confirmed>
                 <with_phone>0</with_phone>
                 <async_process>0</async_process>
                 <paymentInfoKeys>bluepayment_gateway</paymentInfoKeys>

@@ -7,6 +7,7 @@ define(function () {
         testMode: config?.test_mode ?? true,
         logo: config?.logo,
         iframeEnabled: config?.iframe_enabled ?? false,
+        serviceId: Number(config?.service_id ?? 0),
         options: config?.options ?? [],
         separated: config?.separated ?? [],
         collapsible: config?.collapsible ?? false,
