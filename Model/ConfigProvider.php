@@ -612,17 +612,10 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected function iframePaymentEnabled(): bool
     {
-        $isIframePaymentEnabled = (bool) $this->scopeConfig->getValue(
+        return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/iframe_payment',
             ScopeInterface::SCOPE_STORE
         );
-
-        $isWidgetDocumentationConfirmed = (bool) $this->scopeConfig->getValue(
-            'payment/bluepayment/widget_documentation_confirmed',
-            ScopeInterface::SCOPE_STORE
-        );
-
-        return $isIframePaymentEnabled && $isWidgetDocumentationConfirmed;
     }
 
     /**
