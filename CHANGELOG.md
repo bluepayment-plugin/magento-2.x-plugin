@@ -2,6 +2,7 @@
 
 ## Wersja 2.32.0
 - Dodaliśmy tłumaczenia dla języków: NL, LT, LV, ET.
+- Przenieśliśmy płatności kartowe z iFrame do Autopay Widget (model white label) na checkout.
 
 ## Wersja 2.31.2
 - Poprawiliśmy błąd z niewyświetlaniem metod płatności po ręcznym zapisaniu.

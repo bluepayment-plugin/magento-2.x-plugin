@@ -102,6 +102,7 @@ class Payment extends AbstractMethod
         'DefaultRegulationAcceptanceState', // 51
         'DefaultRegulationAcceptanceID', // 52
         'DefaultRegulationAcceptanceTime', // 53
+        'WalletType', // 54
         'AccountHolderName', // 59
         'PlatformName', // 170
         'PlatformVersion', // 171
@@ -511,7 +512,12 @@ class Payment extends AbstractMethod
         if ($automatic === true) {
             switch ($gatewayId) {
                 case ConfigProvider::CARD_GATEWAY_ID:
-                    $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+                    if ($paymentToken !== '') {
+                        $params['PaymentToken'] = base64_encode($paymentToken);
+                        $params['WalletType'] = 'WIDGET';
+                    } else {
+                        $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+                    }
                     break;
                 case ConfigProvider::BLIK_GATEWAY_ID == $gatewayId:
                     $params['AuthorizationCode'] = $authorizationCode;
@@ -525,7 +531,7 @@ class Payment extends AbstractMethod
 
         /* Płatność automatyczna kartowa */
         if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
-            $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
+            $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex, $paymentToken);
         } else {
             $agreementId = reset($agreementsIds);
 
@@ -974,7 +980,13 @@ class Payment extends AbstractMethod
      *
      * @return array
      */
-    private function autopayGateway(array $params, bool $automatic, int $customerId, int $cardIndex): array
+    private function autopayGateway(
+        array $params,
+        bool $automatic,
+        int $customerId,
+        int $cardIndex,
+        string $paymentToken = ''
+    ): array
     {
         /** @var Card $card */
         $card = $this->cardCollectionFactory
@@ -992,7 +1004,12 @@ class Payment extends AbstractMethod
         }
 
         if ($automatic === true) {
-            $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+            if ($paymentToken !== '') {
+                $params['PaymentToken'] = base64_encode($paymentToken);
+                $params['WalletType'] = 'WIDGET';
+            } else {
+                $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+            }
         }
         return $params;
     }
