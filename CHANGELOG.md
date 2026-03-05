@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.32.0
+- Dodaliśmy tłumaczenia dla języków: NL, LT, LV, ET.
+
 ## Wersja 2.31.2
 - Poprawiliśmy błąd z niewyświetlaniem metod płatności po ręcznym zapisaniu.
 
