@@ -145,7 +145,17 @@ class Create extends Action
 
             $order = $this->orderFactory->create()->loadByIncrementId($sessionLastRealOrderSessionId);
 
-            $currency       = $order->getOrderCurrencyCode();
+            if ($this->configProvider->isUseBaseCurrency((int) $order->getStoreId())) {
+                $currency = $order->getBaseCurrencyCode();
+            } else {
+                $currency = $order->getOrderCurrencyCode();
+            }
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'currency' => $currency
+            ]);
+
             $serviceId      = $this->scopeConfig->getValue(
                 'payment/bluepayment/'.strtolower($currency).'/service_id',
                 ScopeInterface::SCOPE_STORE
@@ -192,6 +202,12 @@ class Create extends Action
 
             $this->orderRepository->save($order);
             $this->sendConfirmationEmail->execute($order);
+
+            $this->logger->info('CREATE:' . __LINE__, [
+                'orderId' => $order->getId(),
+                'gatewayId' => $gatewayId,
+                'automatic' => $automatic === true ? 'true' : 'false'
+            ]);
 
             if (ConfigProvider::CARD_GATEWAY_ID == $gatewayId && $automatic === true) {
                 $params = $this->bluepayment->getFormRedirectFields(
@@ -348,7 +364,7 @@ class Create extends Action
                 if ($paymentStatus == Payment::PAYMENT_STATUS_SUCCESS) {
                     // Got success status
 
-                    return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                    return $this->_redirect('checkout/onepage/success', ['_scope' => $order->getStoreId(), '_secure' => true]);
                 }
 
                 // Otherwise - redirect to "waiting" page
@@ -357,6 +373,7 @@ class Create extends Action
 
                 return $this->_redirect('bluepayment/processing/back', [
                     '_secure' => true,
+                    '_scope' => $order->getStoreId(),
                     '_query' => [
                         'ServiceID' => $serviceId,
                         'OrderID' => $orderId,
@@ -407,6 +424,7 @@ class Create extends Action
 
             return $this->_redirect('bluepayment/processing/back', [
                 '_secure' => true,
+                '_scope' => $order->getStoreId(),
                 '_query' => [
                     'ServiceID' => $serviceId,
                     'OrderID' => $orderId,

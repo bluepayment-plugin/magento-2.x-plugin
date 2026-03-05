@@ -4,5 +4,9 @@
         <job name="bluepayment_gateway_synchronization" instance="BlueMedia\BluePayment\Cron\Synchronization" method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
+
+        <job name="bluepayment_refund_status_updater" instance="BlueMedia\BluePayment\Cron\RefundStatusUpdater" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
     </group>
 </config>

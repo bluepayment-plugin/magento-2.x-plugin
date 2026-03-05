@@ -18,12 +18,15 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Config;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\App\ObjectManager;
 
 class ConfigProvider implements ConfigProviderInterface
 {
+    public const TYPE_PBL = 'PBL';
+    public const TYPE_FR = 'FR';
+
     public const BLIK_GATEWAY_ID = 509;
     public const BLIK_BNPL_GATEWAY_ID = 523;
     public const HUB_GATEWAY_ID = 702;
@@ -47,12 +50,6 @@ class ConfigProvider implements ConfigProviderInterface
         self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::GPAY_GATEWAY_ID,
         self::APPLE_PAY_GATEWAY_ID,
-        self::VISA_MOBILE_GATEWAY_ID,
-    ];
-
-    public const STATIC_GATEWAY_NAME = [
-        self::CARD_GATEWAY_ID,
-        self::ALIOR_INSTALLMENTS_GATEWAY_ID,
         self::VISA_MOBILE_GATEWAY_ID,
     ];
 
@@ -151,7 +148,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * ConfigProvider constructor.
      *
-     * @param GatewayCollectionFactory $gatewayCollectionFactory $gatewayCollectionFactory
+     * @param GatewayCollectionFactory $gatewayCollectionFactory
      * @param Form $block
      * @param PriceCurrencyInterface $priceCurrency
      * @param ScopeConfigInterface $scopeConfig
@@ -199,13 +196,15 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Is BlueMedia payment method in test (ACC) mode.
      *
+     * @param  int|null  $storeId
      * @return bool
      */
-    public function isTestMode(): bool
+    public function isTestMode(?int $storeId = null): bool
     {
         return (bool) $this->scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $storeId
         );
     }
 
@@ -272,7 +271,7 @@ class ConfigProvider implements ConfigProviderInterface
             $resultSeparated = [];
             $result = [];
 
-            $amount = (float) $this->checkoutSession->getQuote()->getGrandTotal();
+            $amount = $this->getGrandTotalForQuote();
 
             $gateways = $this->getActiveGateways($currency, (float) $amount);
 
@@ -339,10 +338,35 @@ class ConfigProvider implements ConfigProviderInterface
      * Get active currency code.
      *
      * @return string
+     * @throws NoSuchEntityException
      */
     public function getCurrentCurrencyCode(): string
     {
+        if ($this->isUseBaseCurrency()) {
+            return $this->storeManager->getStore()->getBaseCurrency()->getCode();
+        }
+
         return $this->priceCurrency->getCurrency()->getCurrencyCode();
+    }
+
+    /**
+     * Check if base currency is used for transactions.
+     *
+     * @return bool
+     */
+    /**
+     * Check if base currency should be used for transactions
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isUseBaseCurrency(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/use_base_currency',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     /**
@@ -362,6 +386,7 @@ class ConfigProvider implements ConfigProviderInterface
             'gateway_id' => $gateway->getGatewayId(),
             'name' => $gateway->getName(),
             'bank' => $gateway->getBankName(),
+            'short_description' => $gateway->getShortDescription(),
             'description' => $gateway->getDescription(),
             'sort_order' => $gateway->getSortOrder(),
             'type' => $gateway->getType(),
@@ -457,6 +482,68 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get service ID.
+     *
+     * @param  string  $currency
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getServiceID(string $currency = 'PLN', ?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/service_id',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get shared key.
+     *
+     * @param  string  $currency
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getSharedKey(string $currency = 'PLN', ?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get hash separator.
+     *
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getHashSeparator(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_separator',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get hash algorithm.
+     *
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getHashAlgorithm(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/hash_algorithm',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?? 'sha256';
+    }
+
+    /**
      * Get active gateways
      *
      * @param string $currency
@@ -545,17 +632,17 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get order statuses that cannot be changed
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return array
      */
-    public function getUnchangableStatuses(?StoreInterface $store = null): array
+    public function getUnchangableStatuses(?int $storeId = null): array
     {
         return explode(
             ',',
             $this->scopeConfig->getValue(
                 'payment/bluepayment/unchangeable_statuses',
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             ) ?: ''
         );
     }
@@ -563,46 +650,76 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get status for order with waiting payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusWaitingPayment(?StoreInterface $store = null): ?string
+    public function getStatusWaitingPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_waiting_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with error payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusErrorPayment(?StoreInterface $store = null): ?string
+    public function getStatusErrorPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_error_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PENDING_PAYMENT);
     }
 
     /**
      * Get status for order with success payment
      *
-     * @param StoreInterface|null $store
+     * @param int|null $storeId
      * @return string|null
      */
-    public function getStatusSuccessPayment(?StoreInterface $store = null): ?string
+    public function getStatusSuccessPayment(?int $storeId = null): ?string
     {
         return $this->scopeConfig->getValue(
             'payment/bluepayment/status_accept_payment',
             ScopeInterface::SCOPE_STORE,
-            $store
+            $storeId
         ) ?? $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING);
+    }
+
+    /**
+     * Get status for order with partial refund
+     *
+     * @param  int|null  $storeId
+     * @return string|null
+     */
+    public function getStatusPartialRefund(?int $storeId = null): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_partial_refund',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get status for order with full refund
+     *
+     * @param  int|null  $storeId
+     * @return string|null
+     */
+    public function getStatusFullRefund(?int $storeId = null): ?string
+    {
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/status_full_refund',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     /**
@@ -656,5 +773,63 @@ class ConfigProvider implements ConfigProviderInterface
             'payment/bluepayment/with_phone',
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    /**
+     * Returns current configuration for alior installments.
+     *
+     * @return string 'one' or 'zero'
+     */
+    public function getAliorInstallments(): string
+    {
+        $value = (string) $this->scopeConfig->getValue(
+            'payment/bluepayment/alior_installments',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        if (!in_array($value, ['one', 'zero'])) {
+            return 'one';
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  int|null  $storeId
+     * @return string
+     */
+    public function getRefundStatusUrl(?int $storeId = null): string
+    {
+        if ($this->isTestMode($storeId)) {
+            return $this->scopeConfig->getValue(
+                'payment/bluepayment/refund_status_url_test',
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            );
+        }
+
+        return $this->scopeConfig->getValue(
+            'payment/bluepayment/refund_status_url_prod',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    public function isAsyncProcess(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'payment/bluepayment/async_process',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    protected function getGrandTotalForQuote(): float
+    {
+        $quote = $this->checkoutSession->getQuote();
+
+        if ($this->isUseBaseCurrency()) {
+            return (float) $quote->getBaseGrandTotal();
+        }
+        return (float) $quote->getGrandTotal();
     }
 }

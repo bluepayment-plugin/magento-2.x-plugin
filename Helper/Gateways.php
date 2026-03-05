@@ -9,6 +9,7 @@ use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Gateway;
+use BlueMedia\BluePayment\Model\LocaleMapper;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
 use Exception;
 use Magento\Framework\App\Config\Initial;
@@ -145,13 +146,31 @@ class Gateways extends Data
                         $tryCount = 0;
                         $loadResult = false;
                         while (!$loadResult) {
-                            $loadResult = $this->webapi->gatewayList($serviceId, $hashKey, $currency);
+
+                            $locale = $this->scopeConfig->getValue(
+                                \Magento\Directory\Helper\Data::XML_PATH_DEFAULT_LOCALE,
+                                ScopeInterface::SCOPE_STORE,
+                                $store->getCode()
+                            );
+
+                            $loadResult = $this->webapi->gatewayList(
+                                $serviceId,
+                                $hashKey,
+                                $currency,
+                                LocaleMapper::getLanguageFromLocale($locale)
+                            );
 
                             if (isset($loadResult['result']) && $loadResult['result'] == 'OK') {
+                                $groups = [];
+                                foreach ($loadResult['gatewayGroups'] as $group) {
+                                    $groups[$group['type']] = $group;
+                                }
+
                                 $result['success'] = $this->saveGateways(
                                     $serviceId,
                                     $store,
                                     $loadResult['gatewayList'],
+                                    $groups,
                                     $existingGateways,
                                     $currency
                                 );
@@ -250,6 +269,7 @@ class Gateways extends Data
         int $serviceId,
         StoreInterface $store,
         array $gatewayList,
+        array $groups,
         array $existingGateways,
         string $currency = 'PLN'
     ): bool {
@@ -260,12 +280,13 @@ class Gateways extends Data
             $gateway = (array) $gateway;
 
             if (isset($gateway['gatewayID'])
-                && isset($gateway['gatewayName'])
-                && isset($gateway['gatewayType'])
+                && isset($gateway['name'])
+                && isset($gateway['groupType'])
                 && isset($gateway['bankName'])
                 && isset($gateway['stateDate'])
             ) {
                 $gatewayId = $gateway['gatewayID'];
+                $groupType = $gateway['groupType'];
                 $currentlyActiveGatewayIDs[] = $gatewayId;
 
                 if (isset($existingGateways[$storeId][$currency][$gatewayId])) {
@@ -281,31 +302,45 @@ class Gateways extends Data
                     in_array($gateway['gatewayID'], ConfigProvider::ALWAYS_SEPARATED)
                     || ($gateway['gatewayID'] == ConfigProvider::BLIK_GATEWAY_ID && $this->isBlikZeroEnabled($store))) {
                     $gatewayModel->setIsSeparatedMethod(true);
+                } else {
+                    // If it's not PBL or FR - set as separated method
+                    if (! in_array($gateway['groupType'], [ConfigProvider::TYPE_PBL, ConfigProvider::TYPE_FR])) {
+                        $gatewayModel->setIsSeparatedMethod(true);
+                    }
                 }
 
-                $gatewayModel->setName($gateway['gatewayName']);
+                $gatewayModel->setName($gateway['name']);
                 $gatewayModel->setStoreId($storeId);
                 $gatewayModel->setServiceId($serviceId);
                 $gatewayModel->setCurrency($currency);
                 $gatewayModel->setGatewayId((int) $gateway['gatewayID']);
                 $gatewayModel->setStatus($gateway['state'] == 'OK');
                 $gatewayModel->setBankName($gateway['bankName']);
-                $gatewayModel->setType($gateway['gatewayType']);
-                $gatewayModel->setLogoUrl($gateway['iconURL'] ?? null);
+                $gatewayModel->setType($gateway['groupType']);
+                $gatewayModel->setLogoUrl($gateway['iconUrl'] ?? '');
                 $gatewayModel->setData('status_date', $gateway['stateDate']);
 
+                $gatewayModel->setDescription(
+                    $gateway['description'] ?? $groups[$groupType]['description'] ?? ''
+                );
+                $gatewayModel->setShortDescription(
+                    $gateway['shortDescription'] ?? $groups[$groupType]['shortDescription'] ?? ''
+                );
+                $gatewayModel->setRequiredParams($gateway['requiredParams'] ?? []);
+
                 $save = false;
-                foreach ($gateway['currencyList'] as $currencyInfo) {
+                foreach ($gateway['currencies'] as $currencyInfo) {
                     $currencyInfo = (array) $currencyInfo;
 
                     if ($currencyInfo['currency'] == $currency) {
                         // For now - we support only one currency per service
                         $save = true;
 
-                        $gatewayModel->setMinAmount(isset($currencyInfo['minAmount'])
-                            ? (float) $currencyInfo['minAmount'] : null);
-                        $gatewayModel->setMaxAmount(isset($currencyInfo['maxAmount'])
-                            ? (float) $currencyInfo['maxAmount'] : null);
+                        $minAmount = isset($currencyInfo['minAmount']) ? (float) $currencyInfo['minAmount'] : 0;
+                        $maxAmount = isset($currencyInfo['maxAmount']) ? (float) $currencyInfo['maxAmount'] : 0;
+
+                        $gatewayModel->setMinAmount($minAmount > 0 ? $minAmount : null);
+                        $gatewayModel->setMaxAmount($maxAmount > 0 ? $maxAmount : null);
                     }
                 }
 

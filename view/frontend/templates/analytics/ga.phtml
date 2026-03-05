@@ -1,5 +1,6 @@
 <?php
-/** @var $block \BlueMedia\BluePayment\Block\Analytics\Ga */
+/** @var \BlueMedia\BluePayment\Block\Analytics\Ga $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
 
 $accountId = $block->getAccountId();
 $accountIdGa4 = $block->getAccountIdGa4();
@@ -27,26 +28,31 @@ $accountIdGa4 = $block->getAccountIdGa4();
             src="https://www.googletagmanager.com/gtag/js?id=<?= $block->escapeHtmlAttr($accountIdGa4) ?>">
     </script>
 
-    <script>
-        window.dataLayer = window.dataLayer || [];
+    <?php
+    $content = <<<JS
+window.dataLayer = window.dataLayer || [];
+function gtag () {
+    dataLayer.push(arguments);
+}
 
-        function gtag () {
-            dataLayer.push(arguments);
-        }
+gtag('js', new Date());
+gtag('set', {'currency': '{$block->getCurrency()}'});
+gtag(
+    'config',
+    '{$block->escapeHtmlAttr($accountIdGa4)}'
+);
+JS;
 
-        gtag('js', new Date());
+    if ($block->isAnonymizedIpActive()) {
+        $content .= "\n gtag('set', {'anonymize_ip': true});";
+    }
+    ?>
 
-        gtag('set', {'currency': '<?= /** @noEscape */ $block->getCurrency() ?>'});
-
-        <?php if ($block->isAnonymizedIpActive()): ?>
-            gtag('set', {'anonymize_ip': true});
-        <?php endif; ?>
-
-        gtag(
-            'config',
-            '<?= $block->escapeHtmlAttr($accountIdGa4) ?>'
-        );
-    </script>
+    <?php if (isset($secureRenderer)): ?>
+        <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $content, false); ?>
+    <?php else: ?>
+        <?= /* @noEscape */ "<script>" . $content . "</script>" ?>
+    <?php endif; ?>
 
     <script type="text/x-magento-init">
     {

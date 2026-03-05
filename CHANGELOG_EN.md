@@ -1,9 +1,76 @@
-# What's new in BluePayment?
+# What's new in the Autopay payment gateway module?
+
+## Version 2.31.2
+- We have fixed a bug with payment methods not being displayed after manual save.
+
+## Version 2.31.1
+- We have fixed a return status verification notification bug.
+
+## Version 2.31.0
+- We have updated the GraphQL module (BluePaymentGraphQl 1.3.0) with full PHP 8.2/8.3 compatibility and new schema fields (`bank_name`, `short_description`, `min_amount`, `max_amount`).
+- We have improved documentation and compatibility tables.
+
+## Version 2.30.0
+- We have added translations for languages: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
+## Version 2.29.0
+- We have added ReturnURL support for all transactions.
+
+## Version 2.28.0
+- We have added support for Magento 2.4.8.
+
+## Version 2.27.0
+- We have added the ability to use base currency for creating orders.
+
+## Version 2.26.2
+- We have fixed the bug with the main Autopay payment method not being displayed.
+
+## Version 2.26.1
+- We have fixed bug related to missing header in requests to pay.autopay.eu.
+- We have fixed the behavior of the module in case of no status selection for refunds.
+
+## Version 2.26.0
+- We have introduced support for gatewayList/v3, offering an even broader selection of the latest payment methods and improved gateway communication performance. The updated endpoint and expanded configuration parameters allow merchants to instantly access new, dynamically emerging payment options, resulting in higher conversion rates and an enhanced user experience.
+
+## Version 2.25.0
+- We have changed the way of creating payment returns. We have made modifications to the handling of the parameter related to the status of the return transaction (RemoteOutId - previously, the ID and status were automatically assigned when the return was generated). Currently, Magento asynchronously retrieves the status of the return using CRON.
+
+## Version 2.24.1
+- We have corrected an error with text translation for the Apple Pay method.
+
+## Version 2.24.0
+- We have added possibility for asynchronous ITN processing.
+- We have added a lock on the orders table in case of multiple ITN calls.
+
+## Version 2.23.0
+- We have added FirstName and LastName to transaction start parameters.
+
+## Version 2.22.11
+- We have fixed the bug related to forcing int in Payment.php
+- We have fixed a bug in translations
+
+## Version 2.22.10
+- Fix typo in config.xml
+
+## Version 2.22.9
+- We removed the place-order.js override (submission #12).
+
+## Version 2.22.8
+- We have added support for Amasty's One Step Checkout module.
+- We have added the option to set a link to the relevant calculator (0 or 1%) for "Alior Instalments".
+- Poprawiliśmy działanie Google Pay.
+
+## Version 2.22.7
+- We have added support for Magento 2.4.7.
+- We have fixed issue with CSP for Analytics.
+- We have fixed error if logo URL is empty in gateway list response.
+- We have updated the information for BLIK Pay Later payment.
 
 ## Version 2.22.6
 - We have added the ability to include a phone number for payment start.
 - We have added new entries (for photos) to CSP whitelist.
 - We have fixed a bug with multiple email sending for Google Pay / BLIK 0 / Card payment.
+- We have fixed a bug with wrong redirect when "Add Store Code to URLs" was set to true (credits @piotrmatras).
 
 ## Version 2.22.5
 - We have fixed support for Magneto 2.4.6 (Zend -> Laminas change).

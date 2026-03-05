@@ -3,6 +3,8 @@
 namespace BlueMedia\BluePayment\Api;
 
 use BlueMedia\BluePayment\Exception\ResponseException;
+use BlueMedia\BluePayment\Logger\Logger;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\HTTP\Client\Curl;
 use SimpleXMLElement;
 
@@ -36,6 +38,7 @@ class Client implements ClientInterface
     public function call(string $uri, array $params)
     {
         $this->curl->addHeader('BmHeader', 'pay-bm');
+        $this->curl->addHeader('Content-Type', 'application/x-www-form-urlencoded');
         $this->curl->post($uri, $params);
         $response = $this->curl->getBody();
 

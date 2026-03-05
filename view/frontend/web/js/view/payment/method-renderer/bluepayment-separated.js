@@ -4,12 +4,16 @@ define([
     'Magento_Checkout/js/model/quote',
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-abstract',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment',
+    'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
+    'BlueMedia_BluePayment/js/checkout-data' // <-- Add checkoutData
 ], function (
     ko,
     $t,
     quote,
     Component,
     model,
+    config,
+    checkoutData
 ) {
     'use strict';
 
@@ -20,6 +24,51 @@ define([
             gateway_logo_url: null,
             gateway_name: null,
             gateway_description: null,
+        },
+
+        grandTotalAmount: ko.observable(0),
+
+        /**
+         * Subscribe to grand totals
+         */
+        initObservable: function () {
+            this._super();
+
+            this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+            quote.totals.subscribe(function () {
+                if (this.grandTotalAmount() !== quote.totals()['base_grand_total']) {
+                    this.grandTotalAmount(parseFloat(quote.totals()['base_grand_total']).toFixed(2));
+                }
+            }.bind(this));
+
+            return this;
+        },
+
+        /**
+         * Initialize component
+         */
+        initialize: function () {
+            this._super();
+
+            // Defer checks until quote is likely loaded
+            _.defer(function () {
+                const storedGatewayId = checkoutData.getBluepaymentGatewayId();
+                const currentQuoteMethod = quote.paymentMethod();
+
+                // If bluepayment is the method and the stored ID matches this component
+                if (currentQuoteMethod && currentQuoteMethod.method === this.item.method && storedGatewayId === this.gateway_id) {
+                    // Ensure the quote data reflects this specific separated method selection
+                    if (!currentQuoteMethod.additional_data || currentQuoteMethod.additional_data.gateway_id !== this.gateway_id || !currentQuoteMethod.additional_data.separated) {
+                        const newData = currentQuoteMethod ?? {};
+                        newData.additional_data = newData.additional_data || {};
+                        newData.additional_data.gateway_id = this.gateway_id;
+                        newData.additional_data.separated = true;
+                        quote.paymentMethod(newData);
+                    }
+                }
+            }.bind(this));
+
+            return this;
         },
 
         /**
@@ -62,20 +111,6 @@ define([
          * @returns {string|null}
          */
         getGatewayTitle: function () {
-            let gatewayId = Number(this.gateway_id);
-
-            if (gatewayId === model.gatewaysIds.card) {
-                return $t('Card Payment');
-            }
-
-            if (gatewayId === model.gatewaysIds.alior_installments) {
-                return $t('Spread the cost over installments');
-            }
-
-            if (gatewayId === model.gatewaysIds.visa_mobile) {
-                return $t('Visa Mobile');
-            }
-
             return this.gateway_name;
         },
 
@@ -84,24 +119,8 @@ define([
          *
          * @returns {string|null}
          */
-        getGatewayDescription: function () {
-            let gatewayId = Number(this.gateway_id);
-
-            if (gatewayId === model.gatewaysIds.alior_installments) {
-                return $t('Pay for your purchases using convenient instalments. %1')
-                    .replace('%1', '<a href="https://kalkulator.raty.aliorbank.pl/init?supervisor=B776&promotionList=B" target="_blank">' + $t('Learn more') + '</a>');
-            }
-
-            if (gatewayId === model.gatewaysIds.paypo) {
-                return $t('Pick up your purchases, check them out and pay later &mdash; in 30 days or in convenient installments. %1')
-                    .replace('%1', '<a href="https://start.paypo.pl/" target="_blank">' + $t('Learn more') + '</a>');
-            }
-
-            if (gatewayId === model.gatewaysIds.visa_mobile) {
-                return $t('Enter the phone number and confirm the payment in the mobile app.');
-            }
-
-            return this.gateway_description;
+        getGatewayShortDescription: function () {
+            return this.gateway_short_description;
         },
 
         /**
@@ -110,17 +129,7 @@ define([
          * @returns {string|null}
          */
         getGatewayHelp: function () {
-            let gatewayId = Number(this.gateway_id);
-
-            if (gatewayId === model.gatewaysIds.alior_installments) {
-                return $t("You will be redirected to the bank's website. After your application and positive verification, the bank will send you a loan agreement by email. You can accept it online. Average time of the whole transaction - 15 minutes.");
-            }
-
-            if (gatewayId === model.gatewaysIds.paypo) {
-                return $t("You will be redirected to PayPo's partner website.");
-            }
-
-            return null;
+            return this.gateway_description;
         },
     });
 });

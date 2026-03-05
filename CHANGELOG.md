@@ -1,9 +1,79 @@
-# Co nowego w BluePayment?
+# Co nowego w module bramki płatności Autopay?
+
+## Wersja 2.32.0
+- Dodaliśmy tłumaczenia dla języków: NL, LT, LV, ET.
+
+## Wersja 2.31.2
+- Poprawiliśmy błąd z niewyświetlaniem metod płatności po ręcznym zapisaniu.
+
+## Wersja 2.31.1
+- Poprawiliśmy działanie sprawdzania statusu zwrotu.
+
+## Wersja 2.31.0
+- Zaktualizowaliśmy moduł GraphQL (BluePaymentGraphQl 1.3.0) z pełną zgodnością z PHP 8.2/8.3 oraz nowymi polami w schemacie (`bank_name`, `short_description`, `min_amount`, `max_amount`).
+- Poprawiliśmy dokumentację i tabele kompatybilności.
+
+## Wersja 2.30.0
+- Dodanie tłumaczeń dla języków: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
+## Wersja 2.29.0
+- Dodaliśmy obsługę ReturnURL dla wszystkich transakcji.
+
+## Wersja 2.28.0
+- Dodaliśmy wsparcie dla Magento 2.4.8.
+
+## Wersja 2.27.0
+- Dodaliśmy możliwość korzystania z waluty bazowej do tworzenia zamówień.
+
+## Wersja 2.26.2
+- Poprawiliśmy błąd z brakiem wyświetlania głównej metody płatności Autopay.
+
+## Wersja 2.26.1
+- Poprawiliśmy błąd związany z brakiem nagłówka przy zapytaniach do pay.autopay.eu.
+- Poprawiliśmy zachowanie modułu w przypadku braku wyboru statusu dla zwrotów.
+
+## Wersja 2.26.0
+- Wprowadziliśmy obsługę gatewayList/v3, która zapewnia jeszcze szerszy wachlarz najnowszych metod płatności oraz wyższą wydajność komunikacji z bramkami. Zaktualizowany endpoint i rozszerzone parametry konfiguracyjne umożliwiają sprzedawcom natychmiastowy dostęp do nowych, dynamicznie pojawiających się opcji płatności, co przekłada się na wyższą konwersję i lepsze doświadczenie użytkownika.
+
+## Wersja 2.25.0
+- Zmieniliśmy sposób tworzenia zwrotów płatności. Dokonaliśmy modyfikacji w zarządzaniu parametrem związanym ze statusem transakcji zwrotu (RemoteOutId – dotychczas identyfikator i status były automatycznie przypisywane przy generowaniu zwrotu). Aktualnie Magento asynchronicznie pobiera status zwrotu za pomocą CRONa.
+
+## Wersja 2.24.1
+- Poprawiliśmy błąd z tłumaczeniem tekstów dla metody Apple Pay.
+
+## Wersja 2.24.0
+- Dodaliśmy możliwość asynchronicznego przetwarzania ITN.
+- Dodaliśmy lock na tabeli zamówień w przypadku wielokrotnego wywołania ITN.
+
+## Wersja 2.23.0
+- Dodaliśmy FirstName oraz LastName do parametrów startu transakcji.
+
+## Wersja 2.22.11
+- Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
+- Poprawiliśmy błąd w tłumaczeniach
+
+## Wersja 2.22.10
+- Poprawienie literówki w config.xml
+
+## Wersja 2.22.9
+- Usunęliśmy nadpisanie place-order.js (zgłoszenie #12).
+
+## Wersja 2.22.8
+- Dodaliśmy wsparcie dla modułu Amasty One Step Checkout.
+- Dodaliśmy opcję ustawienia linku do odpowiedniego kalkulatora (0 lub 1%) dla "Alior Raty".
+- Poprawiliśmy działanie Google Pay.
+
+## Wersja 2.22.7
+- Dodaliśmy wsparcie dla Magento 2.4.7.
+- Naprawiliśmy błąd z CSP dla Analytics.
+- Naprawiliśmy błąd, jeśli adres URL logo jest pusty w odpowiedzi na listę bramek.
+- Zaktualizowaliśmy treści dla płatności BLIK Płacę Później.
 
 ## Wersja 2.22.6
 - Dodaliśmy możliwość dołączenia numeru telefonu dla startu płatności.
 - Dodaliśmy nowe ustawienia (dot. zdjęcia) do białej listy CSP.
 - Poprawiliśmy błąd z wielokrotną wysyłką e-maila przy płatności Google Pay / BLIK 0 / Kartą.
+- Naprawiliśmy błąd z nieprawidłowym przekierowaniem, gdy opcja "Dodaj kod sklepu do adresu URL" była ustawiona na wartość true (dzięki @piotrmatras).
 
 ## Wersja 2.22.5
 - Poprawiliśmy wsparcie dla Magneto 2.4.6 (zmiana Zend -> Laminas).

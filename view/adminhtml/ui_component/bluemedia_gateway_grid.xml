@@ -151,15 +151,6 @@
                 </editor>
             </settings>
         </column>
-        <column name="gateway_description" sortOrder="100">
-            <settings>
-                <filter>text</filter>
-                <label translate="true">Gateway Description</label>
-                <editor>
-                    <editorType>text</editorType>
-                </editor>
-            </settings>
-        </column>
         <column name="gateway_sort_order" sortOrder="110">
             <settings>
                 <filter>text</filter>

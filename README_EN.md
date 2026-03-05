@@ -1,4 +1,4 @@
-# The manual of „Autopay” module for Magento 2
+# The manual of "Autopay" module for Magento 2
 
 ## Basic information
 The Autopay Online Payment Plugin for Magento is the easiest way to allow your online store customers use the most popular payment methods. When integrated with the store, the plugin offers the possibility to add over 400 banks to the payment options.
@@ -15,10 +15,11 @@ The main functions of the module include:
 
 
 ### Requirements
-- Magento version: 2.3.0 - 2.4.6.
-- PHP version according to the requirements of your store version.
+- Magento version: 2.3.0 - 2.4.8.
+- PHP version: 7.4 - 8.4 (according to the requirements of your Magento version).
 
 ### [What's new in Autopay?](CHANGELOG_EN.md)
+
 
 ## Installation
 
@@ -147,18 +148,6 @@ Refresh the cache after each configuration edit. To do this:
    ![configuration2.png](docs/configuration2.png "Screenshot")
 
 
-## iFrame payment
-An option that allows customers to make a card payment without leaving the store and leaving the shopping process. The implementation of this form of payment, due to the requirements related to the security of the transaction processing, requires two additional documents: SAQ A and a site audit.
-
-![iframe1.png](docs/iframe1.png)
-
-### Activate iFrame payments
-1. Go to [Module configuration](#configuration).
-2. Select **Enable** for **Iframe Payment** option.
-3. Go to edit the channel with ID *1500* and bank name *Karty*.
-4. Check **Is separated method** option.
-5. [Refresh cache](#refresh-cache)
-
 ## BLIK 0
 BLIK "in-store" is characterized by the fact that the transaction security code must be entered directly on the store's website - in the last step of the shopping process.
 
@@ -171,6 +160,7 @@ BLIK "in-store" is characterized by the fact that the transaction security code 
 4. Check **Is separated method** option.
 5. [Refresh cache](#refresh-cache)
 
+
 ## Google Pay
 This option allows you to pay with Google Pay directly on the store page - in the last step of the shopping process.
 
@@ -178,6 +168,7 @@ This option allows you to pay with Google Pay directly on the store page - in th
 
 ### Activating Google Pay
 Google Pay is **default activated and always displayed** as a separate payment method.
+
 
 ## Automatic payments
 
@@ -205,6 +196,7 @@ The customer can remove the stored cards from his/her account in your online sto
    ![automatic2.png](docs/automatic2.png)
 5. Click **Remove** and confirm.
 
+
 ## Generating orders from the administration panel
 The module allows you to send a link to the payment to the customer for orders created directly in the administration panel. To do this, select the payment method **Autopay** when creating an order.
 
@@ -214,6 +206,7 @@ Payment link will be sent by Autopay to the e-mail address visible in the client
 
 ![admin2.png](docs/admin2.png)
 
+
 ## E-mail templates
 For messages:
 - email_creditmemo_set_template_vars_before
@@ -222,6 +215,7 @@ For messages:
 - email_shipment_set_template_vars_before
 module extends the list of available variables with **payment_channel**. Example usage in the template:
 `{{var payment_channel|raw}}`
+
 
 ## Redirection waiting page
 The module allows you to add an intermediate page, displayed before the user is redirected to the payment itself. This feature can be used for example for e-commerce tracking in Google Analytics.
@@ -236,8 +230,12 @@ To activate the redirection waiting page:
 3. Fill **Seconds to wait before redirect** – to specify how long the page should be displayed.
 4. [Refresh cache](#refresh-cache)
 
+
 ## Refunds
 The module allows you to refund money directly to the customer's account from which the payment was sent, via a **Credit Memo on-line** and directly from the order.
+
+Refunds are performed asynchronously - first a refund order is placed, and then it is processed by the Autopay system.  
+Updating is done via CRON.
 
 ### Via a Credit Memo on-line
 To refund this way:
@@ -266,6 +264,15 @@ This option allows you to refund money directly to the customer's account from w
    
       ![refund3.png](docs/refund3.png)
 
+### Notifications
+
+If the return fails, the module generates a notification in the admin panel.  
+The notification and the order comment contain a detailed reason returned by Autopay (for example, lack of funds on the Autopay balance or an exceeded transaction amount).  
+For this purpose, it is required to launch and activate the `Magento_AdminNotification` module.
+
+![refund4.png](docs/refund4.png)
+
+![refund5.png](docs/refund5.png)
 
 ## Delivery to multiple addresses (multishipping)
 This module allows you to pay for orders placed using the multishipping functionality.
@@ -275,8 +282,9 @@ The payment module itself does not require any additional steps. Autopay payment
 
 **NOTE!**
 
-The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run iFrame, Google Pay and BLIK 0 payments.
+The module in multishipping mode supports ONLY the display of available payment channels on the store page and automatic payments. It is not possible to run Google Pay and BLIK 0 payments.
 For multishipping orders, the OrderID in messages to the customer and in the portal.autopay.eu panel will be the cart number with the QUOTE_ prefix, not the order number.
+
 
 ## Information about payment
 Information about the payment channel selected by the customer is visible from the Order grid.
@@ -286,6 +294,7 @@ The text information about the payment channel will be visible in the table.
 Information about the selected payment channel is stored in the database:
 - in the **blue_gateway_id** (channel id) and **payment_channel** (channel name) column in the **sales_order** table,
 - in the **payment_channel** (channel name) column in the **sales_order_grid** table.
+
 
 ## Custom event
 Option available since version 2.19.0.
@@ -336,12 +345,50 @@ The option is triggered automatically only for new module installations - in cas
 ![cf6.png](docs/cf6.png "Screenshot")
 
 
-## Integration with GraphQL and Magento PWA
-GraphQL module is available at:
-https://github.com/bluepayment-plugin/module-bluepayment-graphql
+## Asynchronous ITN processing
+Option available since version 2.24.0.
 
-PWA Studio module is available at: 
-https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+The module allows asynchronous processing of ITN (Instant Transaction Notification) notifications sent by the Autopay system after the completion of a transaction. Enabling this option means that ITN notifications will be processed in the background, which can be useful in scenarios with higher loads or specific requirements for handling notifications. It also resolves the issue of “status races.”
+
+By default, the Autopay module uses queuing with MySQL (connection “db”). If you wish to use RabbitMQ instead, queue configuration adjustments are required as per the instructions.
+
+> To use this functionality, Magento must have the Magento_MessageQueue and Magento_MysqlMq or Magento_Amqp modules enabled.  
+> CRON must also be properly configured as per the Magento documentation.
+
+**NOTE!**
+When using the standard CRON configuration,
+the status update may take up to a minute, depending on the CRON execution frequency.
+If more frequent updates are needed, a separate consumer for the queue must be started:
+
+### Activation
+
+1. Go to **module configuration**.
+2. Ustaw **Enable** for option **Asynchronous process ITN**
+3. [Refresh cache](#refresh-cache)
+
+
+## Integration with GraphQL and Magento PWA
+The module has a dedicated GraphQL extension for integration with headless applications (PWA Studio, Vue Storefront, custom frontends).
+
+### Installing the GraphQL module
+```bash
+composer require bluepayment-plugin/module-bluepayment-graphql
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+### Compatibility table
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQl | Magento       | PHP         |
+|-----------------------|------------------------------|---------------|-------------|
+| 2.31.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
+| 2.21.2                | 1.2.6                        | 2.4.2 - 2.4.5 | 7.4 - 8.1   |
+
+GraphQL module repository: https://github.com/bluepayment-plugin/module-bluepayment-graphql
+
+PWA Studio module is available at: https://github.com/bluepayment-plugin/bluepayment-pwa-studio
+
 
 ## Update
 
@@ -365,6 +412,7 @@ bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 4. The module is already active.
+
 
 ## Deactivate module
 

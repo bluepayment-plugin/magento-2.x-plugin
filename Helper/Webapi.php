@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Helper;
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Cache\AgreementsCache;
+use BlueMedia\BluePayment\Model\LocaleMapper;
 use Exception;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config\Initial;
@@ -125,16 +126,21 @@ class Webapi extends Data
      * @param  int  $serviceId
      * @param  string  $sharedKey
      * @param  string  $currency
-     *
+     * @param  string  $language // PL, EN for now
      * @return array|bool
      */
-    public function gatewayList(int $serviceId, string $sharedKey, string $currency)
-    {
+    public function gatewayList(
+        int $serviceId,
+        string $sharedKey,
+        string $currency,
+        string $language
+    ) {
         $messageId = $this->randomString(self::MESSAGE_ID_STRING_LENGTH);
         $data = [
             'ServiceID' => $serviceId,
             'MessageID' => $messageId,
-            'Currencies' => $currency
+            'Currencies' => $currency,
+            'Language' => $language,
         ];
 
         return $this->callAPI(
@@ -169,7 +175,7 @@ class Webapi extends Data
                 'ServiceID' => $serviceId,
                 'MessageID' => $this->randomString(self::MESSAGE_ID_STRING_LENGTH),
                 'GatewayID' => $gatewayId,
-                'Language' => $this->getLanguageFromLocale($locale)
+                'Language' => LocaleMapper::getLanguageFromLocale($locale)
             ],
             $sharedKey,
             $this->getLegalDataUrl()
@@ -185,14 +191,14 @@ class Webapi extends Data
         return $result;
     }
 
-    public function transactionStatus(int $serviceId, string $orderId, string $currency, StoreInterface $store)
+    public function transactionStatus(string $serviceId, string $orderId, string $currency, int $storeId)
     {
         return $this->callXMLApi(
             [
                 'ServiceID' => $serviceId,
                 'OrderID' => $orderId,
             ],
-            $this->getConfigValue('shared_key', $currency, $store),
+            $this->getConfigValue('shared_key', $currency, $storeId),
             $this->getTransactionStatusUrl()
         );
     }
@@ -200,17 +206,16 @@ class Webapi extends Data
     /**
      * @param  string  $name
      * @param  string|null  $currency
-     * @param  StoreInterface|null  $store
-     *
+     * @param  int|null  $storeId
      * @return mixed
      */
-    private function getConfigValue(string $name, string $currency = null, ?StoreInterface $store = null)
+    private function getConfigValue(string $name, ?string $currency = null, ?int $storeId = null)
     {
         if ($currency) {
             return $this->scopeConfig->getValue(
                 'payment/bluepayment/' . strtolower($currency) . '/' . $name,
                 ScopeInterface::SCOPE_STORE,
-                $store
+                $storeId
             );
         }
 

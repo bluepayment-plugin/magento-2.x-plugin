@@ -8,90 +8,97 @@ namespace BlueMedia\BluePayment\Api\Data;
 interface RefundTransactionInterface
 {
     const ID = 'refund_id';
-
     const ORDER_ID = 'order_id';
-
     const REMOTE_ID = 'remote_id';
-
+    const MESSAGE_ID = 'message_id';
     const REMOTE_OUT_ID = 'remote_out_id';
-
     const AMOUNT = 'amount';
-
     const CURRENCY = 'currency';
-
     const IS_PARTIAL = 'is_partial';
 
     /**
      * @return string
      */
-    public function getOrderId();
+    public function getOrderId(): string;
 
     /**
-     * @param string $orderId
+     * @param  string  $orderId
      *
      * @return $this
      */
-    public function setOrderId($orderId);
+    public function setOrderId(string $orderId): RefundTransactionInterface;
 
     /**
      * @return string
      */
-    public function getRemoteId();
+    public function getRemoteId(): string;
 
     /**
-     * @param string $remoteId
+     * @param  string  $remoteId
      *
      * @return $this
      */
-    public function setRemoteId($remoteId);
+    public function setRemoteId(string $remoteId): RefundTransactionInterface;
 
     /**
      * @return string
      */
-    public function getRemoteOutId();
+    public function getMessageId(): string;
 
     /**
-     * @param string $remoteId
+     * @param  string  $messageId
      *
      * @return $this
      */
-    public function setRemoteOutId($remoteId);
+    public function setMessageId(string $messageId): RefundTransactionInterface;
+
+    /**
+     * @return string
+     */
+    public function getRemoteOutId(): string;
+
+    /**
+     * @param  string  $remoteId
+     *
+     * @return $this
+     */
+    public function setRemoteOutId(string $remoteId): RefundTransactionInterface;
 
     /**
      * @return float
      */
-    public function getAmount();
+    public function getAmount(): float;
 
     /**
-     * @param float $amount
+     * @param  float  $amount
      *
      * @return $this
      */
-    public function setAmount($amount);
+    public function setAmount(float $amount): RefundTransactionInterface;
 
     /**
      * @return string
      */
-    public function getCurrency();
+    public function getCurrency(): string;
 
     /**
-     * @param string $currency
+     * @param  string  $currency
      *
      * @return $this
      */
-    public function setCurrency($currency);
+    public function setCurrency(string $currency): RefundTransactionInterface;
 
     /**
      * @return bool
      */
-    public function isPartial();
+    public function isPartial(): bool;
 
     /**
-     * @param bool $isPartial
+     * @param  bool  $isPartial
      *
      * @return $this
      */
-    public function setIsPartial($isPartial);
+    public function setIsPartial(bool $isPartial): RefundTransactionInterface;
 
     /**
      * Save object data

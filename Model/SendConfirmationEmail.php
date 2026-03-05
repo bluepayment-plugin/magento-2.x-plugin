@@ -36,7 +36,7 @@ class SendConfirmationEmail
         $canSendNewEmail = $order->getCanSendNewEmailFlag();
         $emailSent = $order->getEmailSent();
 
-        $this->logger->info('CREATE:' . __LINE__, [
+        $this->logger->info('SendConfirmationEmail:' . __LINE__, [
             'canSendNewEmail' => $canSendNewEmail,
             'emailSent' => $emailSent,
         ]);

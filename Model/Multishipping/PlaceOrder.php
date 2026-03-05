@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Model\Multishipping;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\CustomFieldResolver;
 use BlueMedia\BluePayment\Model\Metadata;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
@@ -53,18 +54,25 @@ class PlaceOrder implements PlaceOrderInterface
     /** @var Metadata */
     public $metadata;
 
+    /** @var CustomFieldResolver */
+    public $customFieldResolver;
+
     /**
-     * @param OrderManagementInterface $orderManagement
-     * @param CollectionFactory $gatewayFactory
-     * @param ScopeConfigInterface $scopeConfig
-     * @param ConvertArray $convertArray
-     * @param Data $helper
-     * @param Curl $curl
-     * @param Generic $session
-     * @param CardCollectionFactory $cardCollectionFactory
-     * @param Logger $logger
-     * @param Metadata $metadata
+     * @param  OrderManagementInterface  $orderManagement
+     * @param  CollectionFactory  $gatewayFactory
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  ConvertArray  $convertArray
+     * @param  Data  $helper
+     * @param  Curl  $curl
+     * @param  Generic  $session
+     * @param  CardCollectionFactory  $cardCollectionFactory
+     * @param  Logger  $logger
+     * @param  Metadata  $metadata
+     * @param  CustomFieldResolver  $customFieldResolver
      */
+    /** @var ConfigProvider */
+    public $configProvider;
+
     public function __construct(
         OrderManagementInterface $orderManagement,
         CollectionFactory $gatewayFactory,
@@ -75,7 +83,9 @@ class PlaceOrder implements PlaceOrderInterface
         Generic $session,
         CardCollectionFactory $cardCollectionFactory,
         Logger $logger,
-        Metadata $metadata
+        Metadata $metadata,
+        CustomFieldResolver $customFieldResolver,
+        ConfigProvider $configProvider
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -87,6 +97,8 @@ class PlaceOrder implements PlaceOrderInterface
         $this->cardCollectionFactory = $cardCollectionFactory;
         $this->logger = $logger;
         $this->metadata = $metadata;
+        $this->customFieldResolver = $customFieldResolver;
+        $this->configProvider = $configProvider;
     }
 
     /**
@@ -128,7 +140,11 @@ class PlaceOrder implements PlaceOrderInterface
 
             if ($payment->getMethod() == Payment::METHOD_CODE) {
                 $gatewayId = $payment->getAdditionalInformation('gateway_id');
-                $currency = $order->getOrderCurrencyCode();
+                $useBaseCurrency = $this->scopeConfig->isSetFlag(
+                    'payment/bluepayment/use_base_currency',
+                    ScopeInterface::SCOPE_STORE
+                );
+                $currency = $useBaseCurrency ? $order->getBaseCurrencyCode() : $order->getOrderCurrencyCode();
                 $serviceId = $this->scopeConfig->getValue(
                     'payment/bluepayment/' . strtolower($currency) . '/service_id',
                     ScopeInterface::SCOPE_STORE
@@ -144,9 +160,11 @@ class PlaceOrder implements PlaceOrderInterface
 
                 $this->logger->info('PlaceOrder:' . __LINE__, ['gatewayID' => $gatewayId]);
 
+                $useBaseCurrency = $this->configProvider->isUseBaseCurrency();
+
                 foreach ($order->getAllItems() as $item) {
                     $productsList[] = [
-                        'subAmount' => $item->getRowTotalInclTax(),
+                        'subAmount' => $useBaseCurrency ? $item->getBaseRowTotalInclTax() : $item->getRowTotalInclTax(),
                         'params' => [
                             'productName' => ($item->getQtyOrdered() * 1) . 'x ' . $item->getName(),
                         ],
@@ -157,20 +175,33 @@ class PlaceOrder implements PlaceOrderInterface
                     && ((double)$order->getShippingAmount() || $order->getShippingDescription())
                 ) {
                     $productsList[] = [
-                        'subAmount' => (double)$order->getShippingAmount(),
+                        'subAmount' => $useBaseCurrency ? (double)$order->getBaseShippingAmount() : (double)$order->getShippingAmount(),
                         'params' => [
                             'productName' => __('Shipping & Handling')->render(),
                         ],
                     ];
                 }
 
-                $totalToPay += $order->getGrandTotal();
+                $totalToPay += $useBaseCurrency ? $order->getBaseGrandTotal() : $order->getGrandTotal();
             }
         }
 
         // @ToDo Create Payment
+        $useBaseCurrency = $this->configProvider->isUseBaseCurrency();
+
+        if ($useBaseCurrency) {
+            $totalToPay = 0;
+            foreach ($orderList as $o) {
+                if ($o->getPayment()->getMethod() == Payment::METHOD_CODE) {
+                    $totalToPay += $o->getBaseGrandTotal();
+                }
+            }
+            $currency = $order->getBaseCurrencyCode();
+        } else {
+            $currency = $order->getOrderCurrencyCode();
+        }
+
         $amount = number_format(round($totalToPay, 2), 2, '.', '');
-        $currency = $order->getOrderCurrencyCode();
 
         // Config
         $serviceId = $this->scopeConfig->getValue(
@@ -183,7 +214,6 @@ class PlaceOrder implements PlaceOrderInterface
         );
 
         $customerId = $order->getCustomerId();
-        $customerEmail = $order->getCustomerEmail();
 
         $xml = new \SimpleXMLElement('<productList/>');
 
@@ -210,13 +240,25 @@ class PlaceOrder implements PlaceOrderInterface
             'OrderID' => Payment::QUOTE_PREFIX . $order->getQuoteId(),
             'Amount' => $amount,
             'Currency' => $currency,
-            'CustomerEmail' => $customerEmail,
+            'CustomerEmail' => $order->getCustomerEmail(),
             'Products' => base64_encode($xml->asXML()),
             'GatewayID' => $gatewayId,
+
+            'VerificationFName' => $order->getCustomerFirstname(),
+            'VerificationLName' => $order->getCustomerLastname(),
+
             'PlatformName' => Payment::PLATFORM_NAME . ' ' . $this->metadata->getMagentoEdition(),
             'PlatformVersion' => $this->metadata->getMagentoVersion(),
             'PlatformPluginVersion' => $this->metadata->getModuleVersion(),
         ];
+
+        if ((int) $gatewayId !== 0) {
+            $params = $this->customFieldResolver->resolve(
+                (int)$gatewayId,
+                $order,
+                $params
+            );
+        }
 
         /* Płatność one-click kartowa */
         if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {

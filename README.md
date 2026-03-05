@@ -1,4 +1,4 @@
-# Instrukcja modułu „Autopay” dla platformy Magento 2
+# Instrukcja dla modułu Magento 2: bramka płatności Autopay
 
 ## Podstawowe informacje
 Autopay to moduł płatności umożliwiający realizację transakcji bezgotówkowych w sklepie opartym na platformie Magento 2.
@@ -13,8 +13,8 @@ Do najważniejszych funkcji modułu zalicza się:
   - na stronie sklepu – zintegrowany, klient przenoszony jest od razu do banku lub na stronę płatności kartą.
   
 ### Wymagania
-- Wersja Magento: 2.3.0 – 2.4.6.
-- Wersja PHP zgodna z wymaganiami względem danej wersji sklepu.
+- Wersja Magento: 2.3.0 – 2.4.8.
+- Wersja PHP: 7.4 – 8.4 (zgodna z wymaganiami danej wersji Magento).
 
 ### [Co nowego w Autopay?](CHANGELOG.md)
 
@@ -141,18 +141,6 @@ Odśwież pamięć podręczną po każdej edycji konfiguracji. Żeby to zrobić:
    
    ![configuration2.png](docs/configuration2.png "Screenshot")
 
-## Płatność w iFrame
-Opcja, która umożliwia klientom dokonanie płatności kartą bez wychodzenia ze sklepu i opuszczania procesu zakupowego. Implementacja tej formy płatności, ze względu na wymogi związane z bezpieczeństwem procesowania transakcji, wymaga dwóch dodatkowych dokumentów: SAQ A oraz audyt strony.
-
-![iframe1.png](docs/iframe1.png)
-
-### Aktywacja płatności iFrame
-1. Przejdź do [Konfiguracji modułu](#konfiguracja)
-2. Kliknij **Włącz (Enable)** przy opcji **Płatność w iFrame (Iframe Payment)**.
-3. Przejdź do edycji kanału o ID *1500* i nazwie banku *Karty*.
-4. Ustaw opcję **Traktuj jako oddzielną metodę płatności (Is separated method)**.
-5. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
-
 
 ## BLIK 0
 BLIK "wewnątrz sklepu" cechuje się tym, że kod zabezpieczający transakcję należy wpisać bezpośrednio na stronie sklepu – w ostatnim etapie procesu zakupowego.
@@ -201,6 +189,7 @@ Klient może usunąć zapamiętane karty z poziomu swojego konta w Twoim sklepie
    ![automatic2.png](docs/automatic2.png)
 5. Kliknąć **Usuń** i potwierdzić
 
+
 ## Generowanie zamówień z poziomu panelu administracyjnego
 Moduł umożliwia wysłanie linka do płatności do klienta w przypadku zamówień utworzonych bezpośrednio w panelu administracyjnym. W tym celu, należy przy tworzeniu zamówienia wybrać kanał płatności Autopay.
 
@@ -210,6 +199,7 @@ Link do płatności zostanie przesłany przez Autopay na adres mailowy widoczny 
 
 ![admin2.png](docs/admin2.png)
 
+
 ## Szablony e-mail
 Dla wiadomości:
 - email_creditmemo_set_template_vars_before
@@ -218,6 +208,7 @@ Dla wiadomości:
 - email_shipment_set_template_vars_before
 moduł rozszerza listę dostępnych zmiennych o **payment_channel**. Przykładowe użycie w szablonie:
 `{{var payment_channel|raw}}`
+
 
 ## Strona oczekiwania na przekierowanie
 Moduł umożliwia dodanie strony pośredniej, wyświetlanej przed samym przekierowaniem użytkownika do płatności. Funkcję tę można wykorzystać np. do śledzenia e-commerce w Google Analytics.
@@ -232,8 +223,12 @@ Wykorzystywany szablon: `view/frontend/template/redirect.phtml`
 3. Ustaw opcję **Sekund oczekiwania przed przekierowaniem (Seconds to wait before redirect)** – w celu określenia jak długo strona ma być wyświetlana.
 4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
 
+
 ## Zwroty
-Moduł umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność, poprzez fakturę korygującą (**Credit Memo on-line**) oraz bezpośrednio z zamówienia.
+Moduł umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego została nadana płatność, poprzez fakturę korygującą (**Credit Memo on-line**) oraz bezpośrednio z zamówienia.  
+
+Zwroty wykonywane są asynchronicznie — w pierwszej kolejności składane jest zlecenie zwrotu, a następnie jest on realizowany przez system Autopay.
+Aktualizacja odbywa się poprzez CRON-a.
 
 ### Zwrot poprzez fakturę korygującą
 Żeby zlecić zwrot w ten sposób:
@@ -249,7 +244,7 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
 
 1. Przejdź do [Konfiguracji modułu](#konfiguracja) i zaznacz **Włącz (Enable)** przy opcji **Pokaż ręczny zwrot Autopay w szczegółach zamówienia (Show manual Autopay refund in order details)**. Dzięki temu opcja ta będzie dostępna dla wszystkich zakończonych zamówień opłaconych poprzez ten moduł.
 2. Następnie przejdź do szczegółów zamówienia.
-3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności Autopay, w górnym menu powinien być widoczny przycisk Zwrot Autopay.\
+3. Jeżeli zamówienie zostało opłacone z wykorzystaniem metody płatności Autopay, w górnym menu powinien być widoczny przycisk Zwrot Autopay.
 
    ![refund1.png](docs/refund1.png)
 4. Po jego naciśnięciu zobaczysz okno umożliwiające dokonanie pełnego lub częściowego zwrotu.
@@ -264,6 +259,17 @@ Opcja umożliwia zwrot pieniędzy bezpośrednio na rachunek klienta, z którego 
       ![refund3.png](docs/refund3.png)
 
 
+### Powiadomienia
+
+W przypadku niepowodzenia zwrotu moduł generuje powiadomienie w panelu administracyjnym.  
+Treść powiadomienia oraz komentarza do zamówienia zawiera szczegółową przyczynę zwrotu, zwracaną przez Autopay (np. brak środków na saldzie Autopay lub przekroczenie kwoty transakcji).  
+W tym celu wymagane jest uruchomienie i aktywowanie modułu `Magento_AdminNotification`.
+
+![refund4.png](docs/refund4.png)
+
+![refund5.png](docs/refund5.png)
+
+
 ## Dostawa na wiele adresów (multishipping)
 Moduł umożliwia opłacenie zamówień złożonych z wykorzystaniem funkcjonalności multishipping.
 Konfiguracja dostawy zgodnie z [instrukcją w dokumentacji](https://docs.magento.com/user-guide/configuration/sales/multishipping-settings.html)
@@ -272,8 +278,9 @@ Sam moduł płatności nie wymaga żadnych dodatkowych czynności. Płatności A
 
 **UWAGA!**
 
-Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności iFrame, Google Pay i BLIK 0.
+Moduł w trybie multishipping obsługuje TYLKO wyświetlanie dostępnych kanałów płatności na stronie sklepu oraz płatności automatyczne. Nie ma możliwości uruchomienia płatności Google Pay i BLIK 0.
 Dla zamówień multishipping, OrderID w wiadomościach do klienta oraz w panelu portal.autopay.eu będzie numerem koszyka z przedrostkiem QUOTE_, nie numerem zamówienia.
+
 
 ## Informacje o płatności
 Informacja o wybranym przez klienta kanale płatności jest widoczna z poziomu listy zamówień (Order grid).  
@@ -283,6 +290,7 @@ Informacja tekstowa o kanale płatności będzie widoczna w tabeli.
 Informacje o wybranym kanale płatności zapisane są w bazie danych:
 - w kolumnach **blue_gateway_id** (id kanału) i **payment_channel** (nazwa kanału) w tabeli **sales_order**,
 - w kolumnie **payment_channel** (nazwa kanału) w tabeli **sales_order_grid**.
+
 
 ## Rozszerzona Analityka – Google Analytics 4 e-commerce
 Opcja dostępna od wersji 2.19.0.
@@ -374,8 +382,49 @@ Opcja jest uruchamiana automatycznie tylko dla nowych instalacji modułu – w p
 ![cf6.png](docs/cf6.png "Screenshot")
 
 
+## Asynchroniczne przetwarzanie ITN
+Opcja dostępna od wersji 2.24.0.
+
+Moduł umożliwia asynchroniczne przetwarzanie powiadomień ITN (Instant Transaction Notification) wysyłanych przez system Autopay po zakończeniu transakcji. Włączenie tej opcji oznacza, że powiadomienia ITN będą przetwarzane w tle, co może być przydatne w scenariuszach z większym obciążeniem lub specyficznymi wymaganiami dotyczącymi obsługi powiadomień.
+Rozwiązuje również problem z "wyścigami statusów".
+Moduł Autopay domyślnie wykorzystuje kolejkowanie z wykorzystaniem MySQL (connection "db"). W przypadku chęci wykorzystania RabbitMQ — wymagane jest dostosowanie konfiguracji kolejki [zgodnie z instrukcją](https://developer.adobe.com/commerce/php/development/components/message-queues/#change-message-queue-from-mysql-to-amqp).
+
+> W celu skorzystania z tej funkcjonalności, Magento musi posiadać aktywne moduły **Magento_MessageQueue** oraz **Magento_MysqlMq** lub **Magento_Amqp**.  
+> Musi być również poprawnie skonfigurowany CRON [zgodnie z dokumentacją Magento](https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs).
+
+**UWAGA!**
+Przy wykorzystaniu standardowej konfiguracji z użyciem CRONa - aktualizacja statusu może zająć do minuty, zgodnie z częstotliwością uruchamiania CRONa. W przypadku potrzeby częstszej aktualizacji, wymagane jest oddzielne uruchomienie konsumera (consumer) kolejki:
+```shell
+bin/magento queue:consumers:start autopay.itn.process
+```
+
+### Aktywacja
+Żeby aktywować stronę oczekiwania na przekierowanie:
+
+1. Przejdź do [Konfiguracji modułu](#konfiguracja)
+2. Ustaw **Włącz (Enable)** przy opcji **Asynchroniczne przetwarzanie ITN (Asynchronous process ITN)**
+4. [Odśwież pamięć podręczną.](#odświeżenie-pamięci-podręcznej)
+
+
 ## Obsługa GraphQL oraz integracja z Magento PWA
-Istnieje możliwość integracji tego rozwiązania z naszą wtyczką. Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).
+Moduł posiada dedykowane rozszerzenie GraphQL umożliwiające integrację z aplikacjami headless (PWA Studio, Vue Storefront, custom frontends).
+
+### Instalacja modułu GraphQL
+```bash
+composer require bluepayment-plugin/module-bluepayment-graphql
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+### Tabela kompatybilności
+
+| BlueMedia_BluePayment | BlueMedia_BluePaymentGraphQl | Magento       | PHP         |
+|-----------------------|------------------------------|---------------|-------------|
+| 2.31.0                | 1.3.0                        | 2.4.6 - 2.4.8 | 8.1 - 8.3   |
+| 2.21.2                | 1.2.6                        | 2.4.2 - 2.4.5 | 7.4 - 8.1   |
+
+Szczegóły znajdziesz w rozdziale poświęconym [GraphQL](https://developers.autopay.pl/online/wtyczki/magento-2/pwa-studio) oraz [Magento PWA](https://developers.autopay.pl/online/wtyczki/magento-2/graphql).
 
 
 ## Aktualizacja
@@ -400,6 +449,7 @@ bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 4. Moduł jest już aktywny.
+
 
 ## Dezaktywacja modułu
 

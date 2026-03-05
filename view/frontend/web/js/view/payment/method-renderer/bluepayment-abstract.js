@@ -43,6 +43,10 @@ define([
          * @return {Boolean}
          */
         validate: function () {
+            if (! additionalValidators.validate()) {
+                return false;
+            }
+
             return true;
         },
 

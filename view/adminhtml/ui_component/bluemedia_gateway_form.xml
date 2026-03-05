@@ -140,21 +140,21 @@
         </field>
         <field name="gateway_name" formElement="input">
             <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
                 <dataType>text</dataType>
                 <label translate="true">Gateway Name</label>
-                <validation>
-                    <rule name="required-entry" xsi:type="boolean">true</rule>
-                </validation>
-                <tooltip>
-                    <description translate="true">Installments and payment card channels have static gateway name.</description>
-                </tooltip>
-                <imports>
-                    <link name="disabled">${ $.provider }:data.static_name</link>
-                </imports>
+            </settings>
+        </field>
+        <field name="gateway_short_description" formElement="input">
+            <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
+                <dataType>text</dataType>
+                <label translate="true">Gateway Short Description</label>
             </settings>
         </field>
         <field name="gateway_description" formElement="input">
             <settings>
+                <elementTmpl>ui/form/element/text</elementTmpl>
                 <dataType>text</dataType>
                 <label translate="true">Gateway Description</label>
             </settings>

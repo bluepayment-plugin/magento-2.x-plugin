@@ -58,6 +58,11 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
             return true;
         }
 
+        // If not PBL or FR - have to be separated
+        if (! in_array($this->getType(), [ConfigProvider::TYPE_PBL, ConfigProvider::TYPE_FR])) {
+            return true;
+        }
+
         return (bool) $this->getData(self::IS_SEPARATED_METHOD);
     }
 
@@ -227,6 +232,27 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
     public function setDescription(?string $description): GatewayInterface
     {
         return $this->setData(self::DESCRIPTION, $description);
+    }
+
+    /**
+     * Get gateway short description.
+     *
+     * @return ?string
+     */
+    public function getShortDescription(): ?string
+    {
+        return $this->getData(self::SHORT_DESCRIPTION);
+    }
+
+    /**
+     * Set gateway short description.
+     *
+     * @param ?string $shortDescription
+     * @return GatewayInterface
+     */
+    public function setShortDescription(?string $shortDescription): GatewayInterface
+    {
+        return $this->setData(self::SHORT_DESCRIPTION, $shortDescription);
     }
 
     /**
@@ -454,5 +480,28 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
     public function setMinValidityTime(?float $minValidityTime): GatewayInterface
     {
         return $this->setData(self::MIN_VALIDITY_TIME, $minValidityTime);
+    }
+
+    /**
+     * Get gateway minimal validity time.
+     *
+     * @return ?string[]
+     */
+    public function getRequiredParams(): ?array
+    {
+        // change JSON to array
+        return json_decode($this->getData(self::REQUIRED_PARAMS), true);
+    }
+
+    /**
+     * Set gateway minimal validity time.
+     *
+     * @param ?string[] $requiredParams
+     * @return GatewayInterface
+     */
+    public function setRequiredParams(?array $requiredParams): GatewayInterface
+    {
+        // change array to JSON
+        return $this->setData(self::REQUIRED_PARAMS, json_encode($requiredParams));
     }
 }
