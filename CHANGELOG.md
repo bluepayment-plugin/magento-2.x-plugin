@@ -1,10 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.32.0
+- Dodaliśmy tłumaczenia dla języków: NL, LT, LV, ET.
 - Przenieśliśmy płatności kartowe z iFrame do Autopay Widget (model white label) na checkout.
-- Dodaliśmy obsługę tokena z Widgetu (`PaymentToken`) oraz `WalletType=WIDGET` dla płatności kartą i one-click (dodawanie nowej karty).
-- Zmieniliśmy ładowany skrypt integracyjny z `checkout.js` na `widget-communication.min.js`.
-- Zachowaliśmy obsługę zapisanych kart one-click (bez Widgetu dla `RecurringAction=MANUAL`).
 
 ## Wersja 2.31.2
 - Poprawiliśmy błąd z niewyświetlaniem metod płatności po ręcznym zapisaniu.

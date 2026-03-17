@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.32.0
+- We have added translations for languages: NL, LT, LV, ET.
 - We have migrated card payments from iFrame to the Autopay Widget (white label model) on checkout.
 - We have added support for Widget token flow (`PaymentToken`) and `WalletType=WIDGET` for card and one-click (new card) payments.
 - We have replaced the integration script from `checkout.js` to `widget-communication.min.js`.

@@ -399,40 +399,4 @@ class Gateways extends Data
             $store->getCode()
         );
     }
-
-    /**
-     * Prepare language from a supported list based on store locale.
-     *
-     * @param  string  $locale
-     * @return string
-     */
-    protected function prepareLanguage(string $locale): string
-    {
-        $locales = [
-            'pl_' => 'PL', // polski
-            'en_' => 'EN', // angielski
-            'fr_' => 'FR', // francuski
-            'it_' => 'IT', // włoski
-            'de_' => 'DE', // niemiecki
-            'es_' => 'ES', // hiszpański
-            'cs_' => 'CS', // czeski
-            'ro_' => 'RO', // rumuński
-            'sk_' => 'SK', // słowacki
-            'hu_' => 'HU', // węgierski
-            'uk_' => 'UK', // ukraiński
-            'el_' => 'EL', // grecki
-            'hr_' => 'HR', // chorwacki
-            'sl_' => 'SL', // słoweński
-            'tr_' => 'TR', // turecki
-            'bg_' => 'BG', // bułgarski
-        ];
-
-        $prefix = substr($locale, 0, 3);
-
-        if (isset($locales[$prefix])) {
-            return $locales[$prefix];
-        }
-
-        return 'EN';
-    }
 }
