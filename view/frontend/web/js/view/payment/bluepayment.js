@@ -49,7 +49,9 @@ define([
                     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-blik-bnpl';
                     break;
                 case model.gatewaysIds.card:
-                    component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-card';
+                    component = bluepaymentConfig.iframeEnabled
+                        ? 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-card'
+                        : 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-separated';
                     break;
                 case model.gatewaysIds.one_click:
                     component = 'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-one-click';

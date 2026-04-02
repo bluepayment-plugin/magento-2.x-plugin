@@ -53,6 +53,7 @@ class RefundStatusUpdaterService implements RefundStatusUpdaterInterface
         'CANCELED_AMOUNT_EXCEEDS_TRANSACTION',
         'CANCELED_MANUALLY_BY_SERVICES',
     ];
+    private const FAILED_REMOTE_OUT_ID_PREFIX = 'FAILED:';
 
     /**
      * @var RefundTransactionRepositoryInterface
@@ -466,6 +467,8 @@ class RefundStatusUpdaterService implements RefundStatusUpdaterInterface
             (string) $item->getMessageId()
         );
 
+        $this->markFailedRefundAsFinished($item, $status);
+
         $this->logger->error('Error while processing refund transaction status', [
             'transaction' => $item->getMessageId(),
             'order' => $item->getOrderId(),
@@ -486,6 +489,30 @@ class RefundStatusUpdaterService implements RefundStatusUpdaterInterface
 
         $order->addCommentToStatusHistory($description);
         $this->orderRepository->save($order);
+    }
+
+    /**
+     * Mark refund as finished to stop CRON polling for final failures.
+     *
+     * @param RefundTransactionInterface $item
+     * @param string $status
+     * @return void
+     */
+    private function markFailedRefundAsFinished(RefundTransactionInterface $item, string $status): void
+    {
+        $failedRemoteOutId = substr(self::FAILED_REMOTE_OUT_ID_PREFIX . $status, 0, 50);
+
+        try {
+            $item->setRemoteOutId($failedRemoteOutId);
+            $this->refundTransactionRepository->save($item);
+        } catch (\Exception $e) {
+            $this->logger->error('Unable to mark failed refund transaction as finished', [
+                'transaction' => $item->getMessageId(),
+                'order' => $item->getOrderId(),
+                'status' => $status,
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

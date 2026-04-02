@@ -27,71 +27,97 @@ define([
             gateway_name: null,
             gateway_description: null,
 
-            iframeEnabled: config.iframeEnabled,
             cards: config.cards,
             oneClickAgreement: config.oneClickAgreement,
         },
-        selectedCard: ko.observable(-1),
-        redirectAfterPlaceOrder: !config.iframeEnabled,
+        selectedCard: ko.observable(null),
+        redirectAfterPlaceOrder: false,
 
-        /**
-         * After place order callback.
-         *
-         * @returns {boolean}
-         */
-        afterPlaceOrder: function () {
-            if (this.iframeEnabled && this.selectedCard() == -1) {
-                this.callIframePayment();
-                return false;
-            } else {
-                redirectOnSuccessAction.redirectUrl = url.build('bluepayment/processing/create')
-                    + '?gateway_id=' + this.gateway_id
-                    + '&card_index=' + this.selectedCard();
+        initialize: function () {
+            this._super();
 
-                this.redirectAfterPlaceOrder = true;
-            }
+            this.selectedCard.subscribe(function (selectedCard) {
+                if (Number(selectedCard) === -1) {
+                    if (this.isWidgetEnabled()) {
+                        this.ensureWidgetInitialized();
+                    }
+                } else {
+                    this.resetWidget();
+                }
+            }.bind(this));
+
+            return this;
         },
 
-        /**
-         * Select card
-         *
-         * @param card
-         * @returns {boolean}
-         */
+        afterPlaceOrder: function () {
+            if (!this.hasSelectedCard()) {
+                this.messageContainer.addErrorMessage({message: $t('You have to select card.')});
+                return false;
+            }
+
+            if (Number(this.selectedCard()) === -1) {
+                if (!this.isWidgetEnabled()) {
+                    redirectOnSuccessAction.redirectUrl = url.build('bluepayment/processing/create')
+                        + '?gateway_id=' + this.gateway_id
+                        + '&card_index=-1';
+
+                    this.redirectAfterPlaceOrder = true;
+                    return true;
+                }
+
+                this.redirectAfterPlaceOrder = false;
+                this.callWidgetPayment();
+                return false;
+            }
+
+            redirectOnSuccessAction.redirectUrl = url.build('bluepayment/processing/create')
+                + '?gateway_id=' + this.gateway_id
+                + '&card_index=' + this.selectedCard();
+
+            this.redirectAfterPlaceOrder = true;
+            return true;
+        },
+
+        isWidgetEnabled: function () {
+            return Boolean(config.iframeEnabled);
+        },
+
         selectCard: function (card) {
             this.selectedCard(card.index);
             return true;
         },
 
-        /**
-         * Prepare URL for iframe
-         *
-         * @returns {string}
-         */
-        prepareIframeUrl: function () {
-            return url.build('bluepayment/processing/create')
-                + '?gateway_id=' + this.gateway_id
-                + '&automatic=true'
-                + '&card_index=' + this.selectedCard();
+        getWidgetRecurringAction: function () {
+            return 'INIT_WITH_PAYMENT';
         },
 
-        /**
-         * @return {Boolean}
-         */
+        getWidgetCreatePayload: function (paymentToken) {
+            return {
+                gateway_id: this.gateway_id,
+                automatic: true,
+                token: paymentToken,
+                card_index: this.selectedCard(),
+                form_key: window.FORM_KEY,
+            };
+        },
+
+        hasSelectedCard: function () {
+            const selectedCard = this.selectedCard();
+            return selectedCard !== undefined && selectedCard !== null && selectedCard !== '';
+        },
+
         validate: function () {
-            // One click agreement
             const cardIndex = this.selectedCard();
 
-            if (cardIndex !== undefined) {
-                checkoutData.setCardIndex(cardIndex);
-
-                if (cardIndex == -1 && !$('#bluepayment-one-click-agreement').is(':checked')) {
-                    this.messageContainer.addErrorMessage({message: $t('You have to agree with terms.')});
-
-                    return false;
-                }
-            } else {
+            if (!this.hasSelectedCard()) {
                 this.messageContainer.addErrorMessage({message: $t('You have to select card.')});
+                return false;
+            }
+
+            checkoutData.setCardIndex(cardIndex);
+
+            if (Number(cardIndex) === -1 && !$('#bluepayment-one-click-agreement').is(':checked')) {
+                this.messageContainer.addErrorMessage({message: $t('You have to agree with terms.')});
 
                 return false;
             }

@@ -2,21 +2,32 @@
 /**
  * @var \BlueMedia\BluePayment\Block\ConsumerFinance $block
  */
-?>
-<?php if ($block->isEnabled()): ?>
-    <div class="bluemedia consumer-finance horizontal position-<?= $block->getPosition() ?>">
-        <?php if ($block->isInstallmentsAvailable()): ?>
-            <div class="cf-item installments">
-                <span class="label"><?= __('INSTALLMENTS') ?></span>
-                <span class="text"><?= __('Up to 48 installments') ?></span>
-            </div>
-        <?php endif; ?>
 
-        <?php if ($block->isHubAvailable()): ?>
-            <div class="cf-item hub">
-                <span class="label"><?= __('TAILORED INSTALLMENTS') ?></span>
-                <span class="text"><?= __('Buy on tailored installments') ?></span>
+$items = [];
+
+if ($block->isInstallmentsAvailable()) {
+    $items[] = [
+        'type' => 'installments',
+        'label' => (string) __('INSTALLMENTS'),
+        'text' => (string) __('Up to 48 installments'),
+    ];
+}
+
+if ($block->isHubAvailable()) {
+    $items[] = [
+        'type' => 'hub',
+        'label' => (string) __('TAILORED INSTALLMENTS'),
+        'text' => (string) __('Buy on tailored installments'),
+    ];
+}
+?>
+<?php if ($block->isEnabled() && $items): ?>
+    <div class="bluemedia consumer-finance horizontal position-<?= $block->escapeHtmlAttr($block->getPosition()) ?>">
+        <?php foreach ($items as $item): ?>
+            <div class="cf-item <?= $block->escapeHtmlAttr($item['type']) ?>">
+                <span class="label"><?= $block->escapeHtml($item['label']) ?></span>
+                <span class="text"><?= $block->escapeHtml($item['text']) ?></span>
             </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
     </div>
 <?php endif; ?>

@@ -174,8 +174,9 @@ class Create extends Action
             }
 
             $gatewayId = (int) $this->getRequest()->getParam('gateway_id', 0);
-            $automatic = (boolean) $this->getRequest()->getParam('automatic', false);
+            $automatic = (bool) $this->getRequest()->getParam('automatic', false);
             $cardIndex = (int) $this->getRequest()->getParam('card_index', 0);
+            $paymentToken = (string) $this->getRequest()->getParam('token', '');
 
             $resultJson = $this->resultJsonFactory->create();
 
@@ -214,8 +215,17 @@ class Create extends Action
                     $order,
                     $gatewayId,
                     $agreementsIds,
-                    true
+                    true,
+                    '',
+                    $paymentToken
                 );
+
+                if ($paymentToken !== '') {
+                    $resultJson->setData(
+                        $this->prepareWidgetTokenJsonResponse($order, $serviceId, $sharedKey, $params)
+                    );
+                    return $resultJson;
+                }
 
                 $hashData  = [$serviceId, $orderId, $sharedKey];
                 $redirectHash = $this->helper->generateAndReturnHash($hashData);
@@ -327,11 +337,18 @@ class Create extends Action
                     $agreementsIds,
                     $automatic,
                     '',
-                    '',
+                    $paymentToken,
                     $cardIndex
                 );
 
                 if ($automatic === true) {
+                    if ($paymentToken !== '') {
+                        $resultJson->setData(
+                            $this->prepareWidgetTokenJsonResponse($order, $serviceId, $sharedKey, $params)
+                        );
+                        return $resultJson;
+                    }
+
                     $hashData  = [$serviceId, $orderId, $sharedKey];
                     $redirectHash = $this->helper->generateAndReturnHash($hashData);
 
@@ -512,5 +529,63 @@ class Create extends Action
         $this->logger->info('CREATE:' . __LINE__, ['response' => (array) $response]);
 
         return $response;
+    }
+
+    /**
+     * @param Order $order
+     * @param string $serviceId
+     * @param string $sharedKey
+     * @param array $params
+     * @return array
+     */
+    private function prepareWidgetTokenJsonResponse(
+        Order $order,
+        string $serviceId,
+        string $sharedKey,
+        array $params
+    ): array {
+        $xml = $this->sendRequest($params);
+
+        if ($xml === false) {
+            return [
+                'error' => true,
+            ];
+        }
+
+        $redirectUrl = property_exists($xml, 'redirecturl') ? (string) $xml->redirecturl : null;
+
+        if ($redirectUrl) {
+            return [
+                'redirect_url' => $redirectUrl,
+            ];
+        }
+
+        $backUrl = $this->prepareBackUrl($order, $serviceId, $sharedKey);
+
+        return [
+            'redirect_url' => $backUrl,
+        ];
+    }
+
+    /**
+     * @param Order $order
+     * @param string $serviceId
+     * @param string $sharedKey
+     * @return string
+     */
+    private function prepareBackUrl(Order $order, string $serviceId, string $sharedKey): string
+    {
+        $hashData  = [$serviceId, $order->getRealOrderId(), $sharedKey];
+        $redirectHash = $this->helper->generateAndReturnHash($hashData);
+
+        return $this->_url->getUrl('bluepayment/processing/back', [
+            '_secure' => true,
+            '_scope' => $order->getStoreId(),
+            '_query' => [
+                'ServiceID' => $serviceId,
+                'OrderID' => $order->getRealOrderId(),
+                'Hash' => $redirectHash
+            ]
+        ]);
     }
 }

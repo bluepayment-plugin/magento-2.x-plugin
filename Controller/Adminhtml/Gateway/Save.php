@@ -58,6 +58,14 @@ class Save extends Gateway
 
             $gateway->setData($data);
 
+            // Treat empty or zero min/max amount as NULL (no limit)
+            if (empty($data['min_amount']) || (float) $data['min_amount'] <= 0) {
+                $gateway->setData('min_amount', null);
+            }
+            if (empty($data['max_amount']) || (float) $data['max_amount'] <= 0) {
+                $gateway->setData('max_amount', null);
+            }
+
             try {
                 $this->gatewayRepository->save($gateway);
                 $this->messageManager->addSuccessMessage(__('The gateway has been saved.'));
