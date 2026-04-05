@@ -1114,11 +1114,7 @@ class Payment extends AbstractMethod
      */
     public function sendRequest($params)
     {
-        if (array_key_exists('ClientHash', $params)) {
-            $this->curl->addHeader('BmHeader', 'pay-bm');
-        } else {
-            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
-        }
+        $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
 
         $params = (array) $params;
         $url = $this->getUrlGateway();

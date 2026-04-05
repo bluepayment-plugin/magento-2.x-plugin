@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.32.1
+- We have fixed One Click payment for credit cards.
+
 ## Version 2.32.0
 - We have added translations for languages: NL, LT, LV, ET.
 - We have migrated card payments from iFrame to the Autopay Widget (white label model) on checkout.
