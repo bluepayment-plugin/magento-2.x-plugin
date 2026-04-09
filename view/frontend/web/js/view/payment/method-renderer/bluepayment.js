@@ -93,7 +93,7 @@ define([
 
                 if (currentQuoteMethod && currentQuoteMethod.method === this.item.method) {
                     const separatedMethods = Array.isArray(config.separated) ? config.separated : [];
-                    const isSeparatedStored = separatedMethods.some((gateway) => {
+                    const isSeparatedStored = separatedMethods.some(function (gateway) {
                         return String(gateway.gateway_id) === String(storedGatewayId);
                     });
 
