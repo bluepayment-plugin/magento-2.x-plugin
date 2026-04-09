@@ -6,7 +6,7 @@ define([
     'BlueMedia_BluePayment/js/view/payment/method-renderer/bluepayment-abstract',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment',
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
-    'BlueMedia_BluePayment/js/checkout-data' // <-- Add checkoutData
+    'BlueMedia_BluePayment/js/checkout-data'
 ], function (
     _,
     ko,
@@ -52,25 +52,41 @@ define([
         initialize: function () {
             this._super();
 
+            quote.paymentMethod.subscribe(function (value) {
+                this.restoreSeparatedPaymentMethod(value);
+            }.bind(this));
+
             // Defer checks until quote is likely loaded
             _.defer(function () {
-                const storedGatewayId = checkoutData.getBluepaymentGatewayId();
-                const currentQuoteMethod = quote.paymentMethod();
-
-                // If bluepayment is the method and the stored ID matches this component
-                if (currentQuoteMethod && currentQuoteMethod.method === this.item.method && storedGatewayId === this.gateway_id) {
-                    // Ensure the quote data reflects this specific separated method selection
-                    if (!currentQuoteMethod.additional_data || currentQuoteMethod.additional_data.gateway_id !== this.gateway_id || !currentQuoteMethod.additional_data.separated) {
-                        const newData = currentQuoteMethod ?? {};
-                        newData.additional_data = newData.additional_data || {};
-                        newData.additional_data.gateway_id = this.gateway_id;
-                        newData.additional_data.separated = true;
-                        quote.paymentMethod(newData);
-                    }
-                }
+                this.restoreSeparatedPaymentMethod(quote.paymentMethod());
             }.bind(this));
 
             return this;
+        },
+
+        restoreSeparatedPaymentMethod: function (paymentMethod) {
+            const storedGatewayId = checkoutData.getBluepaymentGatewayId();
+
+            if (!paymentMethod || paymentMethod.method !== this.item.method) {
+                return;
+            }
+
+            if (String(storedGatewayId) !== String(this.gateway_id)) {
+                return;
+            }
+
+            if (paymentMethod.additional_data &&
+                String(paymentMethod.additional_data.gateway_id) === String(this.gateway_id) &&
+                paymentMethod.additional_data.separated) {
+                return;
+            }
+
+            const newData = Object.assign({}, paymentMethod);
+            newData.additional_data = Object.assign({}, paymentMethod.additional_data || {});
+            newData.additional_data.gateway_id = this.gateway_id;
+            newData.additional_data.separated = true;
+
+            quote.paymentMethod(newData);
         },
 
         /**

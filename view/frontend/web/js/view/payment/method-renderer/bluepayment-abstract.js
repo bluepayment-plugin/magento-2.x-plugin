@@ -72,8 +72,12 @@ define([
                 ? data.additional_data.gateway_id
                 : null;
 
-            model.selectedGatewayId(gatewayId);
-            checkoutData.setBluepaymentGatewayId(gatewayId);
+            if (data.additional_data && data.additional_data.gateway_id) {
+                model.selectedGatewayId(data.additional_data.gateway_id);
+            } else {
+                model.selectedGatewayId(null);
+            }
+            checkoutData.setBluepaymentGatewayId(model.selectedGatewayId());
 
             if (model.ordered()) {
                 // It's needed to set payment method in quote, but without request to server.
