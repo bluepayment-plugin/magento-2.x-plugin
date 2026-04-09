@@ -1,4 +1,5 @@
 define([
+    'underscore',
     'ko',
     'mage/translate',
     'Magento_Checkout/js/model/quote',
@@ -7,6 +8,7 @@ define([
     'BlueMedia_BluePayment/js/model/checkout/bluepayment-config',
     'BlueMedia_BluePayment/js/checkout-data' // <-- Add checkoutData
 ], function (
+    _,
     ko,
     $t,
     quote,
