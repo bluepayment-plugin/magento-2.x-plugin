@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.32.1
+- Poprawiliśmy działanie OneClick dla kart.
+
 ## Wersja 2.32.0
 - Dodaliśmy tłumaczenia dla języków: NL, LT, LV, ET.
 - Przenieśliśmy płatności kartowe z iFrame do Autopay Widget (model white label) na checkout.
