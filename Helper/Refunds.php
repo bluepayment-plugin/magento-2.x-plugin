@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BlueMedia\BluePayment\Helper;
 
 use BlueMedia\BluePayment\Api\Client;
@@ -174,8 +176,9 @@ class Refunds extends Data
                 ];
             }
         } elseif (is_array($loadResult) && isset($loadResult['statusCode'])) {
+            $text = ($loadResult['name'] ?? 'n/a') . ' - ' . ($loadResult['description'] ?? '');
             // For error
-            $error = __('Error code: %1 (%2)', $loadResult['statusCode'], $loadResult['name'] ?? 'n/a');
+            $error = __('Error code: %1 (%2)', $loadResult['statusCode'], $text);
 
             return [
                 'error' => true,

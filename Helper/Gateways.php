@@ -9,6 +9,7 @@ use BlueMedia\BluePayment\Helper\Email as EmailHelper;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\Gateway;
+use BlueMedia\BluePayment\Model\LocaleMapper;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\Collection;
 use Exception;
 use Magento\Framework\App\Config\Initial;
@@ -156,7 +157,7 @@ class Gateways extends Data
                                 $serviceId,
                                 $hashKey,
                                 $currency,
-                                $this->prepareLanguage($locale)
+                                LocaleMapper::getLanguageFromLocale($locale)
                             );
 
                             if (isset($loadResult['result']) && $loadResult['result'] == 'OK') {
@@ -335,10 +336,11 @@ class Gateways extends Data
                         // For now - we support only one currency per service
                         $save = true;
 
-                        $gatewayModel->setMinAmount(isset($currencyInfo['minAmount'])
-                            ? (float) $currencyInfo['minAmount'] : null);
-                        $gatewayModel->setMaxAmount(isset($currencyInfo['maxAmount'])
-                            ? (float) $currencyInfo['maxAmount'] : null);
+                        $minAmount = isset($currencyInfo['minAmount']) ? (float) $currencyInfo['minAmount'] : 0;
+                        $maxAmount = isset($currencyInfo['maxAmount']) ? (float) $currencyInfo['maxAmount'] : 0;
+
+                        $gatewayModel->setMinAmount($minAmount > 0 ? $minAmount : null);
+                        $gatewayModel->setMaxAmount($maxAmount > 0 ? $maxAmount : null);
                     }
                 }
 
@@ -396,20 +398,5 @@ class Gateways extends Data
             ScopeInterface::SCOPE_STORE,
             $store->getCode()
         );
-    }
-
-    /**
-     * Prepare language from a supported list based on store locale.
-     *
-     * @param  string  $locale
-     * @return string
-     */
-    protected function prepareLanguage(string $locale): string
-    {
-        if ($locale == 'pl_PL') {
-            return 'PL';
-        }
-
-        return 'EN';
     }
 }

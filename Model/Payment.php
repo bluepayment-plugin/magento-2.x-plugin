@@ -45,6 +45,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use SimpleXMLElement;
 
 /**
@@ -101,6 +102,7 @@ class Payment extends AbstractMethod
         'DefaultRegulationAcceptanceState', // 51
         'DefaultRegulationAcceptanceID', // 52
         'DefaultRegulationAcceptanceTime', // 53
+        'WalletType', // 54
         'AccountHolderName', // 59
         'PlatformName', // 170
         'PlatformVersion', // 171
@@ -255,6 +257,9 @@ class Payment extends AbstractMethod
     /** @var CustomFieldResolver */
     private $customFieldResolver;
 
+    /** @var StoreManagerInterface */
+    private $storeManager;
+
     /**
      * Payment constructor.
      *
@@ -289,6 +294,7 @@ class Payment extends AbstractMethod
      * @param  SendConfirmationEmail  $sendConfirmationEmail
      * @param  ProcessNotification  $processNotification
      * @param  CustomFieldResolver  $customFieldResolver
+     * @param  StoreManagerInterface  $storeManager
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
@@ -325,6 +331,7 @@ class Payment extends AbstractMethod
         SendConfirmationEmail $sendConfirmationEmail,
         ProcessNotification $processNotification,
         CustomFieldResolver $customFieldResolver,
+        StoreManagerInterface $storeManager,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
         array $data = []
@@ -353,6 +360,7 @@ class Payment extends AbstractMethod
         $this->sendConfirmationEmail = $sendConfirmationEmail;
         $this->processNotification = $processNotification;
         $this->customFieldResolver = $customFieldResolver;
+        $this->storeManager = $storeManager;
 
         parent::__construct(
             $context,
@@ -458,7 +466,7 @@ class Payment extends AbstractMethod
                 'general/locale/code',
                 ScopeInterface::SCOPE_STORE
             );
-        $language = $this->helper->getLanguageFromLocale($locale);
+        $language = LocaleMapper::getLanguageFromLocale($locale);
 
         $params = [
             'ServiceID' => $serviceId,
@@ -493,6 +501,8 @@ class Payment extends AbstractMethod
 
         if ($backUrl !== null) {
             $params['ReturnURL'] = $backUrl;
+        } else {
+            $params['ReturnURL'] = $this->getReturnUrl($order);
         }
 
         if ($this->configProvider->isWithPhoneEnabled() && $phone = $this->getPhoneForOrder->execute($order)) {
@@ -502,7 +512,12 @@ class Payment extends AbstractMethod
         if ($automatic === true) {
             switch ($gatewayId) {
                 case ConfigProvider::CARD_GATEWAY_ID:
-                    $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+                    if ($paymentToken !== '') {
+                        $params['PaymentToken'] = base64_encode($paymentToken);
+                        $params['WalletType'] = 'WIDGET';
+                    } else {
+                        $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+                    }
                     break;
                 case ConfigProvider::BLIK_GATEWAY_ID == $gatewayId:
                     $params['AuthorizationCode'] = $authorizationCode;
@@ -516,7 +531,7 @@ class Payment extends AbstractMethod
 
         /* Płatność automatyczna kartowa */
         if (ConfigProvider::ONECLICK_GATEWAY_ID == $gatewayId) {
-            $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex);
+            $params = $this->autopayGateway($params, $automatic, $customerId, $cardIndex, $paymentToken);
         } else {
             $agreementId = reset($agreementsIds);
 
@@ -965,7 +980,13 @@ class Payment extends AbstractMethod
      *
      * @return array
      */
-    private function autopayGateway(array $params, bool $automatic, int $customerId, int $cardIndex): array
+    private function autopayGateway(
+        array $params,
+        bool $automatic,
+        int $customerId,
+        int $cardIndex,
+        string $paymentToken = ''
+    ): array
     {
         /** @var Card $card */
         $card = $this->cardCollectionFactory
@@ -983,7 +1004,12 @@ class Payment extends AbstractMethod
         }
 
         if ($automatic === true) {
-            $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+            if ($paymentToken !== '') {
+                $params['PaymentToken'] = base64_encode($paymentToken);
+                $params['WalletType'] = 'WIDGET';
+            } else {
+                $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
+            }
         }
         return $params;
     }
@@ -1088,11 +1114,7 @@ class Payment extends AbstractMethod
      */
     public function sendRequest($params)
     {
-        if (array_key_exists('ClientHash', $params)) {
-            $this->curl->addHeader('BmHeader', 'pay-bm');
-        } else {
-            $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
-        }
+        $this->curl->addHeader('BmHeader', 'pay-bm-continue-transaction-url');
 
         $params = (array) $params;
         $url = $this->getUrlGateway();
@@ -1281,5 +1303,13 @@ class Payment extends AbstractMethod
         }
 
         return false;
+    }
+
+    protected function getReturnUrl(
+        Order $order
+    ): string {
+        return $this->storeManager
+            ->getStore($order->getStoreId())
+            ->getUrl('bluepayment/processing/back');
     }
 }

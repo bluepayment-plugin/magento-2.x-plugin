@@ -1,5 +1,31 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.32.1
+- We have fixed One Click payment for credit cards.
+
+## Version 2.32.0
+- We have added translations for languages: NL, LT, LV, ET.
+- We have migrated card payments from iFrame to the Autopay Widget (white label model) on checkout.
+- We have added support for Widget token flow (`PaymentToken`) and `WalletType=WIDGET` for card and one-click (new card) payments.
+- We have replaced the integration script from `checkout.js` to `widget-communication.min.js`.
+- We have kept support for stored one-click cards (without Widget for `RecurringAction=MANUAL`).
+
+## Version 2.31.2
+- We have fixed a bug with payment methods not being displayed after manual save.
+
+## Version 2.31.1
+- We have fixed a return status verification notification bug.
+
+## Version 2.31.0
+- We have updated the GraphQL module (BluePaymentGraphQl 1.3.0) with full PHP 8.2/8.3 compatibility and new schema fields (`bank_name`, `short_description`, `min_amount`, `max_amount`).
+- We have improved documentation and compatibility tables.
+
+## Version 2.30.0
+- We have added translations for languages: DE, FR, IT, ES, CS, RO, SK, HU, UK, EL, HR, SL, TR, BG.
+
+## Version 2.29.0
+- We have added ReturnURL support for all transactions.
+
 ## Version 2.28.0
 - We have added support for Magento 2.4.8.
 

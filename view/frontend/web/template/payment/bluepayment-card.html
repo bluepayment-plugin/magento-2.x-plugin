@@ -36,6 +36,14 @@
             <!-- ko template: getTemplate() --><!--/ko-->
         <!--/ko-->
 
+        <div class="bluepayment-widget-container">
+            <iframe
+                class="bluepayment-widget-frame"
+                scrolling="no"
+                data-bind="attr: { id: getWidgetFrameId(), title: 'Autopay Card Widget' }"
+            ></iframe>
+        </div>
+
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
                 <!-- ko template: getTemplate() --><!--/ko-->

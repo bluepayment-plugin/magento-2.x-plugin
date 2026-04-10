@@ -86,9 +86,15 @@
                     </depends>
                 </field>
                 <field id="iframe_payment" translate="label comment" type="select" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Iframe Payment</label>
+                    <label>Widget Payment</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    <comment><![CDATA[Payment without redirecting to Autopay gateway.]]></comment>
+                    <comment><![CDATA[Payment without redirecting to Autopay gateway (Widget).]]></comment>
+                    <depends>
+                        <field id="gateway_selection">1</field>
+                    </depends>
+                </field>
+                <field id="widget_documentation_info" translate="label" type="text" sortOrder="551" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>BlueMedia\BluePayment\Block\Adminhtml\System\Config\Form\Field\WidgetDocumentation</frontend_model>
                     <depends>
                         <field id="gateway_selection">1</field>
                     </depends>

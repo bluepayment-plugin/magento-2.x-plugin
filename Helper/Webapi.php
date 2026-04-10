@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Helper;
 use BlueMedia\BluePayment\Api\Client;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\Cache\AgreementsCache;
+use BlueMedia\BluePayment\Model\LocaleMapper;
 use Exception;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config\Initial;
@@ -174,7 +175,7 @@ class Webapi extends Data
                 'ServiceID' => $serviceId,
                 'MessageID' => $this->randomString(self::MESSAGE_ID_STRING_LENGTH),
                 'GatewayID' => $gatewayId,
-                'Language' => $this->getLanguageFromLocale($locale)
+                'Language' => LocaleMapper::getLanguageFromLocale($locale)
             ],
             $sharedKey,
             $this->getLegalDataUrl()

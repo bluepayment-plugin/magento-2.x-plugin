@@ -74,7 +74,7 @@ define([
             }
             model.selectedGatewayId.subscribe(function (value) {
                 checkoutData.setBluepaymentGatewayId(value);
-            });
+            }.bind(this));
 
             // Slideshow
             // Subscribe first to ensure changes are captured
@@ -92,7 +92,15 @@ define([
                 const currentQuoteMethod = quote.paymentMethod();
 
                 if (currentQuoteMethod && currentQuoteMethod.method === this.item.method) {
-                    const isSeparatedStored = config.separated.some(gateway => gateway.gateway_id === storedGatewayId);
+                    const separatedMethods = Array.isArray(config.separated) ? config.separated : [];
+                    const isSeparatedStored = separatedMethods.some(function (gateway) {
+                        return String(gateway.gateway_id) === String(storedGatewayId);
+                    });
+
+                    if (storedGatewayId && isSeparatedStored) {
+                        model.selectedGatewayId(storedGatewayId);
+                        return;
+                    }
 
                     if (storedGatewayId && !isSeparatedStored) {
                         model.selectedGatewayId(storedGatewayId);
