@@ -16,6 +16,17 @@ Do najważniejszych funkcji modułu zalicza się:
 - Wersja Magento: 2.3.0 – 2.4.8.
 - Wersja PHP: 7.4 – 8.4 (zgodna z wymaganiami danej wersji Magento).
 
+### Zgodność z Hyvä Checkout
+Moduł `BlueMedia_BluePayment` obsługuje standardowy checkout Magento. Dla sklepów korzystających z Hyvä Checkout dostępny jest osobny moduł kompatybilności: `BlueMedia_HyvaPayment`.
+
+Moduł Hyvä:
+- integruje metodę płatności Autopay z Hyvä Checkout,
+- obsługuje zbiorczą metodę Autopay oraz oddzielne metody płatności skonfigurowane w module bazowym,
+- dodaje szablony, style i komponent Magewire wymagane w checkout Hyvä,
+- udostępnia opcjonalne nadpisanie listy metod płatności Hyvä.
+
+Instaluj go tylko wtedy, gdy sklep używa Hyvä Checkout. Szczegółowa instrukcja znajduje się w [README modułu Hyvä](https://github.com/bluepayment-plugin/magento-hyva-payment/blob/master/README.md).
+
 ### [Co nowego w Autopay?](CHANGELOG.md)
 
 ## Instalacja
@@ -65,7 +76,7 @@ unzip -o -d app/code/BlueMedia/BluePayment bm-bluepayment-*.zip && rm bm-bluepay
 ## Konfiguracja
 1. Zaloguj się do panelu administracyjnego w platformie Magento 2.
 2. Wybierz z menu: **Sklepy (Store)** -> **Konfiguracja (Configuration)**
-3. W kolejnym menu wybierz: **Sprzedaż (Sales)** -> **Metody płatności (Payments methods)**
+3. W kolejnym menu wybierz: **Sprzedaż (Sales)** -> **Metody płatności (Payment methods)**
 4. Następnie rozwiń **Inne metody płatności (Other payment methods)** i wybierz **Płatność online Autopay (Online Payment Autopay)**. 
 
 ### Podstawowa konfiguracja modułu
@@ -136,7 +147,7 @@ Jeżeli chcesz zawsze wyświetlać pełną listę kanałów płatności:
 Odśwież pamięć podręczną po każdej edycji konfiguracji. Żeby to zrobić:
 1. Przejdź do **System** -> **Pamięć podręczna (Cache Management)**
 2. Zaznacz **Konfiguracja (Configuration)**
-3. Wybierz **Odśwież (Refresh)** z rowijanego menu
+3. Wybierz **Odśwież (Refresh)** z rozwijanego menu
 4. Kliknij **Wyślij (Submit)**
    
    ![configuration2.png](docs/configuration2.png "Screenshot")
@@ -462,9 +473,9 @@ bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 
-### Dezaktywacja za pośrednictwem panelu administracyjnego (tylko do wersji Magneto 2.3)
+### Dezaktywacja za pośrednictwem panelu administracyjnego (tylko do wersji Magento 2.3)
 1. Będąc zalogowanym do panelu administracyjnego, wybierz z menu głównego **System** -> **Web Setup Wizard**. System poprosi Cię o ponowne zalogowanie się.
-2. Przejdź do **Menadżera komponentów (Component Manager)** i znajdź na liście moduł **BlueMedia/BluePayment** i kliknij **Select**, a póżniej **Disable**.
+2. Przejdź do **Menadżera komponentów (Component Manager)** i znajdź na liście moduł **BlueMedia/BluePayment** i kliknij **Select**, a później **Disable**.
 
    ![dezactivation1.png](docs/dezactivation1.png)
 3. Kliknij **Start Readiness Check**, żeby zainicjować wykonanie weryfikacji zależności, po czym kliknij **Next**. 

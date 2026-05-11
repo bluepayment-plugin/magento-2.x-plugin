@@ -18,6 +18,17 @@ The main functions of the module include:
 - Magento version: 2.3.0 - 2.4.8.
 - PHP version: 7.4 - 8.4 (according to the requirements of your Magento version).
 
+### Hyvä Checkout compatibility
+`BlueMedia_BluePayment` supports the standard Magento checkout. For stores using Hyvä Checkout, a separate compatibility module is available: `BlueMedia_HyvaPayment`.
+
+The Hyvä module:
+- integrates the Autopay payment method with Hyvä Checkout,
+- supports the main Autopay method and separated payment methods configured in the base module,
+- adds templates, styles and the Magewire component required by Hyvä Checkout,
+- provides an optional override for the Hyvä payment method list template.
+
+Install it only when the store uses Hyvä Checkout. See the [Hyvä module README](../HyvaPayment/README.md) for details.
+
 ### [What's new in Autopay?](CHANGELOG_EN.md)
 
 

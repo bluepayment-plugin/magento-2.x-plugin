@@ -47,6 +47,14 @@ class Transaction extends AbstractModel implements TransactionInterface, Identit
     /**
      * {@inheritdoc}
      */
+    protected function _construct()
+    {
+        $this->_init(TransactionResource::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getIdentities()
     {
         return [self::CACHE_TAG.'_'.$this->getId()];

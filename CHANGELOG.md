@@ -1,5 +1,9 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.33.0
+- Dodaliśmy obsługę waluty DKK.
+- Dodaliśmy informację o kompatybilności z Hyvä Checkout oraz odnośnik do dokumentacji modułu `BlueMedia_HyvaPayment`.
+
 ## Wersja 2.32.1
 - Poprawiliśmy działanie OneClick dla kart.
 
