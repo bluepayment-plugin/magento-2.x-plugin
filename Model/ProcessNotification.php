@@ -199,7 +199,7 @@ class ProcessNotification
             try {
                 $orderPayment = $order->getPayment();
 
-                if ($orderPayment === null || $orderPayment->getMethod() !== Payment::METHOD_CODE) {
+                if ($orderPayment === null || !$this->isBluepaymentMethod((string) $orderPayment->getMethod())) {
                     continue;
                 }
 
@@ -516,5 +516,11 @@ class ProcessNotification
                 'transaction_id' => $remoteId,
             ]);
         }
+    }
+
+    private function isBluepaymentMethod(string $method): bool
+    {
+        return $method === Payment::METHOD_CODE
+            || strpos($method, Payment::SEPARATED_PREFIX_CODE) === 0;
     }
 }
