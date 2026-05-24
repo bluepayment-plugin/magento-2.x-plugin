@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
-    <consumer name="autopay.itn.process" queue="autopay.itn.process" handler="BlueMedia\BluePayment\Queue\Handler\ItnProcessRequestHandler::process"/>
+    <consumer name="autopay.itn.process" queue="autopay.itn.process" connection="db" handler="BlueMedia\BluePayment\Queue\Handler\ItnProcessRequestHandler::process"/>
 </config>
