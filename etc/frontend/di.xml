@@ -26,6 +26,15 @@
         <plugin sortOrder="10" name="bluepayment_payment_data" type="BlueMedia\BluePayment\Plugin\ExtendPaymentMethod"/>
     </type>
 
+    <type name="Magento\Payment\Model\Checks\SpecificationFactory">
+        <arguments>
+            <argument name="mapping" xsi:type="array">
+                <item name="bm_amount" xsi:type="object">BlueMedia\BluePayment\Model\Checks\Amount</item>
+            </argument>
+        </arguments>
+        <plugin name="bluepayment_add_amount_check" type="BlueMedia\BluePayment\Plugin\AddAmountCheckPlugin"/>
+    </type>
+
     <type name="Magento\Multishipping\Model\Payment\Method\Specification\Enabled">
         <plugin sortOrder="10" name="bluepayment_enabled" type="BlueMedia\BluePayment\Plugin\SetEnabled"/>
     </type>

@@ -38,6 +38,7 @@ class Gateways extends Data
         'BGN',
         'UAH',
         'SEK',
+        'DKK',
     ];
 
     /** @var GatewayInterfaceFactory */

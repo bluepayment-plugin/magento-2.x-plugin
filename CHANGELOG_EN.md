@@ -1,5 +1,9 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.33.0
+- We have added support for the DKK currency.
+- We have added Hyvä Checkout compatibility information and a link to the `BlueMedia_HyvaPayment` module documentation.
+
 ## Version 2.32.1
 - We have fixed One Click payment for credit cards.
 

@@ -283,6 +283,15 @@
                         <label>Configuration key (hash)</label>
                     </field>
                 </group>
+                <group id="dkk" translate="label" type="text" sortOrder="800" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>DKK configuration</label>
+                    <field id="service_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Service partner ID</label>
+                    </field>
+                    <field id="shared_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Configuration key (hash)</label>
+                    </field>
+                </group>
             </group>
         </section>
 
