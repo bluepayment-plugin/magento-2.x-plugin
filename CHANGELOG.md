@@ -2,6 +2,9 @@
 
 ## Wersja 2.33.1
 - Poprawiliśmy obsługę aktualizacji statusów zamówień dla separowanych metod płatności w Hyvä Checkout.
+- Poprawiliśmy wygląd popup BLIK w Luma.
+- Poprawiliśmy wsparcie dla Magento 2.3.
+- Poprawiliśmy działanie widgetu kartowego.
 
 ## Wersja 2.33.0
 - Dodaliśmy obsługę waluty DKK.

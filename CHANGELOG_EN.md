@@ -1,7 +1,10 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.33.1
-- We have fixed order status updates for separated payment methods in Hyvä Checkout.
+- We have fixed order status update handling for separated payment methods in Hyvä Checkout.
+- We have improved the appearance of the BLIK popup in the Luma theme.
+- We have improved support for Magento 2.3.x.
+- We have improved the card widget behavior.
 
 ## Version 2.33.0
 - We have added support for the DKK currency.
