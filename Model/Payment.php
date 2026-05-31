@@ -513,7 +513,7 @@ class Payment extends AbstractMethod
             switch ($gatewayId) {
                 case ConfigProvider::CARD_GATEWAY_ID:
                     if ($paymentToken !== '') {
-                        $params['PaymentToken'] = base64_encode($paymentToken);
+                        $params['PaymentToken'] = $paymentToken;
                         $params['WalletType'] = 'WIDGET';
                     } else {
                         $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
@@ -805,7 +805,7 @@ class Payment extends AbstractMethod
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
             'local_hash' => $localHash,
-            'remote_hash' => $localHash,
+            'remote_hash' => $remoteHash,
             'serviceId' => $serviceId,
         ]);
 
@@ -1005,7 +1005,7 @@ class Payment extends AbstractMethod
 
         if ($automatic === true) {
             if ($paymentToken !== '') {
-                $params['PaymentToken'] = base64_encode($paymentToken);
+                $params['PaymentToken'] = $paymentToken;
                 $params['WalletType'] = 'WIDGET';
             } else {
                 $params['ScreenType'] = self::IFRAME_SCREEN_TYPE;
