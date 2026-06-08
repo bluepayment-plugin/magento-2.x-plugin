@@ -1,5 +1,11 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.33.1
+- Poprawiliśmy obsługę aktualizacji statusów zamówień dla separowanych metod płatności w Hyvä Checkout.
+- Poprawiliśmy wygląd popup BLIK w Luma.
+- Poprawiliśmy wsparcie dla Magento 2.3.
+- Poprawiliśmy działanie widgetu kartowego.
+
 ## Wersja 2.33.0
 - Dodaliśmy obsługę waluty DKK.
 - Dodaliśmy informację o kompatybilności z Hyvä Checkout oraz odnośnik do dokumentacji modułu `BlueMedia_HyvaPayment`.

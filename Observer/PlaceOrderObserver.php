@@ -43,7 +43,7 @@ class PlaceOrderObserver implements ObserverInterface
         /** @var Order\Payment $payment */
         $payment = $observer->getData('payment');
         $method = $payment->getMethod();
-        if ($method !== Payment::METHOD_CODE) {
+        if (!$this->isBluepaymentMethod((string) $method)) {
             return;
         }
 
@@ -53,5 +53,11 @@ class PlaceOrderObserver implements ObserverInterface
         $order = $payment->getOrder();
         $order->setStatus($status)
             ->setState($state);
+    }
+
+    private function isBluepaymentMethod(string $method): bool
+    {
+        return $method === Payment::METHOD_CODE
+            || strpos($method, Payment::SEPARATED_PREFIX_CODE) === 0;
     }
 }
