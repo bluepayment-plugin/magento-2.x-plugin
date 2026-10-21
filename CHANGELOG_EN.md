@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.24.2
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have withdrawn the change regarding FirstName and LastName at transaction start (from version 2.23.0).
 
 ## Version 2.24.1

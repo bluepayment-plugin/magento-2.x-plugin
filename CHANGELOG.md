@@ -1,6 +1,7 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.24.2
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Wycofaliśmy zmianę dot. FirstName oraz LastName przy starcie transakcji (z wersji 2.23.0).
 
 ## Wersja 2.24.1
