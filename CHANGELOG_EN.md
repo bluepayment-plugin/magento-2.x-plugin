@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.33.1
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have fixed order status update handling for separated payment methods in Hyvä Checkout.
 - We have improved the appearance of the BLIK popup in the Luma theme.
 - We have improved support for Magento 2.3.x.
