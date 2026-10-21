@@ -1,6 +1,7 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.29.0
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Dodaliśmy obsługę rozliczeń transakcji po każdej wpłacie (opis działania [tutaj](https://developers.autopay.pl/online/dokumentacja#model-rozlicze%C5%84-transakcji-po-ka%C5%BCdej-wp%C5%82acie), dokumentacja modułu w README.md).
 
 ## Wersja 2.28.0
