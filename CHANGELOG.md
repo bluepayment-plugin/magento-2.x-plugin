@@ -1,6 +1,7 @@
 # Co nowego w BluePayment?
 
 ## Wersja 2.23.0
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Dodanie FirstName oraz LastName do parametrów startu transakcji.
 
 ## Wersja 2.22.11

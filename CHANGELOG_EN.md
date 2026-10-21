@@ -1,6 +1,7 @@
 # What's new in BluePayment?
 
 ## Version 2.23.0
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have added FirstName and LastName to transaction start parameters.
 
 ## Version 2.22.11
