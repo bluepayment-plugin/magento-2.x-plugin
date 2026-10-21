@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.30.0
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have updated the GraphQL module (BluePaymentGraphQl 1.3.0) with full PHP 8.2/8.3 compatibility and new schema fields (`bank_name`, `short_description`, `min_amount`, `max_amount`).
 - We have improved documentation and compatibility tables.
 
