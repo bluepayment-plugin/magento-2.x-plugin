@@ -1,6 +1,7 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.26.2
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Poprawiliśmy błąd z brakiem wyświetlania głównej metody płatności Autopay.
 
 ## Wersja 2.26.1
