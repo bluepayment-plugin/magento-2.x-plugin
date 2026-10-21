@@ -1,6 +1,7 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.28.0
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Dodaliśmy wsparcie dla Magento 2.4.8.
 
 ## Wersja 2.27.0
