@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.31.2
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have fixed a bug with payment methods not being displayed after manual save.
 
 ## Version 2.31.1
