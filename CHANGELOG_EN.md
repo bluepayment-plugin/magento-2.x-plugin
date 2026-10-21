@@ -1,6 +1,7 @@
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.27.1
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have added validation of first name and last name before starting the payment.
 
 ## Version 2.27.0

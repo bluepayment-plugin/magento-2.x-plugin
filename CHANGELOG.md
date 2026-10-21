@@ -1,6 +1,7 @@
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.27.1
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Dodaliśmy walidację imienia i nazwiska przed rozpoczęciem płatności.
 
 ## Wersja 2.27.0
