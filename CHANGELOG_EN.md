@@ -1,6 +1,7 @@
 # What's new in BluePayment?
 
 ## Version 2.22.11
+- We have fixed disclosure of the configuration key in JSON responses to requests with an invalid signature.
 - We have fixed the bug related to forcing int in Payment.php
 - We have fixed a bug in translations
 

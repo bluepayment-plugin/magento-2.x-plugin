@@ -1,6 +1,7 @@
 # Co nowego w BluePayment?
 
 ## Wersja 2.22.11
+- Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
 - Poprawiliśmy błąd związany z wymuszaniem int w Payment.php
 - Poprawiliśmy błąd w tłumaczeniach
 

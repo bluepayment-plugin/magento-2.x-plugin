@@ -132,8 +132,6 @@ class PaymentStatus extends Action
                 $resultJson->setData([
                     'error' => true,
                     'message' => 'Invalid hash.',
-                    'local' => $hashLocal,
-                    'data' => $hashData
                 ]);
 
                 return $resultJson;
