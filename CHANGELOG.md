@@ -1,7 +1,10 @@
 # Co nowego w module bramki płatności Autopay?
 
-## Wersja 2.33.1
+## Wersja 2.33.1-p1
 - Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
+- Ujednoliciliśmy numer wersji modułu i paczki: parametr `PlatformPluginVersion` przekazywany do Autopay zawiera teraz `2.33.1-p1`.
+
+## Wersja 2.33.1
 - Poprawiliśmy obsługę aktualizacji statusów zamówień dla separowanych metod płatności w Hyvä Checkout.
 - Poprawiliśmy wygląd popup BLIK w Luma.
 - Poprawiliśmy wsparcie dla Magento 2.3.

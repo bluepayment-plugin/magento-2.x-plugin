@@ -19,7 +19,7 @@ if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-p[0-9]+)?$ ]]; then
     exit 1
 fi
 
-if [[ -n "$METADATA_VERSION" && "${PACKAGE_VERSION%%-p*}" != "$METADATA_VERSION" ]]; then
+if [[ -n "$METADATA_VERSION" && "$PACKAGE_VERSION" != "$METADATA_VERSION" ]]; then
     printf 'Package version %s does not match module metadata %s.\n' "$PACKAGE_VERSION" "$METADATA_VERSION" >&2
     exit 1
 fi
