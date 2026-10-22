@@ -1,6 +1,7 @@
 # Co nowego w BluePayment?
 
 ## Wersja [IN PROGRESS]
+- Usunęliśmy stałą wersję z composer.json; wersję pakietu określa referencja Git.
 - Dodaliśmy obsługę AutoPay
 - Dodaliśmy obsługę Huba ratalnego.
 

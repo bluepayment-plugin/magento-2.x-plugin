@@ -1,6 +1,7 @@
 # What's new in BluePayment?
 
 ## Version [IN progress]
+- We have removed the fixed version from composer.json; the package version is determined by its Git reference.
 - We've added Installment Hub to payment.
 - We added Autopay support.
 
