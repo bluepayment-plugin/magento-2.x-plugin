@@ -1,7 +1,10 @@
 # Co nowego w module bramki płatności Autopay?
 
-## Wersja 2.33.0
+## Wersja 2.33.0-p1
 - Usunęliśmy ujawnianie klucza konfiguracyjnego w odpowiedzi JSON przy nieprawidłowym podpisie żądania.
+- Ujednoliciliśmy numer wersji modułu i paczki: parametr `PlatformPluginVersion` przekazywany do Autopay zawiera teraz `2.33.0-p1`.
+
+## Wersja 2.33.0
 - Dodaliśmy obsługę waluty DKK.
 - Dodaliśmy informację o kompatybilności z Hyvä Checkout oraz odnośnik do dokumentacji modułu `BlueMedia_HyvaPayment`.
 
