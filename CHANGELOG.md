@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.34.5
+- Przygotowaliśmy ponowne wydanie poprawek z wersji 2.34.4.
+
 ## Wersja 2.34.4
 - Poprawiliśmy checkout i linki płatności dla różnych walut ([PR #14](https://github.com/bluepayment-plugin/magento-2.x-plugin/pull/14), [PR #16](https://github.com/bluepayment-plugin/magento-2.x-plugin/pull/16), [#17](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/17)).
 - Poprawiliśmy zapis i synchronizację zwrotów oraz obsługę kwot z przecinkiem.

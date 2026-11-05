@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.34.5
+- We have prepared a re-release of the fixes from version 2.34.4.
+
 ## Version 2.34.4
 - We have fixed checkout and payment links across currencies ([PR #14](https://github.com/bluepayment-plugin/magento-2.x-plugin/pull/14), [PR #16](https://github.com/bluepayment-plugin/magento-2.x-plugin/pull/16), [#17](https://github.com/bluepayment-plugin/magento-2.x-plugin/issues/17)).
 - We have fixed refund saving, status synchronization and decimal comma handling.

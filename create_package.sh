@@ -40,4 +40,12 @@ zip -q -r "$TEMP_DIR/$PACKAGE_NAME" . \
     '*.doc' '*.docx' '*.patch' '*.bak' '*.log' '*.tmp' '*.swp'
 
 mv -f -- "$TEMP_DIR/$PACKAGE_NAME" "$PACKAGE_NAME"
+
+# Remove previous releases only after the new package is ready.
+for old_package in bm-bluepayment-*.zip; do
+    if [[ "$old_package" != "$PACKAGE_NAME" && -f "$old_package" ]]; then
+        rm -f -- "$old_package"
+    fi
+done
+
 printf 'Package created: %s/%s\n' "$PWD" "$PACKAGE_NAME"
