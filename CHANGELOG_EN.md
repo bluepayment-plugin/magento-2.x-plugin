@@ -1,5 +1,8 @@
 # What's new in the Autopay payment gateway module?
 
+## Version 2.34.6
+- We have prepared a re-release of version 2.34.5.
+
 ## Version 2.34.5
 - We have prepared a re-release of the fixes from version 2.34.4.
 

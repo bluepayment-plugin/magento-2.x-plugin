@@ -1,5 +1,8 @@
 # Co nowego w module bramki płatności Autopay?
 
+## Wersja 2.34.6
+- Przygotowaliśmy ponowne wydanie wersji 2.34.5.
+
 ## Wersja 2.34.5
 - Przygotowaliśmy ponowne wydanie poprawek z wersji 2.34.4.
 
