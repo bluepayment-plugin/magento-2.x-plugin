@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Disable caching before Magento's built-in cache processes the response. -->
+    <event name="controller_action_postdispatch">
+        <observer name="bluepayment_disable_processing_response_cache" instance="BlueMedia\BluePayment\Observer\DisableProcessingResponseCache" />
+    </event>
+    <!-- Reapply after rendering in case layout or theme code overwrote the headers. -->
+    <event name="controller_front_send_response_before">
+        <observer name="bluepayment_disable_processing_response_cache" instance="BlueMedia\BluePayment\Observer\DisableProcessingResponseCache" />
+    </event>
+</config>

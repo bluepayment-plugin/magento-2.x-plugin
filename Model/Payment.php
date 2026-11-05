@@ -395,19 +395,22 @@ class Payment extends AbstractMethod
     {
         $testMode = $this->_scopeConfig->getValue(
             'payment/bluepayment/test_mode',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $this->getStore()
         );
 
         if ($testMode) {
             return $this->_scopeConfig->getValue(
                 'payment/bluepayment/test_address_url',
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $this->getStore()
             );
         }
 
         return $this->_scopeConfig->getValue(
             'payment/bluepayment/prod_address_url',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $this->getStore()
         );
     }
 
@@ -437,26 +440,21 @@ class Payment extends AbstractMethod
         ?string $backUrl = null
     ): array {
         $orderId       = $order->getRealOrderId();
+        $storeId = (int) $order->getStoreId();
+        $this->setStore($storeId);
+        $currency = $this->configProvider->getOrderPaymentCurrency($order);
 
-        if ($this->configProvider->isUseBaseCurrency()) {
+        if ($this->configProvider->isUseBaseCurrency($storeId)) {
             $amount = $order->getBaseGrandTotal();
-            $currency = $order->getBaseCurrencyCode();
         } else {
             $amount = $order->getGrandTotal();
-            $currency = $order->getOrderCurrencyCode();
         }
 
         $amount = number_format($amount, 2, '.', '');
 
         // Config
-        $serviceId     = $this->_scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/service_id',
-            ScopeInterface::SCOPE_STORE
-        );
-        $sharedKey     = $this->_scopeConfig->getValue(
-            'payment/bluepayment/' . strtolower($currency) . '/shared_key',
-            ScopeInterface::SCOPE_STORE
-        );
+        $serviceId = $this->configProvider->getServiceID($currency, $storeId);
+        $sharedKey = $this->configProvider->getSharedKey($currency, $storeId);
 
         $customerId = $order->getCustomerId();
         $validityTime = $this->getTransactionLifetime($order);
@@ -464,7 +462,8 @@ class Payment extends AbstractMethod
         $locale = $this->_scopeConfig
             ->getValue(
                 'general/locale/code',
-                ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE,
+                $storeId
             );
         $language = LocaleMapper::getLanguageFromLocale($locale);
 
@@ -545,7 +544,7 @@ class Payment extends AbstractMethod
         $hashArray = array_values(self::sortParams($params));
         $hashArray[] = $sharedKey;
 
-        $params['Hash'] = $this->helper->generateAndReturnHash($hashArray);
+        $params['Hash'] = $this->helper->generateAndReturnHash($hashArray, $storeId);
 
         return $params;
     }

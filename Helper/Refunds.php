@@ -102,7 +102,7 @@ class Refunds extends Data
 
     /**
      * @param TransactionInterface|null $transaction
-     * @param null $amount
+     * @param float|int|string|null $amount
      * @return array
      * @throws EmptyRemoteIdException
      */
@@ -126,6 +126,8 @@ class Refunds extends Data
             $amount = $order->getGrandTotal();
         }
 
+        $amount = (float) str_replace(',', '.', (string) $amount);
+
         $refundAmount = $this->refundTransactionRepository->getTotalRefundAmountOnTransaction($transaction);
         $availableRefundAmount = $transaction->getAmount() - $refundAmount;
         if ($amount > $availableRefundAmount) {
@@ -144,7 +146,7 @@ class Refunds extends Data
             $serviceId,
             $messageId,
             $transaction->getRemoteId(),
-            (float) $amount,
+            $amount,
             $sharedKey
         );
 

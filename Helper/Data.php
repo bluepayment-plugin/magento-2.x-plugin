@@ -11,6 +11,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Sales\Model\Order;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -70,18 +71,21 @@ class Data extends \Magento\Payment\Helper\Data
 
     /**
      * @param array $data
+     * @param int|null $storeId
      *
      * @return string
      */
-    public function generateAndReturnHash($data)
+    public function generateAndReturnHash($data, ?int $storeId = null)
     {
         $algorithm = $this->scopeConfig->getValue(
             'payment/bluepayment/hash_algorithm',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $storeId
         );
         $separator = $this->scopeConfig->getValue(
             'payment/bluepayment/hash_separator',
-            ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE,
+            $storeId
         );
         $values_array = array_values($data);
         $values_array_filter = array_filter(($values_array));
@@ -89,6 +93,22 @@ class Data extends \Magento\Payment\Helper\Data
         $replaced = str_replace(",", $separator, $comma_separated);
 
         return hash($algorithm, $replaced);
+    }
+
+    /**
+     * Sign a continuation link only for an existing order with complete credentials.
+     */
+    public function generateContinuationHash(Order $order, string $serviceId, string $sharedKey): ?string
+    {
+        if (!$order->getId() || $serviceId === '' || $sharedKey === '') {
+            return null;
+        }
+
+        return $this->generateAndReturnHash([
+            $serviceId,
+            $order->getIncrementId(),
+            $sharedKey,
+        ], (int) $order->getStoreId());
     }
 
     /**

@@ -90,7 +90,7 @@ class Agreements implements HttpGetActionInterface
         if (is_array($response) && $response['result'] == 'OK') {
             $resultJson->setData($response['regulationList']);
         } else {
-            $this->logger->addError('Unable to get agreements.', [
+            $this->logger->error('Unable to get agreements.', [
                 'gatewayId' => $gatewayId,
                 'currency' => $currency,
                 'locale' => $locale,

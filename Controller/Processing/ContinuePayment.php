@@ -134,40 +134,35 @@ class ContinuePayment extends Action
             $hash = $this->getRequest()->getParam('hash');
 
             $order = $this->orderFactory->create()->loadByIncrementId($orderId);
-            $orderPayment = $order->getPayment();
-
-            if ($this->configProvider->isUseBaseCurrency((int) $order->getStoreId())) {
-                $currency = $order->getBaseCurrencyCode();
-            } else {
-                $currency = $order->getOrderCurrencyCode();
-            }
-
-            $serviceId = $this->scopeConfig->getValue(
-                'payment/bluepayment/' . $currency . '/service_id',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
-            );
-            $sharedKey = $this->scopeConfig->getValue(
-                'payment/bluepayment/' . $currency . '/shared_key',
-                ScopeInterface::SCOPE_STORE,
-                $order->getStoreId()
-            );
-
-            $hashLocal = $this->helper->generateAndReturnHash([
+            $storeId = (int) $order->getStoreId();
+            $currency = $this->configProvider->getOrderPaymentCurrency($order);
+            $serviceId = $this->configProvider->getServiceID($currency, $storeId);
+            $hashLocal = $this->helper->generateContinuationHash(
+                $order,
                 $serviceId,
-                $order->getIncrementId(),
-                $sharedKey
-            ]);
+                $this->configProvider->getSharedKey($currency, $storeId)
+            );
+
+            $validHash = is_string($hash) && $hashLocal !== null && hash_equals($hashLocal, $hash);
+            if (!$validHash && is_string($hash) && $hashLocal !== null
+                && $currency !== $order->getOrderCurrencyCode()) {
+                // Previously emailed links used order-currency credentials.
+                $legacyHash = $this->helper->generateContinuationHash(
+                    $order,
+                    $this->configProvider->getServiceID($order->getOrderCurrencyCode(), $storeId),
+                    $this->configProvider->getSharedKey($order->getOrderCurrencyCode(), $storeId)
+                );
+                $validHash = $legacyHash !== null && hash_equals($legacyHash, $hash);
+            }
 
             $this->logger->info('CONTINUE: ' . __LINE__, [
                 'serviceId' => $serviceId,
                 'orderId' => $order->getIncrementId(),
-                'sharedKey' => $sharedKey,
                 'hash' => $hash,
                 'hashLocal' => $hashLocal,
             ]);
 
-            if ($hash !== $hashLocal) {
+            if (!$validHash) {
                 $this->messageManager->addErrorMessage(__('Invalid hash for order.'));
                 return $this->_redirect('/');
             }
@@ -179,6 +174,7 @@ class ContinuePayment extends Action
                 return $this->_redirect('/');
             }
 
+            $orderPayment = $order->getPayment();
             $existingUrl = (string) $orderPayment->getAdditionalInformation('bluepayment_redirect_url');
             if ($existingUrl) {
                 // Already generated

@@ -262,7 +262,7 @@ class RefundStatusUpdaterService implements RefundStatusUpdaterInterface
         $hashMethod = $config->getHashAlgorithm($storeId) ?? 'sha256';
         $sharedKey = $config->getSharedKey($currency, $storeId);
 
-        $data['Hash'] = hash(
+        $data['hash'] = hash(
             $hashMethod,
             implode($hashSeparator, array_merge(array_values($data), [$sharedKey]))
         );

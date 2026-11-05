@@ -38,6 +38,9 @@ class Info extends \Magento\Payment\Block\Info
     /** @var GetTransactionLifetime */
     private $getTransactionLifetime;
 
+    /** @var ConfigProvider */
+    private $configProvider;
+
     protected $_template = 'BlueMedia_BluePayment::payment/info.phtml';
 
     /**
@@ -47,6 +50,7 @@ class Info extends \Magento\Payment\Block\Info
      * @param Data $helper
      * @param GetTransactionLifetime $getTransactionLifetime
      * @param Context $context
+     * @param ConfigProvider $configProvider
      * @param array $data
      */
     public function __construct(
@@ -56,6 +60,7 @@ class Info extends \Magento\Payment\Block\Info
         Data $helper,
         GetTransactionLifetime $getTransactionLifetime,
         Template\Context $context,
+        ConfigProvider $configProvider,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -64,6 +69,7 @@ class Info extends \Magento\Payment\Block\Info
         $this->url = $url;
         $this->helper = $helper;
         $this->getTransactionLifetime = $getTransactionLifetime;
+        $this->configProvider = $configProvider;
     }
 
     /**
@@ -158,36 +164,30 @@ class Info extends \Magento\Payment\Block\Info
             return false;
         }
 
-        return $this->generateLink($order);
+        return $this->generateLink($order) ?? false;
     }
 
     /**
      * Generate link to continuation
      *
      * @param Order $order
-     * @return string
+     * @return string|null
      */
-    private function generateLink(Order $order): string
+    private function generateLink(Order $order): ?string
     {
         $this->url->setScope($order->getStore());
 
-        $currency = strtolower($order->getOrderCurrencyCode());
-        $serviceId = $this->_scopeConfig->getValue(
-            'payment/bluepayment/' . $currency . '/service_id',
-            ScopeInterface::SCOPE_STORE,
-            $order->getStoreId()
-        );
-        $sharedKey = $this->_scopeConfig->getValue(
-            'payment/bluepayment/' . $currency . '/shared_key',
-            ScopeInterface::SCOPE_STORE,
-            $order->getStoreId()
+        $storeId = (int) $order->getStoreId();
+        $currency = $this->configProvider->getOrderPaymentCurrency($order);
+        $hash = $this->helper->generateContinuationHash(
+            $order,
+            $this->configProvider->getServiceID($currency, $storeId),
+            $this->configProvider->getSharedKey($currency, $storeId)
         );
 
-        $hash = $this->helper->generateAndReturnHash([
-            $serviceId,
-            $order->getIncrementId(),
-            $sharedKey
-        ]);
+        if ($hash === null) {
+            return null;
+        }
 
         return $this->url->getUrl('bluepayment/processing/continuepayment', [
             '_secure' => true,

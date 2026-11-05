@@ -475,7 +475,13 @@ class ProcessNotification
                 .' | Status: '.$paymentStatus.' [IGNORED]'
                 .(!$shouldUpdateOrder ? ' Status SUCCESS/PENDING is in other transaction based on WebAPI.' : '');
 
-            $order->addStatusToHistory($order->getStatus(), $orderComment);
+            // Saving the order itself can change its state even when the notification is ignored.
+            $order->addCommentToStatusHistory($orderComment, $order->getStatus())
+                ->setParentId($order->getId())
+                ->setIsCustomerNotified(false)
+                ->save();
+            $this->sendConfirmationEmail->execute($order);
+            return $orderPaymentState;
         }
 
         $this->orderRepository->save($order);

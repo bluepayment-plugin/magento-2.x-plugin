@@ -489,8 +489,14 @@ class Gateway extends AbstractModel implements IdentityInterface, GatewayInterfa
      */
     public function getRequiredParams(): ?array
     {
-        // change JSON to array
-        return json_decode($this->getData(self::REQUIRED_PARAMS), true);
+        $requiredParams = $this->getData(self::REQUIRED_PARAMS);
+
+        if (is_string($requiredParams)) {
+            // change JSON to array
+            $requiredParams = json_decode($requiredParams, true);
+        }
+
+        return $requiredParams;
     }
 
     /**

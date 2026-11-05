@@ -372,6 +372,16 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get the payment currency using the order store configuration.
+     */
+    public function getOrderPaymentCurrency(Order $order): string
+    {
+        return $this->isUseBaseCurrency((int) $order->getStoreId())
+            ? $order->getBaseCurrencyCode()
+            : $order->getOrderCurrencyCode();
+    }
+
+    /**
      * Prepare gateway detail
      *
      * @param Gateway $gateway

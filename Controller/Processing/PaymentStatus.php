@@ -108,7 +108,21 @@ class PaymentStatus extends Action
                 // Check status after back.
                 $order = $this->orderFactory->create()->loadByIncrementId($orderId);
             }
+        } else {
+            // Check status on cart.
+            $order = $this->session->getLastRealOrder();
+        }
 
+        if (!$order || !$order->getId()) {
+            $resultJson->setData([
+                'error' => true,
+                'message' => (string) __('Unable to retrieve payment status.'),
+            ]);
+
+            return $resultJson;
+        }
+
+        if ($orderId) {
             $hash       = $this->getRequest()->getParam('Hash');
 
             $currency   = strtolower($order->getOrderCurrencyCode());
@@ -137,18 +151,7 @@ class PaymentStatus extends Action
                 return $resultJson;
             }
         } else {
-            // Check status on cart.
-            $order = $this->session->getLastRealOrder();
             $orderId = $order->getIncrementId();
-        }
-
-        if (!$order) {
-            $resultJson->setData([
-                'error' => true,
-                'message' => 'Nie znaleziono takiego zamówienia.',
-            ]);
-
-            return $resultJson;
         }
 
         try {
