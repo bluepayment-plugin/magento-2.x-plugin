@@ -268,11 +268,17 @@ class ConfigProvider implements ConfigProviderInterface
             ];
         }
 
-        if (!isset($this->activeGateways[$currency])) {
+        $amount = $this->getGrandTotalForQuote();
+        $cacheKey = implode('|', [
+            $this->storeManager->getStore()->getId(),
+            $currency,
+            var_export($amount, true),
+            (int) $this->customerSession->getCustomerId(),
+        ]);
+
+        if (!isset($this->activeGateways[$cacheKey])) {
             $resultSeparated = [];
             $result = [];
-
-            $amount = $this->getGrandTotalForQuote();
 
             $gateways = $this->getActiveGateways($currency, (float) $amount);
 
@@ -292,7 +298,7 @@ class ConfigProvider implements ConfigProviderInterface
             $this->sortGateways($result);
             $this->sortGateways($resultSeparated);
 
-            $this->activeGateways[$currency] = [
+            $this->activeGateways[$cacheKey] = [
                 'test_mode' => $this->isTestMode(),
                 'logo' => $this->block->getLogoSrc(),
                 'iframe_enabled' => $this->iframePaymentEnabled(),
@@ -312,7 +318,7 @@ class ConfigProvider implements ConfigProviderInterface
             ];
         }
 
-        return $this->activeGateways[$currency];
+        return $this->activeGateways[$cacheKey];
     }
 
     /**
