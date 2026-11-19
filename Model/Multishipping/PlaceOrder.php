@@ -6,10 +6,12 @@ use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Model\Card;
 use BlueMedia\BluePayment\Model\ConfigProvider;
 use BlueMedia\BluePayment\Model\CustomFieldResolver;
+use BlueMedia\BluePayment\Model\GatewayValidator;
 use BlueMedia\BluePayment\Model\Metadata;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Convert\ConvertArray;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Session\Generic;
@@ -73,6 +75,9 @@ class PlaceOrder implements PlaceOrderInterface
     /** @var ConfigProvider */
     public $configProvider;
 
+    /** @var GatewayValidator */
+    private $gatewayValidator;
+
     public function __construct(
         OrderManagementInterface $orderManagement,
         CollectionFactory $gatewayFactory,
@@ -85,7 +90,8 @@ class PlaceOrder implements PlaceOrderInterface
         Logger $logger,
         Metadata $metadata,
         CustomFieldResolver $customFieldResolver,
-        ConfigProvider $configProvider
+        ConfigProvider $configProvider,
+        ?GatewayValidator $gatewayValidator = null
     ) {
         $this->orderManagement = $orderManagement;
         $this->gatewayFactory = $gatewayFactory;
@@ -99,6 +105,8 @@ class PlaceOrder implements PlaceOrderInterface
         $this->metadata = $metadata;
         $this->customFieldResolver = $customFieldResolver;
         $this->configProvider = $configProvider;
+        $this->gatewayValidator = $gatewayValidator
+            ?? ObjectManager::getInstance()->get(GatewayValidator::class);
     }
 
     /**
@@ -214,6 +222,14 @@ class PlaceOrder implements PlaceOrderInterface
         );
 
         $customerId = $order->getCustomerId();
+
+        $this->gatewayValidator->validate(
+            (int) $gatewayId,
+            (int) $order->getStoreId(),
+            (string) $currency,
+            (float) $amount,
+            (int) $customerId
+        );
 
         $xml = new \SimpleXMLElement('<productList/>');
 

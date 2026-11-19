@@ -5,6 +5,7 @@ namespace BlueMedia\BluePayment\Controller\Processing;
 use BlueMedia\BluePayment\Helper\Data;
 use BlueMedia\BluePayment\Logger\Logger;
 use BlueMedia\BluePayment\Model\ConfigProvider;
+use BlueMedia\BluePayment\Model\GatewayValidator;
 use BlueMedia\BluePayment\Model\GetStateForStatus;
 use BlueMedia\BluePayment\Model\Payment;
 use BlueMedia\BluePayment\Model\PaymentFactory;
@@ -15,10 +16,12 @@ use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\Response\Http;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
@@ -73,6 +76,9 @@ class Create extends Action
     /** @var SendConfirmationEmail */
     private $sendConfirmationEmail;
 
+    /** @var GatewayValidator */
+    private $gatewayValidator;
+
     /**
      * Create constructor.
      *
@@ -90,6 +96,7 @@ class Create extends Action
      * @param  ConfigProvider  $configProvider
      * @param  OrderRepositoryInterface  $orderRepository
      * @param  SendConfirmationEmail  $sendConfirmationEmail
+     * @param  GatewayValidator|null  $gatewayValidator
      */
     public function __construct(
         Context $context,
@@ -105,7 +112,8 @@ class Create extends Action
         GetStateForStatus $getStateForStatus,
         ConfigProvider $configProvider,
         OrderRepositoryInterface $orderRepository,
-        SendConfirmationEmail $sendConfirmationEmail
+        SendConfirmationEmail $sendConfirmationEmail,
+        ?GatewayValidator $gatewayValidator = null
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->logger = $logger;
@@ -119,6 +127,8 @@ class Create extends Action
         $this->configProvider = $configProvider;
         $this->orderRepository = $orderRepository;
         $this->sendConfirmationEmail = $sendConfirmationEmail;
+        $this->gatewayValidator = $gatewayValidator
+            ?? ObjectManager::getInstance()->get(GatewayValidator::class);
 
         $this->bluepayment = $paymentFactory->create();
 
@@ -179,6 +189,25 @@ class Create extends Action
             $paymentToken = (string) $this->getRequest()->getParam('token', '');
 
             $resultJson = $this->resultJsonFactory->create();
+
+            try {
+                $this->gatewayValidator->validateForOrder($order, $gatewayId);
+            } catch (LocalizedException $e) {
+                $this->logger->info('CREATE:' . __LINE__, [
+                    'gatewayId' => $gatewayId,
+                    'error' => $e->getMessage(),
+                ]);
+
+                if ($automatic === true) {
+                    $resultJson->setData([
+                        'error' => true
+                    ]);
+                    return $resultJson;
+                }
+
+                $this->messageManager->addErrorMessage($e->getMessage());
+                return $this->_redirect('checkout/cart');
+            }
 
             $unchangeableStatuses = $this->configProvider->getUnchangableStatuses();
             $status = $this->configProvider->getStatusWaitingPayment();
