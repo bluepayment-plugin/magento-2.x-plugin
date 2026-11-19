@@ -12,6 +12,12 @@
     <event name="email_shipment_set_template_vars_before">
         <observer name="add_payment_channel_to_transport_shipment" instance="BlueMedia\BluePayment\Observer\OrderObserver" />
     </event>
+    <event name="blue_gateway_save_after">
+        <observer name="bluepayment_reset_active_gateways" instance="BlueMedia\BluePayment\Observer\ResetActiveGateways" />
+    </event>
+    <event name="blue_gateway_delete_after">
+        <observer name="bluepayment_reset_active_gateways" instance="BlueMedia\BluePayment\Observer\ResetActiveGateways" />
+    </event>
     <event name="payment_method_assign_data_bluepayment">
         <observer name="bluepayment_gateway_data_assign" instance="BlueMedia\BluePayment\Observer\DataAssignObserver" />
     </event>
