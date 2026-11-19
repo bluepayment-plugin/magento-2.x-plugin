@@ -38,6 +38,7 @@ use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
@@ -450,7 +451,7 @@ class Payment extends AbstractMethod
             $amount = $order->getGrandTotal();
         }
 
-        $amount = number_format($amount, 2, '.', '');
+        $amount = $this->formatTransactionAmount($amount);
 
         // Config
         $serviceId = $this->configProvider->getServiceID($currency, $storeId);
@@ -1179,6 +1180,47 @@ class Payment extends AbstractMethod
     public function isActive($storeId = null): bool
     {
         return (bool)(int)$this->getConfigData('active', $storeId);
+    }
+
+    /**
+     * Check availability; a separated gateway is available only when the quote total is within its amount range.
+     *
+     * @param CartInterface|null $quote
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function isAvailable(?CartInterface $quote = null)
+    {
+        if (!parent::isAvailable($quote)) {
+            return false;
+        }
+
+        $gateway = $this->getGatewayModel();
+        if ($quote === null || $gateway === null) {
+            return true;
+        }
+
+        $amount = (float) $this->formatTransactionAmount(
+            $this->configProvider->isUseBaseCurrency((int) $quote->getStoreId())
+                ? $quote->getBaseGrandTotal()
+                : $quote->getGrandTotal()
+        );
+        $minAmount = $gateway->getMinAmount();
+        $maxAmount = $gateway->getMaxAmount();
+
+        return ($minAmount === null || $amount >= $minAmount)
+            && ($maxAmount === null || $amount <= $maxAmount);
+    }
+
+    /**
+     * Format an amount the way it is sent as the transaction amount.
+     *
+     * @param float|string|null $amount
+     * @return string
+     */
+    private function formatTransactionAmount($amount): string
+    {
+        return number_format((float) $amount, 2, '.', '');
     }
 
     /**
