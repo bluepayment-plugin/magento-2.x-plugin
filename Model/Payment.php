@@ -15,6 +15,7 @@ use BlueMedia\BluePayment\Logger\Logger as BMLogger;
 use BlueMedia\BluePayment\Model\ResourceModel\Card as CardResource;
 use BlueMedia\BluePayment\Model\ResourceModel\Card\CollectionFactory as CardCollectionFactory;
 use BlueMedia\BluePayment\Model\ResourceModel\Gateway\CollectionFactory as GatewayFactory;
+use BlueMedia\BluePayment\Observer\DataAssignObserver;
 use DateTimeZone;
 use DOMDocument;
 use DOMException;
@@ -22,6 +23,7 @@ use Exception;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\AlreadyExistsException;
@@ -38,8 +40,10 @@ use Magento\Payment\Helper\Data as PaymentData;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Store\Api\Data\StoreInterface;
@@ -260,6 +264,9 @@ class Payment extends AbstractMethod
     /** @var StoreManagerInterface */
     private $storeManager;
 
+    /** @var GatewayValidator */
+    private $gatewayValidator;
+
     /**
      * Payment constructor.
      *
@@ -298,6 +305,7 @@ class Payment extends AbstractMethod
      * @param  AbstractResource|null  $resource
      * @param  AbstractDb|null  $resourceCollection
      * @param  array  $data
+     * @param  GatewayValidator|null  $gatewayValidator
      */
     public function __construct(
         Data $helper,
@@ -334,7 +342,8 @@ class Payment extends AbstractMethod
         StoreManagerInterface $storeManager,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
-        array $data = []
+        array $data = [],
+        ?GatewayValidator $gatewayValidator = null
     ) {
         $this->url = $url;
         $this->helper = $helper;
@@ -361,6 +370,8 @@ class Payment extends AbstractMethod
         $this->processNotification = $processNotification;
         $this->customFieldResolver = $customFieldResolver;
         $this->storeManager = $storeManager;
+        $this->gatewayValidator = $gatewayValidator
+            ?? ObjectManager::getInstance()->get(GatewayValidator::class);
 
         parent::__construct(
             $context,
@@ -1011,6 +1022,46 @@ class Payment extends AbstractMethod
             }
         }
         return $params;
+    }
+
+    /**
+     * Validate payment method and the selected gateway (channel).
+     *
+     * @return $this
+     * @throws LocalizedException
+     */
+    public function validate()
+    {
+        parent::validate();
+
+        $paymentInfo = $this->getInfoInstance();
+        $gatewayId = (int) $paymentInfo->getAdditionalInformation(DataAssignObserver::GATEWAY_ID);
+        if ($gatewayId === 0) {
+            return $this;
+        }
+
+        if ($paymentInfo instanceof OrderPayment) {
+            $order = $paymentInfo->getOrder();
+            if (!$order instanceof Order) {
+                return $this;
+            }
+
+            $quote = $order->getQuote();
+            // Multishipping pays all orders in one transaction; Multishipping\PlaceOrder checks the combined total.
+            if ($quote instanceof Quote && $quote->getIsMultiShipping()) {
+                return $this;
+            }
+
+            $this->gatewayValidator->validateForOrder($order, $gatewayId);
+            return $this;
+        }
+
+        $quote = $paymentInfo->getQuote();
+        if ($quote instanceof Quote) {
+            $this->gatewayValidator->validateForQuote($quote, $gatewayId);
+        }
+
+        return $this;
     }
 
     public function order(InfoInterface $payment, $amount)
