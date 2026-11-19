@@ -59,6 +59,9 @@ class ConfigProvider implements ConfigProviderInterface
     /** @var array */
     private $activeGateways = [];
 
+    /** @var GatewayCollection[] */
+    private $gatewayCollections = [];
+
     /** @var Form */
     private $block;
 
@@ -576,6 +579,19 @@ class ConfigProvider implements ConfigProviderInterface
             ScopeInterface::SCOPE_STORE
         );
 
+        $memoise = $this->canMemoiseGateways();
+        $cacheKey = implode('|', [
+            $storeId,
+            $serviceId,
+            $currency,
+            var_export($amount, true),
+            (int) $onlySeparated,
+        ]);
+
+        if ($memoise && isset($this->gatewayCollections[$cacheKey])) {
+            return $this->gatewayCollections[$cacheKey];
+        }
+
         $gateways = $this->gatewayCollectionFactory->create()
             ->addFieldToFilter(GatewayInterface::STORE_ID, ['eq' => $storeId])
             ->addFieldToFilter(GatewayInterface::SERVICE_ID, ['eq' => $serviceId])
@@ -599,7 +615,39 @@ class ConfigProvider implements ConfigProviderInterface
             $gateways->addFieldToFilter(GatewayInterface::IS_SEPARATED_METHOD, ['eq' => 1]);
         }
 
-        return $gateways->load();
+        $gateways->load();
+
+        if ($memoise) {
+            $this->gatewayCollections[$cacheKey] = $gateways;
+        }
+
+        return $gateways;
+    }
+
+    /**
+     * Whether loaded gateways may be kept for the rest of the request.
+     *
+     * Queue consumers, cron and the GraphQL application server run as CLI and live across many
+     * operations, while gateway changes made by other processes do not reach them.
+     *
+     * @return bool
+     */
+    private function canMemoiseGateways(): bool
+    {
+        return PHP_SAPI !== 'cli';
+    }
+
+    /**
+     * Drop gateways loaded in this request, e.g. after a gateway was saved or deleted.
+     *
+     * Also called by the application server between requests (Magento 2.4.8+).
+     *
+     * @return void
+     */
+    public function _resetState(): void
+    {
+        $this->activeGateways = [];
+        $this->gatewayCollections = [];
     }
 
     /**
