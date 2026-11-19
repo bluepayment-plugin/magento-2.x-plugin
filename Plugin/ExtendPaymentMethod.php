@@ -24,6 +24,9 @@ class ExtendPaymentMethod
     /** @var Gateway[] */
     private $gateways = [];
 
+    /** @var bool[] separated codes without an active gateway, keyed by code */
+    private $missingCodes = [];
+
     /**
      * @param  Factory $factory
      * @param  ConfigProvider $configProvider
@@ -81,27 +84,45 @@ class ExtendPaymentMethod
      * @param string $code
      * @return MethodInterface
      * @throws LocalizedException
+     * @throws \UnexpectedValueException when no active gateway matches the code
      * @SuppressWarnings(PMD.UnusedFormalParameter)
      */
     public function aroundGetMethodInstance(Data $subject, callable $proceed, string $code): MethodInterface
     {
-        if (false === strpos($code, Payment::SEPARATED_PREFIX_CODE)) {
+        if (strpos($code, Payment::SEPARATED_PREFIX_CODE) !== 0) {
             return $proceed($code);
         }
 
-        /** @var Payment $payment */
-        $payment = $this->factory->create(Payment::class);
-        $payment->setCode($code);
-
-        if (! $this->gateways) {
+        if (!isset($this->gateways[$code]) && !isset($this->missingCodes[$code])) {
             foreach ($this->configProvider->getSeparatedGateways() as $gateway) {
                 $this->gateways[Payment::SEPARATED_PREFIX_CODE.$gateway['gateway_id']] = $gateway;
             }
         }
 
-        $model = $this->gateways[$code];
-        $payment->setGatewayModel($model);
+        if (!isset($this->gateways[$code])) {
+            $this->missingCodes[$code] = true;
+            // Payment\Model\Info::getMethodInstance() falls back to Method\Substitution on this exception type
+            throw new \UnexpectedValueException(
+                sprintf('No active gateway for payment method "%s".', $code)
+            );
+        }
+
+        /** @var Payment $payment */
+        $payment = $this->factory->create(Payment::class);
+        $payment->setCode($code);
+        $payment->setGatewayModel($this->gateways[$code]);
 
         return $payment;
+    }
+
+    /**
+     * Forget resolved and unresolved gateways so a long-running process starts each request with empty maps.
+     *
+     * @return void
+     */
+    public function _resetState(): void
+    {
+        $this->gateways = [];
+        $this->missingCodes = [];
     }
 }
