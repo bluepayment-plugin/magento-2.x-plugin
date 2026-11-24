@@ -117,8 +117,12 @@ class Back extends Action
 
         $this->logger->info('BACK:' . __LINE__, ['params' => $params]);
         try {
-            $orderId = $params['OrderID'];
-            $hash = $params['Hash'];
+            $orderId = $params['OrderID'] ?? '';
+            $hash = $params['Hash'] ?? null;
+            if (!is_string($orderId) || $orderId === '' || !is_string($hash)) {
+                $block->addData(['error' => true, 'message' => 'Klucz autoryzacji jest nieprawidłowy.']);
+                return $page;
+            }
             $isMultishipping = false;
 
             // Multishipping
@@ -158,16 +162,11 @@ class Back extends Action
                     $order->getStoreId()
                 );
 
-                $hashData = [$serviceId, $orderId, $sharedKey];
-
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
                 $this->logger->info('BACK:' . __LINE__, [
                     'serviceId' => $serviceId,
                     'orderId' => $orderId,
-                    'sharedKey' => $sharedKey,
-                    'hashLocal' => $hashLocal
                 ]);
-                if ($hash == $hashLocal) {
+                if ($order->getId() && $this->helper->isValidReturnHash($serviceId, $orderId, $sharedKey, $hash)) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
                     $status = $this->getBluePaymentState($payment);
 

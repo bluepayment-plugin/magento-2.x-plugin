@@ -96,11 +96,31 @@ class Data extends \Magento\Payment\Helper\Data
     }
 
     /**
+     * Validate a return/status signature only when service credentials are configured.
+     *
+     * @param string|int|null $serviceId
+     * @param string $orderId
+     * @param string|null $sharedKey
+     * @param mixed $hash
+     * @return bool
+     */
+    public function isValidReturnHash($serviceId, string $orderId, $sharedKey, $hash): bool
+    {
+        if (!is_string($hash) || !is_string($sharedKey)
+            || empty(trim((string) $serviceId)) || empty(trim($sharedKey))
+        ) {
+            return false;
+        }
+
+        return hash_equals($this->generateAndReturnHash([$serviceId, $orderId, $sharedKey]), $hash);
+    }
+
+    /**
      * Sign a continuation link only for an existing order with complete credentials.
      */
     public function generateContinuationHash(Order $order, string $serviceId, string $sharedKey): ?string
     {
-        if (!$order->getId() || $serviceId === '' || $sharedKey === '') {
+        if (!$order->getId() || empty(trim($serviceId)) || empty(trim($sharedKey))) {
             return null;
         }
 

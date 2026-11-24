@@ -1,3 +1,6 @@
+## Wersja 2.34.6-p1
+- Poprawiliśmy obsługę żądań.
+
 # Co nowego w module bramki płatności Autopay?
 
 ## Wersja 2.34.6

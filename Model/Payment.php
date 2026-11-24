@@ -600,15 +600,17 @@ class Payment extends AbstractMethod
     public function processStatusPayment(SimpleXMLElement $response)
     {
         $serviceId = (string) $response->serviceID;
-        [$store, $currency] = $this->getStoreByServiceId->execute($serviceId);
+        $storeAndCurrency = $this->getStoreByServiceId->execute($serviceId);
 
-        if (! $store) {
+        if ($storeAndCurrency === false) {
             $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
                 'serviceID' => $serviceId,
             ]);
 
             return false;
         }
+
+        [$store, $currency] = $storeAndCurrency;
 
         if ($this->validAllTransaction($response, $store, $currency)) {
             $transaction = $response->transactions->transaction;
@@ -632,15 +634,17 @@ class Payment extends AbstractMethod
     public function processRecurring(SimpleXMLElement $response)
     {
         $serviceId = (string) $response->serviceID;
-        [$store, $currency] = $this->getStoreByServiceId->execute($serviceId);
+        $storeAndCurrency = $this->getStoreByServiceId->execute($serviceId);
 
-        if (! $store) {
+        if ($storeAndCurrency === false) {
             $this->bmLooger->error('PAYMENT: ' . __LINE__ . ' - Cannot find ServiceID', [
                 'serviceID' => $serviceId,
             ]);
 
             return false;
         }
+
+        [$store, $currency] = $storeAndCurrency;
 
         try {
             if ($this->validAllTransaction($response, $store, $currency)) {
@@ -772,6 +776,10 @@ class Payment extends AbstractMethod
             ScopeInterface::SCOPE_STORE,
             $store
         );
+        if (!is_string($sharedKey) || empty(trim((string) $serviceId)) || empty(trim($sharedKey))) {
+            return false;
+        }
+
         $hashSeparator  = $this->_scopeConfig->getValue(
             'payment/bluepayment/hash_separator',
             ScopeInterface::SCOPE_STORE,
@@ -803,12 +811,11 @@ class Payment extends AbstractMethod
         $localHash = hash($hashAlgorithm, implode($hashSeparator, $this->checkHashArray));
 
         $this->bmLooger->info('PAYMENT:' . __LINE__, [
-            'local_hash' => $localHash,
             'remote_hash' => $remoteHash,
             'serviceId' => $serviceId,
         ]);
 
-        return $localHash == $remoteHash;
+        return hash_equals($localHash, $remoteHash);
     }
 
     /**

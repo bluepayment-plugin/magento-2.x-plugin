@@ -159,7 +159,6 @@ class ContinuePayment extends Action
                 'serviceId' => $serviceId,
                 'orderId' => $order->getIncrementId(),
                 'hash' => $hash,
-                'hashLocal' => $hashLocal,
             ]);
 
             if (!$validHash) {
