@@ -123,10 +123,9 @@ class PaymentStatus extends Action
                 $order->getStoreId()
             );
 
-            $hashData  = [$serviceId, $orderId, $sharedKey];
-            $hashLocal = $this->helper->generateAndReturnHash($hashData);
+            $validHash = $this->helper->isValidReturnHash($serviceId, $orderId, $sharedKey, $hash);
 
-            if ($hash !== $hashLocal) {
+            if (!$validHash) {
                 // Check hash for being sure.
 
                 $resultJson->setData([
