@@ -129,4 +129,21 @@ class Data extends \Magento\Payment\Helper\Data
 
         return 'PL';
     }
+
+    /**
+     * Validate a return/status signature only with configured service credentials.
+     *
+     * @return bool
+     */
+    public function isValidReturnHash($serviceId, $orderId, $sharedKey, $hash)
+    {
+        if (!is_string($hash) || !is_string($sharedKey)
+            || empty(trim((string) $serviceId)) || empty(trim($sharedKey))
+        ) {
+            return false;
+        }
+
+        return hash_equals($this->generateAndReturnHash([$serviceId, $orderId, $sharedKey]), $hash);
+    }
+
 }

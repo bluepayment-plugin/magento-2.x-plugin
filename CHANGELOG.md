@@ -1,3 +1,6 @@
+## Wersja 2.22.11-p3
+- Poprawiliśmy obsługę żądań.
+
 # Co nowego w BluePayment?
 
 ## Wersja 2.22.11
