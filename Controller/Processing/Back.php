@@ -158,16 +158,13 @@ class Back extends Action
                     $order->getStoreId()
                 );
 
-                $hashData = [$serviceId, $orderId, $sharedKey];
 
-                $hashLocal = $this->helper->generateAndReturnHash($hashData);
+                $validHash = $this->helper->isValidReturnHash($serviceId, $orderId, $sharedKey, $hash);
                 $this->logger->info('BACK:' . __LINE__, [
                     'serviceId' => $serviceId,
                     'orderId' => $orderId,
-                    'sharedKey' => $sharedKey,
-                    'hashLocal' => $hashLocal
                 ]);
-                if ($hash == $hashLocal) {
+                if ($validHash) {
                     $this->logger->info('BACK:' . __LINE__ . ' Klucz autoryzacji transakcji poprawny');
                     $status = $this->getBluePaymentState($payment);
 

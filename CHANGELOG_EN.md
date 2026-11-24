@@ -1,3 +1,6 @@
+## Version 2.33.1-p3
+- Improve request validation.
+
 # What's new in the Autopay payment gateway module?
 
 ## Version 2.33.1
