@@ -31,6 +31,10 @@ class GetStoreByServiceId
      */
     public function execute(string $serviceIdToCheck)
     {
+        if (trim($serviceIdToCheck) === '') {
+            return false;
+        }
+
         foreach ($this->storeManager->getStores() as $store) {
             foreach (Gateways::$currencies as $currency) {
                 $serviceId = (string) $this->scopeConfig->getValue(
