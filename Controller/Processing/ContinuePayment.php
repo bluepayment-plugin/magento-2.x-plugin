@@ -153,21 +153,15 @@ class ContinuePayment extends Action
                 $order->getStoreId()
             );
 
-            $hashLocal = $this->helper->generateAndReturnHash([
-                $serviceId,
-                $order->getIncrementId(),
-                $sharedKey
-            ]);
+            $validHash = $this->helper->isValidReturnHash($serviceId, $order->getIncrementId(), $sharedKey, $hash);
 
             $this->logger->info('CONTINUE: ' . __LINE__, [
                 'serviceId' => $serviceId,
                 'orderId' => $order->getIncrementId(),
-                'sharedKey' => $sharedKey,
                 'hash' => $hash,
-                'hashLocal' => $hashLocal,
             ]);
 
-            if ($hash !== $hashLocal) {
+            if (!$validHash) {
                 $this->messageManager->addErrorMessage(__('Invalid hash for order.'));
                 return $this->_redirect('/');
             }
