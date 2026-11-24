@@ -1,3 +1,6 @@
+## Version 2.23.0-p3
+- Improve request validation.
+
 # What's new in BluePayment?
 
 ## Version 2.23.0

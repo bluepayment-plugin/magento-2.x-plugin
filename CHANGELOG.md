@@ -1,3 +1,6 @@
+## Wersja 2.23.0-p3
+- Poprawiliśmy obsługę żądań.
+
 # Co nowego w BluePayment?
 
 ## Wersja 2.23.0
